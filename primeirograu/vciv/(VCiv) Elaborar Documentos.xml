@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Elaborar Documentos">
-    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros...]]></description>  
+    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:1338,8:5852,8:5853')}"/>
@@ -49,6 +49,13 @@
         <transition to="(VCiv) É outros documentos?" name="(VCiv) É outros documentos?"/>
         <transition to="(VCiv) É Certificar Trânsito em Julgado?" name="(VCiv) É Certificar Trânsito em Julgado?"/>
         <transition to="(VCiv) É certificar decurso de prazo?" name="(VCiv) É certificar decurso de prazo?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_alvara')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_oficio')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_outros_documentos')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_certidao_transito_julgado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_certidao_decurso_prazo')}"/>
+        </event>
     </fork>
     <join name="(VCiv) Junção em Elaborar Documentos">
         <transition to="Término" name="Término"/>
@@ -60,7 +67,7 @@
     <task-node end-tasks="true" name="(VCiv) Expedir Alvará">
         <task name="(VCiv) Expedir Alvará" swimlane="Secretaria">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_alvara" mapped-name="textEditCombo:minuta_alvara" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -68,7 +75,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar Alvará" name="Encaminhar para assinatura"/>
-        <transition to="(VCiv) Junção em Elaborar Documentos" name="Ignorar expedição de alvará"/>
+        <transition to="(VCiv) Remover documento temporário alvará" name="Ignorar expedição de alvará"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_alvara'))}"/>
+        </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','91')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar expedição de alvará')}"/>
@@ -121,15 +134,21 @@
     <task-node end-tasks="true" name="(VCiv) Expedir Ofício">
         <task name="(VCiv) Expedir Ofício" swimlane="Secretaria">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_oficio" mapped-name="textEditCombo:minuta_oficio" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Junção em Elaborar Documentos" name="Ignorar expedição de ofício"/>
         <transition to="(VCiv) Assinar Ofício" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Remover documento temporário ofício" name="Ignorar expedição de ofício"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_oficio'))}"/>
+        </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','34')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar expedição de ofício')}"/>
@@ -182,15 +201,21 @@
     <task-node end-tasks="true" name="(VCiv) Expedir outros documentos">
         <task name="(VCiv) Expedir outros documentos" swimlane="Secretaria">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_outros_documentos" mapped-name="textEditCombo:minuta_outros_documentos" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Junção em Elaborar Documentos" name="Ignorar expedição de outros documentos"/>
         <transition to="(VCiv) Assinar outros documentos" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Remover documento temporário outros documentos" name="Ignorar expedição de outros documentos"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_outros_documentos'))}"/>
+        </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,159,160,161,162,163,164,165,166')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar expedição de outros documentos')}"/>
@@ -246,7 +271,7 @@
     <task-node end-tasks="true" name="(VCiv) Certificar Trânsito em Julgado">
         <task name="(VCiv) Certificar Trânsito em Julgado" swimlane="Secretaria">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_certidao_transito_julgado" mapped-name="textEditCombo:minuta_certidao_transito_julgado" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -254,7 +279,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar Certidão de Trânsito em Julgado" name="Encaminhar para assinatura"/>
-        <transition to="(VCiv) Junção em Elaborar Documentos" name="Ignorar certificação de trânsito em julgado"/>
+        <transition to="(VCiv) Remover documento temporário trânsito julgado" name="Ignorar certificação de trânsito em julgado"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_certidao_transito_julgado'))}"/>
+        </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','70')}"/>
             <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
@@ -307,7 +338,7 @@
     <task-node end-tasks="true" name="(VCiv) Certificar decurso de prazo">
         <task name="(VCiv) Certificar decurso de prazo" swimlane="Secretaria">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_certidao_decurso_prazo" mapped-name="textEditCombo:minuta_certidao_decurso_prazo" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -315,7 +346,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar certidão de decurso de prazo" name="Encaminhar para assinatura"/>
-        <transition to="(VCiv) Junção em Elaborar Documentos" name="Ignorar certidão de decurso de prazo"/>
+        <transition to="(VCiv) Remover documento temporário decurso prazo" name="Ignorar certidão de decurso de prazo"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_certidao_decurso_prazo'))}"/>
+        </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
             <action name="upd" expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
@@ -358,7 +395,37 @@
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
-    </task-node>  
+    </task-node>
+    <node name="(VCiv) Remover documento temporário alvará">
+        <transition to="(VCiv) Junção em Elaborar Documentos" name="(VCiv) Junção em Elaborar Documentos"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_alvara')}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Remover documento temporário ofício">
+        <transition to="(VCiv) Junção em Elaborar Documentos" name="(VCiv) Junção em Elaborar Documentos"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_oficio')}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Remover documento temporário outros documentos">
+        <transition to="(VCiv) Junção em Elaborar Documentos" name="(VCiv) Junção em Elaborar Documentos"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_outros_documentos')}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Remover documento temporário trânsito julgado">
+        <transition to="(VCiv) Junção em Elaborar Documentos" name="(VCiv) Junção em Elaborar Documentos"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_certidao_transito_julgado')}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Remover documento temporário decurso prazo">
+        <transition to="(VCiv) Junção em Elaborar Documentos" name="(VCiv) Junção em Elaborar Documentos"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_certidao_decurso_prazo')}"/>
+        </event>
+    </node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
