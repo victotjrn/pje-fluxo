@@ -19,7 +19,15 @@
         <transition to="(VCiv) Bifurcação de atos judiciais" name="(VCiv) Bifurcação de atos judiciais"/>
     </start-state>  
     <!-- NODES -->
-    <end-state name="Término"/>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_despacho')}"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_sentenca')}"/>
+        </event>
+    </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
         <task name="Nó de Desvio - (VCiv) Preparar Ato Judicial" swimlane="Nó de Desvio - (VCiv) Preparar Ato Judicial"/>
         <transition to="Término" name="Término">
@@ -53,6 +61,7 @@
         <transition to="(VCiv) Assinar decisão de desbloqueio" name="(VCiv) Assinar decisão de desbloqueio"/>
         <transition to="(VCiv) Concluso para decisão de suspensão" name="(VCiv) Concluso para decisão de suspensão"/>
         <transition to="(VCiv) Assinar decisão de suspensão" name="(VCiv) Assinar decisão de suspensão"/>
+        <transition to="(VCiv) Certificar Conclusão sem Efeito" name="(VCiv) Certificar Conclusão sem Efeito"/>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:decisao') ? '(VCiv) Lançar movimento concluso para decisão' : '(VCiv) Junção de atos judiciais'}" name="(VCiv) É decisão?">
         <transition to="(VCiv) Lançar movimento concluso para decisão" name="(VCiv) Lançar movimento concluso para decisão"/>
@@ -67,7 +76,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de urgência inicial">
         <task name="(VCiv) Concluso para decisão de urgência inicial" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_decisão" mapped-name="textEditCombo:minuta_decisão" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -76,6 +85,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar decisão de urgência inicial" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Decisão)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_decisão'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -111,7 +127,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para despacho inicial">
         <task name="(VCiv) Concluso para despacho inicial" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_despacho" mapped-name="textEditCombo:minuta_despacho" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -119,6 +135,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar despacho inicial" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Despacho)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_despacho'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -159,7 +182,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para despacho">
         <task name="(VCiv) Concluso para despacho" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_despacho" mapped-name="textEditCombo:minuta_despacho" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -167,6 +190,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar despacho" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Despacho)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_despacho'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -206,7 +236,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para sentença">
         <task name="(VCiv) Concluso para sentença" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_sentenca" mapped-name="textEditCombo:minuta_sentenca" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -214,6 +244,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar sentença" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Sentença)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_sentenca'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -252,7 +289,7 @@
         <transition to="(VCiv) É sentença?" name="(VCiv) É sentença?"/>
     </fork>
     <join name="(VCiv) Junção de atos judiciais">
-        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Certificar Conclusão sem Efeito?" name="(VCiv) Certificar Conclusão sem Efeito?"/>
         <event type="node-leave">
             <action name="upd" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('Processo_Fluxo_revisarMinuta')}"/>
@@ -316,7 +353,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de urgência">
         <task name="(VCiv) Concluso para decisão de urgência" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_decisão" mapped-name="textEditCombo:minuta_decisão" access="read,write"/>
                 <variable name="MinutaEmLote" mapped-name="minutarLote:MinutaEmLote" access="read,write"/>
             </controller>
         </task>
@@ -324,6 +361,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar decisão de urgência" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Decisão)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_decisão'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -363,7 +407,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para sentença de homologação e(ou) extinção">
         <task name="(VCiv) Concluso para sentença de homologação e(ou) extinção" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_sentenca" mapped-name="textEditCombo:minuta_sentenca" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -371,6 +415,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar sentença de homologação e(ou) extinção" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Sentença)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_sentenca'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -428,7 +479,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de Emb. Declaração">
         <task name="(VCiv) Concluso para decisão de Emb. Declaração" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_decisão" mapped-name="textEditCombo:minuta_decisão" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -436,6 +487,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar decisão de Emb. Declaração" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Decisão)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_decisão'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -475,7 +533,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão sobre recurso">
         <task name="(VCiv) Concluso para decisão sobre recurso" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_decisão" mapped-name="textEditCombo:minuta_decisão" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -483,6 +541,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar decisão sobre recurso" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Decisão)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_decisão'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -522,7 +587,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão">
         <task name="(VCiv) Concluso para decisão" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_decisão" mapped-name="textEditCombo:minuta_decisão" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -530,6 +595,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar decisão" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Decisão)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_decisão'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -570,7 +642,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para despacho de cumprimento de sentença">
         <task name="(VCiv) Concluso para despacho de cumprimento de sentença" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_despacho" mapped-name="textEditCombo:minuta_despacho" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -578,6 +650,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar despacho de cumprimento de sentença" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Despacho)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_despacho'))}"/>
+        </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
@@ -617,7 +696,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão sobre reativação">
         <task name="(VCiv) Concluso para decisão sobre reativação" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_decisão" mapped-name="textEditCombo:minuta_decisão" access="read,write"/>
                 <variable name="minutaEmLote" mapped-name="minutarLote:minutaEmLote" access="read,write"/>
             </controller>
         </task>
@@ -625,6 +704,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar decisão sobre reativação" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Decisão)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_decisão'))}"/>
+        </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
@@ -664,7 +750,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de penhora online">
         <task name="(VCiv) Concluso para decisão de penhora online" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_decisão" mapped-name="textEditCombo:minuta_decisão" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -672,6 +758,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar decisão de penhora online" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Decisão)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_decisão'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -711,7 +804,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de desbloqueio">
         <task name="(VCiv) Concluso para decisão de desbloqueio" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_decisão" mapped-name="textEditCombo:minuta_decisão" access="read,write"/>
                 <variable name="minutaEmLote" mapped-name="minutarLote:minutaEmLote" access="read,write"/>
             </controller>
         </task>
@@ -719,6 +812,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar decisão de desbloqueio" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Decisão)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_decisão'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -758,7 +858,7 @@
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de suspensão">
         <task name="(VCiv) Concluso para decisão de suspensão" swimlane="Assessor">
             <controller>
-                <variable name="minutaEmElaboracao" mapped-name="textEditCombo:minutaEmElaboracao" access="read,write"/>
+                <variable name="minuta_decisão" mapped-name="textEditCombo:minuta_decisão" access="read,write"/>
                 <variable name="minutaEmLote" mapped-name="minutarLote:minutaEmLote" access="read,write"/>
             </controller>
         </task>
@@ -766,6 +866,13 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Assinar decisão de suspensão" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito (Decisão)" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_decisão'))}"/>
+        </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
@@ -797,7 +904,70 @@
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de decisão')}"/>
         </event>
-    </task-node>  
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:certidaosemefeito') ? '(VCiv) Certificar Conclusão sem Efeito' : 'Término'}" name="(VCiv) Certificar Conclusão sem Efeito?">
+        <transition to="(VCiv) Certificar Conclusão sem Efeito" name="(VCiv) Certificar Conclusão sem Efeito"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Certificar Conclusão sem Efeito">
+        <task name="(VCiv) Certificar Conclusão sem Efeito" swimlane="Assessor">
+            <controller>
+                <variable name="minutaEmElaboracao" mapped-name="textEditSignature:minutaEmElaboracao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Término">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Bifurcação de atos judiciais" name="Retornar para minuta"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:paj:certidaosemefeito')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
+        </event>
+    </task-node>
+    <node name="(VCiv) Gravar variável conclusão sem efeito (Despacho)">
+        <transition to="(VCiv) Remover documento temporário despacho" name="(VCiv) Remover documento temporário despacho"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:certidaosemefeito', true)}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Remover documento temporário despacho">
+        <transition to="(VCiv) Junção de despacho" name="(VCiv) Junção de despacho"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_despacho')}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Gravar variável conclusão sem efeito (Decisão)">
+        <transition to="(VCiv) Remover documento temporário decisão" name="(VCiv) Remover documento temporário decisão"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:certidaosemefeito', true)}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Remover documento temporário decisão">
+        <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_decisao')}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Gravar variável conclusão sem efeito (Sentença)">
+        <transition to="(VCiv) Remover documento temporário sentença" name="(VCiv) Remover documento temporário sentença"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:certidaosemefeito', true)}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Remover documento temporário sentença">
+        <transition to="(VCiv) Junção de sentença" name="(VCiv) Junção de sentença"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_sentenca')}"/>
+        </event>
+    </node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
