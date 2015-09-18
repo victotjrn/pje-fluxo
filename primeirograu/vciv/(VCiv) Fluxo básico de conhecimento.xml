@@ -15,6 +15,19 @@
         <transition to="(VCiv) Vem de outro fluxo?" name="(VCiv) Vem de outro fluxo?"/>
     </start-state>  
     <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:certidaosemefeito') ? '(VCiv) Análise da secretaria' : tramitacaoProcessualService.recuperaVariavel('vciv:fbc:saida_nao_sentenciado')}" name="(VCiv) Emissão de certidão sem efeito?">
+        <transition to="(VCiv) Análise da secretaria" name="(VCiv) Análise da secretaria"/>
+        <transition to="(VCiv) Despachados urgentes" name="(VCiv) Despachados urgentes"/>
+        <transition to="(VCiv) Despachados" name="(VCiv) Despachados"/>
+        <transition to="(VCiv) Despachados sobre homologação e(ou) extinção" name="(VCiv) Despachados sobre homologação e(ou) extinção"/>
+        <transition to="(VCiv) Dar cumprimento a ato judicial de penhora online" name="(VCiv) Dar cumprimento a ato judicial de penhora online"/>
+        <transition to="(VCiv) Despachados sobre desbloqueio" name="(VCiv) Despachados sobre desbloqueio"/>
+        <transition to="(VCiv) Despachados sobre suspensão" name="(VCiv) Despachados sobre suspensão"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:paj:certidaosemefeito')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:saida_nao_sentenciado')}"/>
+        </event>
+    </decision>
     <decision expression="#{org.jboss.seam.bpm.processInstance.contextInstance.getVariable('pje:fbc:EhDeOutroFluxo') ? 'Processos recebidos do fluxo antigo' : '(VCiv) Tem pedido de urgência?'}" name="(VCiv) Vem de outro fluxo?">
         <transition to="(VCiv) Tem pedido de urgência?" name="(VCiv) Tem pedido de urgência?"/>
         <transition to="Processos recebidos do fluxo antigo" name="Processos recebidos do fluxo antigo"/>
@@ -506,17 +519,9 @@
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
     </task-node>
-    <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCIv) Sentenciados' : tramitacaoProcessualService.recuperaVariavel('vciv:fbc:saida_nao_sentenciado')}" name="(VCIv) Tem sentença ?">
+    <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCIv) Sentenciados' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença ?">
         <transition to="(VCIv) Sentenciados" name="(VCIv) Sentenciados"/>
-        <transition to="(VCiv) Despachados urgentes" name="(VCiv) Despachados urgentes"/>
-        <transition to="(VCiv) Despachados" name="(VCiv) Despachados"/>
-        <transition to="(VCiv) Despachados sobre homologação e(ou) extinção" name="(VCiv) Despachados sobre homologação e(ou) extinção"/>
-        <transition to="(VCiv) Dar cumprimento a ato judicial de penhora online" name="(VCiv) Dar cumprimento a ato judicial de penhora online"/>
-        <transition to="(VCiv) Despachados sobre desbloqueio" name="(VCiv) Despachados sobre desbloqueio"/>
-        <transition to="(VCiv) Despachados sobre suspensão" name="(VCiv) Despachados sobre suspensão"/>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:saida_nao_sentenciado')}"/>
-        </event>
+        <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
     </decision>
     <process-state name="(VCiv) Citar e(ou) intimar">
         <sub-process name="(VCiv) Preparar Ato de Comunicação" binding="late"/>
