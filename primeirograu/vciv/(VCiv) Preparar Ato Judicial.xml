@@ -458,19 +458,19 @@
     <node name="(VCiv) Lançar movimento concluso para decisão">
         <transition to="(VCiv) Bifurcação de decisão" name="(VCiv) Bifurcação de decisão"/>
         <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
+            <action expression="#{!tramitacaoProcessualService.recuperaVariavel('pje:paj:certidaosemefeito') ? preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento() : '' }"/>
         </event>
     </node>
     <node name="(VCiv) Lançar movimento concluso para despacho">
         <transition to="(VCiv) Bifurcação de despacho" name="(VCiv) Bifurcação de despacho"/>
         <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(5).lancarMovimento()}"/>
+            <action expression="#{!tramitacaoProcessualService.recuperaVariavel('pje:paj:certidaosemefeito') ? preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(5).lancarMovimento() : '' }"/>
         </event>
     </node>
     <node name="(VCiv) Lançar movimento de concluso para julgamento">
         <transition to="(VCiv) Bifurcação de sentença" name="(VCiv) Bifurcação de sentença"/>
         <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento()}"/>
+            <action expression="#{!tramitacaoProcessualService.recuperaVariavel('pje:paj:certidaosemefeito') ? preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento() : '' }"/>
         </event>
     </node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:decisao_embargos_declaracao') ? '(VCiv) Concluso para decisão de Emb. Declaração' : '(VCiv) Junção de decisão'}" name="(VCiv) É decisão de embargos de declaração?">
@@ -920,11 +920,11 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Bifurcação de atos judiciais" name="Retornar para minuta"/>
-        <transition to="(VCiv) Remover documento temporário decisão_despacho_sentença" name="(VCiv) Remover documento temporário despacho">
+        <transition to="(VCiv) Tem documento assinado?" name="(VCiv) Tem documento assinado?">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Remover documento temporário despacho')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Tem documento assinado?')}"/>
         </event>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
@@ -969,7 +969,11 @@
         <event type="node-enter">
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_semefeito')}"/>
         </event>
-    </node>  
+    </node>
+    <decision expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo ? '(VCiv) Certificar Conclusão sem Efeito' : '(VCiv) Remover documento temporário decisão_despacho_sentença'}" name="(VCiv) Tem documento assinado?">
+        <transition to="(VCiv) Certificar Conclusão sem Efeito" name="(VCiv) Certificar Conclusão sem Efeito"/>
+        <transition to="(VCiv) Remover documento temporário decisão_despacho_sentença" name="(VCiv) Remover documento temporário decisão_despacho_sentença"/>
+    </decision>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
