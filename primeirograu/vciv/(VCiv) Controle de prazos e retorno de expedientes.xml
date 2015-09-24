@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de prazos e retorno de expedientes">
-    <description><![CDATA[Controla prazos e retorno de expedientes.]]></description>  
+    <description><![CDATA[Controla prazos e retorno de expedientes...]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle de prazos e retorno de expedientes">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -116,10 +116,8 @@
         <transition to="Nó de Desvio - (VCiv) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (VCiv) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Há prazo em aberto?" name="(VCiv) Há prazo em aberto?">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="Término" name="Prazo decorrido, finalizar e sair da tarefa"/>
+        <transition to="(VCiv) Processos com prazo em curso" name="Prazo em aberto, aguardar decurso de prazo"/>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setVariable('pje:fluxo:registrociencia:meios','L')}"/>
         </event>
