@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Preparar Ato Judicial">
-    <description><![CDATA[Fluxo para controle de elaboração de atos judiciais (decisões, despachos e sentenças)..]]></description>  
+    <description><![CDATA[Fluxo para controle de elaboração de atos judiciais (decisões, despachos e sentenças)...]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Assessor">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,7:5197,5:1338,8:5852,8:5853')}" actor-id="#{actor.id}"/>
@@ -32,6 +32,7 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('AssinarEmLote')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('MinutarEmLote')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_semefeito')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:paj:jaexisteconcluso')}"/>
         </event>
     </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
@@ -190,6 +191,7 @@
             <controller>
                 <variable name="minuta_despacho" mapped-name="textEditCombo:minuta_despacho" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
+                <variable name="aaa" mapped-name="textAlert:aaa" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
@@ -458,19 +460,19 @@
     <node name="(VCiv) Lançar movimento concluso para decisão">
         <transition to="(VCiv) Bifurcação de decisão" name="(VCiv) Bifurcação de decisão"/>
         <event type="node-enter">
-            <action expression="#{!tramitacaoProcessualService.recuperaVariavel('pje:paj:certidaosemefeito') ? preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento() : '' }"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:jaexisteconcluso') ? '' : preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento() }"/>
         </event>
     </node>
     <node name="(VCiv) Lançar movimento concluso para despacho">
         <transition to="(VCiv) Bifurcação de despacho" name="(VCiv) Bifurcação de despacho"/>
         <event type="node-enter">
-            <action expression="#{!tramitacaoProcessualService.recuperaVariavel('pje:paj:certidaosemefeito') ? preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(5).lancarMovimento() : '' }"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:jaexisteconcluso') ? '' : preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(5).lancarMovimento() }"/>
         </event>
     </node>
     <node name="(VCiv) Lançar movimento de concluso para julgamento">
         <transition to="(VCiv) Bifurcação de sentença" name="(VCiv) Bifurcação de sentença"/>
         <event type="node-enter">
-            <action expression="#{!tramitacaoProcessualService.recuperaVariavel('pje:paj:certidaosemefeito') ? preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento() : '' }"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:jaexisteconcluso') ? '' : preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento() }"/>
         </event>
     </node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:decisao_embargos_declaracao') ? '(VCiv) Concluso para decisão de Emb. Declaração' : '(VCiv) Junção de decisão'}" name="(VCiv) É decisão de embargos de declaração?">
@@ -919,10 +921,10 @@
         <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Bifurcação de atos judiciais" name="Retornar para minuta"/>
         <transition to="(VCiv) Tem documento assinado?" name="(VCiv) Tem documento assinado?">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(VCiv) Gravar variável já existe concluso" name="Retornar para minuta"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Tem documento assinado?')}"/>
         </event>
@@ -973,7 +975,13 @@
     <decision expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo ? '(VCiv) Certificar Conclusão sem Efeito' : '(VCiv) Remover documento temporário decisão_despacho_sentença'}" name="(VCiv) Tem documento assinado?">
         <transition to="(VCiv) Certificar Conclusão sem Efeito" name="(VCiv) Certificar Conclusão sem Efeito"/>
         <transition to="(VCiv) Remover documento temporário decisão_despacho_sentença" name="(VCiv) Remover documento temporário decisão_despacho_sentença"/>
-    </decision>  
+    </decision>
+    <node name="(VCiv) Gravar variável já existe concluso">
+        <transition to="(VCiv) Bifurcação de atos judiciais" name="(VCiv) Bifurcação de atos judiciais"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:jaexisteconcluso',true)}"/>
+        </event>
+    </node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
