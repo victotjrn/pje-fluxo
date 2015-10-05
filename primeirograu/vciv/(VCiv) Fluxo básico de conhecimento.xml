@@ -663,9 +663,6 @@
     <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCIv) Sentenciados sobre homologação e extinção' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença extinção ?">
         <transition to="(VCIv) Sentenciados sobre homologação e extinção" name="(VCIv) Sentenciados sobre homologação e extinção"/>
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:saida_nao_sentenciado')}"/>
-        </event>
     </decision>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
