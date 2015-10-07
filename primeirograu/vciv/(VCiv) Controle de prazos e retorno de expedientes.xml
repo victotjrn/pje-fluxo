@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de prazos e retorno de expedientes">
-    <description><![CDATA[Controla prazos e retorno de expedientes...]]></description>  
+    <description><![CDATA[Controla prazos e retorno de expedientes...
+
+(VCiv) Aguardando devolução do AR - avisoHaExpedientes - #{tramitacaoProcessualService.recuperaVariavel('avisoHaExpedientes') != null ? tramitacaoProcessualService.recuperaVariavel('avisoHaExpedientes') : ''}
+
+(VCiv) Aguardando devolução do AR - WEB-INF_xhtml_flx_exped_controleCorreios - Inserir informação de AR]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle de prazos e retorno de expedientes">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -41,6 +45,7 @@
     <task-node end-tasks="true" name="(VCiv) Aguardando devolução do AR">
         <task name="(VCiv) Aguardando devolução do AR" swimlane="Secretaria">
             <controller>
+                <variable name="avisoHaExpedientes" mapped-name="textAlert:avisoHaExpedientes" access="read,write"/>
                 <variable name="WEB-INF_xhtml_flx_exped_controleCorreios" mapped-name="frame:WEB-INF_xhtml_flx_exped_controleCorreios" access="read,write"/>
             </controller>
         </task>
@@ -51,6 +56,11 @@
         <transition to="(VCiv) Há expedientes em aberto?" name="Registrar devolução do AR"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:registroCiencia', false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('avisoHaExpedientes')}"/>
+            <action expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0  ? tramitacaoProcessualService.apagaVariavel('avisoHaExpedientes') : tramitacaoProcessualService.gravaVariavel('avisoHaExpedientes', 'Todos os expedientes estão fechados. Por favor clicar em &quot;Ignorar e sair da tarefa&quot;') }"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('textAlert:avisoHaExpedientes')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Registrar devolução do AR">
@@ -238,7 +248,7 @@
     <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(VCiv) Aguardando devolução do AR' : '(VCiv) Controlar retorno de expediente'}" name="(VCiv) Há expediente AR em aberto?">
         <transition to="(VCiv) Aguardando devolução do AR" name="(VCiv) Aguardando devolução do AR"/>
         <transition to="(VCiv) Controlar retorno de expediente" name="(VCiv) Controlar retorno de expediente"/>
-    </decision>  
+    </decision>
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
