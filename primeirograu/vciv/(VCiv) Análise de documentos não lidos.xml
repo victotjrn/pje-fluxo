@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Análise de documentos não lidos">
+    <description><![CDATA[Fluxo para análise de juntada de documentos.
+
+Identificador: VCiv_ADOCNLIDO
+
+Tarefa: (VCiv) Documentos não lidos - Ministério Público
+Label Variável MovimentarLote: Movimentar em lote
+Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido
+
+Tarefa: (VCiv) Documentos não lidos - Defensoria
+Label Variável MovimentarLote: Movimentar em lote
+Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido
+
+Tarefa: (VCiv) Documentos não lidos - Procuradoria
+Label Variável MovimentarLote: Movimentar em lote
+Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido
+
+Tarefa: (VCiv) Documentos não lidos
+Label Variável MovimentarLote: Movimentar em lote
+Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(VCiv) Gravar variável de petições e marcar como lido no agrupador" name="(VCiv) Gravar variável de petições"/>
+    </start-state>  
+    <!-- NODES -->
+    <node name="(VCiv) Gravar variável de petições e marcar como lido no agrupador">
+        <transition to="(VCiv) Foi juntado pelo Ministério Público?" name="(VCiv) Foi juntado pelo Ministério Público?"/>
+        <event type="node-enter">
+            <action expression="#{org.jboss.seam.bpm.jbpmContext.getProcessInstance(tramitacaoProcessualService.recuperaProcesso().processo.idJbpm).contextInstance.setVariable('pje:fluxo:incidental:peticoes',tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes'))}"/>
+            <action expression="#{processoDocumentoLidoManager.definirDocumentoComoLido(processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')), pessoaManager.findById(usuarioService.getUsuarioSistema().getIdUsuario()))}"/>
+        </event>
+    </node>
+    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Ministério Público') &gt; -1 ? '(VCiv) Documentos não lidos - Ministério Público' : '(VCiv) Foi juntado pela Defensoria?'}" name="(VCiv) Foi juntado pelo Ministério Público?">
+        <transition to="(VCiv) Foi juntado pela Defensoria?" name="(VCiv) Foi juntado pela Defensoria?"/>
+        <transition to="(VCiv) Documentos não lidos - Ministério Público" name="(VCiv) Documentos não lidos - Ministério Público"/>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Documentos não lidos - Ministério Público">
+        <task name="(VCiv) Documentos não lidos - Ministério Público" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Defensoria Pública') &gt; -1 ? '(VCiv) Documentos não lidos - Defensoria' : '(VCiv) Foi juntado pela Procuradoria?'}" name="(VCiv) Foi juntado pela Defensoria?">
+        <transition to="(VCiv) Documentos não lidos - Defensoria" name="(VCiv) Documentos não lidos - Defensoria"/>
+        <transition to="(VCiv) Foi juntado pela Procuradoria?" name="(VCiv) Foi juntado pela Procuradoria?"/>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Documentos não lidos - Defensoria">
+        <task name="(VCiv) Documentos não lidos - Defensoria" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Procuradoria') &gt; -1 ? '(VCiv) Documentos não lidos - Procuradoria' : '(VCiv) Documentos não lidos'}" name="(VCiv) Foi juntado pela Procuradoria?">
+        <transition to="(VCiv) Documentos não lidos - Procuradoria" name="(VCiv) Documentos não lidos - Procuradoria"/>
+        <transition to="(VCiv) Documentos não lidos" name="(VCiv) Documentos não lidos"/>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Documentos não lidos - Procuradoria">
+        <task name="(VCiv) Documentos não lidos - Procuradoria" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Finalizar a sair da tarefa"/>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Documentos não lidos">
+        <task name="(VCiv) Documentos não lidos" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
+        <task name="Nó de Desvio - (VCiv) Análise de documentos não lidos" swimlane="Nó de Desvio - (VCiv) Análise de documentos não lidos"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Documentos não lidos" name="(VCiv) Documentos não lidos"/>
+        <transition to="(VCiv) Documentos não lidos - Ministério Público" name="(VCiv) Documentos não lidos - Ministério Público"/>
+        <transition to="(VCiv) Documentos não lidos - Defensoria" name="(VCiv) Documentos não lidos - Defensoria"/>
+        <transition to="(VCiv) Documentos não lidos - Procuradoria" name="(VCiv) Documentos não lidos - Procuradoria"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
