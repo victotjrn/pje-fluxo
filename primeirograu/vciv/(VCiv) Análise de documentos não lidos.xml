@@ -3,23 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Análise de documentos não lidos">
     <description><![CDATA[Fluxo para análise de juntada de documentos.
 
-Identificador: VCiv_ADOCNLIDO
-
-Tarefa: (VCiv) Documentos não lidos - Ministério Público
-Label Variável MovimentarLote: Movimentar em lote
-Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido
-
-Tarefa: (VCiv) Documentos não lidos - Defensoria
-Label Variável MovimentarLote: Movimentar em lote
-Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido
-
-Tarefa: (VCiv) Documentos não lidos - Procuradoria
-Label Variável MovimentarLote: Movimentar em lote
-Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido
-
-Tarefa: (VCiv) Documentos não lidos
-Label Variável MovimentarLote: Movimentar em lote
-Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>  
+Identificador: VCiv_ADOCNLIDO]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
@@ -51,6 +35,8 @@ Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></descr
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[Label Variável MovimentarLote: Movimentar em lote
+Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
         <transition to="Término" name="Finalizar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
             <condition expression="#{true}"/>
@@ -67,6 +53,8 @@ Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></descr
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[Label Variável MovimentarLote: Movimentar em lote
+Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
         <transition to="Término" name="Finalizar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
             <condition expression="#{true}"/>
@@ -83,6 +71,8 @@ Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></descr
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[Label Variável MovimentarLote: Movimentar em lote
+Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
         <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
             <condition expression="#{true}"/>
         </transition>
@@ -95,6 +85,8 @@ Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></descr
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[Label Variável MovimentarLote: Movimentar em lote
+Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
         <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
             <condition expression="#{true}"/>
         </transition>
