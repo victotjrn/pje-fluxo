@@ -35,8 +35,10 @@ Identificador: VCiv_ADOCNLIDO]]></description>
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[Label Variável MovimentarLote: Movimentar em lote
-Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
+        <description><![CDATA[Label de variáveis
+------------------
+MovimentarLote: Movimentar em lote
+WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
         <transition to="Término" name="Finalizar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
             <condition expression="#{true}"/>
@@ -53,8 +55,10 @@ Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></descr
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[Label Variável MovimentarLote: Movimentar em lote
-Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
+        <description><![CDATA[Label de variáveis
+------------------
+MovimentarLote: Movimentar em lote
+WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
         <transition to="Término" name="Finalizar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
             <condition expression="#{true}"/>
@@ -71,8 +75,10 @@ Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></descr
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[Label Variável MovimentarLote: Movimentar em lote
-Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
+        <description><![CDATA[Label de variáveis
+------------------
+MovimentarLote: Movimentar em lote
+WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
         <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
             <condition expression="#{true}"/>
         </transition>
@@ -85,8 +91,10 @@ Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></descr
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[Label Variável MovimentarLote: Movimentar em lote
-Label Variável WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
+        <description><![CDATA[Label de variáveis
+------------------
+MovimentarLote: Movimentar em lote
+WEB-INF_xhtml_flx_visualizarPeticao: Documento não lido]]></description>
         <transition to="Nó de Desvio - (VCiv) Análise de documentos não lidos" name="Nó de Desvio - (VCiv) Análise de documentos não lidos">
             <condition expression="#{true}"/>
         </transition>
