@@ -102,6 +102,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_decisao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar decisão de urgência inicial">
@@ -152,6 +153,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_despacho', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar despacho inicial">
@@ -191,7 +193,6 @@
             <controller>
                 <variable name="minuta_despacho" mapped-name="textEditCombo:minuta_despacho" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
-                <variable name="aaa" mapped-name="textAlert:aaa" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
@@ -208,6 +209,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_despacho', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar despacho">
@@ -262,6 +264,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_sentenca', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar sentença">
@@ -374,6 +377,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_decisao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar decisão de urgência">
@@ -428,6 +432,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_sentenca', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar sentença de homologação e(ou) extinção">
@@ -500,6 +505,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_decisao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar decisão de Emb. Declaração">
@@ -554,6 +560,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_decisao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar decisão sobre recurso">
@@ -608,6 +615,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_decisao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar decisão">
@@ -663,6 +671,7 @@
         <event type="task-start">
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_despacho', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar despacho de cumprimento de sentença">
@@ -717,6 +726,7 @@
         <event type="task-start">
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_decisao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar decisão sobre reativação">
@@ -771,6 +781,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_decisao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar decisão de penhora online">
@@ -825,6 +836,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_decisao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar decisão de desbloqueio">
@@ -879,6 +891,7 @@
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_decisao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar decisão de suspensão">
@@ -929,12 +942,8 @@
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Tem documento assinado?')}"/>
         </event>
         <event type="node-leave">
-            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:idDocAssinado', processoHome.isDocumentoAssinado(processoHome.idProcessoDocumento))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:jaexisteconcluso',true)}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_semefeito'))}"/>
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
