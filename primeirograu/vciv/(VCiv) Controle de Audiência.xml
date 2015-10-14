@@ -142,7 +142,7 @@
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Ignorar e sair da tarefa')}"/>
-            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','87,151')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','87,164')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Informar dados da audiência">
@@ -193,7 +193,7 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:audienciaSelecionada')}"/>
         </event>
         <event type="task-start">
-            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','87,151')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','87,164')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Informar movimentação">
@@ -239,7 +239,7 @@
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
-            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','87,151')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','87,164')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar ata de audiência pelo conciliador">
@@ -266,7 +266,7 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:audienciaSelecionada')}"/>
         </event>
         <event type="task-start">
-            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','87,151')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','87,164')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Redesignar audiência">
