@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum...]]></description>  
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -53,6 +53,8 @@
         <transition to="(VCIv) Sentenciados" name="(VCIv) Sentenciados"/>
         <transition to="Processos recebidos do fluxo antigo" name="Processos recebidos do fluxo antigo"/>
         <transition to="(VCIv) Sentenciados sobre homologação e extinção" name="(VCIv) Sentenciados sobre homologação e extinção"/>
+        <transition to="(VCiv) Sentenciados" name="(VCiv) Sentenciados"/>
+        <transition to="(VCiv) Sentenciados sobre homologação e extinção" name="(VCiv) Sentenciados sobre homologação e extinção"/>
     </task-node>
     <decision expression="#{processoTrfHome.isEmPedidoUrgencia() ? '(VCiv) É Emb. Execução Fiscal - urgente?' : '(VCiv) É Emb. Execução Fiscal?'}" name="(VCiv) Tem pedido de urgência?">
         <transition to="(VCiv) É Emb. Execução Fiscal?" name="(VCiv) É Emb. Execução Fiscal?"/>
@@ -101,7 +103,6 @@
         <task name="(VCiv) Análise da secretaria" swimlane="Secretaria">
             <controller>
                 <variable name="vciv_fbc_aguardar_laudo_tecnico" mapped-name="sim_nao:vciv_fbc_aguardar_laudo_tecnico" access="read,write"/>
-                <variable name="vciv_fbc_aguardar_audiencia" mapped-name="sim_nao:vciv_fbc_aguardar_audiencia" access="read,write"/>
                 <variable name="vciv_fbc_aguardar_decurso_prazo" mapped-name="sim_nao:vciv_fbc_aguardar_decurso_prazo" access="read,write"/>
                 <variable name="vciv_fbc_apensar" mapped-name="sim_nao:vciv_fbc_apensar" access="read,write"/>
                 <variable name="vciv_fbc_bacenjud_minutar" mapped-name="sim_nao:vciv_fbc_bacenjud_minutar" access="read,write"/>
@@ -109,8 +110,8 @@
                 <variable name="vciv_fbc_certificar_decurso" mapped-name="sim_nao:vciv_fbc_certificar_decurso" access="read,write"/>
                 <variable name="vciv_fbc_certificar_transito" mapped-name="sim_nao:vciv_fbc_certificar_transito" access="read,write"/>
                 <variable name="vciv_fbc_citar_intimar" mapped-name="sim_nao:vciv_fbc_citar_intimar" access="read,write"/>
+                <variable name="vciv_fbc_controlar_audiencia" mapped-name="sim_nao:vciv_fbc_controlar_audiencia" access="read,write"/>
                 <variable name="vciv_fbg_controlar_retorno_expediente" mapped-name="sim_nao:vciv_fbg_controlar_retorno_expediente" access="read,write"/>
-                <variable name="vciv_fbc_designar_audiencia" mapped-name="sim_nao:vciv_fbc_designar_audiencia" access="read,write"/>
                 <variable name="vciv_fbc_expedir_alvara" mapped-name="sim_nao:vciv_fbc_expedir_alvara" access="read,write"/>
                 <variable name="vciv_fbc_expedir_carta_precatoria" mapped-name="sim_nao:vciv_fbc_expedir_carta_precatoria" access="read,write"/>
                 <variable name="vciv_fbc_expedir_carta_rogatoria" mapped-name="sim_nao:vciv_fbc_expedir_carta_rogatoria" access="read,write"/>
@@ -161,7 +162,7 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:certificar_decurso', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_certificar_decurso'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:certificar_transito', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_certificar_transito'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:citar_intimar', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_citar_intimar'))}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:designar_audiencia', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_designar_audiencia'))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:controlar_audiencia', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_controlar_audiencia'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_alvara', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_alvara'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_carta_precatoria', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_precatoria'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_mandado', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_mandado'))}"/>
@@ -186,7 +187,7 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_certificar_decurso')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_certificar_transito')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_citar_intimar')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_designar_audiencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_controlar_audiencia')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_alvara')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_precatoria')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_mandado')}"/>
@@ -519,9 +520,21 @@
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
     </task-node>
-    <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCIv) Sentenciados' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença ?">
-        <transition to="(VCIv) Sentenciados" name="(VCIv) Sentenciados"/>
+    <task-node end-tasks="true" name="(VCiv) Sentenciados">
+        <task name="(VCiv) Sentenciados" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Fluxo básico de conhecimento" name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
+    </task-node>
+    <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCiv) Sentenciados' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença ?">
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
+        <transition to="(VCiv) Sentenciados" name="(VCiv) Sentenciados"/>
     </decision>
     <process-state name="(VCiv) Citar e(ou) intimar">
         <sub-process name="(VCiv) Preparar Ato de Comunicação" binding="late"/>
@@ -534,7 +547,6 @@
         <task name="Processos recebidos do fluxo antigo" swimlane="Secretaria">
             <controller>
                 <variable name="vciv_fbc_aguardar_laudo_tecnico" mapped-name="sim_nao:vciv_fbc_aguardar_laudo_tecnico" access="read,write"/>
-                <variable name="vciv_fbc_aguardar_audiencia" mapped-name="sim_nao:vciv_fbc_aguardar_audiencia" access="read,write"/>
                 <variable name="vciv_fbc_aguardar_decurso_prazo" mapped-name="sim_nao:vciv_fbc_aguardar_decurso_prazo" access="read,write"/>
                 <variable name="vciv_fbc_apensar" mapped-name="sim_nao:vciv_fbc_apensar" access="read,write"/>
                 <variable name="vciv_fbc_bacenjud_minutar" mapped-name="sim_nao:vciv_fbc_bacenjud_minutar" access="read,write"/>
@@ -542,8 +554,8 @@
                 <variable name="vciv_fbc_certificar_decurso" mapped-name="sim_nao:vciv_fbc_certificar_decurso" access="read,write"/>
                 <variable name="vciv_fbc_certificar_transito" mapped-name="sim_nao:vciv_fbc_certificar_transito" access="read,write"/>
                 <variable name="vciv_fbc_citar_intimar" mapped-name="sim_nao:vciv_fbc_citar_intimar" access="read,write"/>
+                <variable name="vciv_fbc_controlar_audiencia" mapped-name="sim_nao:vciv_fbc_controlar_audiencia" access="read,write"/>
                 <variable name="vciv_fbg_controlar_retorno_expediente" mapped-name="sim_nao:vciv_fbg_controlar_retorno_expediente" access="read,write"/>
-                <variable name="vciv_fbc_designar_audiencia" mapped-name="sim_nao:vciv_fbc_designar_audiencia" access="read,write"/>
                 <variable name="vciv_fbc_expedir_alvara" mapped-name="sim_nao:vciv_fbc_expedir_alvara" access="read,write"/>
                 <variable name="vciv_fbc_expedir_carta_precatoria" mapped-name="sim_nao:vciv_fbc_expedir_carta_precatoria" access="read,write"/>
                 <variable name="vciv_fbc_expedir_carta_rogatoria" mapped-name="sim_nao:vciv_fbc_expedir_carta_rogatoria" access="read,write"/>
@@ -592,7 +604,7 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:certificar_decurso', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_certificar_decurso'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:certificar_transito', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_certificar_transito'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:citar_intimar', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_citar_intimar'))}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:designar_audiencia', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_designar_audiencia'))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:controlar_audiencia', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_controlar_audiencia'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_alvara', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_alvara'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_carta_precatoria', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_precatoria'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_mandado', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_mandado'))}"/>
@@ -617,7 +629,7 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_certificar_decurso')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_certificar_transito')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_citar_intimar')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_designar_audiencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_controlar_audiencia')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_alvara')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_precatoria')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_mandado')}"/>
@@ -660,9 +672,21 @@
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
     </task-node>
-    <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCIv) Sentenciados sobre homologação e extinção' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença extinção ?">
-        <transition to="(VCIv) Sentenciados sobre homologação e extinção" name="(VCIv) Sentenciados sobre homologação e extinção"/>
+    <task-node end-tasks="true" name="(VCiv) Sentenciados sobre homologação e extinção">
+        <task name="(VCiv) Sentenciados sobre homologação e extinção" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Fluxo básico de conhecimento" name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
+    </task-node>
+    <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCiv) Sentenciados sobre homologação e extinção' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença extinção ?">
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
+        <transition to="(VCiv) Sentenciados sobre homologação e extinção" name="(VCiv) Sentenciados sobre homologação e extinção"/>
     </decision>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
