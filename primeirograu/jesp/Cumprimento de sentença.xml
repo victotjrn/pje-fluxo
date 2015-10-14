@@ -162,6 +162,7 @@
         <transition to="Nó de Desvio - Cumprimento de sentença" name="Nó de Desvio - Cumprimento de sentença">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="Encaminhar para novo fluxo de controle de audiência" name="Encaminhar para novo fluxo de controle de audiência"/>
     </task-node>
     <process-state name="Citar para audiência CS">
         <sub-process name="Preparar ato de comunicação" binding="late"/>
@@ -173,6 +174,7 @@
         <transition to="Nó de Desvio - Cumprimento de sentença" name="Nó de Desvio - Cumprimento de sentença">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="Encaminhar para novo fluxo de controle de audiência" name="Encaminhar para novo fluxo de controle de audiência"/>
     </task-node>
     <task-node end-tasks="true" name="Realizar audiência CS">
         <task name="Realizar audiência CS" swimlane="Conciliação">
@@ -184,6 +186,7 @@
         <transition to="Nó de Desvio - Cumprimento de sentença" name="Nó de Desvio - Cumprimento de sentença">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="Encaminhar para novo fluxo de controle de audiência" name="Encaminhar para novo fluxo de controle de audiência"/>
     </task-node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - Cumprimento de sentença">
@@ -212,6 +215,10 @@
     <process-state name="Expedir documento CS">
         <sub-process name="Elaboração de documentos" binding="late"/>
         <transition to="Verificar providência a adotar CS" name="Verificar providência a adotar CS"/>
+    </process-state>
+    <process-state name="Encaminhar para novo fluxo de controle de audiência">
+        <sub-process name="(VCiv) Controle de Audiência" binding="late"/>
+        <transition to="Encaminhar para fluxo de conhecimento ou execução (VCic)" name="Encaminhar para fluxo de conhecimento ou execução (VCic)"/>
     </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
