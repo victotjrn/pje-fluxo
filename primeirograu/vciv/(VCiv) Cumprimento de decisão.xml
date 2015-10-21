@@ -54,6 +54,7 @@
         <transition to="(VCiv) Infojud, Infoseg ou TRE - Aguardando resposta" name="(VCiv) Infojud, Infoseg ou TRE - Aguardando resposta"/>
         <transition to="(VCiv) Aguardando central de cálculos" name="(VCiv) Aguardar central de cálculos"/>
         <transition to="(VCiv) Processos devolvidos pela central de cálculos" name="(VCiv) Cálculo pronto"/>
+        <transition to="(VCiv) Expedir precatório e(ou) RPV" name="(VCiv) Expedir precatório e(ou) RPV"/>
     </task-node>
     <fork name="(VCiv) Separação em cumprimento de decisão">
         <transition to="(VCiv) Suspender?" name="(VCiv) Suspender?"/>
@@ -83,6 +84,7 @@
         <transition to="(VCiv) É controlar retorno de expediente?" name="(VCiv) É controlar retorno de expediente?"/>
         <transition to="(VCiv) Central de cálculos?" name="(VCiv) Central decálculos?"/>
         <transition to="(VCiv) Controlar audiência?" name="(VCiv) Controlar audiência?"/>
+        <transition to="(VCiv) Expedir precatório e(ou) RPV?" name="(VCiv) Expedir precatório e(ou) RPV?"/>
     </fork>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:suspender') ? '(VCiv) Suspensão de processo' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Suspender?">
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
@@ -709,6 +711,17 @@
         <sub-process name="(VCiv) Controle de Audiência" binding="late"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
     </process-state>  
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:expedir_precatorio_rpv') ? '(VCiv) Expedir precatório e(ou) RPV' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Expedir precatório e(ou) RPV?">
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
+        <transition to="(VCiv) Expedir precatório e(ou) RPV" name="(VCiv) Expedir precatório e(ou) RPV"/>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Expedir precatório e(ou) RPV">
+        <task name="(VCiv) Expedir precatório e(ou) RPV" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="Finalizar tarefa"/>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
