@@ -118,6 +118,7 @@
                 <variable name="vciv_fbc_expedir_mandado" mapped-name="sim_nao:vciv_fbc_expedir_mandado" access="read,write"/>
                 <variable name="vciv_fbc_expedir_oficio" mapped-name="sim_nao:vciv_fbc_expedir_oficio" access="read,write"/>
                 <variable name="vciv_fbc_expedir_outros_documentos" mapped-name="sim_nao:vciv_fbc_expedir_outros_documentos" access="read,write"/>
+                <variable name="vciv_fbc_expedir_precatorio_rpv" mapped-name="sim_nao:vciv_fbc_expedir_precatorio_rpv" access="read,write"/>
                 <variable name="vciv_fbc_infojud_infoseg_consultar" mapped-name="sim_nao:vciv_fbc_infojud_infoseg_consultar" access="read,write"/>
                 <variable name="vciv_fbc_intimar_mp" mapped-name="sim_nao:vciv_fbc_intimar_mp" access="read,write"/>
                 <variable name="vciv_fbc_publicar_dje" mapped-name="sim_nao:vciv_fbc_publicar_dje" access="read,write"/>
@@ -177,6 +178,7 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:intimar_mp', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_intimar_mp'))}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_carta_rogatoria', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_rogatoria'))}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:controlar_retorno_expediente', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbg_controlar_retorno_expediente'))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_precatorio_rpv', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_precatorio_rpv'))}"/>
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_aguardar_laudo_tecnico')}"/>
@@ -206,6 +208,8 @@
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:encaminhar_instancia_superior')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_rogatoria')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:controlar_retorno_expediente')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:expedir_precatorio_rpv')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_precatorio_rpv')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Despachados urgentes">
