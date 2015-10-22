@@ -156,6 +156,7 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('magistrado_dje', tramitacaoProcessualService.recuperaVariavel('magistrado_dje_temp'))}"/>
             <action expression="#{preencherMovimento.deCodigo(1061).lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') ? tramitacaoProcessualService.gravaVariavel('data_dje_direto', dateUtil.getDataAtual('yyyy-MM-dd')) : tramitacaoProcessualService.gravaVariavel('data_dje', dateUtil.getDataAtual('yyyy-MM-dd'))}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') ? tramitacaoProcessualService.gravaVariavel('id_oj_dje_direto', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador) : tramitacaoProcessualService.gravaVariavel('id_oj_dje', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador)}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="(VCiv) Preparar expedientes para o DJE">
