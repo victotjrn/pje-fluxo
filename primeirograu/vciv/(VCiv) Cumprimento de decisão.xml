@@ -55,6 +55,7 @@
         <transition to="(VCiv) Aguardando central de cálculos" name="(VCiv) Aguardar central de cálculos"/>
         <transition to="(VCiv) Processos devolvidos pela central de cálculos" name="(VCiv) Cálculo pronto"/>
         <transition to="(VCiv) Expedir precatório e(ou) RPV" name="(VCiv) Expedir precatório e(ou) RPV"/>
+        <transition to="(VCiv) Aguardando Perícia, Laudo Técnico ou Outros" name="(VCiv) Aguardando Perícia, Laudo Técnico ou Outros"/>
     </task-node>
     <fork name="(VCiv) Separação em cumprimento de decisão">
         <transition to="(VCiv) Suspender?" name="(VCiv) Suspender?"/>
@@ -229,10 +230,21 @@
             <condition expression="#{true}"/>
         </transition>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:aguardar_laudo_tecnico') ? '(VCiv) Aguardar Laudo Técnico' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Aguardar Laudo Técnico?">
-        <transition to="(VCiv) Aguardar Laudo Técnico" name="(VCiv) Aguardar Laudo Técnico"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:aguardar_laudo_tecnico') ? '(VCiv) Aguardando Perícia, Laudo Técnico ou Outros' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Aguardar Laudo Técnico?">
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
+        <transition to="(VCiv) Aguardando Perícia, Laudo Técnico ou Outros" name="(VCiv) Aguardando Perícia, Laudo Técnico ou Outros"/>
     </decision>
+    <task-node end-tasks="true" name="(VCiv) Aguardando Perícia, Laudo Técnico ou Outros">
+        <task name="(VCiv) Aguardando Perícia, Laudo Técnico ou Outros" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="Finalizar tarefa"/>
+    </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:encaminhar_instancia_superior') ? '(VCiv) Encaminhar para instância superior' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Encaminhar para instância superior?">
         <transition to="(VCiv) Encaminhar para instância superior" name="(VCiv) Encaminhar para instância superior"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
