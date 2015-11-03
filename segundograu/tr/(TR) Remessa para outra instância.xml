@@ -39,17 +39,27 @@
         <transition to="Término" name="Finalizar e sair da tarefa"/>
     </task-node>
     <task-node end-tasks="true" name="(TR) Encaminhar ao primeiro grau">
-        <task name="(TR) Encaminhar ao primeiro grau" swimlane="Secretaria"/>
+        <task name="(TR) Encaminhar ao primeiro grau" swimlane="Secretaria">
+            <controller>
+                <variable name="Intercomunicacao_retornoProcesso" mapped-name="frame:Intercomunicacao_retornoProcesso" access="read,write"/>
+            </controller>
+        </task>
         <transition to="Nó de Desvio - (TR) Remessa para outra instância" name="Nó de Desvio - (TR) Remessa para outra instância">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TR) Lançar movimento de remessa para primeiro grau" name="Efetuar remessa ao primeiro grau"/>
+        <transition to="(TR) Lançar movimento de remessa para primeiro grau" name="Efetuar remessa ao primeiro grau">
+            <condition expression="#{true}"/>
+        </transition>
         <transition to="Término" name="Ignorar e sair da tarefa"/>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('comboMotivoRemessa','18;37,38,39,40,90')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('Efetuar remessa ao primeiro grau')}"/>
+        </event>
     </task-node>
     <node name="(TR) Lançar movimento de remessa para primeiro grau">
         <transition to="(TR) Remetidos ao primeiro grau" name="(TR) Remetidos ao primeiro grau"/>
         <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('ao primeiro grau').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(40).lancarMovimento()}"/>
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Devolução de processo').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(motivoRemessa.codigoGlossario).lancarMovimento()}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="(TR) Remetidos ao primeiro grau">
@@ -57,7 +67,12 @@
         <transition to="Nó de Desvio - (TR) Remessa para outra instância" name="Nó de Desvio - (TR) Remessa para outra instância">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Término"/>
+        <transition to="Término" name="Término">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(TR) Encaminhar ao primeiro grau" name="Repetir remessa ao primeiro grau">
+            <condition expression="#{true}"/>
+        </transition>
     </task-node>
     <task-node end-tasks="true" name="Nó de Desvio - (TR) Remessa para outra instância">
         <task name="Nó de Desvio - (TR) Remessa para outra instância" swimlane="Nó de Desvio - (TR) Remessa para outra instância"/>
@@ -121,5 +136,6 @@
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Preparar Sessão de Julgamento">
-    <description><![CDATA[Controle de processos antes e depois da sessão de julgamento..]]></description>  
+    <description><![CDATA[Controle de processos antes e depois da sessão de julgamento.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria Segundo Grau">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('8:1338,8:5483')}"/>
@@ -168,7 +168,7 @@
         <transition to="Nó de Desvio - (TR) Preparar Sessão de Julgamento" name="Nó de Desvio - (TR) Preparar Sessão de Julgamento">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TR) Lançar movimentações de julgamento" name="Retornar para lançar movimentações"/>
+        <transition to="(TR) Lançar movimentações de julgamento" name="Retornar para lançar movimentações de julgamento"/>
     </task-node>
     <task-node end-tasks="true" name="Nó de Desvio - (TR) Preparar Sessão de Julgamento">
         <task name="Nó de Desvio - (TR) Preparar Sessão de Julgamento" swimlane="Nó de Desvio - (TR) Preparar Sessão de Julgamento"/>
