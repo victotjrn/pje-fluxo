@@ -104,7 +104,6 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <task name="(VCiv) Análise da secretaria" swimlane="Secretaria">
             <controller>
                 <variable name="vciv_fbc_aguardar_laudo_tecnico" mapped-name="sim_nao:vciv_fbc_aguardar_laudo_tecnico" access="read,write"/>
-                <variable name="vciv_fbc_aguardar_decurso_prazo" mapped-name="sim_nao:vciv_fbc_aguardar_decurso_prazo" access="read,write"/>
                 <variable name="vciv_fbc_apensar" mapped-name="sim_nao:vciv_fbc_apensar" access="read,write"/>
                 <variable name="vciv_fbc_bacenjud_minutar" mapped-name="sim_nao:vciv_fbc_bacenjud_minutar" access="read,write"/>
                 <variable name="vciv_fbc_calcular_custas" mapped-name="sim_nao:vciv_fbc_calcular_custas" access="read,write"/>
