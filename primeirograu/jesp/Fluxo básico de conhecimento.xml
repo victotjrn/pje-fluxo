@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="Fluxo básico de conhecimento">
-    <description><![CDATA[.....]]></description>  
+    <description><![CDATA[...]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Direção">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
@@ -329,12 +329,17 @@
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
             </controller>
         </task>
-        <transition to="Avaliar forma de encerramento" name="Avaliar forma de encerramento"/>
+        <transition to="Avaliar forma de encerramento" name="Avaliar forma de encerramento">
+            <condition expression="#{true}"/>
+        </transition>
         <transition to="Nó de Desvio - Fluxo básico de conhecimento" name="Nó de Desvio - Fluxo básico de conhecimento">
             <condition expression="#{true}"/>
         </transition>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Turma Recursal').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(motivoRemessa.codigoGlossario).lancarMovimento()}"/>
+        </event>
+        <event type="task-create">
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('Avaliar forma de encerramento')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="Avaliar forma de encerramento">

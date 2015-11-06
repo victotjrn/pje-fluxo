@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum..]]></description>  
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum..
+Aguardar Perícia / Laudo Técnico / Outros]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -103,7 +104,6 @@
         <task name="(VCiv) Análise da secretaria" swimlane="Secretaria">
             <controller>
                 <variable name="vciv_fbc_aguardar_laudo_tecnico" mapped-name="sim_nao:vciv_fbc_aguardar_laudo_tecnico" access="read,write"/>
-                <variable name="vciv_fbc_aguardar_decurso_prazo" mapped-name="sim_nao:vciv_fbc_aguardar_decurso_prazo" access="read,write"/>
                 <variable name="vciv_fbc_apensar" mapped-name="sim_nao:vciv_fbc_apensar" access="read,write"/>
                 <variable name="vciv_fbc_bacenjud_minutar" mapped-name="sim_nao:vciv_fbc_bacenjud_minutar" access="read,write"/>
                 <variable name="vciv_fbc_calcular_custas" mapped-name="sim_nao:vciv_fbc_calcular_custas" access="read,write"/>
