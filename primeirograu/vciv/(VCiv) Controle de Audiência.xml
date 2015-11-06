@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de Audiência">
-    <description><![CDATA[Fluxo responsável por controlar as audiências.........]]></description>  
+    <description><![CDATA[Fluxo responsável por controlar as audiências...]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle de Audiência">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -10,7 +10,7 @@
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469')}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:1470,7:5886')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:1470,7:5886,7:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -110,7 +110,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Informar dados da audiência" name="(VCiv) Informar dados da audiência">
-            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('processo') == 146946}"/>
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('processo') == 156177}"/>
         </transition>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
@@ -163,7 +163,9 @@
         <transition to="(VCiv) Preencheu dados audiência - conciliador?" name="Encaminhar para assinatura do conciliador"/>
         <transition to="(VCiv) Preencheu dados da audiência - magistrado ?" name="Encaminhar para assinatura do magistrado"/>
         <transition to="(VCiv) Preencheu dados da audiência - ato judicial ?" name="Informar Movimentação Processual"/>
-        <transition to="(VCiv) Ajustar audiência e movimentação" name="Gerar movimentação e ajustar audiência"/>
+        <transition to="(VCiv) Ajustar audiência e movimentação" name="Gerar movimentação e ajustar audiência">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('processo') == 156177}"/>
+        </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', 'false')}"/>
         </event>
