@@ -210,7 +210,7 @@
         <transition to="(VCiv) Aguardando resposta de ofício" name="Aguardar resposta de ofício"/>
         <transition to="(VCiv) Há expediente AR em aberto?" name="Aguardar devolução do AR"/>
         <transition to="(VCiv) Há expediente em aberto?" name="Registrar devolução do AR"/>
-        <transition to="(VCiv) Há prazo em aberto?" name="Aguardar decurso de prazo"/>
+        <transition to="(VCiv) Há prazo em aberto?" name="Processos com prazo em curso"/>
         <transition to="(VCiv) Aguardando devolução de mandado" name="Aguardar devolução de mandado"/>
         <transition to="(VCiv) Aguardando devolução de carta precatória ou rogatória" name="Aguardar carta precatória ou rogatória"/>
         <transition to="(VCiv) Aguardando manifestação do MP" name="Aguardando manifestação do MP"/>
