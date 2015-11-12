@@ -411,9 +411,9 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fbc:EhDeOutroFluxo', 'true')}"/>
         </event>
     </process-state>
-    <decision expression="#{((tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia == 3 &amp;&amp; competenciaClasseAssuntoHome.processoContemClasseAssunto('159;156')) || (tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia != 3)) ? '(VCiv) Conclusão para despacho inicial' : '(VCiv) Escolher providência inicial'}" name="(VCiv) É competência de juizado especial cível?">
+    <decision expression="#{((tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia == 3 &amp;&amp; competenciaClasseAssuntoHome.processoContemClasseAssunto('159;156')) || (tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia != 3)) ? '(VCiv) Controlar audiência?' : '(VCiv) Escolher providência inicial'}" name="(VCiv) É competência de juizado especial cível?">
         <transition to="(VCiv) Escolher providência inicial" name="(VCiv) Escolher providência inicial"/>
-        <transition to="(VCiv) Conclusão para despacho inicial" name="(VCiv) Conclusão para despacho inicial"/>
+        <transition to="(VCiv) Controlar audiência?" name="(VCiv) Controlar audiência?"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Escolher providência inicial">
         <task name="(VCiv) Escolher providência inicial" swimlane="Secretaria">
@@ -691,7 +691,15 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
     <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCiv) Sentenciados sobre homologação e extinção' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença extinção ?">
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
         <transition to="(VCiv) Sentenciados sobre homologação e extinção" name="(VCiv) Sentenciados sobre homologação e extinção"/>
-    </decision>  
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador == 77 ? '(VCiv) Controlar audiência' : '(VCiv) Conclusão para despacho inicial'}" name="(VCiv) Controlar audiência?">
+        <transition to="(VCiv) Conclusão para despacho inicial" name="(VCiv) Conclusão para despacho inicial"/>
+        <transition to="(VCiv) Controlar audiência" name="(VCiv) Controlar audiência"/>
+    </decision>
+    <process-state name="(VCiv) Controlar audiência">
+        <sub-process name="(VCiv) Controle de Audiência" binding="late"/>
+        <transition to="(VCiv) Análise da secretaria" name="(VCiv) Análise da secretaria"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
