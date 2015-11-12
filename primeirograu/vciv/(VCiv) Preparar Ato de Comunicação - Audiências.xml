@@ -12,7 +12,12 @@
         <transition to="(VCiv) É citação e(ou) intimação?" name="(VCiv) É citação e(ou) intimação?"/>
     </start-state>  
     <!-- NODES -->
-    <end-state name="Término"/>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:aud:expedir_mandado_aud')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:aud:citar_intimar_aud')}"/>
+        </event>
+    </end-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:aud:citar_intimar_aud') ? '(VCiv) Preparar citação e(ou) intimação da audiência' : '(VCiv) É Mandado?'}" name="(VCiv) É citação e(ou) intimação?">
         <transition to="(VCiv) Preparar citação e(ou) intimação da audiência" name="(VCiv) Preparar citação e(ou) intimação da audiência"/>
         <transition to="(VCiv) É Mandado?" name="(VCiv) É Mandado?"/>
