@@ -28,12 +28,14 @@
         <transition to="Arquivo definitivo" name="Arquivo definitivo"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(246).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:arquivado')}"/>
         </event>
     </node>
     <node name="ArqProv">
         <transition to="Arquivo provisorio" name="Arquivo provisorio"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(245).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:arquivado')}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="Arquivo definitivo">
@@ -56,6 +58,7 @@
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(893).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:arquivado')}"/>
         </event>
     </node>
     <end-state name="Término"/>
