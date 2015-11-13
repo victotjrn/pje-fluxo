@@ -26,6 +26,7 @@
         <transition to="(TR) Arquivados definitivamente" name="(TR) Arquivados definitivamente"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(246).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:arquivado')}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="(TR) Arquivados definitivamente">
@@ -63,12 +64,14 @@
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(849).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:arquivado')}"/>
         </event>
     </node>
     <node name="(TR) Lançar movimento arquivo provisório">
         <transition to="(TR) Arquivados provisoriamente" name="(TR) Arquivados provisoriamente"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(245).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:arquivado')}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="(TR) Arquivados provisoriamente">
@@ -82,6 +85,7 @@
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(893).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:arquivado')}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="Nó de Desvio - (TR) Arquivamento">
