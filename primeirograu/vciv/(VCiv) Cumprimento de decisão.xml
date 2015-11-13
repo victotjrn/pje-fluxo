@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Cumprimento de decisão">
-    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria.]]></description>  
+    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria...]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Cumprimento de decisão">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -271,9 +271,14 @@
         <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Junção em cumprimento de decisão" name="Finalizar tarefa"/>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="Finalizar tarefa">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Turma Recursal').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(motivoRemessa.codigoGlossario).lancarMovimento()}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Finalizar tarefa')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:retificar_autuacao') ? '(VCiv) Retificar autuação' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Retificar autuação?">
@@ -722,7 +727,7 @@
     <process-state name="(VCiv) Controlar audiência">
         <sub-process name="(VCiv) Controle de Audiência" binding="late"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
-    </process-state>  
+    </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:expedir_precatorio_rpv') ? '(VCiv) Expedir precatório e(ou) RPV' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Expedir precatório e(ou) RPV?">
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
         <transition to="(VCiv) Expedir precatório e(ou) RPV" name="(VCiv) Expedir precatório e(ou) RPV"/>
