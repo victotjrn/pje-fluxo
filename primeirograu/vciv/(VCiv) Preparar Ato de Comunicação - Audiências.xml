@@ -156,7 +156,7 @@
         <transition to="(VCiv) Lançar movimentações mandado" name="(VCiv) Lançar movimentações mandado"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Lançar movimento de Expedição de Mandado')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar e sair da tarefa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
     <process-state name="(VCiv) Controlar prazos via mandado">

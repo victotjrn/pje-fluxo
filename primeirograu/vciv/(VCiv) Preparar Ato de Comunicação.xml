@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Preparar Ato de Comunicação">
-    <description><![CDATA[Fluxo destinado a permitir a realização de atos de comunicação, tais como citações, intimações, etc....]]></description>  
+    <description><![CDATA[Fluxo destinado a permitir a realização de atos de comunicação, tais como citações, intimações, etc......]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Preparar Ato de Comunicação">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:1469')}"/>
@@ -106,7 +106,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Preencheu conteúdo DJe?" name="Prosseguir"/>
-        <transition to="(VCiv) Ignorar conteúdo DJe" name="Ignorar e sair da tarefa"/>
+        <transition to="(VCiv) Ignorar conteúdo DJe" name="Cancelar e sair da tarefa"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv_conteudo_dje')}"/>
         </event>
@@ -238,7 +238,7 @@
         <transition to="(VCiv) Lançar movimento de Expedição de Mandado" name="Finalizar e prosseguir"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Lançar movimento de Expedição de Mandado')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar e sair da tarefa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
     <node name="(VCiv) Lançar movimento de Expedição de Mandado">
@@ -273,7 +273,7 @@
         <transition to="(VCiv) Lançar movimento de Expedição de Carta Precatória" name="(VCiv) Lançar movimento de Expedição de Carta Precatória">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="Ignorar e sair da tarefa"/>
+        <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Lançar movimento de Expedição de Carta Precatória')}"/>
         </event>
@@ -425,7 +425,7 @@
         <transition to="Nó de Desvio - (VCiv) Preparar Ato de Comunicação" name="Nó de Desvio - (VCiv) Preparar Ato de Comunicação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="Ignorar e sair da tarefa"/>
+        <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="Cancelar e sair da tarefa"/>
         <transition to="(VCiv) Lançar movimento de Expedição de Outros documentos" name="(VCiv) Lançar movimento de Expedição de Outros documentos">
             <condition expression="#{true}"/>
         </transition>
@@ -484,7 +484,7 @@
         <transition to="Nó de Desvio - (VCiv) Preparar Ato de Comunicação" name="Nó de Desvio - (VCiv) Preparar Ato de Comunicação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Ignorar e sair da tarefa"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Lançar movimento de Expedição de Carta Rogatória')}"/>
         </event>

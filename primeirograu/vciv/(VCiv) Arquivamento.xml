@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Arquivamento">
-    <description><![CDATA[Fluxo que controla o arquivamento.]]></description>  
+    <description><![CDATA[Fluxo que controla o arquivamento..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Arquivamento">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -34,7 +34,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Lançar movimento de Arquivo Definitivo" name="Arquivar definitivamente"/>
-        <transition to="Término" name="Ignorar e sair da tarefa"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="(VCiv) Definir data de Arquivo provisório" name="Arquivar provisoriamente"/>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Definir data de Arquivo provisório">

@@ -104,10 +104,10 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="Assinar alvará CS" name="Assinar alvará CS"/>
-        <transition to="Verificar providência a adotar CS" name="Ignorar e sair da tarefa"/>
+        <transition to="Verificar providência a adotar CS" name="Cancelar e sair da tarefa"/>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','91')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar e sair da tarefa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="Assinar alvará CS">

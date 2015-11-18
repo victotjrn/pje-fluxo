@@ -144,7 +144,7 @@
         <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Junção em cumprimento de decisão" name="Ignorar e sair da tarefa"/>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="Cancelar e sair da tarefa"/>
         <transition to="(VCiv) Redistribuido eletronicamente" name="(VCiv) Redistribuido eletronicamente"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Redistribuido eletronicamente')}"/>
@@ -703,7 +703,7 @@
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
             </controller>
         </task>
-        <transition to="(VCiv) Junção em cumprimento de decisão" name="Ignorar e sair da tarefa"/>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>

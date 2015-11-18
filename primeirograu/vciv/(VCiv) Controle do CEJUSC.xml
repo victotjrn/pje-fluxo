@@ -76,7 +76,7 @@
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Análise do CEJUSC" name="Ignorar e sair da tarefa"/>
+        <transition to="(CEJUSC) Análise do CEJUSC" name="Cancelar e sair da tarefa"/>
         <transition to="(CEJUSC) Separação preparação intimação" name="(CEJUSC) Separação preparação intimação">
             <condition expression="#{true}"/>
         </transition>
@@ -97,7 +97,7 @@
         <transition to="(CEJUSC) Processo com prazo decorrido" name="Processo com prazo decorrido">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Análise do CEJUSC" name="Ignorar e sair da tarefa"/>
+        <transition to="(CEJUSC) Análise do CEJUSC" name="Cancelar e sair da tarefa"/>
         <transition to="(CEJUSC) Prazos continuam abertos ?" name="Verificar se há prazo em aberto"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Processo com prazo decorrido')}"/>
@@ -116,7 +116,7 @@
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Análise do CEJUSC" name="Ignorar e sair da tarefa"/>
+        <transition to="(CEJUSC) Análise do CEJUSC" name="Cancelar e sair da tarefa"/>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Elaborar documento">
         <task name="(CEJUSC) Elaborar documento" swimlane="CEJUSC">
@@ -222,7 +222,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(CEJUSC) Preencheu conteúdo DJe" name="Prosseguir"/>
-        <transition to="(CEJUSC) Ignorar conteúdo DJe" name="Ignorar e sair da tarefa"/>
+        <transition to="(CEJUSC) Ignorar conteúdo DJe" name="Cancelar e sair da tarefa"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv_conteudo_dje')}"/>
         </event>

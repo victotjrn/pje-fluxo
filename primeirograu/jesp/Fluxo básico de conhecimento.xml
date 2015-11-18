@@ -297,9 +297,9 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="Analisar providência após certificar decurso" name="Analisar providência após certificar decurso"/>
-        <transition to="Verificar providência a adotar" name="Ignorar e sair da tarefa"/>
+        <transition to="Verificar providência a adotar" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar e sair da tarefa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="Encaminhar para instância superior">
@@ -314,7 +314,7 @@
         <transition to="Aguardar julgamento de instância superior" name="Aguardar julgamento de instância superior">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Avaliar forma de encerramento" name="Ignorar e sair da tarefa"/>
+        <transition to="Avaliar forma de encerramento" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('Aguardar julgamento de instância superior')}"/>
         </event>
