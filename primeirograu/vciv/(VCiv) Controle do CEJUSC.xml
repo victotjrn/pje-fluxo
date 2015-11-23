@@ -127,15 +127,19 @@
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Análise do CEJUSC" name="Finalizar e sair da tarefa"/>
         <transition to="(CEJUSC) É ofício ?" name="É ofício ?">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(VCiv) Remover documento temporário cejusc" name="Finalizar e sair da tarefa"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('É ofício ?')}"/>
         </event>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','34,57')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Finalizar e sair da tarefa')}"/>
         </event>
     </task-node>
     <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 34 ? '(CEJUSC) Lançar movimentação ofício' : '(CEJUSC) Lançar movimentação certidão'}" name="(CEJUSC) É ofício ?">
@@ -315,6 +319,13 @@
         <transition to="(CEJUSC) Junção preparação intimação" name="(CEJUSC) Junção preparação intimação"/>
         <event type="node-enter">
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('M', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(78).lancarMovimento()}')}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Remover documento temporário cejusc">
+        <transition to="(CEJUSC) Análise do CEJUSC" name="(CEJUSC) Análise do CEJUSC"/>
+        <event type="node-leave">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minutaEmElaboracao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
         </event>
     </node>  
     <!-- PROCESS-EVENTS -->
