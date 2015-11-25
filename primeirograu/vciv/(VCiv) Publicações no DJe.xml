@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Publicações no DJe">
+    <description><![CDATA[Fluxo destinado a publicações no DJe.....]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (VCiv) Publicações no DJe">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(VCiv) Informar conteúdo DJe" name="(VCiv) Informar conteúdo DJe"/>
+    </start-state>  
+    <!-- NODES -->
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="(VCiv) Informar conteúdo DJe">
+        <task name="(VCiv) Informar conteúdo DJe" swimlane="Secretaria">
+            <controller>
+                <variable name="Aviso1" mapped-name="textAlert:Aviso1" access="read,write"/>
+                <variable name="Aviso2" mapped-name="textAlert:Aviso2" access="read,write"/>
+                <variable name="Aviso3" mapped-name="textAlert:Aviso3" access="read,write"/>
+                <variable name="vciv_label_magistrado_dje" mapped-name="textAlert:vciv_label_magistrado_dje" access="read,write"/>
+                <variable name="vciv_magistrado_dje" mapped-name="combo_objetos:vciv_magistrado_dje" access="read,write"/>
+                <variable name="vciv_conteudo_dje" mapped-name="text:vciv_conteudo_dje" access="read,write"/>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="(VCiv) Preencheu conteúdo DJe?" name="Prosseguir"/>
+        <transition to="(VCiv) Ignorar conteúdo DJe" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (VCiv) Publicações no DJe" name="Nó de Desvio - (VCiv) Publicações no DJe">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv_conteudo_dje')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('magistrado_dje_temp', tramitacaoProcessualService.recuperaVariavelTarefa('combo_objetos:vciv_magistrado_dje').getIdUsuario())}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('combo_objetos:vciv_magistrado_dje')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('conteudo_dje_temp', tramitacaoProcessualService.strToBase64(tramitacaoProcessualService.recuperaVariavelTarefa('text:vciv_conteudo_dje')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('text:vciv_conteudo_dje')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Ignorar conteúdo DJe">
+        <task name="(VCiv) Ignorar conteúdo DJe" swimlane="Secretaria">
+            <controller>
+                <variable name="Aviso_DJe" mapped-name="textAlert:Aviso_DJe" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="(VCiv) Informar conteúdo DJe" name="Não"/>
+        <transition to="Nó de Desvio - (VCiv) Publicações no DJe" name="Nó de Desvio - (VCiv) Publicações no DJe">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Sim"/>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('magistrado_dje_temp') == null || tramitacaoProcessualService.recuperaVariavel('conteudo_dje_temp') == &quot;&quot; ? '(VCiv) Informar conteúdo DJe' : '(VCiv) Confirmar conteúdo DJe'}" name="(VCiv) Preencheu conteúdo DJe?">
+        <transition to="(VCiv) Informar conteúdo DJe" name="(VCiv) Informar conteúdo DJe"/>
+        <transition to="(VCiv) Confirmar conteúdo DJe" name="(VCiv) Confirmar conteúdo DJe"/>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Confirmar conteúdo DJe">
+        <task name="(VCiv) Confirmar conteúdo DJe" swimlane="Secretaria">
+            <controller>
+                <variable name="Aviso4" mapped-name="textAlert:Aviso4" access="read,write"/>
+                <variable name="Aviso5" mapped-name="textAlert:Aviso5" access="read,write"/>
+                <variable name="Aviso6" mapped-name="textAlert:Aviso6" access="read,write"/>
+                <variable name="Aviso7" mapped-name="textAlert:Aviso7" access="read,write"/>
+                <variable name="visualizar_dje" mapped-name="textAlert:visualizar_dje" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="(VCiv) Informar conteúdo DJe" name="Retornar para ajustar conteúdo"/>
+        <transition to="(VCiv) Gravar Variáveis DJe" name="Enviar para publicação no DJe"/>
+        <transition to="Nó de Desvio - (VCiv) Publicações no DJe" name="Nó de Desvio - (VCiv) Publicações no DJe">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <node name="(VCiv) Gravar Variáveis DJe">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') ? tramitacaoProcessualService.gravaVariavel('conteudo_dje_direto', tramitacaoProcessualService.recuperaVariavel('conteudo_dje_temp')) : tramitacaoProcessualService.gravaVariavel('conteudo_dje', tramitacaoProcessualService.recuperaVariavel('conteudo_dje_temp')) }"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('magistrado_dje', tramitacaoProcessualService.recuperaVariavel('magistrado_dje_temp'))}"/>
+            <action expression="#{preencherMovimento.deCodigo(1061).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') ? tramitacaoProcessualService.gravaVariavel('data_dje_direto', dateUtil.getDataAtual('yyyy-MM-dd')) : tramitacaoProcessualService.gravaVariavel('data_dje', dateUtil.getDataAtual('yyyy-MM-dd'))}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') ? tramitacaoProcessualService.gravaVariavel('id_oj_dje_direto', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador) : tramitacaoProcessualService.gravaVariavel('id_oj_dje', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador)}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Publicações no DJe">
+        <task name="Nó de Desvio - (VCiv) Publicações no DJe" swimlane="Nó de Desvio - (VCiv) Publicações no DJe"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Informar conteúdo DJe" name="(VCiv) Informar conteúdo DJe"/>
+        <transition to="(VCiv) Ignorar conteúdo DJe" name="(VCiv) Ignorar conteúdo DJe"/>
+        <transition to="(VCiv) Confirmar conteúdo DJe" name="(VCiv) Confirmar conteúdo DJe"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

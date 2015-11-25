@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Preparar Ato de Comunicação">
-    <description><![CDATA[Fluxo destinado a permitir a realização de atos de comunicação, tais como citações, intimações, etc......]]></description>  
+    <description><![CDATA[Fluxo destinado a permitir a realização de atos de comunicação, tais como citações, intimações, etc.........]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Preparar Ato de Comunicação">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:1469')}"/>
@@ -53,9 +53,9 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:pac:intimar_mp', 'false')}"/>
         </event>
     </fork>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') ? '(VCiv) Informar conteúdo DJe' : '(VCiv) Junção em Preparar Ato de Comunicação'}" name="(VCiv) É DJE?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') ? '(VCiv) Sinalizar DJe' : '(VCiv) Junção em Preparar Ato de Comunicação'}" name="(VCiv) É DJE?">
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="(VCiv) Junção em Preparar Ato de Comunicação"/>
-        <transition to="(VCiv) Informar conteúdo DJe" name="(VCiv) Informar conteúdo DJe"/>
+        <transition to="(VCiv) Sinalizar DJe" name="(VCiv) Sinalizar DJe"/>
     </decision>
     <join name="(VCiv) Junção em Preparar Ato de Comunicação">
         <transition to="Término" name="Término"/>
@@ -86,9 +86,9 @@
             <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,S,D')}"/>
         </event>
     </task-node>
-    <decision expression="#{processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10) ? '(VCiv) Separação em citação e(ou) intimação' : '(VCiv) Informar conteúdo DJe'}" name="(VCiv) É competência de Fazenda?">
-        <transition to="(VCiv) Informar conteúdo DJe" name="(VCiv) Informar conteúdo DJe"/>
-        <transition to="(VCiv) Separação em citação e(ou) intimação" name="(VCiv) Separação em citação e(ou) intimação"/>
+    <decision expression="#{(processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10)) || ((comunicacaoProcessualAction.getExpedientesEletronico().size() == 0 &amp;&amp; comunicacaoProcessualAction.getExpedientesCorreios().size() == 0 &amp;&amp; comunicacaoProcessualAction.getExpedientesEdital().size() == 0) &amp;&amp; comunicacaoProcessualAction.getExpedientesPessoal().size() &gt; 0) ? '(VCiv) Registrar ciência sem DJe' : '(VCiv) É via Secretaria?'}" name="(VCiv) É competência de Fazenda?">
+        <transition to="(VCiv) É via Secretaria?" name="(VCiv) É via Secretaria?"/>
+        <transition to="(VCiv) Registrar ciência sem DJe" name="(VCiv) Registrar ciência sem DJe"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Informar conteúdo DJe">
         <task name="(VCiv) Informar conteúdo DJe" swimlane="Secretaria">
@@ -293,7 +293,7 @@
         </transition>
         <transition to="(VCiv) Controlar prazos via carta" name="Finalizar"/>
     </task-node>
-    <decision expression="#{comunicacaoProcessualAction.getExpedientesCorreios().size() &gt; 0 &amp;&amp; !(tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje')) ? '(VCiv) Lançar movimento de Expedição de Aviso de Recebimento' : '(VCiv) Junção em citação e(ou) intimação'}" name="(VCiv) É Correio?">
+    <decision expression="#{(comunicacaoProcessualAction.getExpedientesCorreios().size() &gt; 0 ) &amp;&amp; (tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') != null) &amp;&amp; (!(tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje'))) ? '(VCiv) Lançar movimento de Expedição de Aviso de Recebimento' : '(VCiv) Junção em citação e(ou) intimação'}" name="(VCiv) É Correio?">
         <transition to="(VCiv) Lançar movimento de Expedição de Aviso de Recebimento" name="(VCiv) Lançar movimento de Expedição de Aviso de Recebimento"/>
         <transition to="(VCiv) Junção em citação e(ou) intimação" name="(VCiv) Junção em citação e(ou) intimação"/>
     </decision>
@@ -306,11 +306,16 @@
         <transition to="Nó de Desvio - (VCiv) Preparar Ato de Comunicação" name="Nó de Desvio - (VCiv) Preparar Ato de Comunicação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Controlar prazos via correios" name="Aguardar retorno do AR"/>
+        <transition to="(VCiv) DJe Sinalizado?" name="Informar conteúdo DJe/Aguardar retorno do AR">
+            <condition expression="#{!(processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10))}"/>
+        </transition>
+        <transition to="(VCiv) DJe Sinalizado?" name="Aguardar retorno do AR">
+            <condition expression="#{processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10)}"/>
+        </transition>
     </task-node>
     <process-state name="(VCiv) Controlar prazos via correios">
         <sub-process name="(VCiv) Controle de prazos e retorno de expedientes" binding="late"/>
-        <transition to="(VCiv) Junção em citação e(ou) intimação" name="(VCiv) Junção em citação e(ou) intimação"/>
+        <transition to="(VCiv) Juncao em publicacao DJe" name="(VCiv) Juncao em publicacao DJe"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:correios','true')}"/>
         </event>
@@ -321,13 +326,13 @@
     <fork name="(VCiv) Separação em citação e(ou) intimação">
         <transition to="(VCiv) É Correio?" name="(VCiv) É Correio?"/>
         <transition to="(VCiv) É via sistema?" name="(VCiv) É via sistema?"/>
-        <transition to="(VCiv) É via Secretaria?" name="(VCiv) É via Secretaria?"/>
+        <transition to="(VCiv) É Edital ?" name="(VCiv) É Edital ?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('conteudo_dje_temp')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('magistrado_dje_temp')}"/>
         </event>
     </fork>
-    <decision expression="#{comunicacaoProcessualAction.getExpedientesEletronico().size() &gt; 0 &amp;&amp; !(tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje')) ? '(VCiv) Lançar movimento de Expedição Outros documentos' : '(VCiv) Junção em citação e(ou) intimação'}" name="(VCiv) É via sistema?">
+    <decision expression="#{(comunicacaoProcessualAction.getExpedientesEletronico().size() &gt; 0 ) &amp;&amp; (tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') != null) &amp;&amp; (!(tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje'))) ? '(VCiv) Lançar movimento de Expedição Outros documentos' : '(VCiv) Junção em citação e(ou) intimação'}" name="(VCiv) É via sistema?">
         <transition to="(VCiv) Junção em citação e(ou) intimação" name="(VCiv) Junção em citação e(ou) intimação"/>
         <transition to="(VCiv) Lançar movimento de Expedição Outros documentos" name="(VCiv) Lançar movimento de Expedição Outros documentos"/>
     </decision>
@@ -350,13 +355,13 @@
     <join name="(VCiv) Junção em citação e(ou) intimação">
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="(VCiv) Junção em Preparar Ato de Comunicação"/>
     </join>
-    <decision expression="#{comunicacaoProcessualAction.getExpedientesPessoal().size() &gt; 0 &amp;&amp; !(tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje')) ? '(VCiv) Registrar ciência' : '(VCiv) Junção em citação e(ou) intimação'}" name="(VCiv) É via Secretaria?">
+    <decision expression="#{(comunicacaoProcessualAction.getExpedientesPessoal().size() &gt; 0) &amp;&amp; (tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') != null) &amp;&amp; (!(tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje'))) ? '(VCiv) Registrar ciência' : '(VCiv) Sinalizar DJe'}" name="(VCiv) É via Secretaria?">
         <transition to="(VCiv) Registrar ciência" name="(VCiv) Registrar ciência"/>
-        <transition to="(VCiv) Junção em citação e(ou) intimação" name="(VCiv) Junção em citação e(ou) intimação"/>
+        <transition to="(VCiv) Sinalizar DJe" name="(VCiv) Sinalizar DJe"/>
     </decision>
     <node name="(VCiv) Registrar ciência">
         <description><![CDATA[]]></description>
-        <transition to="(VCiv) Junção em citação e(ou) intimação" name="(VCiv) Junção em citação e(ou) intimação"/>
+        <transition to="(VCiv) Sinalizar DJe" name="(VCiv) Sinalizar DJe"/>
         <event type="node-enter">
             <action expression="#{comunicacaoProcessualAction.registrarCienciaExpedientePessoal()}"/>
         </event>
@@ -499,7 +504,7 @@
     </decision>
     <process-state name="(VCiv) Controlar prazos via sistema">
         <sub-process name="(VCiv) Controle de prazos e retorno de expedientes" binding="late"/>
-        <transition to="(VCiv) Junção em citação e(ou) intimação" name="(VCiv) Junção em citação e(ou) intimação"/>
+        <transition to="(VCiv) Juncao em publicacao DJe" name="(VCiv) Juncao em publicacao DJe"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:sistema','true')}"/>
         </event>
@@ -508,7 +513,7 @@
         </event>
     </process-state>
     <node name="(VCiv) Lançar movimento de Expedição Outros documentos">
-        <transition to="(VCiv) Controlar prazos via sistema" name="(VCiv) Controlar prazos via sistema"/>
+        <transition to="(VCiv) DJe Sinalizado?" name="(VCiv) DJe Sinalizado?"/>
         <event type="node-enter">
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('E', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento()}')}"/>
         </event>
@@ -540,7 +545,49 @@
     <decision expression="#{comunicacaoProcessualAction.getExpedientesMandados().size() &gt; 0 ? '(VCiv) Existe alguma Central de Mandados?' : '(VCiv) Separação em citação e(ou) intimação'}" name="(VCiv) É Mandado Reativação?">
         <transition to="(VCiv) Separação em citação e(ou) intimação" name="(VCiv) Separação em citação e(ou) intimação"/>
         <transition to="(VCiv) Existe alguma Central de Mandados?" name="(VCiv) Existe alguma Central de Mandados?"/>
-    </decision>  
+    </decision>
+    <node name="(VCiv) Registrar ciência sem DJe">
+        <transition to="(VCiv) Separação em citação e(ou) intimação" name="(VCiv) Separação em citação e(ou) intimação"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.registrarCienciaExpedientePessoal()}"/>
+        </event>
+    </node>
+    <process-state name="(VCiv) Publicacao DJe">
+        <sub-process name="(VCiv) Publicações no DJe" binding="late"/>
+        <transition to="(VCiv) Separacao em publicacao DJe" name="(VCiv) Separacao em publicacao DJe"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:pac:dje_publicar')}"/>
+        </event>
+    </process-state>
+    <node name="(VCiv) Sinalizar DJe">
+        <transition to="(VCiv) Separação em citação e(ou) intimação" name="(VCiv) Separação em citação e(ou) intimação"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:pac:dje_publicar', true)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:pac:dje_publicar') != null &amp;&amp; tramitacaoProcessualService.recuperaVariavel('vciv:pac:dje_publicar') ? '(VCiv) Publicacao DJe' : '(VCiv) Separacao em publicacao DJe'}" name="(VCiv) DJe Sinalizado?">
+        <transition to="(VCiv) Publicacao DJe" name="(VCiv) Publicacao DJe"/>
+        <transition to="(VCiv) Separacao em publicacao DJe" name="(VCiv) Separacao em publicacao DJe"/>
+    </decision>
+    <decision expression="#{comunicacaoProcessualAction.getExpedientesCorreios().size() &gt; 0 &amp;&amp; !(tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje')) ? '(VCiv) Controlar prazos via correios' : '(VCiv) Juncao em publicacao DJe'}" name="(VCiv) É correio pós DJe?">
+        <transition to="(VCiv) Controlar prazos via correios" name="(VCiv) Controlar prazos via correios"/>
+        <transition to="(VCiv) Juncao em publicacao DJe" name="(VCiv) Juncao em publicacao DJe"/>
+    </decision>
+    <decision expression="#{comunicacaoProcessualAction.getExpedientesEletronico().size() &gt; 0 &amp;&amp; !(tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje')) ? '(VCiv) Controlar prazos via sistema' : '(VCiv) Juncao em publicacao DJe'}" name="(VCiv) É sistema pós DJe?">
+        <transition to="(VCiv) Controlar prazos via sistema" name="(VCiv) Controlar prazos via sistema"/>
+        <transition to="(VCiv) Juncao em publicacao DJe" name="(VCiv) Juncao em publicacao DJe"/>
+    </decision>
+    <decision expression="#{comunicacaoProcessualAction.getExpedientesEdital().size() &gt; 0 ? '(VCiv) Lançar movimento de Expedição Outros documentos':'(VCiv) Junção em citação e(ou) intimação'}" name="(VCiv) É Edital ?">
+        <transition to="(VCiv) Junção em citação e(ou) intimação" name="(VCiv) Junção em citação e(ou) intimação"/>
+        <transition to="(VCiv) Lançar movimento de Expedição Outros documentos" name="(VCiv) Lançar movimento de Expedição Outros documentos"/>
+    </decision>
+    <fork name="(VCiv) Separacao em publicacao DJe">
+        <transition to="(VCiv) É correio pós DJe?" name="(VCiv) É correio pós DJe?"/>
+        <transition to="(VCiv) É sistema pós DJe?" name="(VCiv) É sistema pós DJe?"/>
+    </fork>
+    <join name="(VCiv) Juncao em publicacao DJe">
+        <transition to="(VCiv) Junção em citação e(ou) intimação" name="(VCiv) Junção em citação e(ou) intimação"/>
+    </join>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

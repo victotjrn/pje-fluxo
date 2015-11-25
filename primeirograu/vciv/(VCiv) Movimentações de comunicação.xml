@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Movimentações PAC">
-    <description><![CDATA[Fluxo responsável pelo lançamento de movimentações de comunicação.]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no VCiv..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Movimentações PAC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197,5:5886')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -20,10 +20,15 @@
         <transition to="(VCiv) É correrio ?" name="(VCiv) É correrio ?"/>
         <transition to="(VCiv) É mandado ?" name="(VCiv) É mandado ?"/>
         <transition to="(VCiv) É via sistema ?" name="(VCiv) É via sistema ?"/>
+        <transition to="(VCiv) É pessoalmente ?" name="(VCiv) É pessoalmente ?"/>
     </fork>
     <join name="(VCiv) Junção preparação intimação">
         <transition to="Término" name="Término"/>
     </join>
+    <decision expression="#{comunicacaoProcessualAction.getExpedientesPessoal().size() &gt; 0 ? '(VCiv) Registrar ciência' : '(VCiv) Junção preparação intimação'}" name="(VCiv) É pessoalmente ?">
+        <transition to="(VCiv) Junção preparação intimação" name="(VCiv) Junção preparação intimação"/>
+        <transition to="(VCiv) Registrar ciência" name="(VCiv) Registrar ciência"/>
+    </decision>
     <decision expression="#{comunicacaoProcessualAction.getExpedientesCorreios().size() &gt; 0 ? '(VCiv) Lançar movimento de Expedição de Aviso de Recebimento' : '(VCiv) Junção preparação intimação'}" name="(VCiv) É correrio ?">
         <transition to="(VCiv) Lançar movimento de Expedição de Aviso de Recebimento" name="(VCiv) Lançar movimento de Expedição de Aviso de Recebimento"/>
         <transition to="(VCiv) Junção preparação intimação" name="(VCiv) Junção preparação intimação"/>
@@ -37,7 +42,7 @@
         <transition to="(VCiv) Junção preparação intimação" name="(VCiv) Junção preparação intimação"/>
     </decision>
     <node name="(VCiv) Lançar movimento de Expedição de Aviso de Recebimento">
-        <transition to="(VCiv) Junção preparação intimação" name="(VCiv) Junção preparação intimação"/>
+        <transition to="(VCiv) Imprimir citações e(ou) intimações de audiência" name="(VCiv) Imprimir citações e(ou) intimações de audiência"/>
         <event type="node-enter">
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(74).lancarMovimento()}')}"/>
         </event>
@@ -54,9 +59,32 @@
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('M', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(78).lancarMovimento()}')}"/>
         </event>
     </node>
+    <node name="(VCiv) Registrar ciência">
+        <transition to="(VCiv) Junção preparação intimação" name="(VCiv) Junção preparação intimação"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.registrarCienciaExpedientePessoal()}"/>
+        </event>
+    </node>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Movimentações PAC">
         <task name="Nó de Desvio - (VCiv) Movimentações PAC" swimlane="Nó de Desvio - (VCiv) Movimentações PAC"/>
         <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Imprimir citações e(ou) intimações de audiência" name="(VCiv) Imprimir citações e(ou) intimações de audiência"/>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Imprimir citações e(ou) intimações de audiência">
+        <task name="(VCiv) Imprimir citações e(ou) intimações de audiência" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_expedientes_correios" mapped-name="frame:Processo_Fluxo_expedientes_correios" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Movimentações PAC" name="Nó de Desvio - (VCiv) Movimentações PAC">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Junção preparação intimação" name="Cancelar e sair da tarefa/Informar conteúdo DJe">
+            <condition expression="#{!(processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10))}"/>
+        </transition>
+        <transition to="(VCiv) Junção preparação intimação" name="Cancelar e sair da tarefa">
+            <condition expression="#{(processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10))}"/>
+        </transition>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
