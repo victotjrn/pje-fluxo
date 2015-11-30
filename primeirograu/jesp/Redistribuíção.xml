@@ -17,9 +17,6 @@
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:EhDoCejusc') ? 'Processos Redistribuídos do Cejusc' : 'Processos Redistribuídos de outras varas'}" name="Eh Cejusc?">
         <transition to="Processos Redistribuídos de outras varas" name="Processos Redistribuídos de outras varas"/>
         <transition to="Processos Redistribuídos do Cejusc" name="Processos Redistribuídos do Cejusc"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fbc:EhDeOutroFluxo','true')}"/>
-        </event>
     </decision>
     <task-node end-tasks="true" name="Processos Redistribuídos de outras varas">
         <task name="Processos Redistribuídos de outras varas" swimlane="Secretária"/>
