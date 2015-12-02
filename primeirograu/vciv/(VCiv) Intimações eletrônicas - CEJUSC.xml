@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(CEJUSC) Intimações eletrônicas">
+    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido...
+
+Para complementar as variáveis:
+- Selecione: label "Selecione o destinatário que deseja intimar diretamente"
+- partesAtivas: label "#{processoParteManager.recuperaPartes(tramitacaoProcessualService.recuperaProcesso(), true, null, null)}"
+- prazoIntimacao: label "Prazo (em dias - 0 para sem prazo)"
+- Processo_Fluxo_visualizarDecisao: label "Ato proferido"]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (CEJUSC) Intimações eletrônicas">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="CEJUSC">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="CEJUSC"/>
+        <transition to="(CEJUSC) Informar dados de intimação eletrônica" name="(CEJUSC) Informar dados de intimação eletrônica"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(CEJUSC) Informar dados de intimação eletrônica">
+        <task name="(CEJUSC) Informar dados de intimação eletrônica" swimlane="CEJUSC">
+            <controller>
+                <variable name="prazoIntimacao" mapped-name="number:prazoIntimacao" access="read,write,required"/>
+            </controller>
+        </task>
+        <description><![CDATA[.]]></description>
+        <transition to="Nó de Desvio - (CEJUSC) Intimações eletrônicas" name="Nó de Desvio - (CEJUSC) Intimações eletrônicas">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(CEJUSC) Intimar partes do polo ativo" name="01 - Intimar partes do polo ativo"/>
+        <transition to="(CEJUSC) Intimar partes do polo passivo" name="02 - Intimar partes do polo passivo"/>
+        <transition to="(CEJUSC) Intimar partes do polo outros participantes" name="02 - Intimar partes do polo outros participantes"/>
+        <transition to="(CEJUSC) Intimar todos os polos" name="04 - Intimar todos os polos"/>
+        <transition to="(CEJUSC) Informar dados de intimação eletrônica direcionada" name="05 - Intimar um destinatário específico"/>
+        <transition to="Término" name="06 - Cancelar e sair da tarefa"/>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', '06 - Cancelar e sair da tarefa,05 - Intimar um destinatário específico')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacao', '')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(CEJUSC) Informar dados de intimação eletrônica direcionada">
+        <task name="(CEJUSC) Informar dados de intimação eletrônica direcionada" swimlane="CEJUSC">
+            <controller>
+                <variable name="Selecione" mapped-name="textAlert:Selecione" access="read,write"/>
+                <variable name="partesAtivas" mapped-name="combo_objetos:partesAtivas" access="read,write"/>
+                <variable name="prazoIntimacao" mapped-name="number:prazoIntimacao" access="read,write,required"/>
+            </controller>
+        </task>
+        <description><![CDATA[.]]></description>
+        <transition to="Nó de Desvio - (CEJUSC) Intimações eletrônicas" name="Nó de Desvio - (CEJUSC) Intimações eletrônicas">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(CEJUSC) Intimar destinatário específico" name="Intimar destinatário selecionado"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar a tarefa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacao', '')}"/>
+        </event>
+    </task-node>
+    <node name="(CEJUSC) Intimar partes do polo ativo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'A',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),6171,65)}"/>
+        </event>
+    </node>
+    <node name="(CEJUSC) Intimar partes do polo passivo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'P',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),6171,65)}"/>
+        </event>
+    </node>
+    <node name="(CEJUSC) Intimar partes do polo outros participantes">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'T',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),6171,65)}"/>
+        </event>
+    </node>
+    <node name="(CEJUSC) Intimar todos os polos">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'A',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),6171,65)}"/>
+            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'P',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),6171,65)}"/>
+            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'T',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),6171,65)}"/>
+        </event>
+    </node>
+    <node name="(CEJUSC) Intimar destinatário específico">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarDestinatarioEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, partesAtivas.getPessoa().idPessoa,(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D', (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'), 6171,65)}"/>
+        </event>
+    </node>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntimacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('partesAtivas')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('Selecione')}"/>
+        </event>
+    </end-state>
+    <task-node end-tasks="true" name="Nó de Desvio - (CEJUSC) Intimações eletrônicas">
+        <task name="Nó de Desvio - (CEJUSC) Intimações eletrônicas" swimlane="Nó de Desvio - (CEJUSC) Intimações eletrônicas"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(CEJUSC) Informar dados de intimação eletrônica" name="(CEJUSC) Informar dados de intimação eletrônica"/>
+        <transition to="(CEJUSC) Informar dados de intimação eletrônica direcionada" name="(CEJUSC) Informar dados de intimação eletrônica direcionada"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>

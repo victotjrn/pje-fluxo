@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC..]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC......]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -10,7 +10,7 @@
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197')}"/>
     </swimlane>
     <swimlane name="CEJUSC">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886,5:1338')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -47,6 +47,7 @@
         </transition>
         <transition to="(CEJUSC) Elaborar documento" name="Elaborar documento"/>
         <transition to="(CEJUSC) Intimar da audiência" name="Intimar da audiência"/>
+        <transition to="(CEJUSC) Intimações eletrônicas" name="Intimar eletrônicamente"/>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Autos devolvidos pelo CEJUSC">
         <task name="(CEJUSC) Autos devolvidos pelo CEJUSC" swimlane="Secretaria"/>
@@ -327,7 +328,11 @@
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minutaEmElaboracao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
         </event>
-    </node>  
+    </node>
+    <process-state name="(CEJUSC) Intimações eletrônicas">
+        <sub-process name="(CEJUSC) Intimações eletrônicas" binding="late"/>
+        <transition to="(CEJUSC) Separação preparação intimação" name="(CEJUSC) Separação preparação intimação"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
