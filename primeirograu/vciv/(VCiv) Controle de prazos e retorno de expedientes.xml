@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de prazos e retorno de expedientes">
-    <description><![CDATA[Controla prazos e retorno de expedientes
+    <description><![CDATA[Controla prazos e retorno de expedientes..
 
 (VCiv) Aguardando devolução do AR - avisoHaExpedientes - #{tramitacaoProcessualService.recuperaVariavel('avisoHaExpedientes') != null ? tramitacaoProcessualService.recuperaVariavel('avisoHaExpedientes') : ''}
 
@@ -173,7 +173,11 @@
         <transition to="(VCiv) Processos com prazo em curso" name="(VCiv) Processos com prazo em curso"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Processos com prazo em curso">
-        <task name="(VCiv) Processos com prazo em curso" swimlane="Secretaria"/>
+        <task name="(VCiv) Processos com prazo em curso" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (VCiv) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
