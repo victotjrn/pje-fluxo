@@ -4,7 +4,7 @@
     <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:1338,8:5852,8:5853')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:1338,8:5852,8:5853,6:5901')}"/>
     </swimlane>
     <swimlane name="Nó de Desvio - (VCiv) Elaborar Documentos">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -155,7 +155,7 @@
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar Ofício">
-        <task name="(VCiv) Assinar Ofício" swimlane="Secretaria">
+        <task name="(VCiv) Assinar Ofício" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
@@ -222,7 +222,7 @@
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar outros documentos">
-        <task name="(VCiv) Assinar outros documentos" swimlane="Secretaria">
+        <task name="(VCiv) Assinar outros documentos" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
@@ -293,7 +293,7 @@
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar Certidão de Trânsito em Julgado">
-        <task name="(VCiv) Assinar Certidão de Trânsito em Julgado" swimlane="Secretaria">
+        <task name="(VCiv) Assinar Certidão de Trânsito em Julgado" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentoProcessual" mapped-name="homologadorEventoTree:confirmarMovimentoProcessual" access="read,write"/>
@@ -360,7 +360,7 @@
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar certidão de decurso de prazo">
-        <task name="(VCiv) Assinar certidão de decurso de prazo" swimlane="Secretaria">
+        <task name="(VCiv) Assinar certidão de decurso de prazo" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentoProcessual" mapped-name="homologadorEventoTree:confirmarMovimentoProcessual" access="read,write"/>

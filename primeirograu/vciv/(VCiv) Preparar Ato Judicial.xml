@@ -10,7 +10,7 @@
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}"/>
     </swimlane>
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:1338,7:5197,8:5852,8:5853')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:1338,7:5197,8:5852,8:5853,6:5901')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -81,7 +81,7 @@
         </transition>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de urgência inicial">
-        <task name="(VCiv) Concluso para decisão de urgência inicial" swimlane="Assessor">
+        <task name="(VCiv) Concluso para decisão de urgência inicial" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_decisao" mapped-name="textEditCombo:minuta_decisao" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
@@ -133,7 +133,7 @@
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Concluso para despacho inicial">
-        <task name="(VCiv) Concluso para despacho inicial" swimlane="Assessor">
+        <task name="(VCiv) Concluso para despacho inicial" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_despacho" mapped-name="textEditCombo:minuta_despacho" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
@@ -189,7 +189,7 @@
         <transition to="(VCiv) Junção de atos judiciais" name="(VCiv) Junção de atos judiciais"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para despacho">
-        <task name="(VCiv) Concluso para despacho" swimlane="Assessor">
+        <task name="(VCiv) Concluso para despacho" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_despacho" mapped-name="textEditCombo:minuta_despacho" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
@@ -244,7 +244,7 @@
         <transition to="(VCiv) Junção de atos judiciais" name="(VCiv) Junção de atos judiciais"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para sentença">
-        <task name="(VCiv) Concluso para sentença" swimlane="Assessor">
+        <task name="(VCiv) Concluso para sentença" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_sentenca" mapped-name="textEditCombo:minuta_sentenca" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
@@ -357,7 +357,7 @@
         <transition to="(VCiv) Concluso para decisão de urgência" name="(VCiv) Concluso para decisão de urgência"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de urgência">
-        <task name="(VCiv) Concluso para decisão de urgência" swimlane="Assessor">
+        <task name="(VCiv) Concluso para decisão de urgência" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_decisao" mapped-name="textEditCombo:minuta_decisao" access="read,write"/>
                 <variable name="MinutaEmLote" mapped-name="minutarLote:MinutaEmLote" access="read,write"/>
@@ -412,7 +412,7 @@
         <transition to="(VCiv) Junção de sentença" name="(VCiv) Junção de sentença"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para sentença de homologação e(ou) extinção">
-        <task name="(VCiv) Concluso para sentença de homologação e(ou) extinção" swimlane="Assessor">
+        <task name="(VCiv) Concluso para sentença de homologação e(ou) extinção" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_sentenca" mapped-name="textEditCombo:minuta_sentenca" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
@@ -485,7 +485,7 @@
         <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de Emb. Declaração">
-        <task name="(VCiv) Concluso para decisão de Emb. Declaração" swimlane="Assessor">
+        <task name="(VCiv) Concluso para decisão de Emb. Declaração" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_decisao" mapped-name="textEditCombo:minuta_decisao" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
@@ -540,7 +540,7 @@
         <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão sobre recurso">
-        <task name="(VCiv) Concluso para decisão sobre recurso" swimlane="Assessor">
+        <task name="(VCiv) Concluso para decisão sobre recurso" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_decisao" mapped-name="textEditCombo:minuta_decisao" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
@@ -595,7 +595,7 @@
         <transition to="(VCiv) Concluso para decisão" name="(VCiv) Concluso para decisão"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão">
-        <task name="(VCiv) Concluso para decisão" swimlane="Assessor">
+        <task name="(VCiv) Concluso para decisão" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_decisao" mapped-name="textEditCombo:minuta_decisao" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
@@ -651,7 +651,7 @@
         <transition to="(VCiv) Concluso para despacho de cumprimento de sentença" name="(VCiv) Concluso para despacho de cumprimento de sentença"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para despacho de cumprimento de sentença">
-        <task name="(VCiv) Concluso para despacho de cumprimento de sentença" swimlane="Assessor">
+        <task name="(VCiv) Concluso para despacho de cumprimento de sentença" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_despacho" mapped-name="textEditCombo:minuta_despacho" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
@@ -706,7 +706,7 @@
         <transition to="(VCiv) Concluso para decisão sobre reativação" name="(VCiv) Concluso para decisão sobre reativação"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão sobre reativação">
-        <task name="(VCiv) Concluso para decisão sobre reativação" swimlane="Assessor">
+        <task name="(VCiv) Concluso para decisão sobre reativação" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_decisao" mapped-name="textEditCombo:minuta_decisao" access="read,write"/>
                 <variable name="minutaEmLote" mapped-name="minutarLote:minutaEmLote" access="read,write"/>
@@ -761,7 +761,7 @@
         <transition to="(VCiv) Concluso para decisão de penhora online" name="(VCiv) Concluso para decisão de penhora online"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de penhora online">
-        <task name="(VCiv) Concluso para decisão de penhora online" swimlane="Assessor">
+        <task name="(VCiv) Concluso para decisão de penhora online" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_decisao" mapped-name="textEditCombo:minuta_decisao" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
@@ -816,7 +816,7 @@
         <transition to="(VCiv) Concluso para decisão de desbloqueio" name="(VCiv) Concluso para decisão de desbloqueio"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de desbloqueio">
-        <task name="(VCiv) Concluso para decisão de desbloqueio" swimlane="Assessor">
+        <task name="(VCiv) Concluso para decisão de desbloqueio" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_decisao" mapped-name="textEditCombo:minuta_decisao" access="read,write"/>
                 <variable name="minutaEmLote" mapped-name="minutarLote:minutaEmLote" access="read,write"/>
@@ -871,7 +871,7 @@
         <transition to="(VCiv) Concluso para decisão de suspensão" name="(VCiv) Concluso para decisão de suspensão"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão de suspensão">
-        <task name="(VCiv) Concluso para decisão de suspensão" swimlane="Assessor">
+        <task name="(VCiv) Concluso para decisão de suspensão" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_decisao" mapped-name="textEditCombo:minuta_decisao" access="read,write"/>
                 <variable name="minutaEmLote" mapped-name="minutarLote:minutaEmLote" access="read,write"/>

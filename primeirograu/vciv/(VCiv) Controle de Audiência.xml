@@ -7,7 +7,7 @@
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:1470,7:5886,7:5197,6:5901')}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:1470,7:5886,7:5197')}"/>
@@ -175,7 +175,7 @@
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar ata de audiência pelo magistrado">
-        <task name="(VCiv) Assinar ata de audiência pelo magistrado" swimlane="Secretaria">
+        <task name="(VCiv) Assinar ata de audiência pelo magistrado" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
@@ -224,7 +224,7 @@
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar ata de audiência com ato judicial">
-        <task name="(VCiv) Assinar ata de audiência com ato judicial" swimlane="Secretaria">
+        <task name="(VCiv) Assinar ata de audiência com ato judicial" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
