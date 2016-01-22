@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Cumprimento de decisão">
-    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria...]]></description>  
+    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria...]]></description>
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Cumprimento de decisão">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Conciliação">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,7:5197,7:5886,6:1469')}"/>
     </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
+    </swimlane>
     <swimlane name="Secretaria e Servidor de cálculo">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:5891')}"/>
-    </swimlane>  
+    </swimlane>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
         <description><![CDATA[]]></description>
         <transition to="(VCiv) Separação em cumprimento de decisão" name="(VCiv) Separação em cumprimento de decisão"/>
-    </start-state>  
+    </start-state>
     <!-- NODES -->
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
@@ -703,11 +703,17 @@
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
             </controller>
         </task>
-        <transition to="(VCiv) Junção em cumprimento de decisão" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Processos devolvidos pela central de cálculos" name="Devolver para a secretária"/>
+        <event type="task-create">
+            <action expression="#{preencherMovimento.deCodigo(979).lancarMovimento()}"/>
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', 'false')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{preencherMovimento.deCodigo(980).comComplementoDeCodigo(7).preencherComTexto('juízo de orgem').lancarMovimento()}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Processos devolvidos pela central de cálculos">
         <task name="(VCiv) Processos devolvidos pela central de cálculos" swimlane="Secretaria"/>
@@ -738,7 +744,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="Finalizar tarefa"/>
-    </task-node>  
+    </task-node>
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -787,5 +793,5 @@
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>
 </process-definition>
