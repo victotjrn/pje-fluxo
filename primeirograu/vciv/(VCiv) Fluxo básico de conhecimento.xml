@@ -126,6 +126,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
                 <variable name="vciv_fbc_retificar_autuacao" mapped-name="sim_nao:vciv_fbc_retificar_autuacao" access="read,write"/>
                 <variable name="vciv_fbc_suspender" mapped-name="sim_nao:vciv_fbc_suspender" access="read,write"/>
                 <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[]]></description>
