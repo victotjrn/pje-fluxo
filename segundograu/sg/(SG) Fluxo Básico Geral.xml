@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Fluxo Básico Geral">
+    <description><![CDATA[Código do fluxo: SG_FBG
+
+Descrição: Fluxo básico geral de entrada dos processos..
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SG) Fluxo Básico Geral">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(SG) Tem pedido de urgência?" name="(SG) Tem pedido de urgência?"/>
+    </start-state>
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.temUrgencia() ? '(SG) Preparação de decisão de urgência inicial' : '(SG) Preparação de despacho inicial'}" name="(SG) Tem pedido de urgência?">
+        <transition to="(SG) Preparação de decisão de urgência inicial" name="(SG) Preparação de decisão de urgência inicial"/>
+        <transition to="(SG) Preparação de despacho inicial" name="(SG) Preparação de despacho inicial"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão de urgência inicial">
+        <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
+        <transition to="(SG) Análise de despachados urgentes" name="(SG) Análise de despachados urgentes"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_urgencia_inicial', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_urgencia_inicial')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Análise de despachados urgentes">
+        <sub-process name="(SG) Despachados" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado_urgente', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado_urgente')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Preparação de despacho inicial">
+        <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
+        <transition to="(SG) Análise de despachados" name="(SG) Análise de despachados"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:despacho', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:despacho_inicial', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:despacho')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:despacho_inicial')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Análise de despachados">
+        <sub-process name="(SG) Despachados" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado')}"/>
+        </event>
+    </process-state>
+    <task-node end-tasks="true" name="(SG) Secretaria - ANALISAR">
+        <task name="(SG) Secretaria - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Término" name="Término">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (SG) Fluxo Básico Geral" name="Nó de Desvio - (SG) Fluxo Básico Geral">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Fluxo Básico Geral">
+        <task name="Nó de Desvio - (SG) Fluxo Básico Geral" swimlane="Nó de Desvio - (SG) Fluxo Básico Geral"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+    </task-node>
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <!-- ACTIONS -->
+</process-definition>
