@@ -28,14 +28,6 @@
                 <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[Labels:
-- Aviso1:ATENÇÃO:
-- Aviso2:O sistema PJe está integrado com o sistema Hermes. Ao fazer a publicação abaixo o texto será encaminhado automaticamente para o Diário da Justiça Eletrônico.
-- Aviso3:Os atos encaminhados para publicação até as 17h:59m do dia corrente serão disponibilizados no DJe do mesmo dia. Após o referido horário a disponibilização ficará para o próximo dia útil.
-- vciv_label_magistrado_dje:Informe o magistrado que proferiu o ato:
-- vciv_magistrado_dje:#{pessoaMagistradoDAO.magistradoPorOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador)}
-- vciv_conteudo_dje:Informe apenas o teor do ato a ser publicado no DJe:
-- Processo_Fluxo_visualizarDecisao:Último ato judicial]]></description>
         <transition to="(VCiv) Preencheu conteúdo DJe?" name="Prosseguir"/>
         <transition to="(VCiv) Ignorar conteúdo DJe" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Publicações no DJe" name="Nó de Desvio - (VCiv) Publicações no DJe">
@@ -57,8 +49,6 @@
                 <variable name="Aviso_DJe" mapped-name="textAlert:Aviso_DJe" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[Labels:
--Aviso_DJe: Deseja realmente ignorar a publicação para o DJe?]]></description>
         <transition to="(VCiv) Informar conteúdo DJe" name="Não"/>
         <transition to="Nó de Desvio - (VCiv) Publicações no DJe" name="Nó de Desvio - (VCiv) Publicações no DJe">
             <condition expression="#{true}"/>
@@ -79,12 +69,6 @@
                 <variable name="visualizar_dje" mapped-name="textAlert:visualizar_dje" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[Labels:
--Aviso4:ATENÇÃO:
--Aviso5:Caso queira ajustar o conteúdo abaixo, clique no botão "Retornar para ajustar conteúdo".
--Aviso6:Após clicar no botão "Enviar para publicação no DJe", a publicação não poderá ser mais cancelada.
--Aviso7:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--visualizar_dje:#{tramitacaoProcessualService.base64ToString(tramitacaoProcessualService.recuperaVariavel('conteudo_dje_temp'))}]]></description>
         <transition to="(VCiv) Informar conteúdo DJe" name="Retornar para ajustar conteúdo"/>
         <transition to="(VCiv) Gravar Variáveis DJe" name="Enviar para publicação no DJe"/>
         <transition to="Nó de Desvio - (VCiv) Publicações no DJe" name="Nó de Desvio - (VCiv) Publicações no DJe">
