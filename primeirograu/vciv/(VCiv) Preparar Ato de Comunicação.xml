@@ -9,9 +9,6 @@
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
     </swimlane>  
-    <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901')}" actor-id="#{actor.id}"/>
-    </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
@@ -207,7 +204,7 @@
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="(VCiv) Junção em Preparar Ato de Comunicação"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Expedir Mandado">
-        <task name="(VCiv) Expedir Mandado" swimlane="Magistrado">
+        <task name="(VCiv) Expedir Mandado" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
             </controller>
@@ -265,7 +262,7 @@
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="(VCiv) Junção em Preparar Ato de Comunicação"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Expedir Carta Precatória">
-        <task name="(VCiv) Expedir Carta Precatória" swimlane="Magistrado">
+        <task name="(VCiv) Expedir Carta Precatória" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
             </controller>
