@@ -6,6 +6,9 @@
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,7:5197')}" actor-id="#{actor.id}"/>
     </swimlane>  
+	<swimlane name="Magistrado">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,7:5197,6:5901')}" actor-id="#{actor.id}"/>
+    </swimlane> 
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
@@ -45,8 +48,10 @@
         </event>
     </task-node>
     <decision expression="#{(processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10)) || ((comunicacaoProcessualAction.getExpedientesEletronico().size() == 0 &amp;&amp; comunicacaoProcessualAction.getExpedientesCorreios().size() == 0 &amp;&amp; comunicacaoProcessualAction.getExpedientesEdital().size() == 0) &amp;&amp; comunicacaoProcessualAction.getExpedientesPessoal().size() &gt; 0) ? '(VCiv) Separação em controle de prazo' : '(VCiv) Publicacao DJe'}" name="(VCiv) É competência de Fazenda?">
+
         <transition to="(VCiv) Publicacao DJe" name="(VCiv) Publicacao DJe"/>
         <transition to="(VCiv) Separação em controle de prazo" name="(VCiv) Separação em controle de prazo"/>
+
     </decision>
     <task-node end-tasks="true" name="(VCiv) Informar conteúdo DJe">
         <task name="(VCiv) Informar conteúdo DJe" swimlane="Secretaria">
@@ -277,3 +282,4 @@
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
+
