@@ -40,7 +40,11 @@
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('vciv:cpre:correios') ? '(VCiv) Aguardando devolução do AR' : '(VCiv) É via mandado?'}" name="(VCiv) É via correios?">
         <transition to="(VCiv) Aguardando devolução do AR" name="(VCiv) Aguardando devolução do AR"/>
+<<<<<<< HEAD
         <transition to="(VCiv) É via mandado?" name="(VCiv) É via mandado?"/>
+=======
+
+>>>>>>> refs/heads/#3311
     </decision>
     <task-node end-tasks="true" name="(VCiv) Aguardando devolução do AR">
         <task name="(VCiv) Aguardando devolução do AR" swimlane="Secretaria">
@@ -159,7 +163,7 @@
     </decision>
     <task-node end-tasks="true" name="(VCiv) Processos com prazo decorrido para manifestação do MP">
         <task name="(VCiv) Processos com prazo decorrido para manifestação do MP" swimlane="Secretaria">
-            <controller>
+			<controller>
                 <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
@@ -170,7 +174,11 @@
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('vciv:cpre:sistema') ? '(VCiv) Há prazo em aberto?' : '(VCiv) Controlar retorno de expediente'}" name="(VCiv) É via sistema?">
         <transition to="(VCiv) Há prazo em aberto?" name="(VCiv) Há prazo em aberto?"/>
+<<<<<<< HEAD
         <transition to="(VCiv) Controlar retorno de expediente" name="(VCiv) Controlar retorno de expediente"/>
+=======
+
+>>>>>>> refs/heads/#3311
     </decision>
     <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 ? '(VCiv) Processos com prazo em curso' : 'Término'}" name="(VCiv) Há prazo em aberto?">
         <transition to="Término" name="Término"/>
@@ -178,7 +186,7 @@
     </decision>
     <task-node end-tasks="true" name="(VCiv) Processos com prazo em curso">
         <task name="(VCiv) Processos com prazo em curso" swimlane="Secretaria">
-            <controller>
+			<controller>
                 <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>

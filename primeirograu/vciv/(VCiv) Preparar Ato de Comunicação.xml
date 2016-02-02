@@ -12,9 +12,9 @@
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901')}" actor-id="#{actor.id}"/>
     </swimlane>  
-    <swimlane name="Magistrado">
+	<swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901')}" actor-id="#{actor.id}"/>
-    </swimlane>  
+    </swimlane> 
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
@@ -94,6 +94,8 @@
     </task-node>
     <decision expression="#{(processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10)) || ((comunicacaoProcessualAction.getExpedientesEletronico().size() == 0 &amp;&amp; comunicacaoProcessualAction.getExpedientesCorreios().size() == 0 &amp;&amp; comunicacaoProcessualAction.getExpedientesEdital().size() == 0) &amp;&amp; comunicacaoProcessualAction.getExpedientesPessoal().size() &gt; 0) ? '(VCiv) Registrar ciência sem DJe' : '(VCiv) É via Secretaria?'}" name="(VCiv) É competência de Fazenda?">
         <transition to="(VCiv) É via Secretaria?" name="(VCiv) É via Secretaria?"/>
+
+
         <transition to="(VCiv) Registrar ciência sem DJe" name="(VCiv) Registrar ciência sem DJe"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Informar conteúdo DJe">
@@ -210,7 +212,7 @@
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="(VCiv) Junção em Preparar Ato de Comunicação"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Expedir Mandado">
-        <task name="(VCiv) Expedir Mandado" swimlane="Magistrado">
+        <task name="(VCiv) Expedir Mandado" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
             </controller>
@@ -268,7 +270,7 @@
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="(VCiv) Junção em Preparar Ato de Comunicação"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Expedir Carta Precatória">
-        <task name="(VCiv) Expedir Carta Precatória" swimlane="Magistrado">
+        <task name="(VCiv) Expedir Carta Precatória" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
             </controller>
@@ -318,6 +320,7 @@
         <transition to="(VCiv) DJe Sinalizado?" name="Aguardar retorno do AR">
             <condition expression="#{processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10)}"/>
         </transition>
+
     </task-node>
     <process-state name="(VCiv) Controlar prazos via correios">
         <sub-process name="(VCiv) Controle de prazos e retorno de expedientes" binding="late"/>
@@ -330,16 +333,29 @@
         </event>
     </process-state>
     <fork name="(VCiv) Separação em citação e(ou) intimação">
+<<<<<<< HEAD
         <transition to="(VCiv) É Correio?" name="(VCiv) É Correio?"/>
         <transition to="(VCiv) É via sistema?" name="(VCiv) É via sistema?"/>
         <transition to="(VCiv) É Edital ?" name="(VCiv) É Edital ?"/>
+=======
+        <transition to="(VCiv) É pessoalmente ?" name="(VCiv) É pessoalmente ?"/>
+        <transition to="(VCiv) Separacao Dje unico" name="(VCiv) Separacao Dje unico"/>
+
+
+
+>>>>>>> refs/heads/#3311
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('conteudo_dje_temp')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('magistrado_dje_temp')}"/>
         </event>
     </fork>
+<<<<<<< HEAD
     <decision expression="#{(comunicacaoProcessualAction.getExpedientesEletronico().size() &gt; 0 ) &amp;&amp; (tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') != null) &amp;&amp; (!(tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje'))) ? '(VCiv) Lançar movimento de Expedição Outros documentos' : '(VCiv) Junção em citação e(ou) intimação'}" name="(VCiv) É via sistema?">
         <transition to="(VCiv) Junção em citação e(ou) intimação" name="(VCiv) Junção em citação e(ou) intimação"/>
+=======
+    <decision expression="#{(comunicacaoProcessualAction.getExpedientesEletronico().size() &gt; 0 ) &amp;&amp; (tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje') != null) &amp;&amp; (!(tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:publicar_dje'))) ? '(VCiv) Lançar movimento de Expedição Outros documentos' : '(VCiv) Junção Dje único'}" name="(VCiv) É via sistema?">
+
+>>>>>>> refs/heads/#3311
         <transition to="(VCiv) Lançar movimento de Expedição Outros documentos" name="(VCiv) Lançar movimento de Expedição Outros documentos"/>
     </decision>
     <node name="(VCiv) Lançar movimento de Expedição de Outros documentos">
@@ -519,7 +535,12 @@
         </event>
     </process-state>
     <node name="(VCiv) Lançar movimento de Expedição Outros documentos">
+<<<<<<< HEAD
         <transition to="(VCiv) DJe Sinalizado?" name="(VCiv) DJe Sinalizado?"/>
+=======
+        <transition to="(VCiv) Junção Dje único" name="(VCiv) Junção Dje único"/>
+
+>>>>>>> refs/heads/#3311
         <event type="node-enter">
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('E', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento()}')}"/>
         </event>
