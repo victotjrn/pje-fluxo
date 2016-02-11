@@ -130,6 +130,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de decisão')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Concluso para despacho inicial">
@@ -182,6 +183,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de despacho')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:despacho') ? '(VCiv) Lançar movimento concluso para despacho' : '(VCiv) Junção de atos judiciais'}" name="(VCiv) É despacho?">
@@ -237,6 +239,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de despacho')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:sentenca') ? '(VCiv) Lançar movimento de concluso para julgamento' : '(VCiv) Junção de atos judiciais'}" name="(VCiv) É sentença?">
@@ -292,6 +295,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de sentença')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <fork name="(VCiv) Bifurcação de atos judiciais">
@@ -300,6 +304,7 @@
         <transition to="(VCiv) É sentença?" name="(VCiv) É sentença?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:paj:certidaosemefeito')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',62,63,64)}"/>
         </event>
     </fork>
     <join name="(VCiv) Junção de atos judiciais">
@@ -405,6 +410,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de decisão')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:sentenca_homologacao_extincao') ? '(VCiv) Concluso para sentença de homologação e(ou) extinção' : '(VCiv) Junção de sentença'}" name="(VCiv) É sentença de homologação e(ou) extinção?">
@@ -460,6 +466,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de sentença')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <node name="(VCiv) Lançar movimento concluso para decisão">
@@ -533,6 +540,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de decisão')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:decisao_recurso') ? '(VCiv) Concluso para decisão sobre recurso' : '(VCiv) Junção de decisão'}" name="(VCiv) É decisão sobre recurso?">
@@ -588,6 +596,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de decisão')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:decisao_generica') ? '(VCiv) Concluso para decisão' : '(VCiv) Junção de decisão'}" name="É decisão genérica?">
@@ -699,6 +708,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de despacho')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:decisao_reativacao') ? '(VCiv) Concluso para decisão sobre reativação' : '(VCiv) Junção de decisão'}" name="(VCiv) É decisão sobre reativação">
@@ -754,6 +764,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de decisão')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:decisao_penhora_online') ? '(VCiv) Concluso para decisão de penhora online' : '(VCiv) Junção de decisão'}" name="(VCiv) É decisão de penhora online?">
@@ -809,6 +820,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de decisão')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:decisao_desbloqueio') ? '(VCiv) Concluso para decisão de desbloqueio' : '(VCiv) Junção de decisão'}" name="(VCiv) É decisão de desbloqueio?">
@@ -919,6 +931,7 @@
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de decisão')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:certidaosemefeito') ? '(VCiv) Certificar Conclusão sem Efeito' : '(VCiv) Remover documento temporário sem efeito'}" name="(VCiv) Certificar Conclusão sem Efeito?">
