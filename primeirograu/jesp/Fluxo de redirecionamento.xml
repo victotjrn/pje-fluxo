@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="Fluxo de redirecionamento">
-    <description><![CDATA[Fluxo de redirecionamento com base na competência para controle de conflito de competência..]]></description>  
+    <description><![CDATA[Fluxo de redirecionamento com base na competência para controle de conflito de competência.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - Fluxo de redirecionamento">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -15,9 +15,9 @@
         <transition to="É competência de Fazenda?" name="É competência de Fazenda?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{processoTrfHome.possuiCompetencia(10) || '  101 2 14 15 82 9 10 12 13 16 17 93 94 11 18 95 7 3 4 5 6 8 71 72 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat(' ')) ? 'Fluxo de conhecimento de VCiv' : 'É competência de JEC?'}" name="É competência de Fazenda?">
+    <decision expression="#{processoTrfHome.possuiCompetencia(10) || ' 101 2 14 15 82 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat(' ')) ? 'É jurisdição de Fazenda?' : 'É competência de JEC?'}" name="É competência de Fazenda?">
         <transition to="É competência de JEC?" name="É competência de JEC?"/>
-        <transition to="Fluxo de conhecimento de VCiv" name="Fluxo de conhecimento de VCiv"/>
+        <transition to="É jurisdição de Fazenda?" name="É jurisdição de Fazenda?"/>
     </decision>
     <end-state name="Término"/>
     <decision expression="#{processoTrfHome.possuiCompetencia(3) ? 'É classe de execução do JEC?' : 'É competência de CEJUSC?'}" name="É competência de JEC?">
@@ -51,7 +51,17 @@
     <task-node end-tasks="true" name="Nó de Desvio - Fluxo de redirecionamento">
         <task name="Nó de Desvio - Fluxo de redirecionamento" swimlane="Nó de Desvio - Fluxo de redirecionamento"/>
         <transition to="Término" name="Término"/>
-    </task-node>  
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao == 12 &amp;&amp; !tramitacaoProcessualService.recuperaProcesso().isIncidente ? 'Deslocar orgão julgador' : 'Fluxo de conhecimento de VCiv'}" name="É jurisdição de Fazenda?">
+        <transition to="Deslocar orgão julgador" name="Deslocar orgão julgador"/>
+        <transition to="Fluxo de conhecimento de VCiv" name="Fluxo de conhecimento de VCiv"/>
+    </decision>
+    <node name="Deslocar orgão julgador">
+        <transition to="Fluxo de conhecimento de VCiv" name="Fluxo de conhecimento de VCiv"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),102,0,252,true)}"/>
+        </event>
+    </node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
