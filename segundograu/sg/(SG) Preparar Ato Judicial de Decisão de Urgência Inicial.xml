@@ -33,18 +33,27 @@ Magistrado  Assessoria Segundo Grau  Assessoria
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[Variáveis
-Variável                      Label
-minuta_ato_judicial           Minuta em elaboração
-MinutarEmLote                 Minutar em lote
+        <description><![CDATA[*Variáveis*
 
-Eventos de tarefa
-Tipo do evento     Agrupamento eventos
-Sair da tarefa     Magistrado]]></description>
+1. Variável: minuta_ato_judicial
+   Label: Minuta em elaboração
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Editor
+2. Variável: MinutarEmLote
+   Label: Minutar em lote
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Minutar em Lote
+
+*Eventos de tarefa*
+
+1. Tipo do evento: Sair da tarefa
+   Agrupamento eventos: Magistrado]]></description>
         <transition to="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Concluso para decisão de urgência inicial - ASSINAR" name="Encaminhar para o desembargador"/>
+        <transition to="(SG) Concluso para decisão de urgência inicial - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
         <transition to="(SG) Concluso para decisão de urgência inicial - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
@@ -54,7 +63,6 @@ Sair da tarefa     Magistrado]]></description>
         </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:documento:tipo:minuta:ids','63,64')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Concluso para decisão de urgência inicial - CONFIRMAR">
@@ -65,12 +73,24 @@ Sair da tarefa     Magistrado]]></description>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[Variáveis
-Variável                      Label
-Processo_Fluxo_revisarMinuta  Confirmar minuta
-MovimentarEmLote              Movimentar em lote
-AssinaturaEmLote              Assinar em lote]]></description>
-        <transition to="(SG) Concluso para decisão de urgência inicial - ASSINAR" name="Encaminhar para o desembargador"/>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: Confirmar minuta
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame
+2. Variável: MovimentarEmLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Movimentação em Lote
+3. Variável: AssinaturaEmLote
+   Label: Assinar em lote
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="(SG) Concluso para decisão de urgência inicial - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
         <transition to="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial">
             <condition expression="#{true}"/>
         </transition>
@@ -83,7 +103,6 @@ AssinaturaEmLote              Assinar em lote]]></description>
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:documento:tipo:minuta:ids','63,64')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Concluso para decisão de urgência inicial - ASSINAR">
@@ -94,11 +113,23 @@ AssinaturaEmLote              Assinar em lote]]></description>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[Variáveis
-Variável                      Label
-Processo_Fluxo_revisarMinuta  Assinar minuta
-MovimentarEmLote              Movimentar em lote
-AssinaturaEmLote              Assinar em lote]]></description>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: Assinar minuta
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame
+2. Variável: MovimentarEmLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Movimentação em Lote
+3. Variável: AssinaturaEmLote
+   Label: Assinar em lote
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
@@ -112,10 +143,15 @@ AssinaturaEmLote              Assinar em lote]]></description>
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:documento:tipo:minuta:ids','63,64')}"/>
         </event>
     </task-node>
-    <end-state name="Término"/>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_ato_judicial')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
+            <action expression="#{org.jboss.seam.bpm.processInstance.contextInstance.deleteVariable('condicaoLancamentoMovimentosTemporario')}"/>
+        </event>
+    </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial">
         <task name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial" swimlane="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial"/>
         <transition to="Término" name="Término"/>
@@ -173,4 +209,5 @@ AssinaturaEmLote              Assinar em lote]]></description>
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <!-- ACTIONS -->
+    <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:documento:tipo:minuta:ids','63')}"/>
 </process-definition>

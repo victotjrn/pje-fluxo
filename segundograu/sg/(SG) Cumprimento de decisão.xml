@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Cumprimento de decisão">
+    <description><![CDATA[Código do fluxo: SG_CUMPRIDEC
+
+Descrição: Cumprimento de decisões judiciais.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
+    <!-- SWIMLANES -->
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Cumprimento de decisão">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+    </swimlane>
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(SG) Separação em cumprimento de decisão" name="(SG) Separação em cumprimento de decisão"/>
+    </start-state>
+    <!-- NODES -->
+    <fork name="(SG) Separação em cumprimento de decisão">
+        <transition to="(SG) É apensar ou desapensar?" name="(SG) É apensar ou desapensar?"/>
+    </fork>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_apensar_desapensar') == true ? '(SG) Apensamento ou desapensamento - ANALISAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É apensar ou desapensar?">
+        <transition to="(SG) Apensamento ou desapensamento - ANALISAR" name="(SG) Apensamento ou desapensamento - ANALISAR"/>
+        <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Apensamento ou desapensamento - ANALISAR">
+        <task name="(SG) Apensamento ou desapensamento - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_associarProcessos" mapped-name="frame:Processo_Fluxo_associarProcessos" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_associarProcessos
+   Label: Associar processo
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (SG) Cumprimento de decisão" name="Nó de Desvio - (SG) Cumprimento de decisão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Junção em cumprimento de decisão" name="Concluir e sair da tarefa"/>
+    </task-node>
+    <join name="(SG) Junção em cumprimento de decisão">
+        <transition to="Término" name="Término"/>
+    </join>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Cumprimento de decisão">
+        <task name="Nó de Desvio - (SG) Cumprimento de decisão" swimlane="Nó de Desvio - (SG) Cumprimento de decisão"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Apensamento ou desapensamento - ANALISAR" name="(SG) Apensamento ou desapensamento - ANALISAR"/>
+    </task-node>
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+</process-definition>

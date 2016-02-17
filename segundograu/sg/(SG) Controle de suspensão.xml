@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de suspensão">
+    <description><![CDATA[Código do fluxo: SG_CONSUSP
+
+Descrição: Controle de suspensão processual.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SG) Controle de suspensão">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,599:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(SG) Suspensão de processo - CONFIRMAR" name="(SG) Suspensão de processo - CONFIRMAR"/>
+    </start-state>
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(SG) Suspensão de processo - CONFIRMAR">
+        <task name="(SG) Suspensão de processo - CONFIRMAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: ATENÇÂO! Após escolha da opção de suspensão abaixo, só será possível encerrar a suspensão do processo após enviá-lo concluso ao magistrado.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Nó de Desvio - (SG) Controle de suspensão" name="Nó de Desvio - (SG) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Suspensão de processo pela relatoria - AGUARDAR" name="Suspender e aguardar a relatoria"/>
+        <transition to="(SG) Suspensão de processo pela instância superior - AGUARDAR" name="Suspender e aguardar instância superior"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Suspensão de processo pela relatoria - AGUARDAR">
+        <task name="(SG) Suspensão de processo pela relatoria - AGUARDAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (SG) Controle de suspensão" name="Nó de Desvio - (SG) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Preparação de decisão sobre encerramento de suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:consusp:suspensao_relatoria', true)}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Suspensão de processo pela instância superior - AGUARDAR">
+        <task name="(SG) Suspensão de processo pela instância superior - AGUARDAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (SG) Controle de suspensão" name="Nó de Desvio - (SG) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Preparação de decisão sobre encerramento de suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:consusp:suspensao_instancia_superior', true)}"/>
+        </event>
+    </task-node>
+    <process-state name="(SG) Preparação de decisão sobre encerramento de suspensão">
+        <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
+        <transition to="(SG) Análise de despachado sobre encerramento de suspensão" name="(SG) Análise de despachado sobre encerramento de suspensão"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_encerramento_suspensao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_encerramento_suspensao')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Análise de despachado sobre encerramento de suspensão">
+        <sub-process name="(SG) Despachados" binding="late"/>
+        <transition to="(SG) Mantém processo suspenso?" name="(SG) Mantém processo suspenso?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado_encerramento_suspensao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado_encerramento_suspensao')}"/>
+        </event>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:consusp:manter_suspensao') == true ? '(SG) Retornar para suspensão pela relatoria?' : '(SG) Lançar movimento de encerramento de suspensão'}" name="(SG) Mantém processo suspenso?">
+        <transition to="(SG) Retornar para suspensão pela relatoria?" name="(SG) Retornar para suspensão pela relatoria?"/>
+        <transition to="(SG) Lançar movimento de encerramento de suspensão" name="(SG) Lançar movimento de encerramento de suspensão"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:consusp:suspensao_relatoria') == true ? '(SG) Suspensão de processo pela relatoria - AGUARDAR' : '(SG) Suspensão de processo pela instância superior - AGUARDAR' }" name="(SG) Retornar para suspensão pela relatoria?">
+        <transition to="(SG) Suspensão de processo pela relatoria - AGUARDAR" name="(SG) Suspensão de processo pela relatoria - AGUARDAR"/>
+        <transition to="(SG) Suspensão de processo pela instância superior - AGUARDAR" name="(SG) Suspensão de processo pela instância superior - AGUARDAR"/>
+    </decision>
+    <node name="(SG) Lançar movimento de encerramento de suspensão">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(9001).lancarMovimento()}"/>
+        </event>
+    </node>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:consusp:suspensao_relatoria')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:consusp:suspensao_instancia_superior')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:consusp:manter_suspensao')}"/>
+        </event>
+    </end-state>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Controle de suspensão">
+        <task name="Nó de Desvio - (SG) Controle de suspensão" swimlane="Nó de Desvio - (SG) Controle de suspensão"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Suspensão de processo - CONFIRMAR" name="(SG) Suspensão de processo - CONFIRMAR"/>
+        <transition to="(SG) Suspensão de processo pela relatoria - AGUARDAR" name="(SG) Suspensão de processo pela relatoria - AGUARDAR"/>
+        <transition to="(SG) Suspensão de processo pela instância superior - AGUARDAR" name="(SG) Suspensão de processo pela instância superior - AGUARDAR"/>
+    </task-node>
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+</process-definition>
