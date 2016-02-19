@@ -986,7 +986,7 @@
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_despacho')}"/>
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_decisao')}"/>
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_sentenca')}"/>
-            <action expression="#{preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(107).lancarMovimento()}"/>
+            <action expression="#{preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(100001).lancarMovimento()}"/>
         </event>
     </node>
     <node name="(VCiv) Remover documento temporário sem efeito">
