@@ -29,7 +29,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
     <task-node end-tasks="true" name="(SG) Concluso para despacho - MINUTAR">
         <task name="(SG) Concluso para despacho - MINUTAR" swimlane="Assessoria">
             <controller>
-                <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write"/>
+                <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -38,7 +38,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
 1. Variável: minuta_ato_judicial
    Label: Minuta em elaboração
    Escrita: Sim
-   Obrig. Não
+   Obrig. Sim
    Tipo: Editor
 2. Variável: MinutarEmLote
    Label: Minutar em lote
@@ -64,6 +64,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Concluso para despacho - CONFIRMAR">
@@ -104,6 +105,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','63,64')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Concluso para despacho - ASSINAR">
@@ -144,26 +146,18 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','63,64')}"/>
         </event>
     </task-node>
     <process-state name="(SG) Emissão de certidão de conclusão sem efeito">
         <sub-process name="(SG) Expedição de certidão de conclusão sem efeito" binding="late"/>
         <transition to="(SG) Cancelou a conclusão?" name="(SG) Cancelou a conclusão?"/>
     </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:cancelar_certidao_sem_efeito') == true ? '(SG) Concluso para despacho - MINUTAR' : 'Término'}" name="(SG) Cancelou a conclusão?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_certidao_sem_efeito') == true ? 'Término' : '(SG) Concluso para despacho - MINUTAR'}" name="(SG) Cancelou a conclusão?">
         <transition to="(SG) Concluso para despacho - MINUTAR" name="(SG) Concluso para despacho - MINUTAR"/>
         <transition to="Término" name="Término"/>
     </decision>
-    <end-state name="Término">
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_ato_judicial')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
-            <action expression="#{org.jboss.seam.bpm.processInstance.contextInstance.deleteVariable('condicaoLancamentoMovimentosTemporario')}"/>
-            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
-            <action expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:cancelar_certidao_sem_efeito') == false ? documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_ato_judicial') : '' }"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:eccse:cancelar_certidao_sem_efeito')}"/>
-        </event>
-    </end-state>
+    <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato Judicial de Despacho Genérico">
         <task name="Nó de Desvio - (SG) Preparar Ato Judicial de Despacho Genérico" swimlane="Nó de Desvio - (SG) Preparar Ato Judicial de Despacho Genérico"/>
         <transition to="Término" name="Término"/>

@@ -29,7 +29,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
     <task-node end-tasks="true" name="(SG) Concluso para decisão de urgência inicial - MINUTAR">
         <task name="(SG) Concluso para decisão de urgência inicial - MINUTAR" swimlane="Assessoria">
             <controller>
-                <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write"/>
+                <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
@@ -38,7 +38,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
 1. Variável: minuta_ato_judicial
    Label: Minuta em elaboração
    Escrita: Sim
-   Obrig. Não
+   Obrig. Sim
    Tipo: Editor
 2. Variável: MinutarEmLote
    Label: Minutar em lote
@@ -63,6 +63,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Concluso para decisão de urgência inicial - CONFIRMAR">
@@ -103,6 +104,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','63,64')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Concluso para decisão de urgência inicial - ASSINAR">
@@ -143,15 +145,10 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','63,64')}"/>
         </event>
     </task-node>
-    <end-state name="Término">
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_ato_judicial')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
-            <action expression="#{org.jboss.seam.bpm.processInstance.contextInstance.deleteVariable('condicaoLancamentoMovimentosTemporario')}"/>
-        </event>
-    </end-state>
+    <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial">
         <task name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial" swimlane="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial"/>
         <transition to="Término" name="Término"/>

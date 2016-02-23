@@ -106,7 +106,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </task-node>
     <process-state name="(SG) Preparação de decisão sobre reativação">
         <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
-        <transition to="(SG) Análise de despachado sobre reativação" name="(SG) Análise de despachado sobre reativação"/>
+        <transition to="(SG) Manter arquivado definitivamente?" name="(SG) Manter arquivado definitivamente?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_reativacao', true)}"/>
@@ -114,16 +114,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_reativacao')}"/>
-        </event>
-    </process-state>
-    <process-state name="(SG) Análise de despachado sobre reativação">
-        <sub-process name="(SG) Despachados" binding="late"/>
-        <transition to="(SG) Manter arquivado definitivamente?" name="(SG) Manter arquivado definitivamente?"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado_reativacao', 'true')}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado_reativacao')}"/>
         </event>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:arq:manter_arquivado') == true ? '(SG) ~Arquivo definitivo' : '(SG) Lançar movimento de reativação'}" name="(SG) Manter arquivado definitivamente?">

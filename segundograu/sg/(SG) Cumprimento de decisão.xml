@@ -23,6 +23,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <!-- NODES -->
     <fork name="(SG) Separação em cumprimento de decisão">
         <transition to="(SG) É apensar ou desapensar?" name="(SG) É apensar ou desapensar?"/>
+        <transition to="(SG) É certificar decurso de prazo?" name="(SG) É certificar decurso de prazo?"/>
     </fork>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_apensar_desapensar') == true ? '(SG) Apensamento ou desapensamento - ANALISAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É apensar ou desapensar?">
         <transition to="(SG) Apensamento ou desapensamento - ANALISAR" name="(SG) Apensamento ou desapensamento - ANALISAR"/>
@@ -46,6 +47,20 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <transition to="(SG) Junção em cumprimento de decisão" name="Concluir e sair da tarefa"/>
     </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_certificar_decurso_prazo') == true ? '(SG) Expedição de certidão de decurso de prazo' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É certificar decurso de prazo?">
+        <transition to="(SG) Expedição de certidão de decurso de prazo" name="(SG) Expedição de certidão de decurso de prazo"/>
+        <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
+    </decision>
+    <process-state name="(SG) Expedição de certidão de decurso de prazo">
+        <sub-process name="(SG) Expedição de documentos" binding="late"/>
+        <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:expdoc:certidao_decurso_prazo', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:expdoc:certidao_decurso_prazo')}"/>
+        </event>
+    </process-state>
     <join name="(SG) Junção em cumprimento de decisão">
         <transition to="Término" name="Término"/>
     </join>

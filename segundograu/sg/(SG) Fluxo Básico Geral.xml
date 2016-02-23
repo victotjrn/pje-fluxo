@@ -27,7 +27,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </decision>
     <process-state name="(SG) Preparação de decisão de urgência inicial">
         <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
-        <transition to="(SG) Análise de despachados urgentes" name="(SG) Análise de despachados urgentes"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_urgencia_inicial', true)}"/>
@@ -37,19 +37,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_urgencia_inicial')}"/>
         </event>
     </process-state>
-    <process-state name="(SG) Análise de despachados urgentes">
-        <sub-process name="(SG) Despachados" binding="late"/>
-        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado_urgente', true)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado_urgente')}"/>
-        </event>
-    </process-state>
     <process-state name="(SG) Preparação de despacho inicial">
         <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
-        <transition to="(SG) Análise de despachados" name="(SG) Análise de despachados"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:despacho', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:despacho_inicial', true)}"/>
@@ -59,21 +49,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:despacho_inicial')}"/>
         </event>
     </process-state>
-    <process-state name="(SG) Análise de despachados">
-        <sub-process name="(SG) Despachados" binding="late"/>
-        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado', true)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado')}"/>
-        </event>
-    </process-state>
     <task-node end-tasks="true" name="(SG) Secretaria - ANALISAR">
         <task name="(SG) Secretaria - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
                 <variable name="sg_fbg_apensar_desapensar" mapped-name="sim_nao:sg_fbg_apensar_desapensar" access="read,write"/>
+                <variable name="sg_fbg_certificar_decurso_prazo" mapped-name="sim_nao:sg_fbg_certificar_decurso_prazo" access="read,write"/>
                 <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
             </controller>
         </task>
@@ -88,8 +69,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label: Apensar / desapensar
    Escrita: Sim
    Obrig. Não
-   Tipo: Ato proferido
-3. Variável: Processo_Fluxo_visualizarDecisao
+   Tipo: Checkbox
+3. Variável: sg_fbg_certificar_decurso_prazo
+   Label: Certificar decurso de prazo
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Checkbox
+4. Variável: Processo_Fluxo_visualizarDecisao
    Label: Ato proferido
    Escrita: Sim
    Obrig. Não
@@ -102,14 +88,18 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <transition to="(SG) Cumprimento de decisão via análise da secretaria" name="01 - Prosseguir nas tarefa(s) selecionada(s)"/>
         <transition to="(SG) Preparação de decisão genérica" name="02 - Enviar concluso para decisão"/>
-        <transition to="(SG) Preparação de despacho genérico" name="03 - Enviar concluso para despacho"/>
-        <transition to="(SG) Controlar suspensão de processo" name="04 - Suspender o processo"/>
-        <transition to="(SG) Preparação para arquivamento" name="05 - Arquivar o processo"/>
+        <transition to="(SG) Preparação de decisão de urgência" name="03 - Enviar concluso para decisão de urgência"/>
+        <transition to="(SG) Preparação de decisão de embargos de declaração" name="04 - Enviar concluso para decisão de embargos de declaração"/>
+        <transition to="(SG) Preparação de decisão de agravo regimental ou interno" name="05 - Enviar concluso para decisão de agravo regimental ou interno"/>
+        <transition to="(SG) Preparação de despacho genérico" name="06 - Enviar concluso para despacho"/>
+        <transition to="(SG) Controlar suspensão de processo" name="07 - Suspender o processo"/>
+        <transition to="(SG) Preparação para arquivamento" name="08 - Arquivar o processo"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_apensar_desapensar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_certificar_decurso_prazo')}"/>
         </event>
         <event type="task-create">
-            <action name="upd" expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <process-state name="(SG) Cumprimento de decisão via análise da secretaria">
@@ -126,6 +116,42 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_generica')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Preparação de decisão de urgência">
+        <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_urgencia', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_urgencia')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Preparação de decisão de embargos de declaração">
+        <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_embargos_declaracao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_embargos_declaracao')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Preparação de decisão de agravo regimental ou interno">
+        <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_agravo_regimental_interno', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_agravo_regimental_interno')}"/>
         </event>
     </process-state>
     <process-state name="(SG) Preparação de despacho genérico">
@@ -203,5 +229,4 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <!-- ACTIONS -->
 </process-definition>

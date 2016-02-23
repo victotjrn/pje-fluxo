@@ -8,11 +8,11 @@ Descrição: Expedição de certidão de conclusão sem efeito, para retirada de concl
 Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessor]]></description>
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (SG) Expedição de certidão de conclusão sem efeito">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
-    </swimlane>
     <swimlane name="Assessoria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Expedição de certidão de conclusão sem efeito">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
     </swimlane>
     <!-- START-STATE -->
     <start-state name="Início">
@@ -45,7 +45,6 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:eccse:cancelar_certidao_sem_efeito', false)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e retornar para minuta')}"/>
         </event>
     </task-node>
@@ -53,12 +52,13 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(60).associarAoDocumento(processoDocumentoManager.getUltimoProcessoDocumentoAssinado(tipoProcessoDocumentoManager.findByCodigoDocumento('4050014'), tramitacaoProcessualService.recuperaProcesso().processo)).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(200001).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:eccse:assinou_certidao_sem_efeito', true)}"/>
         </event>
     </node>
     <node name="(SG) Remover certidão não assinar e sinalizar cancelamento">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:eccse:cancelar_certidao_sem_efeito', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:eccse:assinou_certidao_sem_efeito', false)}"/>
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('certidao_sem_efeito_em_elaboracao')}"/>
         </event>
     </node>

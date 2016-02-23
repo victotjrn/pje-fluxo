@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar Ato Judicial">
     <description><![CDATA[Código do fluxo: SG_PAJ
 
-Descrição: Fluxo destinado ao controle de atos judicias....]]></description>
+Descrição: Fluxo destinado ao controle de atos judicias..]]></description>
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Preparar Ato Judicial">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
@@ -14,7 +14,7 @@ Descrição: Fluxo destinado ao controle de atos judicias....]]></description>
         <transition to="(SG) Concluso para decisão?" name="(SG) Concluso para decisão?"/>
     </start-state>
     <!-- NODES -->
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao') ? '(SG) Lançar movimento conclusos para decisão' : '(SG) Concluso para despacho?'}" name="(SG) Concluso para decisão?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao') == true ? '(SG) Lançar movimento conclusos para decisão' : '(SG) Concluso para despacho?'}" name="(SG) Concluso para decisão?">
         <transition to="(SG) Concluso para despacho?" name="(SG) Concluso para despacho?"/>
         <transition to="(SG) Lançar movimento conclusos para decisão" name="(SG) Lançar movimento conclusos para decisão"/>
     </decision>
@@ -24,15 +24,63 @@ Descrição: Fluxo destinado ao controle de atos judicias....]]></description>
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
         </event>
     </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_urgencia_inicial') ? '(SG) Preparação de decisão de urgência inicial' : 'Término'}" name="(SG) Concluso para decisão de urgência inicial?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_urgencia_inicial') == true ? '(SG) Preparação de decisão de urgência inicial' : '(SG) Concluso para decisão genérica?'}" name="(SG) Concluso para decisão de urgência inicial?">
         <transition to="(SG) Preparação de decisão de urgência inicial" name="(SG) Preparação de decisão de urgência inicial"/>
-        <transition to="Término" name="Término"/>
+        <transition to="(SG) Concluso para decisão genérica?" name="(SG) Concluso para decisão genérica?"/>
     </decision>
     <process-state name="(SG) Preparação de decisão de urgência inicial">
         <sub-process name="(SG) Preparar Ato Judicial de Decisão de Urgência Inicial" binding="late"/>
-        <transition to="Término" name="Término"/>
+        <transition to="(SG) Análise de despachado urgente" name="(SG) Análise de despachado urgente"/>
     </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:despacho') ? '(SG) Lançar movimento conclusos para despacho' : 'Término'}" name="(SG) Concluso para despacho?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_generica') == true ? '(SG) Preparação de decisão genérica' : '(SG) Concluso para decisão de urgência?'}" name="(SG) Concluso para decisão genérica?">
+        <transition to="(SG) Preparação de decisão genérica" name="(SG) Preparação de decisão genérica"/>
+        <transition to="(SG) Concluso para decisão de urgência?" name="(SG) Concluso para decisão de urgência?"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão genérica">
+        <sub-process name="(SG) Preparar Ato Judicial de Decisão Genérica" binding="late"/>
+        <transition to="(SG) Cancelada conclusão de decisão genérica?" name="(SG) Cancelada conclusão de decisão genérica?"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_urgencia') == true ? '(SG) Preparação de decisão de urgência' : '(SG) Concluso para decisão sobre encerramento de suspensão?'}" name="(SG) Concluso para decisão de urgência?">
+        <transition to="(SG) Preparação de decisão de urgência" name="(SG) Preparação de decisão de urgência"/>
+        <transition to="(SG) Concluso para decisão sobre encerramento de suspensão?" name="(SG) Concluso para decisão sobre encerramento de suspensão?"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão de urgência">
+        <sub-process name="(SG) Preparar Ato Judicial Específico" binding="late"/>
+        <transition to="(SG) Cancelada conclusão de decisão de urgência?" name="(SG) Cancelada conclusão de decisão de urgência?"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_encerramento_suspensao') == true ? '(SG) Preparação de decisão de encerramento de suspensão' : '(SG) Concluso para decisão sobre reativação?'}" name="(SG) Concluso para decisão sobre encerramento de suspensão?">
+        <transition to="(SG) Preparação de decisão de encerramento de suspensão" name="(SG) Preparação de decisão de encerramento de suspensão"/>
+        <transition to="(SG) Concluso para decisão sobre reativação?" name="(SG) Concluso para decisão sobre reativação?"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão de encerramento de suspensão">
+        <sub-process name="(SG) Preparar Ato Judicial Específico" binding="late"/>
+        <transition to="(SG) Análise de despachado sobre encerramento de suspensão" name="(SG) Análise de despachado sobre encerramento de suspensão"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_reativacao') == true ? '(SG) Preparação de decisão sobre reativação' : '(SG) Concluso para decisão de embargos de declaração?'}" name="(SG) Concluso para decisão sobre reativação?">
+        <transition to="(SG) Preparação de decisão sobre reativação" name="(SG) Preparação de decisão sobre reativação"/>
+        <transition to="(SG) Concluso para decisão de embargos de declaração?" name="(SG) Concluso para decisão de embargos de declaração?"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão sobre reativação">
+        <sub-process name="(SG) Preparar Ato Judicial Específico" binding="late"/>
+        <transition to="(SG) Análise de despachado sobre reativação" name="(SG) Análise de despachado sobre reativação"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_embargos_declaracao') == true ? '(SG) Preparação de decisão de embargos de declaração' : '(SG) Concluso para decisão de agravo regimental ou interno?'}" name="(SG) Concluso para decisão de embargos de declaração?">
+        <transition to="(SG) Preparação de decisão de embargos de declaração" name="(SG) Preparação de decisão de embargos de declaração"/>
+        <transition to="(SG) Concluso para decisão de agravo regimental ou interno?" name="(SG) Concluso para decisão de agravo regimental ou interno?"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão de embargos de declaração">
+        <sub-process name="(SG) Preparar Ato Judicial Específico" binding="late"/>
+        <transition to="(SG) Cancelada conclusão de decisão de embargos de declaração?" name="(SG) Cancelada conclusão de decisão de embargos de declaração?"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_agravo_regimental_interno') == true ? '(SG) Preparação de decisão de agravo regimental ou interno' : 'Término'}" name="(SG) Concluso para decisão de agravo regimental ou interno?">
+        <transition to="(SG) Preparação de decisão de agravo regimental ou interno" name="(SG) Preparação de decisão de agravo regimental ou interno"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão de agravo regimental ou interno">
+        <sub-process name="(SG) Preparar Ato Judicial Específico" binding="late"/>
+        <transition to="(SG) Cancelada conclusão de agravo regimental e interno?" name="(SG) Cancelada conclusão de agravo regimental e interno?"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:despacho') == true ? '(SG) Lançar movimento conclusos para despacho' : 'Término'}" name="(SG) Concluso para despacho?">
         <transition to="Término" name="Término"/>
         <transition to="(SG) Lançar movimento conclusos para despacho" name="(SG) Lançar movimento conclusos para despacho"/>
     </decision>
@@ -42,19 +90,120 @@ Descrição: Fluxo destinado ao controle de atos judicias....]]></description>
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(5).lancarMovimento()}"/>
         </event>
     </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:despacho_inicial') ? '(SG) Preparação de despacho inicial' : 'Término'}" name="(SG) Concluso para despacho inicial?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:despacho_inicial') == true ? '(SG) Preparação de despacho inicial' : '(SG) Concluso para despacho genérico?'}" name="(SG) Concluso para despacho inicial?">
         <transition to="(SG) Preparação de despacho inicial" name="(SG) Preparação de despacho inicial"/>
-        <transition to="Término" name="Término"/>
+        <transition to="(SG) Concluso para despacho genérico?" name="(SG) Concluso para despacho genérico?"/>
     </decision>
     <process-state name="(SG) Preparação de despacho inicial">
         <sub-process name="(SG) Preparar Ato Judicial de Despacho Inicial" binding="late"/>
+        <transition to="(SG) Análise de despachado" name="(SG) Análise de despachado"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:despacho_generico') == true ? '(SG) Preparação de despacho genérico' : 'Término'}" name="(SG) Concluso para despacho genérico?">
+        <transition to="(SG) Preparação de despacho genérico" name="(SG) Preparação de despacho genérico"/>
         <transition to="Término" name="Término"/>
+    </decision>
+    <process-state name="(SG) Preparação de despacho genérico">
+        <sub-process name="(SG) Preparar Ato Judicial de Despacho Genérico" binding="late"/>
+        <transition to="(SG) Cancelada conclusão de despacho genérico?" name="(SG) Cancelada conclusão de despacho genérico?"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_certidao_sem_efeito') == true ? '(SG) Análise de despachado por certidão de conclusão sem efeito' : '(SG) Análise de despachado urgente'}" name="(SG) Cancelada conclusão de decisão de urgência?">
+        <transition to="(SG) Análise de despachado urgente" name="(SG) Análise de despachado urgente"/>
+        <transition to="(SG) Análise de despachado por certidão de conclusão sem efeito" name="(SG) Análise de despachado por certidão de conclusão sem efeito"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_certidao_sem_efeito') == true ? '(SG) Análise de despachado por certidão de conclusão sem efeito' : '(SG) Análise de despachado'}" name="(SG) Cancelada conclusão de decisão genérica?">
+        <transition to="(SG) Análise de despachado" name="(SG) Análise de despachado"/>
+        <transition to="(SG) Análise de despachado por certidão de conclusão sem efeito" name="(SG) Análise de despachado por certidão de conclusão sem efeito"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_certidao_sem_efeito') == true ? '(SG) Análise de despachado por certidão de conclusão sem efeito' : '(SG) Análise de despachado sobre embargos de declaração'}" name="(SG) Cancelada conclusão de decisão de embargos de declaração?">
+        <transition to="(SG) Análise de despachado sobre embargos de declaração" name="(SG) Análise de despachado sobre embargos de declaração"/>
+        <transition to="(SG) Análise de despachado por certidão de conclusão sem efeito" name="(SG) Análise de despachado por certidão de conclusão sem efeito"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_certidao_sem_efeito') == true ? '(SG) Análise de despachado por certidão de conclusão sem efeito' : '(SG) Análise de despachado sobre agravo regimental ou interno'}" name="(SG) Cancelada conclusão de agravo regimental e interno?">
+        <transition to="(SG) Análise de despachado sobre agravo regimental ou interno" name="(SG) Análise de despachado sobre agravo regimental ou interno"/>
+        <transition to="(SG) Análise de despachado por certidão de conclusão sem efeito" name="(SG) Análise de despachado por certidão de conclusão sem efeito"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_certidao_sem_efeito') == true ? '(SG) Análise de despachado por certidão de conclusão sem efeito' : '(SG) Preparação de despacho genérico'}" name="(SG) Cancelada conclusão de despacho genérico?">
+        <transition to="(SG) Análise de despachado" name="(SG) Análise de despachado"/>
+        <transition to="(SG) Análise de despachado por certidão de conclusão sem efeito" name="(SG) Análise de despachado por certidão de conclusão sem efeito"/>
+    </decision>
+    <process-state name="(SG) Análise de despachado">
+        <sub-process name="(SG) Despachados" binding="late"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Análise de despachado urgente">
+        <sub-process name="(SG) Despachados" binding="late"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado_urgente', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado_urgente')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Análise de despachado sobre encerramento de suspensão">
+        <sub-process name="(SG) Despachados" binding="late"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado_encerramento_suspensao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado_encerramento_suspensao')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Análise de despachado sobre reativação">
+        <sub-process name="(SG) Despachados" binding="late"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado_reativacao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado_reativacao')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Análise de despachado sobre embargos de declaração">
+        <sub-process name="(SG) Despachados" binding="late"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado_embargo_declaracao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado_embargo_declaracao')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Análise de despachado sobre agravo regimental ou interno">
+        <sub-process name="(SG) Despachados" binding="late"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado_agravo_regimental_interno', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado_agravo_regimental_interno')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Análise de despachado por certidão de conclusão sem efeito">
+        <sub-process name="(SG) Despachados" binding="late"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:desp:despachado_certidao_conclusao_sem_efeito', true)}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_certidao_sem_efeito') == true ? documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_ato_judicial') : ''}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:desp:despachado_certidao_conclusao_sem_efeito')}"/>
+        </event>
     </process-state>
     <end-state name="Término">
         <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:eccse:assinou_certidao_sem_efeito')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_ato_judicial')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{org.jboss.seam.bpm.processInstance.contextInstance.deleteVariable('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
         </event>
     </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato Judicial">

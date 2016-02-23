@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Expedição de documentos">
+    <description><![CDATA[Código do fluxo: SG_EXPDOC
+
+Descrição: Fluxo responsável pela expedição de documentos.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
+    <!-- SWIMLANES -->
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Expedição de documentos">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+    </swimlane>
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(SG) Certidão de decurso de prazo?" name="(SG) Certidão de decurso de prazo?"/>
+    </start-state>
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:expdoc:certidao_decurso_prazo') == true ? '(SG) Certidão de decurso de prazo - EXPEDIR' : '(SG) Certidão de trânsito em julgado?'}" name="(SG) Certidão de decurso de prazo?">
+        <transition to="(SG) Certidão de decurso de prazo - EXPEDIR" name="(SG) Certidão de decurso de prazo - EXPEDIR"/>
+        <transition to="(SG) Certidão de trânsito em julgado?" name="(SG) Certidão de trânsito em julgado?"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Certidão de decurso de prazo - EXPEDIR">
+        <task name="(SG) Certidão de decurso de prazo - EXPEDIR" swimlane="Secretaria">
+            <controller>
+                <variable name="minuta_certidao_decurso_prazo" mapped-name="textEditSignature:minuta_certidao_decurso_prazo" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: minuta_certidao_decurso_prazo
+   Label: Certidão de decurso de prazo
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Editor Com Assinatura]]></description>
+        <transition to="Término" name="Término">
+            <action expression="#{lancadorMovimentosAction.lancarMovimentosSemFluxo(eventsEditorTree.eventoBeanList, processoDocumentoManager.getUltimoProcessoDocumentoAssinado(tipoProcessoDocumentoManager.findByCodigoDocumento('4050014'), tramitacaoProcessualService.recuperaProcesso().processo), tramitacaoProcessualService.recuperaProcesso().processo)}"/>
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (SG) Expedição de documentos" name="Nó de Desvio - (SG) Expedição de documentos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Apagar minuta não assinada de decurso de prazo" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','167')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+        </event>
+    </task-node>
+    <node name="(SG) Apagar minuta não assinada de decurso de prazo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_certidao_decurso_prazo')}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:expdoc:certidao_transito_julgado') == true ? '(SG) Certidão de trânsito em julgado - EXPEDIR' : 'Término'}" name="(SG) Certidão de trânsito em julgado?">
+        <transition to="(SG) Certidão de trânsito em julgado - EXPEDIR" name="(SG) Certidão de trânsito em julgado - EXPEDIR"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Certidão de trânsito em julgado - EXPEDIR">
+        <task name="(SG) Certidão de trânsito em julgado - EXPEDIR" swimlane="Secretaria">
+            <controller>
+                <variable name="minuta_certidao_transito_julgado" mapped-name="textEditSignature:minuta_certidao_transito_julgado" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: minuta_certidao_transito_julgado
+   Label: Certidão de trânsito em julgado
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Editor Com Assinatura]]></description>
+        <transition to="Término" name="Término">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (SG) Expedição de documentos" name="Nó de Desvio - (SG) Expedição de documentos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Apagar minuta não assinada de trânsito em julgado" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','70')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+        </event>
+    </task-node>
+    <node name="(SG) Apagar minuta não assinada de trânsito em julgado">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_certidao_transito_julgado')}"/>
+        </event>
+    </node>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{org.jboss.seam.bpm.processInstance.contextInstance.deleteVariable('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_certidao_decurso_prazo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_certidao_transito_julgado')}"/>
+        </event>
+    </end-state>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Expedição de documentos">
+        <task name="Nó de Desvio - (SG) Expedição de documentos" swimlane="Nó de Desvio - (SG) Expedição de documentos"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Certidão de decurso de prazo - EXPEDIR" name="(SG) Certidão de decurso de prazo - EXPEDIR"/>
+        <transition to="(SG) Certidão de trânsito em julgado - EXPEDIR" name="(SG) Certidão de trânsito em julgado - EXPEDIR"/>
+    </task-node>
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+</process-definition>
