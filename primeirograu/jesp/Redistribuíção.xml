@@ -20,12 +20,7 @@
     </decision>
     <task-node end-tasks="true" name="Processos Redistribuídos de outras varas">
         <task name="Processos Redistribuídos de outras varas" swimlane="Secretária"/>
-        <transition to="Enviar para análise de secretária" name="Enviar para análise de secretária">
-            <condition expression="#{!(processoTrfHome.instance.orgaoJulgador.getOrgaoJulgadorCompetenciaList().get(0).getCompetencia().getIdCompetencia() == 3)}"/>
-        </transition>
-        <transition to="Enviar para verificar providencia adotar" name="Enviar para verificar providencia adotar">
-            <condition expression="#{processoTrfHome.instance.orgaoJulgador.getOrgaoJulgadorCompetenciaList().get(0).getCompetencia().getIdCompetencia() == 3}"/>
-        </transition>
+        <transition to="Enviar para análise de secretária" name="Enviar para análise de secretária"/>
         <transition to="Nó de Desvio - Redistribuíção" name="Nó de Desvio - Redistribuíção">
             <condition expression="#{true}"/>
         </transition>
