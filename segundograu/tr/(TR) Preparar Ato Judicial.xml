@@ -39,6 +39,7 @@
         <transition to="(TR) Assinar decisão" name="(TR) Assinar decisão"/>
         <transition to="(TR) Concluso para decisão de embargos de declaração" name="(TR) Concluso para decisão de embargos de declaração"/>
         <transition to="(TR) Assinar decisão de embargos de declaração" name="(TR) Assinar decisão de embargos de declaração"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="(TR) Certificar Conclusão sem Efeito"/>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:paj:decisao') ? '(TR) Lançar movimento conclusos para decisão' : '(TR) É despacho?'}" name="(TR) É decisão?">
         <transition to="(TR) Lançar movimento conclusos para decisão" name="(TR) Lançar movimento conclusos para decisão"/>
@@ -114,6 +115,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar decisão de urgência" name="Encaminhar para assinatura"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -138,11 +140,14 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Concluso para decisão de urgência" name="Retornar para minuta"/>
+        <transition to="(TR) Remover documento temporário sem efeito" name="(TR) Remover documento temporário sem efeito">
+            <condition expression="#{true}"/>
+        </transition>
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Remover documento temporário sem efeito')}"/>
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
@@ -163,6 +168,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar decisão" name="Encaminhar para assinatura"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -190,8 +196,11 @@
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TR) Remover documento temporário sem efeito" name="(TR) Remover documento temporário sem efeito">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Remover documento temporário sem efeito')}"/>
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
@@ -212,6 +221,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar decisão de agravo regimental" name="Encaminhar para assinatura"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -239,8 +249,11 @@
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TR) Remover documento temporário sem efeito" name="(TR) Remover documento temporário sem efeito">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Remover documento temporário sem efeito')}"/>
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
@@ -261,6 +274,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar decisão de agravo interno" name="Encaminhar para assinatura"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -288,8 +302,11 @@
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TR) Remover documento temporário sem efeito" name="(TR) Remover documento temporário sem efeito">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Remover documento temporário sem efeito')}"/>
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
@@ -310,6 +327,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar decisão de extinção" name="Encaminhar para assinatura"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -337,8 +355,11 @@
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TR) Remover documento temporário sem efeito" name="(TR) Remover documento temporário sem efeito">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Remover documento temporário sem efeito')}"/>
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
@@ -359,6 +380,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar decisão de reativação" name="Encaminhar para assinatura"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -386,8 +408,11 @@
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TR) Remover documento temporário sem efeito" name="(TR) Remover documento temporário sem efeito">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Remover documento temporário sem efeito')}"/>
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
@@ -408,6 +433,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar decisão de embargos de declaração" name="Encaminhar para assinatura"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -435,8 +461,11 @@
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TR) Remover documento temporário sem efeito" name="(TR) Remover documento temporário sem efeito">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Remover documento temporário sem efeito')}"/>
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
@@ -512,6 +541,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar despacho" name="Encaminhar para assinatura"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -539,13 +569,60 @@
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TR) Remover documento temporário sem efeito" name="(TR) Remover documento temporário sem efeito">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Remover documento temporário sem efeito')}"/>
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
         </event>
     </task-node>
+    <task-node end-tasks="true" name="(TR) Certificar Conclusão sem Efeito">
+        <task name="(TR) Certificar Conclusão sem Efeito" swimlane="Assessoria">
+            <controller>
+                <variable name="minuta_semefeito" mapped-name="textEditSignature:minuta_semefeito" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (TR) Preparar Ato Judicial" name="Nó de Desvio - (TR) Preparar Ato Judicial">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(TR) Concluso para decisão de urgência" name="Retornar para minuta"/>
+        <transition to="(TR) Tem documento assinado?" name="(TR) Tem documento assinado?">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Tem documento assinado?')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:idDocAssinado', processoHome.isDocumentoAssinado(processoHome.idProcessoDocumento))}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_semefeito'))}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:idDocAssinado') ? '(TR) Remover documento temporário decisão_despacho_sentença' : '(TR) Certificar Conclusão sem Efeito'}" name="(TR) Tem documento assinado?">
+        <transition to="(TR) Remover documento temporário decisão_despacho_sentença" name="(TR) Remover documento temporário decisão_despacho_sentença"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="(TR) Certificar Conclusão sem Efeito"/>
+    </decision>
+    <node name="(TR) Remover documento temporário decisão_despacho_sentença">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_ato_judicial')}"/>
+            <action expression="#{preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(200001).lancarMovimento()}"/>
+        </event>
+    </node>
+    <node name="(TR) Remover documento temporário sem efeito">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_semefeito')}"/>
+        </event>
+    </node>
     <end-state name="Término">
         <event type="node-enter">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
@@ -565,6 +642,8 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_ato_judicial')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_semefeito')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:paj:idDocAssinado')}"/>
         </event>
     </end-state>  
     <!-- PROCESS-EVENTS -->
