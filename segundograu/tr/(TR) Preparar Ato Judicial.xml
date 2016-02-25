@@ -118,6 +118,7 @@
         <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para decisão de urgência')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
@@ -171,6 +172,7 @@
         <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para decisão')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
@@ -224,6 +226,7 @@
         <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para decisão de agravo regimental')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
@@ -277,6 +280,7 @@
         <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para decisão de agravo interno')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
@@ -330,6 +334,7 @@
         <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para decisão de extinção')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
@@ -383,6 +388,7 @@
         <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para decisão de reativação')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
@@ -436,6 +442,7 @@
         <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para decisão de embargos de declaração')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
@@ -544,6 +551,7 @@
         <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para despacho')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
@@ -588,10 +596,10 @@
         <transition to="Nó de Desvio - (TR) Preparar Ato Judicial" name="Nó de Desvio - (TR) Preparar Ato Judicial">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TR) Concluso para decisão de urgência" name="Retornar para minuta"/>
         <transition to="(TR) Tem documento assinado?" name="(TR) Tem documento assinado?">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TR) Retornar pra qual concluso?" name="Retornar para minuta"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Tem documento assinado?')}"/>
         </event>
@@ -606,6 +614,16 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
         </event>
     </task-node>
+    <decision expression="#{true ? tramitacaoProcessualService.recuperaVariavel('pje:paj:tiporetornominuta') : ''}" name="(TR) Retornar pra qual concluso?">
+        <transition to="(TR) Concluso para decisão de urgência" name="(TR) Concluso para decisão de urgência"/>
+        <transition to="(TR) Concluso para decisão" name="(TR) Concluso para decisão"/>
+        <transition to="(TR) Concluso para decisão de agravo regimental" name="(TR) Concluso para decisão de agravo regimental"/>
+        <transition to="(TR) Concluso para decisão de agravo interno" name="(TR) Concluso para decisão de agravo interno"/>
+        <transition to="(TR) Concluso para decisão de extinção" name="(TR) Concluso para decisão de extinção"/>
+        <transition to="(TR) Concluso para decisão de reativação" name="(TR) Concluso para decisão de reativação"/>
+        <transition to="(TR) Concluso para decisão de embargos de declaração" name="(TR) Concluso para decisão de embargos de declaração"/>
+        <transition to="(TR) Concluso para despacho" name="(TR) Concluso para despacho"/>
+    </decision>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:idDocAssinado') ? '(TR) Remover documento temporário decisão_despacho_sentença' : '(TR) Certificar Conclusão sem Efeito'}" name="(TR) Tem documento assinado?">
         <transition to="(TR) Remover documento temporário decisão_despacho_sentença" name="(TR) Remover documento temporário decisão_despacho_sentença"/>
         <transition to="(TR) Certificar Conclusão sem Efeito" name="(TR) Certificar Conclusão sem Efeito"/>
