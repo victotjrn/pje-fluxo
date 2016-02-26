@@ -3,10 +3,7 @@
 
 import psycopg2
 import os
-import shutil
-import datetime
 import env
-from datetime import datetime
 
 con = None
 
@@ -14,7 +11,7 @@ try:
     con = psycopg2.connect(host=env.DB_HOST, user=env.DB_USER, password=env.DB_PASS, database=env.DB_NAME, port=env.DB_PORT)
 
     cur = con.cursor()
-    cur.execute("SELECT ds_fluxo, ds_xml FROM tb_fluxo WHERE ds_fluxo ilike '" + env.SQL_LIKE_CRITERIA + "%'")
+    cur.execute("SELECT ds_fluxo, ds_xml FROM tb_fluxo WHERE ds_fluxo ilike '%" + env.SQL_LIKE_CRITERIA + "%'")
 except psycopg2.DatabaseError, e:
     print 'Erro ao tentar conexão com o banco: %s' % e
     sys.exit(1)
