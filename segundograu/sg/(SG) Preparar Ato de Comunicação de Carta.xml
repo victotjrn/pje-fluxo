@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar Ato de Comunicação de Carta">
+    <description><![CDATA[Código do fluxo: SG_PAC_CARTA
+
+Descrição: Preparar ato de comunicação como intimações e citações via correios, sistema e edital.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR" name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR">
+        <task name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_prepararExpediente
+   Label: Expedir carta de ordem, precatória e/ou rogatória
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR')}"/>
+            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,174')}"/>
+            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('L')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR">
+        <task name="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_expedientes_precatorias" mapped-name="frame:Processo_Fluxo_expedientes_precatorias" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_expedientes_precatorias
+   Label: Expedientes do tipo carta de ordem, precatória e rogatória
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" name="Aguardar devolução da carta"/>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória e rogatória - AGUARDAR">
+        <task name="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR" name="Registrar devolução da carta"/>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR">
+        <task name="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="Aguardar prazo de cumprimento do destinatário"/>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR">
+        <task name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR"/>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR">
+        <task name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
+        <task name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" swimlane="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR" name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR"/>
+        <transition to="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" name="(SG) Carta de ordem, precatória e rogatória - AGUARDAR"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR" name="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
