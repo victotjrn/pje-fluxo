@@ -13,8 +13,8 @@ try:
     cur = con.cursor()
     cur.execute("SELECT ds_fluxo, ds_xml FROM tb_fluxo WHERE ds_fluxo ilike '%" + env.SQL_LIKE_CRITERIA + "%'")
 except psycopg2.DatabaseError, e:
-    print 'Erro ao tentar conexão com o banco: %s' % e
-    sys.exit(1)
+    print 'Erro ao tentar conexão com o banco. Por favor, verifique o erro apresentado abaixo:\n%s' % e
+    raise SystemExit(0)
 
 if cur.rowcount == 0:
     print "Nenhum fluxo foi encontrado com os critérios informados. Backup não realizado!"
