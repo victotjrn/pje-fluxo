@@ -52,7 +52,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Agrupamento eventos: Decurso de prazo
    Condição para lançamento temporário: #{true}]]></description>
         <transition to="Término" name="Término">
-            <action expression="#{lancadorMovimentosAction.lancarMovimentosSemFluxo(eventsEditorTree.eventoBeanList, processoDocumentoManager.getUltimoProcessoDocumentoAssinado(tipoProcessoDocumentoManager.findByCodigoDocumento('4050014'), tramitacaoProcessualService.recuperaProcesso().processo), tramitacaoProcessualService.recuperaProcesso().processo)}"/>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Nó de Desvio - (SG) Expedição de documentos" name="Nó de Desvio - (SG) Expedição de documentos">
@@ -198,7 +197,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Término">
-            <action expression="#{lancadorMovimentosAction.lancarMovimentosSemFluxo(eventsEditorTree.eventoBeanList, processoDocumentoManager.getUltimoProcessoDocumentoAssinado(tipoProcessoDocumentoManager.findByCodigoDocumento('4050014'), tramitacaoProcessualService.recuperaProcesso().processo), tramitacaoProcessualService.recuperaProcesso().processo)}"/>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Certidão de trânsito em julgado - EXPEDIR" name="Retornar para minuta de certidão de trânsito em julgado"/>
