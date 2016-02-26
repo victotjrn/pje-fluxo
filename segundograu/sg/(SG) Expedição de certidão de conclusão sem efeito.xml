@@ -6,19 +6,19 @@
 Descrição: Expedição de certidão de conclusão sem efeito, para retirada de concluso dispensando assinatura pelo magistrado..
 
 Raia        Localização              Papel
-Assessoria  Assessoria Segundo Grau  Assessor]]></description>
+Assessoria  Assessoria Segundo Grau  Assessor]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Assessoria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197')}" actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Nó de Desvio - (SG) Expedição de certidão de conclusão sem efeito">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
     </swimlane>
+    <swimlane name="Assessoria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197')}" actor-id="#{actor.id}"/>
+    </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Assessoria"/>
         <transition to="(SG) Certidão de conclusão sem efeito - EXPEDIR" name="(SG) Certidão de conclusão sem efeito - EXPEDIR"/>
-    </start-state>
+    </start-state>  
     <!-- NODES -->
     <task-node end-tasks="true" name="(SG) Certidão de conclusão sem efeito - EXPEDIR">
         <task name="(SG) Certidão de conclusão sem efeito - EXPEDIR" swimlane="Assessoria">
@@ -71,7 +71,7 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <task name="Nó de Desvio - (SG) Expedição de certidão de conclusão sem efeito" swimlane="Nó de Desvio - (SG) Expedição de certidão de conclusão sem efeito"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Certidão de conclusão sem efeito - EXPEDIR" name="(SG) Certidão de conclusão sem efeito - EXPEDIR"/>
-    </task-node>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -120,5 +120,5 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
+    </event> 
 </process-definition>

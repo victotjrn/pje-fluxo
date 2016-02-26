@@ -3,16 +3,16 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar Ato Judicial">
     <description><![CDATA[Código do fluxo: SG_PAJ
 
-Descrição: Fluxo destinado ao controle de atos judicias..]]></description>
+Descrição: Fluxo destinado ao controle de atos judicias..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Preparar Ato Judicial">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
-    </swimlane>
+    </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
         <transition to="(SG) Concluso para decisão?" name="(SG) Concluso para decisão?"/>
-    </start-state>
+    </start-state>  
     <!-- NODES -->
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao') == true ? '(SG) Lançar movimento conclusos para decisão' : '(SG) Concluso para despacho?'}" name="(SG) Concluso para decisão?">
         <transition to="(SG) Concluso para despacho?" name="(SG) Concluso para despacho?"/>
@@ -209,7 +209,7 @@ Descrição: Fluxo destinado ao controle de atos judicias..]]></description>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato Judicial">
         <task name="Nó de Desvio - (SG) Preparar Ato Judicial" swimlane="Nó de Desvio - (SG) Preparar Ato Judicial"/>
         <transition to="Término" name="Término"/>
-    </task-node>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -258,5 +258,5 @@ Descrição: Fluxo destinado ao controle de atos judicias..]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
+    </event> 
 </process-definition>

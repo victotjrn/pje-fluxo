@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar Ato de Comunicação">
+    <description><![CDATA[Código do fluxo: SG_PAC
+
+Descrição: Preparar ato de comunicação como intimações e citações via correios, sistema e edital.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="É citação ou intimação genérica?" name="É citação ou intimação genérica?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:pac:intimar_citar') == true ? '(SG) Intimação ou citação - EXPEDIR' : '(SG) É citação ou intimação ao Ministério Público?'}" name="É citação ou intimação genérica?">
+        <transition to="(SG) Intimação ou citação - EXPEDIR" name="(SG) Intimação ou citação - EXPEDIR"/>
+        <transition to="(SG) É citação ou intimação ao Ministério Público?" name="(SG) É citação ou intimação ao Ministério Público?"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Intimação ou citação - EXPEDIR">
+        <task name="(SG) Intimação ou citação - EXPEDIR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_prepararExpediente
+   Label: Expedir intimação ou citação
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Separação em ato de comunicação" name="(SG) Separação em ato de comunicação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Separação em ato de comunicação')}"/>
+            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,174')}"/>
+            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,D')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:pac:intimar_citar_mp') == true ? '(SG) Intimação ou citação ao Ministério Público - EXPEDIR' : 'Término'}" name="(SG) É citação ou intimação ao Ministério Público?">
+        <transition to="(SG) Intimação ou citação ao Ministério Público - EXPEDIR" name="(SG) Intimação ou citação ao Ministério Público - EXPEDIR"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Intimação ou citação ao Ministério Público - EXPEDIR">
+        <task name="(SG) Intimação ou citação ao Ministério Público - EXPEDIR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_prepararExpediente
+   Label: Expedir intimação ou citação ao MP
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Separação em ato de comunicação" name="(SG) Separação em ato de comunicação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Separação em ato de comunicação')}"/>
+            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,174')}"/>
+            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E')}"/>
+        </event>
+    </task-node>
+    <fork name="(SG) Separação em ato de comunicação">
+        <transition to="(SG) É correio?" name="(SG) É correio?"/>
+        <transition to="(SG) É sistema?" name="(SG) É sistema?"/>
+    </fork>
+    <decision expression="#{comunicacaoProcessualAction.getExpedientesCorreios().size() &gt; 0 ? '(SG) Encaminhar expediente via correios' : '(SG) Junção em ato de comunicação'}" name="(SG) É correio?">
+        <transition to="(SG) Junção em ato de comunicação" name="(SG) Junção em ato de comunicação"/>
+        <transition to="(SG) Encaminhar expediente via correios" name="(SG) Encaminhar expediente via correios"/>
+    </decision>
+    <node name="(SG) Encaminhar expediente via correios">
+        <transition to="(SG) Intimação ou citação via correios - IMPRIMIR" name="(SG) Intimação ou citação via correios - IMPRIMIR"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(74).lancarMovimento()}')}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(SG) Intimação ou citação via correios - IMPRIMIR">
+        <task name="(SG) Intimação ou citação via correios - IMPRIMIR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_expedientes_correios" mapped-name="frame:Processo_Fluxo_expedientes_correios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_expedientes_correios
+   Label: Imprimir correspondências
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Junção em ato de comunicação" name="Prosseguir"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+    </task-node>
+    <decision expression="#{comunicacaoProcessualAction.getExpedientesEletronico().size() &gt; 0 ? '(SG) Encaminhar expediente via sistema' : '(SG) Junção em ato de comunicação'}" name="(SG) É sistema?">
+        <transition to="(SG) Encaminhar expediente via sistema" name="(SG) Encaminhar expediente via sistema"/>
+        <transition to="(SG) Junção em ato de comunicação" name="(SG) Junção em ato de comunicação"/>
+    </decision>
+    <node name="(SG) Encaminhar expediente via sistema">
+        <transition to="(SG) Junção em ato de comunicação" name="(SG) Junção em ato de comunicação"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('E', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento()}')}"/>
+        </event>
+    </node>
+    <join name="(SG) Junção em ato de comunicação">
+        <transition to="Término" name="Término"/>
+    </join>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
+        <task name="Nó de Desvio - (SG) Preparar Ato de Comunicação" swimlane="Nó de Desvio - (SG) Preparar Ato de Comunicação"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Intimação ou citação - EXPEDIR" name="(SG) Intimação ou citação - EXPEDIR"/>
+        <transition to="(SG) Intimação ou citação via correios - IMPRIMIR" name="(SG) Intimação ou citação via correios - IMPRIMIR"/>
+        <transition to="(SG) É sistema?" name="(SG) É sistema?"/>
+        <transition to="(SG) Intimação ou citação ao Ministério Público - EXPEDIR" name="(SG) Intimação ou citação ao Ministério Público - EXPEDIR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

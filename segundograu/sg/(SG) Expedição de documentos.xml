@@ -7,19 +7,19 @@ Descrição: Fluxo responsável pela expedição de documentos.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
-Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Nó de Desvio - (SG) Expedição de documentos">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
-    </swimlane>
+    </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
         <transition to="(SG) Certidão de decurso de prazo?" name="(SG) Certidão de decurso de prazo?"/>
-    </start-state>
+    </start-state>  
     <!-- NODES -->
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:expdoc:certidao_decurso_prazo') == true ? '(SG) Certidão de decurso de prazo - EXPEDIR' : '(SG) Certidão de trânsito em julgado?'}" name="(SG) Certidão de decurso de prazo?">
         <transition to="(SG) Certidão de decurso de prazo - EXPEDIR" name="(SG) Certidão de decurso de prazo - EXPEDIR"/>
@@ -28,16 +28,29 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="(SG) Certidão de decurso de prazo - EXPEDIR">
         <task name="(SG) Certidão de decurso de prazo - EXPEDIR" swimlane="Secretaria">
             <controller>
-                <variable name="minuta_certidao_decurso_prazo" mapped-name="textEditSignature:minuta_certidao_decurso_prazo" access="read,write"/>
+                <variable name="minuta_certidao_decurso_prazo" mapped-name="textEditCombo:minuta_certidao_decurso_prazo" access="read,write,required"/>
+                <variable name="MinutaemLote" mapped-name="minutarLote:MinutaemLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
 1. Variável: minuta_certidao_decurso_prazo
-   Label: Certidão de decurso de prazo
+   Label: Minuta em elaboração de certidão de decurso de prazo
+   Escrita: Sim
+   Obrig.: Sim
+   Tipo: Editor
+
+2. Variável: MinutaemLote
+   Label: Minutar em lote
    Escrita: Sim
    Obrig.: Não
-   Tipo: Editor Com Assinatura]]></description>
+   Tipo: Habilitar Minutar em Lote
+
+*Eventos de tarefa*
+
+1. Tipo de evento: Sair tarefa
+   Agrupamento eventos: Decurso de prazo
+   Condição para lançamento temporário: #{true}]]></description>
         <transition to="Término" name="Término">
             <action expression="#{lancadorMovimentosAction.lancarMovimentosSemFluxo(eventsEditorTree.eventoBeanList, processoDocumentoManager.getUltimoProcessoDocumentoAssinado(tipoProcessoDocumentoManager.findByCodigoDocumento('4050014'), tramitacaoProcessualService.recuperaProcesso().processo), tramitacaoProcessualService.recuperaProcesso().processo)}"/>
             <condition expression="#{true}"/>
@@ -46,12 +59,59 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Apagar minuta não assinada de decurso de prazo" name="Cancelar e sair da tarefa"/>
+        <transition to=" (SG) Certidão de decurso de prazo - ASSINAR" name=" Encaminhar para assinatura"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_certidao_decurso_prazo'))}"/>
+        </event>
+        <event type="task-start">
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',167)}"/>
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','167')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name=" (SG) Certidão de decurso de prazo - ASSINAR">
+        <task name=" (SG) Certidão de decurso de prazo - ASSINAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+                <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: Assinar Minuta
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: MovimentarEmLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+3. Variável: AssinaturaEmLote
+   Label: Assinar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="Término" name="Término">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (SG) Expedição de documentos" name="Nó de Desvio - (SG) Expedição de documentos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Certidão de decurso de prazo - EXPEDIR" name="Retornar para minuta de certidão de decurso de prazo"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
         </event>
         <event type="task-start">
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','167')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
     <node name="(SG) Apagar minuta não assinada de decurso de prazo">
@@ -67,29 +127,87 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="(SG) Certidão de trânsito em julgado - EXPEDIR">
         <task name="(SG) Certidão de trânsito em julgado - EXPEDIR" swimlane="Secretaria">
             <controller>
-                <variable name="minuta_certidao_transito_julgado" mapped-name="textEditSignature:minuta_certidao_transito_julgado" access="read,write"/>
+                <variable name="minuta_certidao_transito_julgado" mapped-name="textEditCombo:minuta_certidao_transito_julgado" access="read,write,required"/>
+                <variable name="MinutaemLote" mapped-name="minutarLote:MinutaemLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
 1. Variável: minuta_certidao_transito_julgado
-   Label: Certidão de trânsito em julgado
+   Label: Minuta em elaboração de certidão de trânsito em julgado
    Escrita: Sim
    Obrig.: Não
-   Tipo: Editor Com Assinatura]]></description>
-        <transition to="Término" name="Término">
-            <condition expression="#{true}"/>
-        </transition>
+   Tipo: Editor
+
+2. Variável: MinutaemLote
+   Label: Minutar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Minutar em Lote
+
+*Eventos de tarefa*
+
+1. Tipo de evento: Sair tarefa
+   Agrupamento eventos: Trânsito em julgado
+   Condição para lançamento temporário: #{true}]]></description>
         <transition to="Nó de Desvio - (SG) Expedição de documentos" name="Nó de Desvio - (SG) Expedição de documentos">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Apagar minuta não assinada de trânsito em julgado" name="Cancelar e sair da tarefa"/>
+        <transition to=" (SG) Certidão de trânsito em julgado - ASSINAR" name=" Encaminhar para assinatura"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_certidao_transito_julgado'))}"/>
+        </event>
+        <event type="task-start">
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',70)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','70')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name=" (SG) Certidão de trânsito em julgado - ASSINAR">
+        <task name=" (SG) Certidão de trânsito em julgado - ASSINAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+                <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: Assinar Minuta
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: MovimentarEmLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+3. Variável: AssinaturaEmLote
+   Label: Assinar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="Nó de Desvio - (SG) Expedição de documentos" name="Nó de Desvio - (SG) Expedição de documentos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Término">
+            <action expression="#{lancadorMovimentosAction.lancarMovimentosSemFluxo(eventsEditorTree.eventoBeanList, processoDocumentoManager.getUltimoProcessoDocumentoAssinado(tipoProcessoDocumentoManager.findByCodigoDocumento('4050014'), tramitacaoProcessualService.recuperaProcesso().processo), tramitacaoProcessualService.recuperaProcesso().processo)}"/>
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Certidão de trânsito em julgado - EXPEDIR" name="Retornar para minuta de certidão de trânsito em julgado"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
         </event>
         <event type="task-start">
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','70')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
     <node name="(SG) Apagar minuta não assinada de trânsito em julgado">
@@ -103,6 +221,8 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{org.jboss.seam.bpm.processInstance.contextInstance.deleteVariable('condicaoLancamentoMovimentosTemporario')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_certidao_decurso_prazo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_certidao_transito_julgado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
         </event>
     </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Expedição de documentos">
@@ -110,7 +230,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Certidão de decurso de prazo - EXPEDIR" name="(SG) Certidão de decurso de prazo - EXPEDIR"/>
         <transition to="(SG) Certidão de trânsito em julgado - EXPEDIR" name="(SG) Certidão de trânsito em julgado - EXPEDIR"/>
-    </task-node>
+        <transition to=" (SG) Certidão de trânsito em julgado - ASSINAR" name=" (SG) Certidão de trânsito em julgado - ASSINAR"/>
+        <transition to=" (SG) Certidão de decurso de prazo - ASSINAR" name=" (SG) Certidão de decurso de prazo - ASSINAR"/>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -159,5 +281,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>

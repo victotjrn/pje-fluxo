@@ -3,23 +3,23 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Fluxo Básico Geral">
     <description><![CDATA[Código do fluxo: SG_FBG
 
-Descrição: Fluxo básico geral de entrada dos processos..
+Descrição: Fluxo básico geral de entrada dos processos.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
-Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Fluxo Básico Geral">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
-    </swimlane>
+    </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
         <transition to="(SG) Tem pedido de urgência?" name="(SG) Tem pedido de urgência?"/>
-    </start-state>
+    </start-state>  
     <!-- NODES -->
     <decision expression="#{tramitacaoProcessualService.temUrgencia() == true ? '(SG) Preparação de decisão de urgência inicial' : '(SG) Preparação de despacho inicial'}" name="(SG) Tem pedido de urgência?">
         <transition to="(SG) Preparação de decisão de urgência inicial" name="(SG) Preparação de decisão de urgência inicial"/>
@@ -52,10 +52,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="(SG) Secretaria - ANALISAR">
         <task name="(SG) Secretaria - ANALISAR" swimlane="Secretaria">
             <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
                 <variable name="sg_fbg_apensar_desapensar" mapped-name="sim_nao:sg_fbg_apensar_desapensar" access="read,write"/>
                 <variable name="sg_fbg_certificar_decurso_prazo" mapped-name="sim_nao:sg_fbg_certificar_decurso_prazo" access="read,write"/>
-                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="sg_fbg_certificar_transito_julgado" mapped-name="sim_nao:sg_fbg_certificar_transito_julgado" access="read,write"/>
+                <variable name="sg_fbg_intimar_citar" mapped-name="sim_nao:sg_fbg_intimar_citar" access="read,write"/>
+                <variable name="sg_fbg_intimar_citar_mp" mapped-name="sim_nao:sg_fbg_intimar_citar_mp" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -75,7 +78,22 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig. Não
    Tipo: Checkbox
-4. Variável: Processo_Fluxo_visualizarDecisao
+4. Variável: sg_fbg_certificar_transito_julgado
+   Label: Certificar trânsito em julgado
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Checkbox
+5. Variável: sg_fbg_intimar_citar
+   Label: Intimar ou citar via sistema, correios ou edital
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Checkbox
+6. Variável: sg_fbg_intimar_citar_mp
+   Label: Intimar ou citar Ministério Público
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Checkbox
+7. Variável: Processo_Fluxo_visualizarDecisao
    Label: Ato proferido
    Escrita: Sim
    Obrig. Não
@@ -93,10 +111,16 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Preparação de decisão de agravo regimental ou interno" name="05 - Enviar concluso para decisão de agravo regimental ou interno"/>
         <transition to="(SG) Preparação de despacho genérico" name="06 - Enviar concluso para despacho"/>
         <transition to="(SG) Controlar suspensão de processo" name="07 - Suspender o processo"/>
-        <transition to="(SG) Preparação para arquivamento" name="08 - Arquivar o processo"/>
+        <transition to="(SG) Preparação de redistribuição" name="08 - Redistribuir"/>
+        <transition to="(SG) Preparação para arquivamento" name="09 - Arquivar o processo"/>
+        <transition to="(SG) Preparação de remessa para instância superior" name="10 - Remeter para instância superior"/>
+        <transition to="(SG) Preparação de remessa para o primeiro grau" name="11 - Remeter para o primeiro grau"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_apensar_desapensar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_certificar_decurso_prazo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_certificar_transito_julgado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_intimar_citar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_intimar_citar_mp')}"/>
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
@@ -166,6 +190,10 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:despacho_generico')}"/>
         </event>
     </process-state>
+    <process-state name="(SG) Preparação de redistribuição">
+        <sub-process name="(SG) Redistribuição" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+    </process-state>
     <process-state name="(SG) Controlar suspensão de processo">
         <sub-process name="(SG) Controle de suspensão" binding="late"/>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
@@ -174,12 +202,32 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <sub-process name="(SG) Arquivamento" binding="late"/>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
     </process-state>
+    <process-state name="(SG) Preparação de remessa para instância superior">
+        <sub-process name="(SG) Remessa para outra instância" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:reminst:remessa_instancia_superior', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:reminst:remessa_instancia_superior')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Preparação de remessa para o primeiro grau">
+        <sub-process name="(SG) Remessa para outra instância" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:reminst:remessa_primeiro_grau', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:reminst:remessa_primeiro_grau')}"/>
+        </event>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Fluxo Básico Geral">
         <task name="Nó de Desvio - (SG) Fluxo Básico Geral" swimlane="Nó de Desvio - (SG) Fluxo Básico Geral"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
-    </task-node>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -228,5 +276,5 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
+    </event> 
 </process-definition>

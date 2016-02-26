@@ -7,19 +7,19 @@ Descrição: Controle dos processos despachados (oriundos do gabinete).
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
-Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Despachados">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
-    </swimlane>
+    </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
         <transition to="(SG) É despachado?" name="(SG) É despachado urgente?"/>
-    </start-state>
+    </start-state>  
     <!-- NODES -->
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado') == true ? '(SG) Despachado - ANALISAR' : '(SG) É despachado urgente?'}" name="(SG) É despachado?">
         <transition to="(SG) Despachado - ANALISAR" name="(SG) Despachado - ANALISAR"/>
@@ -259,7 +259,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Despachado sobre embargos de declaração - ANALISAR" name="(SG) Despachado sobre embargos de declaração - ANALISAR"/>
         <transition to="(SG) Despachado sobre agravo regimental ou interno - ANALISAR" name="(SG) Despachado sobre agravo regimental ou interno - ANALISAR"/>
         <transition to="(SG) Despachado por certidão de conclusão sem efeito - ANALISAR" name="(SG) Despachado por certidão de conclusão sem efeito - ANALISAR"/>
-    </task-node>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -308,5 +308,5 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
+    </event> 
 </process-definition>

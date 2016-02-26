@@ -7,19 +7,19 @@ Descrição: Controle de suspensão processual.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
-Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Controle de suspensão">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,599:1469')}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
-    </swimlane>
+    </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
         <transition to="(SG) Suspensão de processo - CONFIRMAR" name="(SG) Suspensão de processo - CONFIRMAR"/>
-    </start-state>
+    </start-state>  
     <!-- NODES -->
     <task-node end-tasks="true" name="(SG) Suspensão de processo - CONFIRMAR">
         <task name="(SG) Suspensão de processo - CONFIRMAR" swimlane="Secretaria">
@@ -103,7 +103,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Suspensão de processo - CONFIRMAR" name="(SG) Suspensão de processo - CONFIRMAR"/>
         <transition to="(SG) Suspensão de processo pela relatoria - AGUARDAR" name="(SG) Suspensão de processo pela relatoria - AGUARDAR"/>
         <transition to="(SG) Suspensão de processo pela instância superior - AGUARDAR" name="(SG) Suspensão de processo pela instância superior - AGUARDAR"/>
-    </task-node>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -152,5 +152,5 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
+    </event> 
 </process-definition>

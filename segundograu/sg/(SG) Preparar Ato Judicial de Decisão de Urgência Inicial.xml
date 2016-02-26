@@ -9,7 +9,7 @@ Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessoria
             Gabinete Segundo Grau    Magistrado
 Magistrado  Assessoria Segundo Grau  Assessoria
-            Gabinete Segundo Grau    Magistrado]]></description>
+            Gabinete Segundo Grau    Magistrado]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
@@ -19,12 +19,12 @@ Magistrado  Assessoria Segundo Grau  Assessoria
     </swimlane>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469')}"/>
-    </swimlane>
+    </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Assessoria"/>
         <transition to="(SG) Concluso para decisão de urgência inicial - MINUTAR" name="(SG) Concluso para decisão de urgência inicial - MINUTAR"/>
-    </start-state>
+    </start-state>  
     <!-- NODES -->
     <task-node end-tasks="true" name="(SG) Concluso para decisão de urgência inicial - MINUTAR">
         <task name="(SG) Concluso para decisão de urgência inicial - MINUTAR" swimlane="Assessoria">
@@ -40,6 +40,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
    Escrita: Sim
    Obrig. Sim
    Tipo: Editor
+
 2. Variável: MinutarEmLote
    Label: Minutar em lote
    Escrita: Sim
@@ -49,7 +50,8 @@ Magistrado  Assessoria Segundo Grau  Assessoria
 *Eventos de tarefa*
 
 1. Tipo do evento: Sair da tarefa
-   Agrupamento eventos: Magistrado]]></description>
+   Agrupamento eventos: Magistrado
+   Condição para lançamento temporário: #{true}]]></description>
         <transition to="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Urgência Inicial">
             <condition expression="#{true}"/>
         </transition>
@@ -81,11 +83,13 @@ Magistrado  Assessoria Segundo Grau  Assessoria
    Escrita: Sim
    Obrig. Não
    Tipo: Frame
+
 2. Variável: MovimentarEmLote
    Label: Movimentar em lote
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Movimentação em Lote
+
 3. Variável: AssinaturaEmLote
    Label: Assinar em lote
    Escrita: Sim
@@ -122,11 +126,13 @@ Magistrado  Assessoria Segundo Grau  Assessoria
    Escrita: Sim
    Obrig. Não
    Tipo: Frame
+
 2. Variável: MovimentarEmLote
    Label: Movimentar em lote
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Movimentação em Lote
+
 3. Variável: AssinaturaEmLote
    Label: Assinar em lote
    Escrita: Sim
@@ -155,7 +161,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <transition to="(SG) Concluso para decisão de urgência inicial - MINUTAR" name="(SG) Concluso para decisão de urgência inicial - MINUTAR"/>
         <transition to="(SG) Concluso para decisão de urgência inicial - ASSINAR" name="(SG) Concluso para decisão de urgência inicial - ASSINAR"/>
         <transition to="(SG) Concluso para decisão de urgência inicial - CONFIRMAR" name="(SG) Concluso para decisão de urgência inicial - CONFIRMAR"/>
-    </task-node>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -204,7 +210,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
+    </event>  
     <!-- ACTIONS -->
-    <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:documento:tipo:minuta:ids','63')}"/>
+    <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:documento:tipo:minuta:ids','63')}"/> 
 </process-definition>
