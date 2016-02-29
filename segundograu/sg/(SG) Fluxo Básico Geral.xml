@@ -59,45 +59,58 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
                 <variable name="sg_fbg_certificar_transito_julgado" mapped-name="sim_nao:sg_fbg_certificar_transito_julgado" access="read,write"/>
                 <variable name="sg_fbg_intimar_citar" mapped-name="sim_nao:sg_fbg_intimar_citar" access="read,write"/>
                 <variable name="sg_fbg_intimar_citar_mp" mapped-name="sim_nao:sg_fbg_intimar_citar_mp" access="read,write"/>
+                <variable name="sg_fbg_expedir_carta" mapped-name="sim_nao:sg_fbg_expedir_carta" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: label_informacao
+1. Variável: Processo_Fluxo_visualizarDecisao
+   Label: Ato proferido
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame
+
+2. Variável: label_informacao
    Label: Marque a(s) opção(ões) de cumprimento abaixo, em seguida, clique em "Próxima ação: 01 - Prosseguir nas tarefa(s) selecionada(s)". Ou se preferir, deixe as opções de cumprimento desmarcadas e escolha a "Próxima ação" desejada.
    Escrita: Sim
    Obrig. Não
    Tipo: Aviso
-2. Variável: sg_fbg_apensar_desapensar
+
+3. Variável: sg_fbg_apensar_desapensar
    Label: Apensar / desapensar
    Escrita: Sim
    Obrig. Não
    Tipo: Checkbox
-3. Variável: sg_fbg_certificar_decurso_prazo
+
+4. Variável: sg_fbg_certificar_decurso_prazo
    Label: Certificar decurso de prazo
    Escrita: Sim
    Obrig. Não
    Tipo: Checkbox
-4. Variável: sg_fbg_certificar_transito_julgado
+
+5. Variável: sg_fbg_certificar_transito_julgado
    Label: Certificar trânsito em julgado
    Escrita: Sim
    Obrig. Não
    Tipo: Checkbox
-5. Variável: sg_fbg_intimar_citar
+
+6. Variável: sg_fbg_intimar_citar
    Label: Intimar ou citar via sistema, correios ou edital
    Escrita: Sim
    Obrig. Não
    Tipo: Checkbox
-6. Variável: sg_fbg_intimar_citar_mp
+
+7. Variável: sg_fbg_intimar_citar_mp
    Label: Intimar ou citar Ministério Público
    Escrita: Sim
    Obrig. Não
    Tipo: Checkbox
-7. Variável: Processo_Fluxo_visualizarDecisao
-   Label: Ato proferido
+
+8. Variável: sg_fbg_expedir_carta
+   Label: Expedir carta de ordem, precatória e/ou rogatória
    Escrita: Sim
    Obrig. Não
-   Tipo: Frame]]></description>
+   Tipo: Checkbox]]></description>
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>

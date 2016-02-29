@@ -51,6 +51,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <task name="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_expedientes_precatorias" mapped-name="frame:Processo_Fluxo_expedientes_precatorias" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -59,38 +60,142 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label: Expedientes do tipo carta de ordem, precatória e rogatória
    Escrita: Sim
    Obrig.: Não
-   Tipo: Frame]]></description>
+   Tipo: Frame
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" name="Aguardar devolução da carta"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
     </task-node>
     <task-node end-tasks="true" name="(SG) Carta de ordem, precatória e rogatória - AGUARDAR">
-        <task name="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" swimlane="Secretaria"/>
+        <task name="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: label_informacao
+   Label: O processo encontra-se aguardando a devolução da carta precatória. Ao ser devolvida, clique em "Registrar devolução da carta" para informar a data da devolução a fim de que o sistema possa iniciar o prazo de cumprimento (quando aplicável).
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR" name="Registrar devolução da carta"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="Retornar para encaminhar carta"/>
     </task-node>
     <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR">
-        <task name="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR" swimlane="Secretaria"/>
+        <task name="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_registroCiencia" mapped-name="frame:WEB-INF_xhtml_flx_exped_registroCiencia" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: WEB-INF_xhtml_flx_exped_registroCiencia
+   Label: Registrar devolução da carta
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="Aguardar prazo de cumprimento do destinatário"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" name="Retornar para aguardar devolução da carta"/>
+        <transition to="(SG) Existe prazo de expediente do tipo carta em aberto?" name="Verificar existência da prazo"/>
     </task-node>
+    <decision expression="#{processoParteExpedienteManager.recuperaExpedientesAbertosPorMeiosComunicacaoAndProcessoTrf('L', processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR' : 'Término'}" name="(SG) Existe prazo de expediente do tipo carta em aberto?">
+        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
+        <transition to="Término" name="Término"/>
+    </decision>
     <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR">
-        <task name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" swimlane="Secretaria"/>
+        <task name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: label_informacao
+   Label: O processo encontra-se aguardando o prazo de cumprimento da carta precatória. Ao decorrer o prazo, o processo movimentará automaticamente para tarefa "(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR".
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Os prazos dos expedientes do tipo carta continuam abertos?" name="(SG) Os prazos dos expedientes do tipo carta continuam abertos?">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Os prazos dos expedientes do tipo carta continuam abertos?')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+        </event>
     </task-node>
+    <decision expression="#{processoParteExpedienteManager.recuperaExpedientesAbertosPorMeiosComunicacaoAndProcessoTrf('L', processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR' : '(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR'}" name="(SG) Os prazos dos expedientes do tipo carta continuam abertos?">
+        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR"/>
+    </decision>
     <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR">
-        <task name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" swimlane="Secretaria"/>
+        <task name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: label_informacao
+   Label: O prazo de cumprimento da carta foi decorrido. Favor seguir no fluxo normalmente.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
     </task-node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">

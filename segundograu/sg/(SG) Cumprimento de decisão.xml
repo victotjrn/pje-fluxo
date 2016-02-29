@@ -27,6 +27,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) É certificar trânsito em julgado?" name="(SG) É certificar trânsito em julgado?"/>
         <transition to="(SG) É intimação ou citação genérica?" name="(SG) É intimação ou citação genérica?"/>
         <transition to="(SG) É intimação ou citação ao MP?" name="(SG) É intimação ou citação ao MP?"/>
+        <transition to="(SG) É expedir carta?" name="(SG) É expedir carta?"/>
     </fork>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_apensar_desapensar') == true ? '(SG) Apensamento ou desapensamento - ANALISAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É apensar ou desapensar?">
         <transition to="(SG) Apensamento ou desapensamento - ANALISAR" name="(SG) Apensamento ou desapensamento - ANALISAR"/>
@@ -105,6 +106,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:intimar_citar_mp')}"/>
         </event>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_expedir_carta') == true ? '(SG) Expedição de carta de ordem, precatória e(ou) rogatória' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É expedir carta?">
+        <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
+        <transition to="(SG) Expedição de carta de ordem, precatória e(ou) rogatória" name="(SG) Expedição de carta de ordem, precatória e(ou) rogatória"/>
+    </decision>
+    <process-state name="(SG) Expedição de carta de ordem, precatória e(ou) rogatória">
+        <sub-process name="(SG) Preparar Ato de Comunicação de Carta" binding="late"/>
+        <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
     </process-state>
     <join name="(SG) Junção em cumprimento de decisão">
         <transition to="Término" name="Término"/>
