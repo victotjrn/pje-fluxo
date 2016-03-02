@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Remessa para a presidÃªncia">
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Remessa para a presidência">
     <description><![CDATA[..]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia">
+    <swimlane name="Nó de Desvio - (TR) Remessa para a presidência">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:5197,8:1338')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
-    <start-state name="InÃ­cio">
+    <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Magistrado"/>
-        <transition to="(TR) Enviar para a presidÃªncia" name="(TR) Enviar para a presidÃªncia"/>
+        <transition to="(TR) Enviar para a presidência" name="(TR) Enviar para a presidência"/>
     </start-state>  
     <!-- NODES -->
-    <node name="(TR) Enviar para a presidÃªncia">
-        <transition to="(TR) Ã‰ decisÃ£o para presidÃªncia?" name="(TR) Ã‰ decisÃ£o para presidÃªncia?"/>
+    <node name="(TR) Enviar para a presidência">
+        <transition to="(TR) É decisão para presidência?" name="(TR) É decisão para presidência?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado == 2 ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino',2) : (tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado == 3 ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino',7) : tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino',9))}"/>
             <action expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado == 2 ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino',2) : (tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado == 3 ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino',10) : tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino',9))}"/>
@@ -24,27 +24,27 @@
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
         </event>
     </node>
-    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:rempre:decisao_presidencia') ? '(TR) LanÃ§ar movimento concluso para decisÃ£o' : '(TR) Ã‰ despacho para presidÃªncia?'}" name="(TR) Ã‰ decisÃ£o para presidÃªncia?">
-        <transition to="(TR) Ã‰ despacho para presidÃªncia?" name="(TR) Ã‰ despacho para presidÃªncia?"/>
-        <transition to="(TR) LanÃ§ar movimento concluso para decisÃ£o" name="(TR) LanÃ§ar movimento concluso para decisÃ£o"/>
+    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:rempre:decisao_presidencia') ? '(TR) Lançar movimento concluso para decisão' : '(TR) É despacho para presidência?'}" name="(TR) É decisão para presidência?">
+        <transition to="(TR) É despacho para presidência?" name="(TR) É despacho para presidência?"/>
+        <transition to="(TR) Lançar movimento concluso para decisão" name="(TR) Lançar movimento concluso para decisão"/>
     </decision>
-    <node name="(TR) LanÃ§ar movimento concluso para decisÃ£o">
-        <transition to="(TR) Concluso para decisÃ£o da presidÃªncia" name="(TR) Concluso para decisÃ£o da presidÃªncia"/>
+    <node name="(TR) Lançar movimento concluso para decisão">
+        <transition to="(TR) Concluso para decisão da presidência" name="(TR) Concluso para decisão da presidência"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
         </event>
     </node>
-    <task-node end-tasks="true" name="(TR) Concluso para decisÃ£o da presidÃªncia">
-        <task name="(TR) Concluso para decisÃ£o da presidÃªncia" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(TR) Concluso para decisão da presidência">
+        <task name="(TR) Concluso para decisão da presidência" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
-        <transition to="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia" name="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia">
+        <transition to="Nó de Desvio - (TR) Remessa para a presidência" name="Nó de Desvio - (TR) Remessa para a presidência">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TR) Assinar decisÃ£o da presidÃªncia" name="Encaminhar para assinatura"/>
+        <transition to="(TR) Assinar decisão da presidência" name="Encaminhar para assinatura"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -56,8 +56,8 @@
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(TR) Assinar decisÃ£o da presidÃªncia">
-        <task name="(TR) Assinar decisÃ£o da presidÃªncia" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(TR) Assinar decisão da presidência">
+        <task name="(TR) Assinar decisão da presidência" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
@@ -65,38 +65,38 @@
                 <variable name="HomologarMovimentos" mapped-name="homologadorEventoTree:HomologarMovimentos" access="read,write"/>
             </controller>
         </task>
-        <transition to="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia" name="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia">
+        <transition to="Nó de Desvio - (TR) Remessa para a presidência" name="Nó de Desvio - (TR) Remessa para a presidência">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TR) Concluso para decisÃ£o da presidÃªncia" name="Retornar para minuta"/>
-        <transition to="(TR) Receber da presidÃªncia" name="(TR) Receber da presidÃªncia">
+        <transition to="(TR) Concluso para decisão da presidência" name="Retornar para minuta"/>
+        <transition to="(TR) Receber da presidência" name="(TR) Receber da presidência">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Receber da presidÃªncia')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Receber da presidência')}"/>
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
         </event>
     </task-node>
-    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:rempre:despacho_presidencia') ? '(TR) LanÃ§ar movimento concluso para despacho' : '(TR) Receber da presidÃªncia'}" name="(TR) Ã‰ despacho para presidÃªncia?">
-        <transition to="(TR) Receber da presidÃªncia" name="(TR) Receber da presidÃªncia"/>
-        <transition to="(TR) LanÃ§ar movimento concluso para despacho" name="(TR) LanÃ§ar movimento concluso para despacho"/>
+    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:rempre:despacho_presidencia') ? '(TR) Lançar movimento concluso para despacho' : '(TR) Receber da presidência'}" name="(TR) É despacho para presidência?">
+        <transition to="(TR) Receber da presidência" name="(TR) Receber da presidência"/>
+        <transition to="(TR) Lançar movimento concluso para despacho" name="(TR) Lançar movimento concluso para despacho"/>
     </decision>
-    <node name="(TR) LanÃ§ar movimento concluso para despacho">
-        <transition to="(TR) Concluso para despacho da presidÃªncia" name="(TR) Concluso para despacho da presidÃªncia"/>
+    <node name="(TR) Lançar movimento concluso para despacho">
+        <transition to="(TR) Concluso para despacho da presidência" name="(TR) Concluso para despacho da presidência"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(5).lancarMovimento()}"/>
         </event>
     </node>
-    <task-node end-tasks="true" name="(TR) Concluso para despacho da presidÃªncia">
-        <task name="(TR) Concluso para despacho da presidÃªncia" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(TR) Concluso para despacho da presidência">
+        <task name="(TR) Concluso para despacho da presidência" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
-        <transition to="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia" name="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia">
+        <transition to="Nó de Desvio - (TR) Remessa para a presidência" name="Nó de Desvio - (TR) Remessa para a presidência">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar despacho da presidencia" name="Encaminhar para assinatura"/>
@@ -120,22 +120,22 @@
                 <variable name="HomologarMovimentos" mapped-name="homologadorEventoTree:HomologarMovimentos" access="read,write"/>
             </controller>
         </task>
-        <transition to="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia" name="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia">
+        <transition to="Nó de Desvio - (TR) Remessa para a presidência" name="Nó de Desvio - (TR) Remessa para a presidência">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TR) Concluso para despacho da presidÃªncia" name="Retornar para minuta"/>
-        <transition to="(TR) Receber da presidÃªncia" name="(TR) Receber da presidÃªncia">
+        <transition to="(TR) Concluso para despacho da presidência" name="Retornar para minuta"/>
+        <transition to="(TR) Receber da presidência" name="(TR) Receber da presidência">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Receber da presidÃªncia')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Receber da presidência')}"/>
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
         </event>
     </task-node>
-    <node name="(TR) Receber da presidÃªncia">
-        <transition to="TÃ©rmino" name="TÃ©rmino"/>
+    <node name="(TR) Receber da presidência">
+        <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
@@ -143,13 +143,13 @@
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
         </event>
     </node>
-    <end-state name="TÃ©rmino"/>
-    <task-node end-tasks="true" name="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia">
-        <task name="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia" swimlane="NÃ³ de Desvio - (TR) Remessa para a presidÃªncia"/>
-        <transition to="TÃ©rmino" name="TÃ©rmino"/>
-        <transition to="(TR) Concluso para decisÃ£o da presidÃªncia" name="(TR) Concluso para decisÃ£o da presidÃªncia"/>
-        <transition to="(TR) Concluso para despacho da presidÃªncia" name="(TR) Concluso para despacho da presidÃªncia"/>
-        <transition to="(TR) Assinar decisÃ£o da presidÃªncia" name="(TR) Assinar decisÃ£o da presidÃªncia"/>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (TR) Remessa para a presidência">
+        <task name="Nó de Desvio - (TR) Remessa para a presidência" swimlane="Nó de Desvio - (TR) Remessa para a presidência"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(TR) Concluso para decisão da presidência" name="(TR) Concluso para decisão da presidência"/>
+        <transition to="(TR) Concluso para despacho da presidência" name="(TR) Concluso para despacho da presidência"/>
+        <transition to="(TR) Assinar decisão da presidência" name="(TR) Assinar decisão da presidência"/>
         <transition to="(TR) Assinar despacho da presidencia" name="(TR) Assinar despacho da presidencia"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->

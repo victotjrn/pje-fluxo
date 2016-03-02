@@ -79,14 +79,12 @@
         <transition to="(TR) Retirar aptidão para julgamento" name="Retornar à assessoria">
             <condition expression="#{processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')).selecionadoPauta}"/>
         </transition>
-        <transition to="(TR) O relator é o vencedor?" name="(TR) O relator é o vencedor?">
-            <condition expression="#{true}"/>
-        </transition>
+        <transition to="(TR) O relator é o vencedor?" name="Encaminhar manualmente para assinatura do inteiro teor"/>
         <transition to="(TR) Registrar cancelamento de decisão colegiada" name="Cancelar tarefa"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator', true)}"/>
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) O relator é o vencedor?')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('Encaminhar manualmente para assinatura do inteiro teor')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
@@ -119,6 +117,7 @@
         <transition to="(TR) Lançar movimentações de julgamento" name="(TR) Lançar movimentações de julgamento">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TR) Aguardando sessão de julgamento" name="Retornar para aguardar sessão de julgamento"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Lançar movimentações de julgamento')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir',true)}"/>

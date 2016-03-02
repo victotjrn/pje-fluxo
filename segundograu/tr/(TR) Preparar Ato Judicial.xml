@@ -3,10 +3,10 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Preparar Ato Judicial">
     <description><![CDATA[Permite elaborar minuta de atos judiciais (decisões e despachos)...]]></description>  
     <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (TR) Preparar Ato Judicial"/>
     <swimlane name="Assessoria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5197,6:1469,8:1338')}" actor-id="#{actor.id}"/>
     </swimlane>
-    <swimlane name="Nó de Desvio - (TR) Preparar Ato Judicial"/>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:5197,8:1338')}"/>
     </swimlane>  
