@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Preparar Sessão de Julgamento">
-    <description><![CDATA[Controle de processos antes e depois da sessão de julgamento.]]></description>  
+    <description><![CDATA[Controle de processos antes e depois da sessão de julgamento.
+(TR) Confirmar relatório - voto - ementa - avisoVotoRequired - #{tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired')}
+(TR) Elaborar relatório - voto - ementa - avisoVotoRequired - #{tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired')}]]></description>    
     <!-- SWIMLANES -->
     <swimlane name="Secretaria Segundo Grau">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('8:1338,8:5483')}"/>
@@ -23,33 +25,60 @@
         <task name="(TR) Elaborar relatório - voto - ementa" swimlane="Assessoria">
             <controller>
                 <variable name="WEB-INF_xhtml_flx_votacaoColegiado" mapped-name="frame:WEB-INF_xhtml_flx_votacaoColegiado" access="read,write"/>
+                <variable name="avisoVotoRequired" mapped-name="textAlert:avisoVotoRequired" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (TR) Preparar Sessão de Julgamento" name="Nó de Desvio - (TR) Preparar Sessão de Julgamento">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TR) Confirmar relatório - voto - ementa" name="Encaminhar para confirmação"/>
+        <transition to="(TR) Voto vazio?" name="Encaminhar para confirmação">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tarefaOrigem', '(TR) Elaborar relatório - voto - ementa')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tarefaDestino', '(TR) Confirmar relatório - voto - ementa')}"/>
+        </transition>
         <transition to="(TR) Registrar cancelamento de decisão colegiada" name="Ignorar e sair da tarefa"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao',false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('textAlert:avisoVotoRequired')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('avisoVotoRequired')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
         </event>
     </task-node>
+    <decision expression="#{(sessaoProcessoDocumentoVotoHome.instance == null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento == null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento.processoDocumentoBin.modeloDocumento ==  null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento.processoDocumentoBin.modeloDocumento.isEmpty()) ? tramitacaoProcessualService.recuperaVariavel('tarefaOrigem') : tramitacaoProcessualService.recuperaVariavel('tarefaDestino')}" name="(TR) Voto vazio?">
+        <transition to="(TR) Confirmar relatório - voto - ementa" name="(TR) Confirmar relatório - voto - ementa"/>
+        <transition to="(TR) Elaborar relatório - voto - ementa" name="(TR) Elaborar relatório - voto - ementa"/>
+        <transition to="(TR) Registrar aptidão para julgamento" name="(TR) Registrar aptidão para julgamento"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tarefaOrigem')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tarefaDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('avisoVotoRequired', (sessaoProcessoDocumentoVotoHome.instance == null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento == null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento.processoDocumentoBin.modeloDocumento ==  null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento.processoDocumentoBin.modeloDocumento.isEmpty()) ? 'O Voto é obrigatório para prosseguir na tarefa.' : '' ) }"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired') != null and tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired').isEmpty() ? tramitacaoProcessualService.apagaVariavel('avisoVotoRequired') : '' }"/>
+        </event>
+    </decision>
     <task-node end-tasks="true" name="(TR) Confirmar relatório - voto - ementa">
         <task name="(TR) Confirmar relatório - voto - ementa" swimlane="Magistrado">
             <controller>
                 <variable name="WEB-INF_xhtml_flx_votacaoColegiado" mapped-name="frame:WEB-INF_xhtml_flx_votacaoColegiado" access="read,write"/>
+                <variable name="avisoVotoRequired" mapped-name="textAlert:avisoVotoRequired" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (TR) Preparar Sessão de Julgamento" name="Nó de Desvio - (TR) Preparar Sessão de Julgamento">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TR) Registrar aptidão para julgamento" name="Solicitar inclusão em pauta"/>
+        <transition to="(TR) Voto vazio?" name="Solicitar inclusão em pauta">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tarefaOrigem', '(TR) Confirmar relatório - voto - ementa')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tarefaDestino', '(TR) Registrar aptidão para julgamento')}"/>
+        </transition>
         <transition to="(TR) Elaborar relatório - voto - ementa" name="Retornar à assessoria"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao',false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('textAlert:avisoVotoRequired')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('avisoVotoRequired')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
