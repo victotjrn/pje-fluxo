@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Remessa para a presidência">
-    <description><![CDATA[..]]></description>  
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Remessa para a presidência"> 
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (TR) Remessa para a presidência">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -193,6 +192,7 @@
         <event type="node-enter">
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_ato_judicial')}"/>
             <action expression="#{preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(200001).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:rempre:temcertidaosemefeito', true)}"/>
         </event>
     </node>
     <node name="(TR) Remover documento temporário sem efeito da presidência">

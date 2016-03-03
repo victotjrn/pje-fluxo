@@ -276,7 +276,7 @@
     </process-state>
     <process-state name="(TR) Conclusão para decisão da presidência">
         <sub-process name="(TR) Remessa para a presidência" binding="late"/>
-        <transition to="(TR) Despachados pela presidência" name="(TR) Despachados pela presidência"/>
+        <transition to="(TR) Tem certidão sem efeito?" name="(TR) Tem certidão sem efeito"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('tr:rempre:decisao_presidencia','true')}"/>
         </event>
@@ -286,7 +286,7 @@
     </process-state>
     <process-state name="(TR) Conclusão para despacho da presidência">
         <sub-process name="(TR) Remessa para a presidência" binding="late"/>
-        <transition to="(TR) Despachados pela presidência" name="(TR) Despachados pela presidência"/>
+        <transition to="(TR) Tem certidão sem efeito?" name="(TR) Tem certidão sem efeito"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('tr:rempre:despacho_presidencia','true')}"/>
         </event>
@@ -294,6 +294,13 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('tr:rempre:despacho_presidencia')}"/>
         </event>
     </process-state>
+    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('pje:rempre:temcertidaosemefeito') ? '(TR) Análise da Secretaria' : '(TR) Despachados pela presidência'}" name="(TR) Tem certidão sem efeito?">
+        <transition to="(TR) Análise da Secretaria" name="(TR) Análise da Secretaria"/>
+        <transition to="(TR) Despachados pela presidência" name="(TR) Despachados pela presidência"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:rempre:temcertidaosemefeito')}"/>
+        </event>
+    </decision>
     <task-node end-tasks="true" name="(TR) Despachados pela presidência">
         <task name="(TR) Despachados pela presidência" swimlane="Secretaria Segundo Grau">
             <controller>
