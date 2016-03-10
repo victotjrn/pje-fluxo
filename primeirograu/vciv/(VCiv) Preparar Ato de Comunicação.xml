@@ -414,7 +414,7 @@
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="(VCiv) Junção em Preparar Ato de Comunicação"/>
         <transition to="(VCiv) Preparar citação e(ou) intimação da audiência" name="(VCiv) Preparar citação e(ou) intimação da audiência"/>
     </decision>
-    <task-node end-tasks="true" name="(VCiv) Preparar citação e(ou) intimação da audiência">
+    <task-node end-tasks="true" name="(VCiv) Preparar citação e(ou) intimação da audiência - Fluxo antigo">
         <task name="(VCiv) Preparar citação e(ou) intimação da audiência" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
