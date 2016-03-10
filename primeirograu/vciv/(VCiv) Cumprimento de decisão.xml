@@ -176,7 +176,7 @@
         <transition to="(VCiv) Designar audiência" name="(VCiv) Designar audiência"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
     </decision>
-    <task-node end-tasks="true" name="(VCiv) Designar audiência">
+    <task-node end-tasks="true" name="(VCiv) Designar audiência - Fluxo antigo">
         <task name="(VCiv) Designar audiência" swimlane="Conciliação">
             <controller>
                 <variable name="Processo_Fluxo_abaDesignarAudiencia" mapped-name="frame:Processo_Fluxo_abaDesignarAudiencia" access="read,write"/>
