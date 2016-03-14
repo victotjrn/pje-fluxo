@@ -109,6 +109,9 @@
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Entregar Alvará')}"/>
         </event>
+        <event type="task-end">
+            <action expression="#{preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(73).lancarMovimento()}"/>
+        </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',91)}"/>
         </event>
@@ -123,9 +126,6 @@
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-start">
-            <action name="upd" expression="#{preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(73).lancarMovimento()}"/>
-        </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:expedir_oficio') ? '(VCiv) Expedir Ofício' : '(VCiv) Junção em Elaborar Documentos'}" name="(VCiv) É Ofício?">
         <transition to="(VCiv) Expedir Ofício" name="(VCiv) Expedir Ofício"/>
