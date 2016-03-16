@@ -64,6 +64,9 @@
         </transition>
         <transition to="(VCiv) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
         <transition to="(VCiv) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+        </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cs:suspensao_art40', 'true')}"/>
         </event>
@@ -80,6 +83,9 @@
         </transition>
         <transition to="(VCiv) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
         <transition to="(VCiv) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+        </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cs:suspensao_parcelamento', 'true')}"/>
         </event>
@@ -100,6 +106,9 @@
         </transition>
         <transition to="(VCiv) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
         <transition to="(VCiv) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+        </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cs:suspensao_com_prazo', 'true')}"/>
         </event>
@@ -115,6 +124,9 @@
         </transition>
         <transition to="(VCiv) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
         <transition to="(VCiv) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+        </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cs:suspensao_sem_prazo', 'true')}"/>
         </event>
@@ -158,6 +170,7 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('date:vciv_cs_data_limite_suspensao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('dls')}"/>
             <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:suspenso')}"/>
         </event>
     </node>
     <end-state name="Término"/>
