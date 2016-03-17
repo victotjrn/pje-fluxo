@@ -212,6 +212,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:controlar_retorno_expediente')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:expedir_precatorio_rpv')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_precatorio_rpv')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:aguardar_central_calculos')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Despachados urgentes">
