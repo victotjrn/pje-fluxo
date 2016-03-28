@@ -1,48 +1,65 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC......]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC.....]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197')}"/>
-    </swimlane>
     <swimlane name="CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886,5:1338,6:1469,6:5197')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
-        <task name="Tarefa inicial"/>
-        <transition to="É intimar CEJUSC ?" name="É intimar CEJUSC ?"/>
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(CEJUSC) É intimar CEJUSC ?" name="É intimar CEJUSC ?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('cejusc:intimar_padrao') != null &amp;&amp; tramitacaoProcessualService.recuperaVariavel('cejusc:intimar_padrao') ? '(CEJUSC) Intimar da audiência' : '(CEJUSC) Designar audiência'}" name="É intimar CEJUSC ?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('cejusc:intimar_padrao') != null &amp;&amp; tramitacaoProcessualService.recuperaVariavel('cejusc:intimar_padrao') ? '(CEJUSC) Intimar da audiência' : '(CEJUSC) Designar audiência'}" name="(CEJUSC) É intimar CEJUSC ?">
         <transition to="(CEJUSC) Designar audiência" name="(CEJUSC) Designar audiência"/>
         <transition to="(CEJUSC) Intimar da audiência" name="(CEJUSC) Intimar da audiência"/>
     </decision>
     <task-node end-tasks="true" name="(CEJUSC) Designar audiência">
-        <task name="(CEJUSC) Designar audiência" swimlane="Secretaria">
+        <task name="(CEJUSC) Designar audiência" swimlane="CEJUSC">
             <controller>
                 <variable name="Processo_Fluxo_abaDesignarAudiencia" mapped-name="frame:Processo_Fluxo_abaDesignarAudiencia" access="read,write"/>
+                <variable name="Aviso1" mapped-name="textAlert:Aviso1" access="read,write"/>
+                <variable name="Aviso2" mapped-name="textAlert:Aviso2" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[#{processoAudienciaHome.obterPossivelAudiencias(orgaoJulgadorManager.findById(105))}...
+        <description><![CDATA[Labels: 
+..
+Processo_Fluxo_abaDesignarAudiencia - > "Designar audiência"
 
-#{authenticator.getPapelAtual().getIdPapel() == 5886}]]></description>
+
+Aviso1 -> ATENÇÃO 01: Caso haja a necessidade de intimar mais de uma parte ao mesmo tempo utilizar a opção "Intimar via mandado/sistema/correio/pessoalmente"
+
+Aviso2 -> ATENÇÃO 02: Caso a intimação seja apenas para o advogado do polo ativo clicar na opção "Intimar via sistema (advogados -Polo Ativo).
+
+#{processoAudienciaHome.obterPossivelAudiencias(orgaoJulgadorManager.findById(105))}...
+
+#{authenticator.getPapelAtual().getIdPapel() == 5886}
+
+
+expressão p/ quando ativar parnamirim:
+
+#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains("NATAL") ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 105) :       (authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains("MOSSOR") ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 99) :  authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains("PARNAMIRIM") ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 107) : null)}]]></description>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Análise do CEJUSC" name="Cancelar e sair da tarefa"/>
-        <transition to="(CEJUSC) Intimações eletrônicas" name="Intimar da audiência eletronicamente (exclusivo para advogados)"/>
-        <transition to="(CEJUSC) Intimar da audiência" name="Intimar da audiência via correios/mandados/outros"/>
+        <transition to="(CEJUSC) Análise do CEJUSC" name="Análise do CEJUSC"/>
+        <transition to="(CEJUSC) Intimações eletrônicas" name="Intimar via sistema (Advogados - Polo Ativo)"/>
+        <transition to="(CEJUSC) Intimar da audiência" name="Intimar via mandado/correios/sistema/pessoalmente"/>
+        <transition to="(CEJUSC) Elaborar documento" name="Expedir Ato Ordinatório"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('CEJUSC').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('juizo de origem').lancarMovimento()}"/>
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idTipoAudiencia', 21)}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 105)}"/>
+            <action name="upd" expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 105) :       (authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;MOSSOR&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 99) : null)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Análise do CEJUSC">
@@ -54,22 +71,31 @@
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Autos devolvidos pelo CEJUSC" name="Devolver autos à secretaria">
-            <condition expression="#{authenticator.getPapelAtual().getIdPapel() == 5886}"/>
-        </transition>
-        <transition to="(CEJUSC) Realizar audiência" name="Realizar audiência">
+        <transition to="(CEJUSC) Realização da audiência" name="Realizar Audiência">
             <condition expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null}"/>
         </transition>
         <transition to="(CEJUSC) Designar audiência" name="Designar audiência">
             <condition expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) == null}"/>
         </transition>
         <transition to="(CEJUSC) Elaborar documento" name="Elaborar documento"/>
-        <transition to="(CEJUSC) Intimar da audiência" name="Intimar da audiência"/>
-        <transition to="(CEJUSC) Intimações eletrônicas" name="Intimar eletronicamente"/>
+        <transition to="(CEJUSC) Intimar da audiência" name="Intimar mandado/correio/sistema/pessoalmente"/>
+        <transition to="(CEJUSC) Intimações eletrônicas" name="Intimar via sistema (advogados - Polo Ativo)"/>
+        <transition to="(CEJUSC) Audiências não realizadas" name="Devolver - Não realizado"/>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Autos devolvidos pelo CEJUSC">
-        <task name="(CEJUSC) Autos devolvidos pelo CEJUSC" swimlane="Secretaria"/>
+        <task name="(CEJUSC) Autos devolvidos pelo CEJUSC" swimlane="Nó de Desvio - (VCiv) Controle do CEJUSC"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
+            <condition expression="#{true}"/>
+        </transition>
         <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(CEJUSC) Audiências realizadas sem acordo">
+        <task name="(CEJUSC) Audiências realizadas sem acordo" swimlane="Secretaria"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
@@ -77,21 +103,25 @@
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(CEJUSC) Realizar audiência">
-        <task name="(CEJUSC) Realizar audiência" swimlane="CEJUSC">
-            <controller>
-                <variable name="Processo_Fluxo_abaDesignarAudiencia" mapped-name="frame:Processo_Fluxo_abaDesignarAudiencia" access="read,write"/>
-            </controller>
-        </task>
+    <task-node end-tasks="true" name="(CEJUSC) Audiências realizadas com acordo">
+        <task name="(CEJUSC) Audiências realizadas com acordo" swimlane="Secretaria"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Análise do CEJUSC" name="Cancelar e sair da tarefa">
-            <condition expression="#{authenticator.getPapelAtual().getIdPapel() == 5886}"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(CEJUSC) Audiências não realizadas">
+        <task name="(CEJUSC) Audiências não realizadas" swimlane="Secretaria"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
+            <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Realização da audiência" name="Informar dados da audiência">
-            <condition expression="#{authenticator.getPapelAtual().getIdPapel() == 5886}"/>
-        </transition>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Intimar da audiência">
         <task name="(CEJUSC) Intimar da audiência" swimlane="CEJUSC">
@@ -106,7 +136,7 @@
         <transition to="(CEJUSC) Separação preparação intimação" name="(CEJUSC) Separação preparação intimação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Intimações eletrônicas" name="Intimar da audiência eletronicamente (exclusivo para advogados)"/>
+        <transition to="(CEJUSC) Intimações eletrônicas" name="Intimar via sistema (advogados - polo ativo)"/>
         <event type="node-enter">
             <action name="upd" expression="#{modeloDocumento.set('Processo_Fluxo_prepararExpediente',80)}"/>
         </event>
@@ -157,7 +187,7 @@
         <transition to="(CEJUSC) É ofício ?" name="É ofício ?">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Remover documento temporário cejusc" name="Finalizar e sair da tarefa"/>
+        <transition to="(CEJUSC) Remover documento temporário cejusc" name="Finalizar e sair da tarefa"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('É ofício ?')}"/>
         </event>
@@ -165,12 +195,16 @@
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
         <event type="task-start">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','34,57')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','34,57,67')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Finalizar e sair da tarefa')}"/>
         </event>
     </task-node>
-    <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 34 ? '(CEJUSC) Lançar movimentação ofício' : '(CEJUSC) Lançar movimentação certidão'}" name="(CEJUSC) É ofício ?">
+    <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 34 ? '(CEJUSC) Lançar movimentação ofício' : '(CEJUSC) É ato ordinatório ?'}" name="(CEJUSC) É ofício ?">
         <transition to="(CEJUSC) Lançar movimentação ofício" name="(CEJUSC) Lançar movimentação ofício"/>
+        <transition to="(CEJUSC) É ato ordinatório ?" name="(CEJUSC) É ato ordinatório ?"/>
+    </decision>
+    <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 67 ? '(CEJUSC) Lançar movimentação de Ato Ordinatório' : '(CEJUSC) Lançar movimentação certidão'}" name="(CEJUSC) É ato ordinatório ?">
+        <transition to="(CEJUSC) Lançar movimentação de Ato Ordinatório" name="(CEJUSC) Lançar movimentação de Ato Ordinatório"/>
         <transition to="(CEJUSC) Lançar movimentação certidão" name="(CEJUSC) Lançar movimentação certidão"/>
     </decision>
     <node name="(CEJUSC) Lançar movimentação certidão">
@@ -183,6 +217,12 @@
         <transition to="(CEJUSC) Imprimir Documento" name="(CEJUSC) Imprimir Documento"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(79).lancarMovimento()}"/>
+        </event>
+    </node>
+    <node name="(CEJUSC) Lançar movimentação de Ato Ordinatório">
+        <transition to="(CEJUSC) Imprimir Documento" name="(CEJUSC) Imprimir Documento"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(11383).lancarMovimento()}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="(CEJUSC) Assinar documento">
@@ -229,13 +269,16 @@
         <transition to="(CEJUSC) Elaborar documento" name="(CEJUSC) Elaborar documento"/>
         <transition to="(CEJUSC) Processo com prazo em curso" name="(CEJUSC) Processo com prazo em curso"/>
         <transition to="(CEJUSC) Processo com prazo decorrido" name="(CEJUSC) Processo com prazo decorrido"/>
-        <transition to="(CEJUSC) Realizar audiência" name="(CEJUSC) Realizar audiência"/>
         <transition to="(CEJUSC) Autos devolvidos pelo CEJUSC" name="(CEJUSC) Autos devolvidos pelo CEJUSC"/>
         <transition to="(CEJUSC) Assinar documento" name="(CEJUSC) Assinar documento"/>
         <transition to="(CEJUSC) Imprimir Documento" name="(CEJUSC) Imprimir Documento"/>
         <transition to="(CEJUSC) Informar conteúdo DJe" name="(CEJUSC) Informar conteúdo DJe"/>
         <transition to="(CEJUSC) Ignorar conteúdo DJe" name="(CEJUSC) Ignorar conteúdo DJe"/>
         <transition to="(CEJUSC) Confirmar conteúdo DJe" name="(CEJUSC) Confirmar conteúdo DJe"/>
+        <transition to="(CEJUSC) Audiências realizadas sem acordo" name="(CEJUSC) Audiências realizadas sem acordo"/>
+        <transition to="(CEJUSC) Audiências realizadas com acordo" name="(CEJUSC) Audiências realizadas com acordo"/>
+        <transition to="(CEJUSC) Audiências não realizadas" name="(CEJUSC) Audiências não realizadas"/>
+        <transition to="(CEJUSC) Escolher tipo de devolução" name="(CEJUSC) Escolher tipo de devolução"/>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Informar conteúdo DJe">
         <task name="(CEJUSC) Informar conteúdo DJe" swimlane="CEJUSC">
@@ -308,7 +351,7 @@
     </node>
     <process-state name="(CEJUSC) Realização da audiência">
         <sub-process name="(VCiv) Controle de audiências do CEJUSC" binding="late"/>
-        <transition to="(CEJUSC) Análise do CEJUSC" name="(CEJUSC) Análise do CEJUSC"/>
+        <transition to="(CEJUSC) Escolher tipo de devolução" name="(CEJUSC) Escolher tipo de devolução"/>
     </process-state>
     <fork name="(CEJUSC) Separação preparação intimação">
         <transition to="(CEJUSC) É correrio ?" name="(CEJUSC) É correrio ?"/>
@@ -348,7 +391,7 @@
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('M', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(78).lancarMovimento()}')}"/>
         </event>
     </node>
-    <node name="(VCiv) Remover documento temporário cejusc">
+    <node name="(CEJUSC) Remover documento temporário cejusc">
         <transition to="(CEJUSC) Análise do CEJUSC" name="(CEJUSC) Análise do CEJUSC"/>
         <event type="node-leave">
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minutaEmElaboracao')}"/>
@@ -358,7 +401,16 @@
     <process-state name="(CEJUSC) Intimações eletrônicas">
         <sub-process name="(VCiv) Intimações eletrônicas - CEJUSC" binding="late"/>
         <transition to="(CEJUSC) Separação preparação intimação" name="(CEJUSC) Separação preparação intimação"/>
-    </process-state>  
+    </process-state>
+    <task-node end-tasks="true" name="(CEJUSC) Escolher tipo de devolução">
+        <task name="(CEJUSC) Escolher tipo de devolução" swimlane="CEJUSC"/>
+        <transition to="(CEJUSC) Audiências realizadas sem acordo" name="Devolver - Sem acordo"/>
+        <transition to="(CEJUSC) Audiências realizadas com acordo" name="Devolver - Com acordo"/>
+        <transition to="(CEJUSC) Audiências não realizadas" name="Devolver - Não realizado"/>
+        <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
