@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de audiências do CEJUSC">
-    <description><![CDATA[Fluxo responsável por controlar as audiências....]]></description>  
+    <description><![CDATA[Fluxo responsável por controlar as audiências no CEJUSC....]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
-    </swimlane>
-    <swimlane name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
-    </swimlane>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469')}"/>
     </swimlane>
@@ -16,14 +10,70 @@
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5886,6:1469')}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:1470,7:5886,7:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="CEJUSC"/>
-        <transition to="(CEJUSC) Existe audiência designada ?" name="(CEJUSC) Existe audiência designada ?"/>
+        <transition to="(CEJUSC) Verifica se existe audiência designada" name="(CEJUSC) Verifica se existe audiência designada"/>
     </start-state>  
     <!-- NODES -->
+    <decision expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) == null ? 'Término' : '(CEJUSC) Realizar audiência'}" name="(CEJUSC) Verifica se existe audiência designada">
+        <transition to="(CEJUSC) Realizar audiência" name="(CEJUSC) Realizar audiência"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <task-node end-tasks="true" name="(CEJUSC) Minutar ata de audiência">
+        <task name="(CEJUSC) Minutar ata de audiência" swimlane="CEJUSC">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="minuta_audiencia" mapped-name="textEditCombo:minuta_audiencia" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="(CEJUSC) Informar dados da audiência" name="Informar dados da audiência"/>
+        <transition to="(CEJUSC) Apagar minuta em elaboração" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:audienciaSelecionada', processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()))}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('aviso')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:transicao:dispensaRequeridos')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_audiencia'))}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e sair da tarefa')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','87,164')}"/>
+        </event>
+    </task-node>
+    <node name="(CEJUSC) Apagar minuta em elaboração">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_audiencia')}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(CEJUSC) Realizar audiência">
+        <task name="(CEJUSC) Realizar audiência" swimlane="CEJUSC"/>
+        <transition to="(CEJUSC) Minutar ata de audiência" name="Minutar ata de audiência"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:transicao:dispensaRequeridos')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e sair da tarefa')}"/>
+        </event>
+    </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Informar dados da audiência">
         <task name="(CEJUSC) Informar dados da audiência" swimlane="CEJUSC">
             <controller>
@@ -32,19 +82,35 @@
                 <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
             </controller>
         </task>
-        <transition to="Nó de Desvio - (CEJUSC) Controle de audiência" name="Nó de Desvio - (CEJUSC) Controle de audiência">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="Término" name="Análise do CEJUSC"/>
-        <transition to="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC">
-            <condition expression="#{true}"/>
-        </transition>
+        <transition to="(CEJUSC) Preencheu dados audiência - conciliador?" name="Encaminhar para assinatura do conciliador"/>
         <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', 'false')}"/>
         </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:audienciaSelecionada') eq null ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:audienciaSelecionada',processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)) : ''}"/>
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+            <action expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 105) :       (authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;MOSSOR&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 99) : null)}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(CEJUSC) Assinar ata de audiência pelo conciliador">
+        <task name="(CEJUSC) Assinar ata de audiência pelo conciliador" swimlane="CEJUSC">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Término">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Documento já assinado">
+            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
         <event type="node-leave">
             <action expression="#{processoAudienciaHome.instance.setStatusAudiencia(tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada'))}"/>
             <action expression="#{processoAudienciaHome.update()}"/>
@@ -53,65 +119,27 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:audienciaSelecionada')}"/>
         </event>
         <event type="task-start">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:audienciaSelecionada', processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()))}"/>
-            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','87,164')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(CEJUSC) Redesignar audiência">
-        <task name="(CEJUSC) Redesignar audiência" swimlane="CEJUSC">
-            <controller>
-                <variable name="Processo_Fluxo_abaDesignarAudiencia" mapped-name="frame:Processo_Fluxo_abaDesignarAudiencia" access="read,write"/>
-            </controller>
-        </task>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <transition to="Nó de Desvio - (CEJUSC) Controle de audiência" name="Nó de Desvio - (CEJUSC) Controle de audiência">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
-            <condition expression="#{true}"/>
-        </transition>
+    <end-state name="Término">
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:expedir_mandado')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:citar_intimar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('textEditCombo:minuta_audiencia')}"/>
         </event>
-    </task-node>
-    <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (CEJUSC) Controle de audiência">
-        <task name="Nó de Desvio - (CEJUSC) Controle de audiência" swimlane="CEJUSC"/>
+    </end-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(CEJUSC) Assinar ata de audiência pelo conciliador' : '(CEJUSC) Informar dados da audiência'}" name="(CEJUSC) Preencheu dados audiência - conciliador?">
         <transition to="(CEJUSC) Informar dados da audiência" name="(CEJUSC) Informar dados da audiência"/>
-        <transition to="(CEJUSC) Redesignar audiência" name="(CEJUSC) Redesignar audiência"/>
-        <transition to="Término" name="Término"/>
-        <transition to="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
-            <condition expression="#{true}"/>
-        </transition>
-    </task-node>
-    <decision expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) == null ? 'Término' : '(CEJUSC) Informar dados da audiência'}" name="(CEJUSC) Existe audiência designada ?">
-        <transition to="(CEJUSC) Informar dados da audiência" name="(CEJUSC) Informar dados da audiência"/>
-        <transition to="Término" name="Término"/>
+        <transition to="(CEJUSC) Assinar ata de audiência pelo conciliador" name="(CEJUSC) Assinar ata de audiência pelo conciliador"/>
     </decision>
-    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC">
-        <task name="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC" swimlane="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC"/>
-        <transition to="(CEJUSC) Informar dados da audiência" name="(CEJUSC) Informar dados da audiência"/>
-        <transition to="(CEJUSC) Redesignar audiência" name="(CEJUSC) Redesignar audiência"/>
-        <transition to="Término" name="Término"/>
-        <transition to="Nó de Desvio - (CEJUSC) Controle de audiência" name="Nó de Desvio - (CEJUSC) Controle de audiência"/>
-        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
-            <condition expression="#{true}"/>
-        </transition>
-    </task-node>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
-        <task name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" swimlane="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC"/>
+        <task name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC"/>
         <transition to="(CEJUSC) Informar dados da audiência" name="(CEJUSC) Informar dados da audiência"/>
-        <transition to="(CEJUSC) Redesignar audiência" name="(CEJUSC) Redesignar audiência"/>
+        <transition to="(CEJUSC) Assinar ata de audiência pelo conciliador" name="(CEJUSC) Assinar ata de audiência pelo conciliador"/>
         <transition to="Término" name="Término"/>
-        <transition to="Nó de Desvio - (CEJUSC) Controle de audiência" name="Nó de Desvio - (CEJUSC) Controle de audiência"/>
-        <transition to="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiência do CEJUSC"/>
+        <transition to="(CEJUSC) Minutar ata de audiência" name="(CEJUSC) Minutar ata de audiência"/>
+        <transition to="(CEJUSC) Realizar audiência" name="(CEJUSC) Realizar audiência"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
