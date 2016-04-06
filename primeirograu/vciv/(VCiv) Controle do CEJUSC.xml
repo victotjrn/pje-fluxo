@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC.......]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC........]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -31,19 +31,11 @@
         <description><![CDATA[Labels: 
 ..
 Processo_Fluxo_abaDesignarAudiencia - > "Designar audiência"
-
-
 Aviso1 -> ATENÇÃO 01: Caso haja a necessidade de intimar mais de uma parte ao mesmo tempo utilizar a opção "Intimar via mandado/sistema/correio/pessoalmente"
-
 Aviso2 -> ATENÇÃO 02: Caso a intimação seja apenas para o advogado do polo ativo clicar na opção "Intimar via sistema (advogados -Polo Ativo).
-
 #{processoAudienciaHome.obterPossivelAudiencias(orgaoJulgadorManager.findById(105))}...
-
 #{authenticator.getPapelAtual().getIdPapel() == 5886}
-
-
 expressão p/ quando ativar parnamirim:
-
 #{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains("NATAL") ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 105) :       (authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains("MOSSOR") ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 99) :  authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains("PARNAMIRIM") ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 107) : null)}]]></description>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
@@ -444,3 +436,4 @@ expressão p/ quando ativar parnamirim:
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
+

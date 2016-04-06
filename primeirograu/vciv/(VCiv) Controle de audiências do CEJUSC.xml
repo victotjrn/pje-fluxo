@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de audiências do CEJUSC">
-    <description><![CDATA[Fluxo responsável por controlar as audiências no CEJUSC....]]></description>  
+    <description><![CDATA[Fluxo responsável por controlar as audiências no CEJUSC.....]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469')}"/>
     </swimlane>
-    <swimlane name="CEJUSC">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5886,6:1469')}"/>
-    </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:1470,7:5886,7:5197')}"/>
+    </swimlane>
+    <swimlane name="CEJUSC">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5886,6:1469')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -29,6 +29,9 @@
                 <variable name="minuta_audiencia" mapped-name="textEditCombo:minuta_audiencia" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[aviso: Próxima audiência: #{processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)}
+
+minuta_audiencia: Minutar ata de audiência]]></description>
         <transition to="(CEJUSC) Informar dados da audiência" name="Informar dados da audiência"/>
         <transition to="(CEJUSC) Apagar minuta em elaboração" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
@@ -82,6 +85,11 @@
                 <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[aviso1: Audiência: #{processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)}
+
+ProcessoAudiencia_informarDadosAudiencia: Informar dados da audiência
+
+aviso2: ATENÇÃO: É necessário SEMPRE clicar no botão "GRAVAR" após preencher os dados da audiência.]]></description>
         <transition to="(CEJUSC) Preencheu dados audiência - conciliador?" name="Encaminhar para assinatura do conciliador"/>
         <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
             <condition expression="#{true}"/>
@@ -102,6 +110,7 @@
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[Processo_Fluxo_revisarMinuta: Assinar ata de audiência pelo conciliador]]></description>
         <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
@@ -192,3 +201,4 @@
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
+
