@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum..........
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum.................
 Aguardar Perícia / Laudo Técnico / Outros]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
@@ -99,6 +99,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir despacho"/>
+        <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Análise da secretaria">
         <task name="(VCiv) Análise da secretaria" swimlane="Secretaria">
@@ -228,6 +229,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir despacho"/>
+        <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
     </task-node>
     <process-state name="(VCiv) Conclusão para decisão de urgência">
         <sub-process name="(VCiv) Preparar Ato Judicial" binding="late"/>
@@ -466,6 +468,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="Nó de Desvio - (VCiv) Fluxo básico de conhecimento" name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
     </task-node>
     <process-state name="(VCiv) Conclusão para decisão sobre desbloqueio">
         <sub-process name="(VCiv) Preparar Ato Judicial" binding="late"/>
@@ -504,6 +507,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="Nó de Desvio - (VCiv) Fluxo básico de conhecimento" name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Despachados sobre suspensão">
         <task name="(VCiv) Despachados sobre suspensão" swimlane="Secretaria">
@@ -516,6 +520,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="Nó de Desvio - (VCiv) Fluxo básico de conhecimento" name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
     </task-node>
     <task-node end-tasks="true" name="(VCIv) Sentenciados">
         <task name="(VCIv) Sentenciados" swimlane="Secretaria">
@@ -528,6 +533,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
+        <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Sentenciados">
         <task name="(VCiv) Sentenciados" swimlane="Secretaria">
@@ -540,6 +546,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
+        <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
     </task-node>
     <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCiv) Sentenciados' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença ?">
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
@@ -680,6 +687,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
+        <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Sentenciados sobre homologação e extinção">
         <task name="(VCiv) Sentenciados sobre homologação e extinção" swimlane="Secretaria">
@@ -692,6 +700,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
+        <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
     </task-node>
     <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCiv) Sentenciados sobre homologação e extinção' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença extinção ?">
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
@@ -756,3 +765,4 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
+

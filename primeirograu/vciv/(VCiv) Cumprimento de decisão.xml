@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Cumprimento de decisão">
-    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria......]]></description>  
+    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria..........]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Cumprimento de decisão">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Conciliação">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,7:5197,7:5886,6:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria e Servidor de cálculo">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:5891')}"/>
@@ -767,7 +767,7 @@
         <sub-process name="(VCiv) Controle do CEJUSC" binding="late"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
     </process-state>
-    <decision expression="#{!(' 3 10 19 8 14 16 7 9 11 17 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia).concat(' '))) ? '(VCiv) Junção em cumprimento de decisão' : '(VCiv) Aviso CEJUSC'}" name="(VCiv) É juizado ou fazenda ou sucessoes ou precatorias ou execucao fiscal ou arrematacao?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:encaminar_cejusc') &amp;&amp; !(' 3 10 19 8 14 16 7 9 11 17 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia).concat(' '))) ? '(VCiv) Junção em cumprimento de decisão' : '(VCiv) Aviso CEJUSC'}" name="(VCiv) É juizado ou fazenda ou sucessoes ou precatorias ou execucao fiscal ou arrematacao?">
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
         <transition to="(VCiv) Aviso CEJUSC" name="(VCiv) Aviso CEJUSC"/>
     </decision>  
@@ -821,3 +821,4 @@
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>
+
