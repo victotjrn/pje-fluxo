@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de Retorno de Expediente"> 
+    <!-- SWIMLANES -->
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Controle de Retorno de Expediente">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(SG) Retorno de expediente - ENCAMINHAR" name="(SG) Retorno de expediente - ENCAMINHAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(SG) Retorno de expediente - ENCAMINHAR">
+        <task name="(SG) Retorno de expediente - ENCAMINHAR" swimlane="Secretaria">
+            <controller>
+                <variable name="sg_cont_ret_exp_oficio" mapped-name="sim_nao:sg_cont_ret_exp_oficio" access="read,write"/>
+                <variable name="sg_cont_ret_exp_carta" mapped-name="sim_nao:sg_cont_ret_exp_carta" access="read,write"/>
+                <variable name="sg_cont_ret_exp_mandado" mapped-name="sim_nao:sg_cont_ret_exp_mandado" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (SG) Controle de Retorno de Expediente" name="Nó de Desvio - (SG) Controle de Retorno de Expediente">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Separação em controle de retorno de expediente" name="Prosseguir na(s) tarefa(s) selecionada(s) acima"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <fork name="(SG) Separação em controle de retorno de expediente">
+        <transition to="(SG) É controle de retorno de ofício?" name="(SG) É controle de retorno de ofício?"/>
+        <transition to="(SG) É controle de retorno de carta?" name="(SG) É controle de retorno de carta?"/>
+        <transition to="(SG) É controle de retorno de mandado?" name="(SG) É controle de retorno de mandado?"/>
+    </fork>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_cont_ret_exp_oficio') == true ? '(SG) Controle de prazo de ofício manualmente' : '(SG) Junção em controle de retorno de expediente'}" name="(SG) É controle de retorno de ofício?">
+        <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
+        <transition to="(SG) Controle de prazo de ofício manualmente" name="(SG) Controle de prazo de ofício manualmente"/>
+    </decision>
+    <process-state name="(SG) Controle de prazo de ofício manualmente">
+        <sub-process name="(SG) Controle de prazos de ofícios" binding="late"/>
+        <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_cont_ret_exp_carta') == true ? '(SG) Controle de prazo de carta manualmente' : '(SG) Junção em controle de retorno de expediente'}" name="(SG) É controle de retorno de carta?">
+        <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
+        <transition to="(SG) Controle de prazo de carta manualmente" name="(SG) Controle de prazo de carta manualmente"/>
+    </decision>
+    <process-state name="(SG) Controle de prazo de carta manualmente">
+        <sub-process name="(SG) Controle de prazos de carta precatória" binding="late"/>
+        <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_cont_ret_exp_mandado') == true ? '(SG) Controle de prazo de mandado manualmente' : '(SG) Junção em controle de retorno de expediente'}" name="(SG) É controle de retorno de mandado?">
+        <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
+        <transition to="(SG) Controle de prazo de mandado manualmente" name="(SG) Controle de prazo de mandado manualmente"/>
+    </decision>
+    <process-state name="(SG) Controle de prazo de mandado manualmente">
+        <sub-process name="(SG) Controle de prazos de mandados" binding="late"/>
+        <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
+    </process-state>
+    <join name="(SG) Junção em controle de retorno de expediente">
+        <transition to="Término" name="Término"/>
+    </join>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_cont_ret_exp_oficio')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_cont_ret_exp_carta')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_cont_ret_exp_mandado')}"/>
+        </event>
+    </end-state>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Controle de Retorno de Expediente">
+        <task name="Nó de Desvio - (SG) Controle de Retorno de Expediente" swimlane="Nó de Desvio - (SG) Controle de Retorno de Expediente"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Retorno de expediente - ENCAMINHAR" name="(SG) Retorno de expediente - ENCAMINHAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

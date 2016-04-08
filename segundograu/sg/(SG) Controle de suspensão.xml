@@ -43,6 +43,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Suspensão de processo pela relatoria - AGUARDAR">
         <task name="(SG) Suspensão de processo pela relatoria - AGUARDAR" swimlane="Secretaria"/>

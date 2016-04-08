@@ -9,11 +9,11 @@ Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
 Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -21,9 +21,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="É citação ou intimação genérica?" name="É citação ou intimação genérica?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:pac:intimar_citar') == true ? '(SG) Intimação ou citação - EXPEDIR' : '(SG) É citação ou intimação ao Ministério Público?'}" name="É citação ou intimação genérica?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:pac:intimar_citar') == true ? '(SG) Intimação ou citação - EXPEDIR' : '(SG) É citação ou intimação ao MP?'}" name="É citação ou intimação genérica?">
         <transition to="(SG) Intimação ou citação - EXPEDIR" name="(SG) Intimação ou citação - EXPEDIR"/>
-        <transition to="(SG) É citação ou intimação ao Ministério Público?" name="(SG) É citação ou intimação ao Ministério Público?"/>
+        <transition to="(SG) É citação ou intimação ao MP?" name="(SG) É citação ou intimação ao MP?"/>
     </decision>
     <task-node end-tasks="true" name="(SG) Intimação ou citação - EXPEDIR">
         <task name="(SG) Intimação ou citação - EXPEDIR" swimlane="Secretaria">
@@ -51,12 +51,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,D')}"/>
         </event>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:pac:intimar_citar_mp') == true ? '(SG) Intimação ou citação ao Ministério Público - EXPEDIR' : 'Término'}" name="(SG) É citação ou intimação ao Ministério Público?">
-        <transition to="(SG) Intimação ou citação ao Ministério Público - EXPEDIR" name="(SG) Intimação ou citação ao Ministério Público - EXPEDIR"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:pac:intimar_citar_mp') == true ? '(SG) Intimação ou citação ao MP - EXPEDIR' : 'Término'}" name="(SG) É citação ou intimação ao MP?">
+        <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="(SG) Intimação ou citação ao MP - EXPEDIR"/>
         <transition to="Término" name="Término"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Intimação ou citação ao Ministério Público - EXPEDIR">
-        <task name="(SG) Intimação ou citação ao Ministério Público - EXPEDIR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Intimação ou citação ao MP - EXPEDIR">
+        <task name="(SG) Intimação ou citação ao MP - EXPEDIR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
             </controller>
@@ -136,7 +136,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Intimação ou citação - EXPEDIR" name="(SG) Intimação ou citação - EXPEDIR"/>
         <transition to="(SG) Intimação ou citação via correios - IMPRIMIR" name="(SG) Intimação ou citação via correios - IMPRIMIR"/>
         <transition to="(SG) É sistema?" name="(SG) É sistema?"/>
-        <transition to="(SG) Intimação ou citação ao Ministério Público - EXPEDIR" name="(SG) Intimação ou citação ao Ministério Público - EXPEDIR"/>
+        <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="(SG) Intimação ou citação ao MP - EXPEDIR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

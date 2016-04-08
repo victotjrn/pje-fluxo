@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar Ato de Comunicação de Carta">
-    <description><![CDATA[Código do fluxo: SG_PAC_CARTA
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar Ato de Comunicação de Ofício">
+    <description><![CDATA[Código do fluxo: SG_PAC_OFI
 
-Descrição: Preparar ato de comunicação como intimações e citações via correios, sistema e edital.
+Descrição: Preparar ato de comunicação do tipo ofício.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
 Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Ofício">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+    </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
-    </swimlane>
-    <swimlane name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR" name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR"/>
+        <transition to="(SG) Ofício - EXPEDIR" name="(SG) Ofício - EXPEDIR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR">
-        <task name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Ofício - EXPEDIR">
+        <task name="(SG) Ofício - EXPEDIR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
             </controller>
@@ -30,32 +30,38 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: Processo_Fluxo_prepararExpediente
-   Label: Expedir carta de ordem, precatória e/ou rogatória
+   Label: Expedir ofício
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
-        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Ofício" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Ofício">
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <transition to="(SG) Controle de prazo de carta precatória após expedição" name="(SG) Controle de prazo de carta precatória após expedição">
+        <transition to="(SG) Registrar movimento de expedição de ofício" name="(SG) Registrar movimento de expedição de ofício">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Controle de prazo de carta precatória após expedição')}"/>
-            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,174')}"/>
-            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('L')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Registrar movimento de expedição de ofício')}"/>
+            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','34')}"/>
+            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('C,M,E')}"/>
         </event>
     </task-node>
-    <process-state name="(SG) Controle de prazo de carta precatória após expedição">
-        <sub-process name="(SG) Controle de prazos de carta precatória" binding="late"/>
+    <node name="(SG) Registrar movimento de expedição de ofício">
+        <transition to="(SG) Controle de prazo de ofício após expedição" name="(SG) Controle de prazo de ofício após expedição"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('E', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(79).lancarMovimento()}')}"/>
+        </event>
+    </node>
+    <process-state name="(SG) Controle de prazo de ofício após expedição">
+        <sub-process name="(SG) Controle de prazos de ofícios" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta">
-        <task name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta" swimlane="Nó de Desvio - (SG) Preparar Ato de Comunicação de Carta"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Ofício">
+        <task name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Ofício" swimlane="Nó de Desvio - (SG) Preparar Ato de Comunicação de Ofício"/>
         <transition to="Término" name="Término"/>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR" name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR"/>
+        <transition to="(SG) Ofício - EXPEDIR" name="(SG) Ofício - EXPEDIR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
@@ -105,5 +111,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>

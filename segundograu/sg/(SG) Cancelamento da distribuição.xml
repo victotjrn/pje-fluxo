@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Redistribuição">
-    <description><![CDATA[Código do fluxo: SG_REDIST
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Cancelamento da distribuição">
+    <description><![CDATA[Código do fluxo: SG_CANDIST
 
-Descrição: Controle de redistribuição de processo.
+Descrição: Fluxo responsável pelo cancelamento da distribuição de processos.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
 Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (SG) Redistribuição">
+    <swimlane name="Nó de Desvio - (SG) Cancelamento da distribuição">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
     </swimlane>
     <swimlane name="Secretaria">
@@ -18,48 +18,57 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(SG) Redistribuição - CONFIRMAR" name="(SG) Redistribuição - CONFIRMAR"/>
+        <transition to="(SG) ~Cancelamento da distribuição - CONFIRMAR" name="(SG) ~Cancelamento da distribuição - CONFIRMAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(SG) Redistribuição - CONFIRMAR">
-        <task name="(SG) Redistribuição - CONFIRMAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) ~Cancelamento da distribuição - CONFIRMAR">
+        <task name="(SG) ~Cancelamento da distribuição - CONFIRMAR" swimlane="Secretaria">
             <controller>
-                <variable name="Processo_Fluxo_abaRedistribuicaoProcesso" mapped-name="frame:Processo_Fluxo_abaRedistribuicaoProcesso" access="read,write"/>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: Processo_Fluxo_abaRedistribuicaoProcesso
-   Label: Redistribuir processo
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Frame]]></description>
-        <transition to="(SG) Redistribuição recebida de outro relator - ANALISAR" name="(SG) Redistribuição recebida de outro relator - ANALISAR">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="Nó de Desvio - (SG) Redistribuição" name="Nó de Desvio - (SG) Redistribuição">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Redistribuição recebida de outro relator - ANALISAR')}"/>
-        </event>
-    </task-node>
-    <task-node end-tasks="true" name="(SG) Redistribuição recebida de outro relator - ANALISAR">
-        <task name="(SG) Redistribuição recebida de outro relator - ANALISAR" swimlane="Secretaria">
-            <controller>
-                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
-            </controller>
-        </task>
-        <description><![CDATA[*Variáveis*
-
-1. Variável: label_informacao
-   Label: Processo recebido de outro gabinete. Clique em Prosseguir para seguir normalmente no fluxo.
+1. Variável: aviso1   
+   Label: ATENÇÃO! Ao selecionar a opção "Confirmar cancelamento da distribuição", o processo não poderá mais ser movimentado.
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso]]></description>
-        <transition to="Término" name="Prosseguir"/>
-        <transition to="Nó de Desvio - (SG) Redistribuição" name="Nó de Desvio - (SG) Redistribuição">
+        <transition to="Nó de Desvio - (SG) Cancelamento da distribuição" name="Nó de Desvio - (SG) Cancelamento da distribuição">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Lançar movimento de cancelamento da distribuição" name="Confirmar cancelamento da distribuição"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(SG) Lançar movimento de cancelamento da distribuição">
+        <transition to="(SG) ~Cancelamento da distribuição confirmado" name="(SG) ~Cancelamento da distribuição confirmado"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(488).lancarMovimento()}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(SG) ~Cancelamento da distribuição confirmado">
+        <task name="(SG) ~Cancelamento da distribuição confirmado" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1   
+   Label: O processo teve o cancelamento da sua distribuição efetuada, não poderá mais ser movimentado.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Término" name="Término">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (SG) Cancelamento da distribuição" name="Nó de Desvio - (SG) Cancelamento da distribuição">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
@@ -70,11 +79,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </event>
     </task-node>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (SG) Redistribuição">
-        <task name="Nó de Desvio - (SG) Redistribuição" swimlane="Nó de Desvio - (SG) Redistribuição"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Cancelamento da distribuição">
+        <task name="Nó de Desvio - (SG) Cancelamento da distribuição" swimlane="Nó de Desvio - (SG) Cancelamento da distribuição"/>
         <transition to="Término" name="Término"/>
-        <transition to="(SG) Redistribuição - CONFIRMAR" name="(SG) Redistribuição - CONFIRMAR"/>
-        <transition to="(SG) Redistribuição recebida de outro relator - ANALISAR" name="(SG) Redistribuição recebida de outro relator - ANALISAR"/>
+        <transition to="(SG) ~Cancelamento da distribuição - CONFIRMAR" name="(SG) ~Cancelamento da distribuição - CONFIRMAR"/>
+        <transition to="(SG) ~Cancelamento da distribuição confirmado" name="(SG) ~Cancelamento da distribuição confirmado"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

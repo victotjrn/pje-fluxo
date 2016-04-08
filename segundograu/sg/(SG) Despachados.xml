@@ -51,6 +51,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_urgente') == true ? '(SG) Despachado urgente - ANALISAR' : '(SG) É despachado sobre embargos de declaração?'}" name="(SG) É despachado urgente?">
         <transition to="(SG) Despachado urgente - ANALISAR" name="(SG) Despachado urgente - ANALISAR"/>
@@ -82,6 +85,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_embargo_declaracao') == true ? '(SG) Despachado sobre embargos de declaração - ANALISAR' : '(SG) É despachado sobre encerramento de suspensão?'}" name="(SG) É despachado sobre embargos de declaração?">
         <transition to="(SG) Despachado sobre embargos de declaração - ANALISAR" name="(SG) Despachado sobre embargos de declaração - ANALISAR"/>
@@ -112,6 +118,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Término" name="Cumprir determinações"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_encerramento_suspensao') == true ? '(SG) Despachado sobre encerramento de suspensão - ANALISAR' : '(SG) É despachado sobre reativação?'}" name="(SG) É despachado sobre encerramento de suspensão?">
@@ -149,6 +158,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_reativacao') == true ? '(SG) Despachado sobre reativação - ANALISAR' : '(SG) É despachado sobre agravo regimental ou interno?'}" name="(SG) É despachado sobre reativação?">
         <transition to="(SG) Despachado sobre reativação - ANALISAR" name="(SG) Despachado sobre reativação - ANALISAR"/>
@@ -185,6 +197,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_agravo_regimental_interno') == true ? '(SG) Despachado sobre agravo regimental ou interno - ANALISAR' : '(SG) É despachado por certidão de conclusão sem efeito'}" name="(SG) É despachado sobre agravo regimental ou interno?">
         <transition to="(SG) Despachado sobre agravo regimental ou interno - ANALISAR" name="(SG) Despachado sobre agravo regimental ou interno - ANALISAR"/>
@@ -216,6 +231,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_certidao_conclusao_sem_efeito') == true ? '(SG) Despachado por certidão de conclusão sem efeito - ANALISAR' : 'Término'}" name="(SG) É despachado por certidão de conclusão sem efeito">
         <transition to="(SG) Despachado por certidão de conclusão sem efeito - ANALISAR" name="(SG) Despachado por certidão de conclusão sem efeito - ANALISAR"/>
@@ -246,6 +264,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <end-state name="Término"/>

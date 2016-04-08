@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de prazos">
+    <description><![CDATA[Código do fluxo: SG_CONTPRAZOS
+
+Descrição: Controle de prazos de intimações e citações genéricas.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SG) Controle de prazos">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(SG) É intimação ou citação genérica?" name="(SG) É intimação ou citação genérica?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:contprazos:intimacao_generica') == true ? '(SG) Intimação ou citação com prazo em curso - AGUARDAR' : '(SG) É intimação ou citação ao MP?'}" name="(SG) É intimação ou citação genérica?">
+        <transition to="(SG) Intimação ou citação com prazo em curso - AGUARDAR" name="(SG) Intimação ou citação com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) É intimação ou citação ao MP?" name="(SG) É intimação ou citação ao MP?"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Intimação ou citação com prazo em curso - AGUARDAR">
+        <task name="(SG) Intimação ou citação com prazo em curso - AGUARDAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (SG) Controle de prazos" name="Nó de Desvio - (SG) Controle de prazos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Intimação ou citação com prazo decorrido - ANALISAR" name="(SG) Intimação ou citação com prazo decorrido - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Prazos de intmações ou citações genéricas continuam em aberto?" name="(SG) Prazos de intmações ou citações genéricas continuam em aberto?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Intimação ou citação com prazo decorrido - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT ppe FROM ProcessoParteExpediente AS ppe  JOIN ppe.processoExpediente pe WHERE ppe.processoJudicial.idProcessoTrf = &quot; +  + &quot; AND ppe.fechado = false AND pe.meioExpedicaoExpediente = MEIO_COMUNIC AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = ''&quot;).getResultList() &gt; 0 ? 'Analisar manifestação' : 'Término'}" name="(SG) Prazos de intmações ou citações genéricas continuam em aberto?">
+        <transition to="(SG) Intimação ou citação com prazo em curso - AGUARDAR" name="(SG) Intimação ou citação com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Intimação ou citação com prazo decorrido - ANALISAR" name="(SG) Intimação ou citação com prazo decorrido - ANALISAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Intimação ou citação com prazo decorrido - ANALISAR">
+        <task name="(SG) Intimação ou citação com prazo decorrido - ANALISAR" swimlane="Secretaria"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (SG) Controle de prazos" name="Nó de Desvio - (SG) Controle de prazos">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:contprazos:intimacao_generica') == true ? '(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR' : 'Término'}" name="(SG) É intimação ou citação ao MP?">
+        <transition to="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" name="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR">
+        <task name="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (SG) Controle de prazos" name="Nó de Desvio - (SG) Controle de prazos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR" name="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR"/>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR">
+        <task name="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (SG) Controle de prazos" name="Nó de Desvio - (SG) Controle de prazos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Controle de prazos">
+        <task name="Nó de Desvio - (SG) Controle de prazos" swimlane="Nó de Desvio - (SG) Controle de prazos"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Intimação ou citação com prazo em curso - AGUARDAR" name="(SG) Intimação ou citação com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Intimação ou citação com prazo decorrido - ANALISAR" name="(SG) Intimação ou citação com prazo decorrido - ANALISAR"/>
+        <transition to="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" name="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR" name="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

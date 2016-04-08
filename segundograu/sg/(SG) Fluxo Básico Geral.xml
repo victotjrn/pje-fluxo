@@ -60,6 +60,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
                 <variable name="sg_fbg_intimar_citar" mapped-name="sim_nao:sg_fbg_intimar_citar" access="read,write"/>
                 <variable name="sg_fbg_intimar_citar_mp" mapped-name="sim_nao:sg_fbg_intimar_citar_mp" access="read,write"/>
                 <variable name="sg_fbg_expedir_carta" mapped-name="sim_nao:sg_fbg_expedir_carta" access="read,write"/>
+                <variable name="sg_fbg_expedir_mandado" mapped-name="sim_nao:sg_fbg_expedir_mandado" access="read,write"/>
+                <variable name="sg_fbg_expedir_alvara" mapped-name="sim_nao:sg_fbg_expedir_alvara" access="read,write"/>
+                <variable name="sg_fbg_expedir_oficio" mapped-name="sim_nao:sg_fbg_expedir_oficio" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -107,7 +110,19 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Tipo: Checkbox
 
 8. Variável: sg_fbg_expedir_carta
-   Label: Expedir carta de ordem, precatória e/ou rogatória
+   Label: Expedir carta de ordem, precatória ou rogatória
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Checkbox
+
+9. Variável: sg_fbg_expedir_mandado
+   Label: Expedir mandado
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Checkbox
+
+10. Variável: sg_fbg_expedir_alvara
+   Label: Expedir alvará
    Escrita: Sim
    Obrig. Não
    Tipo: Checkbox]]></description>
@@ -117,7 +132,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Fluxo Básico Geral" name="Nó de Desvio - (SG) Fluxo Básico Geral">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Cumprimento de decisão via análise da secretaria" name="01 - Prosseguir nas tarefa(s) selecionada(s)"/>
+        <transition to="(SG) Cumprimento de decisão via análise da secretaria" name="01 - Prosseguir na(s) tarefa(s) selecionada(s)"/>
         <transition to="(SG) Preparação de decisão genérica" name="02 - Enviar concluso para decisão"/>
         <transition to="(SG) Preparação de decisão de urgência" name="03 - Enviar concluso para decisão de urgência"/>
         <transition to="(SG) Preparação de decisão de embargos de declaração" name="04 - Enviar concluso para decisão de embargos de declaração"/>
@@ -128,15 +143,24 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Preparação para arquivamento" name="09 - Arquivar o processo"/>
         <transition to="(SG) Preparação de remessa para instância superior" name="10 - Remeter para instância superior"/>
         <transition to="(SG) Preparação de remessa para o primeiro grau" name="11 - Remeter para o primeiro grau"/>
+        <transition to="(SG) Confirmar cancelamento da distribuição" name="12 - Cancelar distribuição"/>
+        <transition to="(SG) Controle de retorno de expediente" name="13 - Controlar retorno de expediente"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_apensar_desapensar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_certificar_decurso_prazo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_certificar_transito_julgado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_intimar_citar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_intimar_citar_mp')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_expedir_carta')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_expedir_mandado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_expedir_alvara')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_expedir_oficio')}"/>
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <process-state name="(SG) Cumprimento de decisão via análise da secretaria">
@@ -235,12 +259,20 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:reminst:remessa_primeiro_grau')}"/>
         </event>
     </process-state>
+    <process-state name="(SG) Confirmar cancelamento da distribuição">
+        <sub-process name="(SG) Cancelamento da distribuição" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Fluxo Básico Geral">
         <task name="Nó de Desvio - (SG) Fluxo Básico Geral" swimlane="Nó de Desvio - (SG) Fluxo Básico Geral"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
-    </task-node>  
+    </task-node>
+    <process-state name="(SG) Controle de retorno de expediente">
+        <sub-process name="(SG) Controle de Retorno de Expediente" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
