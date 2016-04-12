@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Intimações eletrônicas">
-    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido..
-
-Para complementar as variáveis:
-- Selecione: label "Selecione o destinatário que deseja intimar diretamente"
-- partesAtivas: label "#{processoParteManager.recuperaPartes(tramitacaoProcessualService.recuperaProcesso(), true, null, null)}"
-- prazoIntimacao: label "Prazo (em dias - 0 para sem prazo)"
-- Processo_Fluxo_visualizarDecisao: label "Ato proferido"]]></description>  
+    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido......................]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Intimações eletrônicas">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
@@ -24,75 +18,23 @@ Para complementar as variáveis:
     <task-node end-tasks="true" name="(VCiv) Informar dados de intimação eletrônica">
         <task name="(VCiv) Informar dados de intimação eletrônica" swimlane="Secretaria">
             <controller>
-                <variable name="prazoIntimacao" mapped-name="number:prazoIntimacao" access="read,write,required"/>
-                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="prazoIntimacaoAtivo" mapped-name="number:prazoIntimacaoAtivo" access="read,write,required"/>
+                <variable name="prazoIntimacaoPassivo" mapped-name="number:prazoIntimacaoPassivo" access="read,write,required"/>
             </controller>
         </task>
+        <description><![CDATA[prazoIntimacaoAtivo: Prazo (em dias - 0 para sem prazo, -1 para não intimar)
+prazoIntimacaoPassivo: Prazo (em dias - 0 para sem prazo, -1 para não intimar)]]></description>
         <transition to="Nó de Desvio - (VCiv) Intimações eletrônicas" name="Nó de Desvio - (VCiv) Intimações eletrônicas">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Intimar partes do polo ativo" name="01 - Intimar partes do polo ativo"/>
-        <transition to="(VCiv) Intimar partes do polo passivo" name="02 - Intimar partes do polo passivo"/>
-        <transition to="(VCiv) Intimar partes do polo outros participantes" name="02 - Intimar partes do polo outros participantes"/>
-        <transition to="(VCiv) Intimar todos os polos" name="04 - Intimar todos os polos"/>
-        <transition to="(VCiv) Informar dados de intimação eletrônica direcionada" name="05 - Intimar um destinatário específico"/>
-        <transition to="Término" name="06 - Cancelar e sair da tarefa"/>
-        <event type="task-start">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', '06 - Cancelar e sair da tarefa,05 - Intimar um destinatário específico')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacao', '')}"/>
-        </event>
-    </task-node>
-    <task-node end-tasks="true" name="(VCiv) Informar dados de intimação eletrônica direcionada">
-        <task name="(VCiv) Informar dados de intimação eletrônica direcionada" swimlane="Secretaria">
-            <controller>
-                <variable name="Selecione" mapped-name="textAlert:Selecione" access="read,write"/>
-                <variable name="partesAtivas" mapped-name="combo_objetos:partesAtivas" access="read,write"/>
-                <variable name="prazoIntimacao" mapped-name="number:prazoIntimacao" access="read,write,required"/>
-                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
-            </controller>
-        </task>
-        <transition to="Nó de Desvio - (VCiv) Intimações eletrônicas" name="Nó de Desvio - (VCiv) Intimações eletrônicas">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="(VCiv) Intimar destinatário específico" name="Intimar destinatário selecionado"/>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <event type="task-create">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar a tarefa')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacao', '')}"/>
+        <transition to="(VCiv) Separação em intimação eletrônica" name="Prosseguir"/>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacaoAtivo', '-1')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacaoPassivo', '-1')}"/>
         </event>
     </task-node>
-    <node name="(VCiv) Intimar partes do polo ativo">
-        <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'A',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
-        </event>
-    </node>
-    <node name="(VCiv) Intimar partes do polo passivo">
-        <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'P',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
-        </event>
-    </node>
-    <node name="(VCiv) Intimar partes do polo outros participantes">
-        <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'T',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
-        </event>
-    </node>
-    <node name="(VCiv) Intimar todos os polos">
-        <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'A',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
-            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'P',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
-            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'T',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
-        </event>
-    </node>
-    <node name="(VCiv) Intimar destinatário específico">
-        <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{atoComunicacaoService.intimarDestinatarioEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,partesAtivas.getPessoa().idPessoa,(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
-        </event>
-    </node>
     <end-state name="Término">
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntimacao')}"/>
@@ -104,8 +46,97 @@ Para complementar as variáveis:
         <task name="Nó de Desvio - (VCiv) Intimações eletrônicas" swimlane="Nó de Desvio - (VCiv) Intimações eletrônicas"/>
         <transition to="Término" name="Término"/>
         <transition to="(VCiv) Informar dados de intimação eletrônica" name="(VCiv) Informar dados de intimação eletrônica"/>
-        <transition to="(VCiv) Informar dados de intimação eletrônica direcionada" name="(VCiv) Informar dados de intimação eletrônica direcionada"/>
-    </task-node>  
+        <transition to="(VCiv) Aviso inaptos" name="(VCiv) Aviso inaptos"/>
+    </task-node>
+    <fork name="(VCiv) Separação em intimação eletrônica">
+        <transition to="(VCiv) Tem polo ativo ?" name="(VCiv) Tem polo ativo ?"/>
+        <transition to="(VCiv) Tem polo passivo ?" name="(VCiv) Tem polo passivo ?"/>
+    </fork>
+    <join name="(VCiv) Junção em intimação eletrônica">
+        <transition to="(VCiv) Existem inaptos ?" name="(VCiv) Existem inaptos ?"/>
+    </join>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != -1 ? '(VCiv) Verificar inaptos polo ativo' : '(VCiv) Junção em intimação eletrônica'}" name="(VCiv) Tem polo ativo ?">
+        <transition to="(VCiv) Verificar inaptos polo ativo" name="(VCiv) Verificar inaptos polo ativo"/>
+        <transition to="(VCiv) Junção em intimação eletrônica" name="(VCiv) Junção em intimação eletrônica"/>
+    </decision>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != -1 ? '(VCiv) Verificar inaptos polo passivo' : '(VCiv) Junção em intimação eletrônica'}" name="(VCiv) Tem polo passivo ?">
+        <transition to="(VCiv) Verificar inaptos polo passivo" name="(VCiv) Verificar inaptos polo passivo"/>
+        <transition to="(VCiv) Junção em intimação eletrônica" name="(VCiv) Junção em intimação eletrônica"/>
+    </decision>
+    <node name="(VCiv) Verificar inaptos polo ativo">
+        <transition to="(VCiv) Junção em intimação eletrônica" name="(VCiv) Junção em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('enviarAtivo', 'true')}"/>
+            <action expression="#{atoComunicacaoService.naoAptosImtimar(tramitacaoProcessualService.recuperaProcesso(),tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloAtivo()) ,'inaptosAtivo')}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Verificar inaptos polo passivo">
+        <transition to="(VCiv) Junção em intimação eletrônica" name="(VCiv) Junção em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('enviarPassivo', 'true')}"/>
+            <action expression="#{atoComunicacaoService.naoAptosImtimar(tramitacaoProcessualService.recuperaProcesso(),tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloPassivo()) ,'inaptosPassivo')}"/>
+        </event>
+    </node>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') or not empty tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') ? '(VCiv) Aviso inaptos' : '(VCiv) Separação execução intimação'}" name="(VCiv) Existem inaptos ?">
+        <transition to="(VCiv) Aviso inaptos" name="(VCiv) Aviso inaptos"/>
+        <transition to="(VCiv) Separação execução intimação" name="(VCiv) Separação execução intimação"/>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Aviso inaptos">
+        <task name="(VCiv) Aviso inaptos" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="poloAtivo" mapped-name="textAlert:poloAtivo" access="read,write"/>
+                <variable name="advogadosPoloAtivo" mapped-name="textAlert:advogadosPoloAtivo" access="read,write"/>
+                <variable name="poloPassivo" mapped-name="textAlert:poloPassivo" access="read,write"/>
+                <variable name="advogadosPoloPassivo" mapped-name="textAlert:advogadosPoloPassivo" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[aviso: ATENÇÃO: Existem Advogados que não podem ser intimados via sistema!
+poloAtivo:#{tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') != null ? 'Polo ativo:' : ''}
+advogadosPoloAtivo: #{tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') != null ? tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') : ''}
+poloPassivo: #{tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') != null ? 'Polo passivo:' : ''}
+advogadosPoloPassivo:#{tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') != null ? tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') : ''}]]></description>
+        <transition to="Nó de Desvio - (VCiv) Intimações eletrônicas" name="Nó de Desvio - (VCiv) Intimações eletrônicas">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Retornar"/>
+        <transition to="(VCiv) Separação execução intimação" name="Confirmar"/>
+    </task-node>
+    <fork name="(VCiv) Separação execução intimação">
+        <transition to="(VCiv) Enviar ativo ?" name="(VCiv) Enviar ativo ?"/>
+        <transition to="(VCiv) Enviar passivo ?" name="(VCiv) Enviar passivo ?"/>
+    </fork>
+    <join name="(VCiv) Junção execução intimação">
+        <transition to="(VCiv) Informar DJe" name="(VCiv) Informar DJe"/>
+    </join>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('enviarAtivo') &amp;&amp; tramitacaoProcessualService.recuperaVariavel('enviarAtivo') ? '(VCiv) Executar intimação ativos' : '(VCiv) Junção execução intimação'}" name="(VCiv) Enviar ativo ?">
+        <transition to="(VCiv) Executar intimação ativos" name="(VCiv) Executar intimação ativos"/>
+        <transition to="(VCiv) Junção execução intimação" name="(VCiv) Junção execução intimação"/>
+    </decision>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('enviarPassivo') &amp;&amp; tramitacaoProcessualService.recuperaVariavel('enviarPassivo') ? '(VCiv) Executar intimação passivos' : '(VCiv) Junção execução intimação'}" name="(VCiv) Enviar passivo ?">
+        <transition to="(VCiv) Executar intimação passivos" name="(VCiv) Executar intimação passivos"/>
+        <transition to="(VCiv) Junção execução intimação" name="(VCiv) Junção execução intimação"/>
+    </decision>
+    <node name="(VCiv) Executar intimação ativos">
+        <transition to="(VCiv) Junção execução intimação" name="(VCiv) Junção execução intimação"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloAtivo()), empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 0) ? 'S' : 'D', (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Executar intimação passivos">
+        <transition to="(VCiv) Junção execução intimação" name="(VCiv) Junção execução intimação"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloPassivo()), empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 0) ? 'S' : 'D', (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+        </event>
+    </node>
+    <process-state name="(VCiv) Informar DJe">
+        <sub-process name="(VCiv) Publicações no DJe" binding="late"/>
+        <transition to="(VCiv) Controle de Prazo" name="(VCiv) Controle de Prazo"/>
+    </process-state>
+    <process-state name="(VCiv) Controle de Prazo">
+        <sub-process name="(VCiv) Controle de prazos e retorno de expedientes" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -157,3 +188,4 @@ Para complementar as variáveis:
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
+

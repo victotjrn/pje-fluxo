@@ -100,6 +100,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir despacho"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Análise da secretaria">
         <task name="(VCiv) Análise da secretaria" swimlane="Secretaria">
@@ -230,6 +231,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir despacho"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
     </task-node>
     <process-state name="(VCiv) Conclusão para decisão de urgência">
         <sub-process name="(VCiv) Preparar Ato Judicial" binding="late"/>
@@ -469,6 +471,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
     </task-node>
     <process-state name="(VCiv) Conclusão para decisão sobre desbloqueio">
         <sub-process name="(VCiv) Preparar Ato Judicial" binding="late"/>
@@ -508,6 +511,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Despachados sobre suspensão">
         <task name="(VCiv) Despachados sobre suspensão" swimlane="Secretaria">
@@ -521,6 +525,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
     </task-node>
     <task-node end-tasks="true" name="(VCIv) Sentenciados">
         <task name="(VCIv) Sentenciados" swimlane="Secretaria">
@@ -547,6 +552,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
     </task-node>
     <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCiv) Sentenciados' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença ?">
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
@@ -688,6 +694,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Sentenciados sobre homologação e extinção">
         <task name="(VCiv) Sentenciados sobre homologação e extinção" swimlane="Secretaria">
@@ -701,6 +708,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
     </task-node>
     <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCiv) Sentenciados sobre homologação e extinção' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença extinção ?">
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
@@ -713,6 +721,9 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
     <process-state name="(VCiv) Controlar audiência">
         <sub-process name="(VCiv) Controle de Audiência" binding="late"/>
         <transition to="(VCiv) Análise da secretaria" name="(VCiv) Análise da secretaria"/>
+    </process-state>
+    <process-state name="(VCiv) Intimações eletrônicas">
+        <sub-process name="(VCiv) Intimações eletrônicas" binding="late"/>
     </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
