@@ -22,7 +22,17 @@
         <transition to="(VCiv) Separação em cumprimento de decisão" name="(VCiv) Separação em cumprimento de decisão"/>
     </start-state>  
     <!-- NODES -->
-    <end-state name="Término"/>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:citar_intimar_audiencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:citar_intimar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:publicar_dje')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:expedir_mandado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:expedir_carta_precatoria')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:intimar_mp')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:expedir_carta_rogatoria')}"/>
+        </event>
+    </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
         <task name="Nó de Desvio - (VCiv) Cumprimento de decisão" swimlane="Nó de Desvio - (VCiv) Cumprimento de decisão"/>
         <transition to="Término" name="Término"/>
@@ -30,7 +40,7 @@
         <transition to="(VCiv) Redistribuir" name="(VCiv) Redistribuir"/>
         <transition to="(VCiv) Redistribuir eletronicamente" name="(VCiv) Redistribuir eletronicamente"/>
         <transition to="(VCiv) Redistribuir fisicamente" name="(VCiv) Redistribuir fisicamente"/>
-        <transition to="(VCiv) Designar audiência" name="(VCiv) Designar audiência"/>
+        <transition to="(VCiv) Designar audiência - Fluxo antigo" name="(VCiv) Designar audiência - Fluxo antigo"/>
         <transition to="(VCiv) Audiência designada" name="(VCiv) Audiência designada"/>
         <transition to="(VCiv) Aguardar Laudo Técnico" name="(VCiv) Aguardar Laudo Técnico"/>
         <transition to="(VCiv) Encaminhar para instância superior" name="(VCiv) Encaminhar para instância superior"/>
@@ -174,12 +184,12 @@
         <sub-process name="(VCiv) Arquivamento" binding="late"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
     </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:designar_audiencia') ? '(VCiv) Designar audiência' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Designar audiência?">
-        <transition to="(VCiv) Designar audiência" name="(VCiv) Designar audiência"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:designar_audiencia') ? '(VCiv) Designar audiência - Fluxo antigo' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Designar audiência - Fluxo antigo?">
+        <transition to="(VCiv) Designar audiência - Fluxo antigo" name="(VCiv) Designar audiência - Fluxo antigo"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Designar audiência - Fluxo antigo">
-        <task name="(VCiv) Designar audiência" swimlane="Conciliação">
+        <task name="(VCiv) Designar audiência - Fluxo antigo" swimlane="Conciliação">
             <controller>
                 <variable name="Processo_Fluxo_abaDesignarAudiencia" mapped-name="frame:Processo_Fluxo_abaDesignarAudiencia" access="read,write"/>
             </controller>
@@ -208,7 +218,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="Finalizar tarefa"/>
-        <transition to="(VCiv) Designar audiência" name="Designar uma nova audiência"/>
+        <transition to="(VCiv) Designar audiência - Fluxo antigo" name="Designar uma nova audiência"/>
         <transition to="(VCiv) Controlar audiência" name="Encaminhar para o novo fluxo de controle de audiência"/>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:certificar_decurso') ? '(VCiv) Certificação de decurso de prazo' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Certificar decurso de prazo?">
@@ -819,4 +829,3 @@
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>
-
