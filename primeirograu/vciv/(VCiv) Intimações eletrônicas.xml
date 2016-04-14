@@ -58,11 +58,11 @@ prazoIntimacaoPassivo: Prazo (em dias - 0 para sem prazo, -1 para não intimar)]]
     <join name="(VCiv) Junção em intimação eletrônica">
         <transition to="(VCiv) Existem inaptos ?" name="(VCiv) Existem inaptos ?"/>
     </join>
-    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != -1 ? '(VCiv) Verificar inaptos polo ativo' : '(VCiv) Junção em intimação eletrônica'}" name="(VCiv) Tem polo ativo ?">
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != -1 ? '(VCiv) Verificar inaptos polo ativo' : '(VCiv) Junção em intimação eletrônica'}" name="(VCiv) Tem polo ativo ?">
         <transition to="(VCiv) Verificar inaptos polo ativo" name="(VCiv) Verificar inaptos polo ativo"/>
         <transition to="(VCiv) Junção em intimação eletrônica" name="(VCiv) Junção em intimação eletrônica"/>
     </decision>
-    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != -1 ? '(VCiv) Verificar inaptos polo passivo' : '(VCiv) Junção em intimação eletrônica'}" name="(VCiv) Tem polo passivo ?">
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != -1 ? '(VCiv) Verificar inaptos polo passivo' : '(VCiv) Junção em intimação eletrônica'}" name="(VCiv) Tem polo passivo ?">
         <transition to="(VCiv) Verificar inaptos polo passivo" name="(VCiv) Verificar inaptos polo passivo"/>
         <transition to="(VCiv) Junção em intimação eletrônica" name="(VCiv) Junção em intimação eletrônica"/>
     </decision>
