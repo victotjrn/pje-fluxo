@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Intimações eletrônicas">
-    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido......................]]></description>  
+    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido...................]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Intimações eletrônicas">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
@@ -37,9 +37,12 @@ prazoIntimacaoPassivo: Prazo (em dias - 0 para sem prazo, -1 para não intimar)]]
     </task-node>
     <end-state name="Término">
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntimacao')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('partesAtivas')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('Selecione')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntimacaoAtivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntimacaoPassivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('inaptosAtivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('inaptosPassivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('enviarAtivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('enviarPassivo')}"/>
         </event>
     </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Intimações eletrônicas">
@@ -99,8 +102,8 @@ advogadosPoloPassivo:#{tramitacaoProcessualService.recuperaVariavel('inaptosPass
         <transition to="Nó de Desvio - (VCiv) Intimações eletrônicas" name="Nó de Desvio - (VCiv) Intimações eletrônicas">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Retornar"/>
         <transition to="(VCiv) Separação execução intimação" name="Confirmar"/>
+        <transition to="(VCiv) Sinalizar cancelamento" name="Retornar"/>
     </task-node>
     <fork name="(VCiv) Separação execução intimação">
         <transition to="(VCiv) Enviar ativo ?" name="(VCiv) Enviar ativo ?"/>
@@ -120,13 +123,13 @@ advogadosPoloPassivo:#{tramitacaoProcessualService.recuperaVariavel('inaptosPass
     <node name="(VCiv) Executar intimação ativos">
         <transition to="(VCiv) Junção execução intimação" name="(VCiv) Junção execução intimação"/>
         <event type="node-enter">
-            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloAtivo()), empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 0) ? 'S' : 'D', (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+            <action expression="${atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloAtivo()), (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 0) ? 'S' : 'D', (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
         </event>
     </node>
     <node name="(VCiv) Executar intimação passivos">
         <transition to="(VCiv) Junção execução intimação" name="(VCiv) Junção execução intimação"/>
         <event type="node-enter">
-            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloPassivo()), empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 0) ? 'S' : 'D', (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloPassivo()), (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 0) ? 'S' : 'D', (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
         </event>
     </node>
     <process-state name="(VCiv) Informar DJe">
@@ -136,7 +139,19 @@ advogadosPoloPassivo:#{tramitacaoProcessualService.recuperaVariavel('inaptosPass
     <process-state name="(VCiv) Controle de Prazo">
         <sub-process name="(VCiv) Controle de prazos e retorno de expedientes" binding="late"/>
         <transition to="Término" name="Término"/>
-    </process-state>  
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:sistema','true')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cpre:sistema')}"/>
+        </event>
+    </process-state>
+    <node name="(VCiv) Sinalizar cancelamento">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:intelet:cancelou','true')}"/>
+        </event>
+    </node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
