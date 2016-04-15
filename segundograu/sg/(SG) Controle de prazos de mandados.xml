@@ -18,37 +18,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(SG) Vem de controlar retorno de expediente?" name="(SG) Vem de controlar retorno de expediente?"/>
+        <transition to="(SG) Existe expediente do tipo mandado pendente de ciência?" name="(SG) Existe expediente do tipo mandado pendente de ciência?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(SG) Mandado pendente da escolha de central - SELECIONAR' : '(SG) Encaminhar para central de mandados'}" name="(SG) Existe central de mandados?">
-        <transition to="(SG) Mandado pendente da escolha de central - SELECIONAR" name="(SG) Mandado pendente da escolha de central - SELECIONAR"/>
-        <transition to="(SG) Encaminhar para central de mandados" name="(SG) Encaminhar para central de mandados"/>
-    </decision>
-    <task-node end-tasks="true" name="(SG) Mandado pendente da escolha de central - SELECIONAR">
-        <task name="(SG) Mandado pendente da escolha de central - SELECIONAR" swimlane="Secretaria">
-            <controller>
-                <variable name="Processo_Fluxo_expedientes_centralmandados" mapped-name="frame:Processo_Fluxo_expedientes_centralmandados" access="read,write"/>
-            </controller>
-        </task>
-        <description><![CDATA[*Variáveis*
-
-1. Variável: Processo_Fluxo_expedientes_centralmandados
-   Label: Selecione a central de mandados
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Frame]]></description>
-        <transition to="Nó de Desvio - (SG) Controle de prazos de mandados" name="Nó de Desvio - (SG) Controle de prazos de mandados">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="(SG) Encaminhar para central de mandados" name="Encaminhar para central de mandados"/>
-    </task-node>
-    <node name="(SG) Encaminhar para central de mandados">
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'M' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Mandado pendente de cumprimento - AGUARDAR' : 'Término'}" name="(SG) Existe expediente do tipo mandado pendente de ciência?">
         <transition to="(SG) Mandado pendente de cumprimento - AGUARDAR" name="(SG) Mandado pendente de cumprimento - AGUARDAR"/>
-        <event type="node-enter">
-            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('M', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(78).lancarMovimento()}')}"/>
-        </event>
-    </node>
+        <transition to="Término" name="Término"/>
+    </decision>
     <task-node end-tasks="true" name="(SG) Mandado pendente de cumprimento - AGUARDAR">
         <task name="(SG) Mandado pendente de cumprimento - AGUARDAR" swimlane="Secretaria">
             <controller>
@@ -84,12 +60,8 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Controle de prazos de mandados">
         <task name="Nó de Desvio - (SG) Controle de prazos de mandados" swimlane="Nó de Desvio - (SG) Controle de prazos de mandados"/>
         <transition to="Término" name="Término"/>
-        <transition to="(SG) Mandado pendente da escolha de central - SELECIONAR" name="(SG) Mandado pendente da escolha de central - SELECIONAR"/>
         <transition to="(SG) Mandado pendente de cumprimento - AGUARDAR" name="(SG) Mandado pendente de cumprimento - AGUARDAR"/>
-    </task-node>
-    <decision name="(SG) Vem de controlar retorno de expediente?">
-        <transition to="(SG) Existe central de mandados?" name="(SG) Existe central de mandados?"/>
-    </decision>  
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

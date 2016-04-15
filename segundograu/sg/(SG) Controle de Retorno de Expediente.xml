@@ -17,16 +17,21 @@
     <task-node end-tasks="true" name="(SG) Retorno de expediente - ENCAMINHAR">
         <task name="(SG) Retorno de expediente - ENCAMINHAR" swimlane="Secretaria">
             <controller>
-                <variable name="sg_cont_ret_exp_oficio" mapped-name="sim_nao:sg_cont_ret_exp_oficio" access="read,write"/>
-                <variable name="sg_cont_ret_exp_carta" mapped-name="sim_nao:sg_cont_ret_exp_carta" access="read,write"/>
-                <variable name="sg_cont_ret_exp_mandado" mapped-name="sim_nao:sg_cont_ret_exp_mandado" access="read,write"/>
+                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: label_informacao
+   Label: O controle de retorno de expediente será realizado automaticamente de acordo com cada expediente aberto do processo. Clique em "Encaminhar automaticamente para controle de retorno dos expedientes", para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (SG) Controle de Retorno de Expediente" name="Nó de Desvio - (SG) Controle de Retorno de Expediente">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Separação em controle de retorno de expediente" name="Prosseguir na(s) tarefa(s) selecionada(s) acima"/>
+        <transition to="(SG) Separação em controle de retorno de expediente" name="Encaminhar automaticamente para controle de retorno dos expedientes"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -35,44 +40,31 @@
         </event>
     </task-node>
     <fork name="(SG) Separação em controle de retorno de expediente">
-        <transition to="(SG) É controle de retorno de ofício?" name="(SG) É controle de retorno de ofício?"/>
-        <transition to="(SG) É controle de retorno de carta?" name="(SG) É controle de retorno de carta?"/>
-        <transition to="(SG) É controle de retorno de mandado?" name="(SG) É controle de retorno de mandado?"/>
+        <transition to="(SG) Controle de prazo de ofício" name="(SG) Controle de prazo de ofício"/>
+        <transition to="(SG) Controle de prazo de carta" name="(SG) Controle de prazo de carta"/>
+        <transition to="(SG) Controle de prazo de mandado" name="(SG) Controle de prazo de mandado"/>
+        <transition to="(SG) Controle de prazo de intimação ou citação genérica" name="(SG) Controle de prazo de intimação ou citação genérica"/>
     </fork>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_cont_ret_exp_oficio') == true ? '(SG) Controle de prazo de ofício manualmente' : '(SG) Junção em controle de retorno de expediente'}" name="(SG) É controle de retorno de ofício?">
+    <process-state name="(SG) Controle de prazo de intimação ou citação genérica">
+        <sub-process name="(SG) Controle de prazos" binding="late"/>
         <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
-        <transition to="(SG) Controle de prazo de ofício manualmente" name="(SG) Controle de prazo de ofício manualmente"/>
-    </decision>
-    <process-state name="(SG) Controle de prazo de ofício manualmente">
+    </process-state>
+    <process-state name="(SG) Controle de prazo de ofício">
         <sub-process name="(SG) Controle de prazos de ofícios" binding="late"/>
         <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
     </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_cont_ret_exp_carta') == true ? '(SG) Controle de prazo de carta manualmente' : '(SG) Junção em controle de retorno de expediente'}" name="(SG) É controle de retorno de carta?">
-        <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
-        <transition to="(SG) Controle de prazo de carta manualmente" name="(SG) Controle de prazo de carta manualmente"/>
-    </decision>
-    <process-state name="(SG) Controle de prazo de carta manualmente">
+    <process-state name="(SG) Controle de prazo de carta">
         <sub-process name="(SG) Controle de prazos de carta precatória" binding="late"/>
         <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
     </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_cont_ret_exp_mandado') == true ? '(SG) Controle de prazo de mandado manualmente' : '(SG) Junção em controle de retorno de expediente'}" name="(SG) É controle de retorno de mandado?">
-        <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
-        <transition to="(SG) Controle de prazo de mandado manualmente" name="(SG) Controle de prazo de mandado manualmente"/>
-    </decision>
-    <process-state name="(SG) Controle de prazo de mandado manualmente">
+    <process-state name="(SG) Controle de prazo de mandado">
         <sub-process name="(SG) Controle de prazos de mandados" binding="late"/>
         <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
     </process-state>
     <join name="(SG) Junção em controle de retorno de expediente">
         <transition to="Término" name="Término"/>
     </join>
-    <end-state name="Término">
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_cont_ret_exp_oficio')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_cont_ret_exp_carta')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_cont_ret_exp_mandado')}"/>
-        </event>
-    </end-state>
+    <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Controle de Retorno de Expediente">
         <task name="Nó de Desvio - (SG) Controle de Retorno de Expediente" swimlane="Nó de Desvio - (SG) Controle de Retorno de Expediente"/>
         <transition to="Término" name="Término"/>

@@ -38,15 +38,43 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <transition to="(SG) Controle de prazo de mandados após expedição" name="(SG) Controle de prazo de mandados após expedição">
+        <transition to="(SG) Existe central de mandados?" name="(SG) Existe central de mandados?">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Controle de prazo de mandados após expedição')}"/>
-            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,174')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Existe central de mandados?')}"/>
+            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('M')}"/>
         </event>
     </task-node>
+    <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(SG) Mandado aguardando escolha da central - SELECIONAR' : '(SG) Encaminhar para central de mandados'}" name="(SG) Existe central de mandados?">
+        <transition to="(SG) Mandado aguardando escolha da central - SELECIONAR" name="(SG) Mandado aguardando escolha da central - SELECIONAR"/>
+        <transition to="(SG) Encaminhar para central de mandados" name="(SG) Encaminhar para central de mandados"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Mandado aguardando escolha da central - SELECIONAR">
+        <task name="(SG) Mandado aguardando escolha da central - SELECIONAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_expedientes_centralmandados" mapped-name="frame:Processo_Fluxo_expedientes_centralmandados" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_expedientes_centralmandados
+   Label: Selecione a central de mandados
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="(SG) Encaminhar para central de mandados" name="(SG) Encaminhar para central de mandados"/>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Mandado" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Mandado">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <node name="(SG) Encaminhar para central de mandados">
+        <transition to="(SG) Controle de prazo de mandados após expedição" name="(SG) Controle de prazo de mandados após expedição"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('M', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(78).lancarMovimento()}')}"/>
+        </event>
+    </node>
     <process-state name="(SG) Controle de prazo de mandados após expedição">
         <sub-process name="(SG) Controle de prazos de mandados" binding="late"/>
         <transition to="Término" name="Término"/>
@@ -56,6 +84,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <task name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Mandado" swimlane="Nó de Desvio - (SG) Preparar Ato de Comunicação de Mandado"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Mandado - EXPEDIR" name="(SG) Mandado - EXPEDIR"/>
+        <transition to="(SG) Mandado aguardando escolha da central - SELECIONAR" name="(SG) Mandado aguardando escolha da central - SELECIONAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

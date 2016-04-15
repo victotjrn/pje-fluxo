@@ -41,62 +41,35 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Separação em ato de comunicação" name="(SG) Separação em ato de comunicação">
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Separação em preparar ato de comunicação" name="(SG) Separação em preparar ato de comunicação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Separação em ato de comunicação')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Separação em preparar ato de comunicação')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,174')}"/>
-            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,D')}"/>
+            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,D,S')}"/>
         </event>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:pac:intimar_citar_mp') == true ? '(SG) Intimação ou citação ao MP - EXPEDIR' : 'Término'}" name="(SG) É citação ou intimação ao MP?">
-        <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="(SG) Intimação ou citação ao MP - EXPEDIR"/>
-        <transition to="Término" name="Término"/>
-    </decision>
-    <task-node end-tasks="true" name="(SG) Intimação ou citação ao MP - EXPEDIR">
-        <task name="(SG) Intimação ou citação ao MP - EXPEDIR" swimlane="Secretaria">
-            <controller>
-                <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
-            </controller>
-        </task>
-        <description><![CDATA[*Variáveis*
-
-1. Variável: Processo_Fluxo_prepararExpediente
-   Label: Expedir intimação ou citação ao MP
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Frame]]></description>
-        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="(SG) Separação em ato de comunicação" name="(SG) Separação em ato de comunicação">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Separação em ato de comunicação')}"/>
-            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,174')}"/>
-            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E')}"/>
-        </event>
-    </task-node>
-    <fork name="(SG) Separação em ato de comunicação">
-        <transition to="(SG) É correio?" name="(SG) É correio?"/>
+    <fork name="(SG) Separação em preparar ato de comunicação">
+        <transition to="(SG) É edital?" name="(SG) É edital?"/>
         <transition to="(SG) É sistema?" name="(SG) É sistema?"/>
+        <transition to="(SG) É pessoalmente?" name="(SG) É pessoalmente?"/>
+        <transition to="(SG) É correios?" name="(SG) É correios?"/>
     </fork>
-    <decision expression="#{comunicacaoProcessualAction.getExpedientesCorreios().size() &gt; 0 ? '(SG) Encaminhar expediente via correios' : '(SG) Junção em ato de comunicação'}" name="(SG) É correio?">
-        <transition to="(SG) Junção em ato de comunicação" name="(SG) Junção em ato de comunicação"/>
-        <transition to="(SG) Encaminhar expediente via correios" name="(SG) Encaminhar expediente via correios"/>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'C' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Registrar movimento de expediçao de AR' : '(SG) Junção em preparar ato de comunicação'}" name="(SG) É correios?">
+        <transition to="(SG) Junção em preparar ato de comunicação" name="(SG) Junção em preparar ato de comunicação"/>
+        <transition to="(SG) Registrar movimento de expediçao de AR" name="(SG) Registrar movimento de expediçao de AR"/>
     </decision>
-    <node name="(SG) Encaminhar expediente via correios">
-        <transition to="(SG) Intimação ou citação via correios - IMPRIMIR" name="(SG) Intimação ou citação via correios - IMPRIMIR"/>
+    <node name="(SG) Registrar movimento de expediçao de AR">
+        <description><![CDATA[#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(74).lancarMovimento()}')}]]></description>
+        <transition to=" (SG) Intimação ou citação via correios - IMPRIMIR" name=" (SG) Intimação ou citação via correios - IMPRIMIR"/>
         <event type="node-enter">
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(74).lancarMovimento()}')}"/>
         </event>
     </node>
-    <task-node end-tasks="true" name="(SG) Intimação ou citação via correios - IMPRIMIR">
-        <task name="(SG) Intimação ou citação via correios - IMPRIMIR" swimlane="Secretaria">
+    <task-node end-tasks="true" name=" (SG) Intimação ou citação via correios - IMPRIMIR">
+        <task name=" (SG) Intimação ou citação via correios - IMPRIMIR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_expedientes_correios" mapped-name="frame:Processo_Fluxo_expedientes_correios" access="read,write"/>
             </controller>
@@ -111,32 +84,97 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Junção em ato de comunicação" name="Prosseguir"/>
+        <transition to="(SG) Controle de prazo de intimação ou citação expedida" name="Finalizar e sair da tarefa"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
-    <decision expression="#{comunicacaoProcessualAction.getExpedientesEletronico().size() &gt; 0 ? '(SG) Encaminhar expediente via sistema' : '(SG) Junção em ato de comunicação'}" name="(SG) É sistema?">
-        <transition to="(SG) Encaminhar expediente via sistema" name="(SG) Encaminhar expediente via sistema"/>
-        <transition to="(SG) Junção em ato de comunicação" name="(SG) Junção em ato de comunicação"/>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'S' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Registrar ciência após expedição' : '(SG) Junção em preparar ato de comunicação'}" name="(SG) É pessoalmente?">
+        <transition to="(SG) Registrar ciência após expedição" name="(SG) Registrar ciência após expedição"/>
+        <transition to="(SG) Junção em preparar ato de comunicação" name="(SG) Junção em preparar ato de comunicação"/>
     </decision>
-    <node name="(SG) Encaminhar expediente via sistema">
-        <transition to="(SG) Junção em ato de comunicação" name="(SG) Junção em ato de comunicação"/>
+    <node name="(SG) Registrar ciência após expedição">
+        <transition to="(SG) Lançar movimento de expedição de outros documentos" name="(SG) Lançar movimento de expedição de outros documentos"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.registrarCienciaExpedientePessoal()}"/>
+        </event>
+    </node>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'E' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Lançar movimento de expedição de outros documentos' : '(SG) Junção em preparar ato de comunicação'}" name="(SG) É sistema?">
+        <transition to="(SG) Lançar movimento de expedição de outros documentos" name="(SG) Lançar movimento de expedição de outros documentos"/>
+        <transition to="(SG) Junção em preparar ato de comunicação" name="(SG) Junção em preparar ato de comunicação"/>
+    </decision>
+    <node name="(SG) Lançar movimento de expedição de outros documentos">
+        <transition to="(SG) Controle de prazo de intimação ou citação expedida" name="(SG) Controle de prazo de intimação ou citação expedida"/>
         <event type="node-enter">
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('E', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento()}')}"/>
         </event>
     </node>
-    <join name="(SG) Junção em ato de comunicação">
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'D' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Registrar ciência após expedição' : '(SG) Junção em preparar ato de comunicação'}" name="(SG) É edital?">
+        <transition to="(SG) Registrar ciência após expedição" name="(SG) Registrar ciência após expedição"/>
+        <transition to="(SG) Junção em preparar ato de comunicação" name="(SG) Junção em preparar ato de comunicação"/>
+    </decision>
+    <process-state name="(SG) Controle de prazo de intimação ou citação expedida">
+        <sub-process name="(SG) Controle de prazos" binding="late"/>
+        <transition to="(SG) Junção em preparar ato de comunicação" name="(SG) Junção em preparar ato de comunicação"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:contprazos:intimacao_generica', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:contprazos:intimacao_generica')}"/>
+        </event>
+    </process-state>
+    <join name="(SG) Junção em preparar ato de comunicação">
         <transition to="Término" name="Término"/>
     </join>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:pac:intimar_citar_mp') == true ? '(SG) Intimação ou citação ao MP - EXPEDIR' : 'Término'}" name="(SG) É citação ou intimação ao MP?">
+        <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="(SG) Intimação ou citação ao MP - EXPEDIR"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Intimação ou citação ao MP - EXPEDIR">
+        <task name="(SG) Intimação ou citação ao MP - EXPEDIR" swimlane="Secretaria">
+            <controller>
+                <variable name="prazoIntimacao" mapped-name="number:prazoIntimacao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: prazoIntimacao
+   Label: Prazo para manifestação - em dias 0 (zero) para sem prazo
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Numérico]]></description>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Lançar movimento de expedição de documentos ao MP" name="(SG) Lançar movimento de expedição de documentos ao MP"/>
+    </task-node>
+    <node name="(SG) Lançar movimento de expedição de documentos ao MP">
+        <transition to="(SG) Controle de prazo de intimação ou citação ao MP expedida" name="(SG) Controle de prazo de intimação ou citação ao MP expedida"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('E', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento()}')}"/>
+        </event>
+    </node>
+    <process-state name="(SG) Controle de prazo de intimação ou citação ao MP expedida">
+        <sub-process name="(SG) Controle de prazos" binding="late"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:contprazos:intimacao_mp', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:contprazos:intimacao_mp', true)}"/>
+        </event>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
         <task name="Nó de Desvio - (SG) Preparar Ato de Comunicação" swimlane="Nó de Desvio - (SG) Preparar Ato de Comunicação"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Intimação ou citação - EXPEDIR" name="(SG) Intimação ou citação - EXPEDIR"/>
-        <transition to="(SG) Intimação ou citação via correios - IMPRIMIR" name="(SG) Intimação ou citação via correios - IMPRIMIR"/>
-        <transition to="(SG) É sistema?" name="(SG) É sistema?"/>
         <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="(SG) Intimação ou citação ao MP - EXPEDIR"/>
+        <transition to=" (SG) Intimação ou citação via correios - IMPRIMIR" name=" (SG) Intimação ou citação via correios - IMPRIMIR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
@@ -186,5 +224,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>

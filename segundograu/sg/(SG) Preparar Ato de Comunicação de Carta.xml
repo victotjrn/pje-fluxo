@@ -43,7 +43,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Controle de prazo de carta precatória após expedição')}"/>
-            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,174')}"/>
+            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('L')}"/>
         </event>
     </task-node>
