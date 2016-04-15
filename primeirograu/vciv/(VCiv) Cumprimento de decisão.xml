@@ -67,6 +67,7 @@
         <transition to="(VCiv) Expedir precatório e(ou) RPV" name="(VCiv) Expedir precatório e(ou) RPV"/>
         <transition to="(VCiv) Aguardando Perícia, Laudo Técnico ou Outros" name="(VCiv) Aguardando Perícia, Laudo Técnico ou Outros"/>
         <transition to="(VCiv) Aviso CEJUSC" name="(VCiv) Aviso CEJUSC"/>
+        <transition to="(VCiv) Encerrar prazo" name="(VCiv) Encerrar prazo"/>
     </task-node>
     <fork name="(VCiv) Separação em cumprimento de decisão">
         <transition to="(VCiv) Suspender?" name="(VCiv) Suspender?"/>
@@ -98,6 +99,7 @@
         <transition to="(VCiv) Controlar audiência?" name="(VCiv) Controlar audiência?"/>
         <transition to="(VCiv) Expedir precatório e(ou) RPV?" name="(VCiv) Expedir precatório e(ou) RPV?"/>
         <transition to="(VCiv) CEJUSC ?" name="(VCiv) CEJUSC ?"/>
+        <transition to="(VCiv) Encerrar prazo?" name="(VCiv) Encerrar prazo?"/>
     </fork>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:suspender') ? '(VCiv) Suspensão de processo' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Suspender?">
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
@@ -779,6 +781,21 @@
         <sub-process name="(VCiv) Controle do CEJUSC" binding="late"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
     </process-state>  
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:encerrar_prazo') ? '(VCiv) Encerrar prazo' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Encerrar prazo?">
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
+        <transition to="(VCiv) Encerrar prazo" name="(VCiv) Encerrar prazo"/>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Encerrar prazo">
+        <task name="(VCiv) Encerrar prazo" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_encerrarExpedienteManual" mapped-name="frame:WEB-INF_xhtml_flx_exped_encerrarExpedienteManual" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="Cancelar e sair da tarefa"/>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
