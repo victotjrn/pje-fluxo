@@ -184,7 +184,7 @@
         <transition to="(TR) Concluso para decisão da presidência" name="(TR) Concluso para decisão da presidência"/>
         <transition to="(TR) Concluso para despacho da presidência" name="(TR) Concluso para despacho da presidência"/>
     </decision>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:idDocAssinado') ? '(TR) Remover documento temporário decisão_despacho' : '(TR) Remover documento temporário decisão_despacho'}" name="(TR) Tem documento da presidência assinado?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:idDocAssinado') ? '(TR) Remover documento temporário decisão_despacho' : '(TR) Certificar Conclusão sem Efeito da presidência'}" name="(TR) Tem documento da presidência assinado?">
         <transition to="(TR) Certificar Conclusão sem Efeito da presidência" name="(TR) Certificar Conclusão sem Efeito da presidência"/>
         <transition to="(TR) Remover documento temporário decisão_despacho" name="(TR) Remover documento temporário decisão_despacho"/>
     </decision>
@@ -229,10 +229,10 @@
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
+    <event type="before-signal">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="process-start">
