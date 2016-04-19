@@ -595,6 +595,9 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
         <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Sentenciados')}"/>
+        </event>
     </task-node>
     <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCiv) Sentenciados' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença ?">
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
@@ -758,6 +761,9 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
         <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Sentenciados sobre homologação e extinção')}"/>
+        </event>
     </task-node>
     <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 62 ? '(VCiv) Sentenciados sobre homologação e extinção' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença extinção ?">
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
@@ -836,4 +842,3 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
-

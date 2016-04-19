@@ -22,8 +22,8 @@
                 <variable name="prazoIntimacaoPassivo" mapped-name="number:prazoIntimacaoPassivo" access="read,write,required"/>
             </controller>
         </task>
-        <description><![CDATA[prazoIntimacaoAtivo: Prazo (em dias - 0 para sem prazo, -1 para não intimar)
-prazoIntimacaoPassivo: Prazo (em dias - 0 para sem prazo, -1 para não intimar)]]></description>
+        <description><![CDATA[prazoIntimacaoAtivo: Prazo (em dias - 0 para sem prazo, 99 para não intimar)
+prazoIntimacaoPassivo: Prazo (em dias - 0 para sem prazo, 99 para não intimar)]]></description>
         <transition to="Nó de Desvio - (VCiv) Intimações eletrônicas" name="Nó de Desvio - (VCiv) Intimações eletrônicas">
             <condition expression="#{true}"/>
         </transition>
@@ -31,8 +31,8 @@ prazoIntimacaoPassivo: Prazo (em dias - 0 para sem prazo, -1 para não intimar)]]
         <transition to="(VCiv) Separação em intimação eletrônica" name="Prosseguir"/>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacaoAtivo', '-1')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacaoPassivo', '-1')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacaoAtivo', '99')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacaoPassivo', '99')}"/>
         </event>
     </task-node>
     <end-state name="Término">
@@ -58,11 +58,11 @@ prazoIntimacaoPassivo: Prazo (em dias - 0 para sem prazo, -1 para não intimar)]]
     <join name="(VCiv) Junção em intimação eletrônica">
         <transition to="(VCiv) Existem inaptos ?" name="(VCiv) Existem inaptos ?"/>
     </join>
-    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != -1 ? '(VCiv) Verificar inaptos polo ativo' : '(VCiv) Junção em intimação eletrônica'}" name="(VCiv) Tem polo ativo ?">
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != 99 ? '(VCiv) Verificar inaptos polo ativo' : '(VCiv) Junção em intimação eletrônica'}" name="(VCiv) Tem polo ativo ?">
         <transition to="(VCiv) Verificar inaptos polo ativo" name="(VCiv) Verificar inaptos polo ativo"/>
         <transition to="(VCiv) Junção em intimação eletrônica" name="(VCiv) Junção em intimação eletrônica"/>
     </decision>
-    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != -1 ? '(VCiv) Verificar inaptos polo passivo' : '(VCiv) Junção em intimação eletrônica'}" name="(VCiv) Tem polo passivo ?">
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != 99 ? '(VCiv) Verificar inaptos polo passivo' : '(VCiv) Junção em intimação eletrônica'}" name="(VCiv) Tem polo passivo ?">
         <transition to="(VCiv) Verificar inaptos polo passivo" name="(VCiv) Verificar inaptos polo passivo"/>
         <transition to="(VCiv) Junção em intimação eletrônica" name="(VCiv) Junção em intimação eletrônica"/>
     </decision>
@@ -203,4 +203,3 @@ advogadosPoloPassivo:#{tramitacaoProcessualService.recuperaVariavel('inaptosPass
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
-
