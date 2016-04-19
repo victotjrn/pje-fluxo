@@ -310,10 +310,13 @@
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Imprimir Certidão de Trânsito em Julgado" name="Documento já assinado! Encaminhar para secretaria">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Junção em Elaborar Documentos" name="Documento assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir Certidão de Trânsito em Julgado')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Documento assinado! Encaminhar para secretaria')}"/>
         </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',70)}"/>
