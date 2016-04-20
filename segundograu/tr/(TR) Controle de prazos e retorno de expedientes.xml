@@ -144,7 +144,9 @@
         <transition to="Nó de Desvio - (TR) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (TR) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TR) Prazos continuam em aberto?" name="Verificar existência de prazo em aberto"/>
+        <transition to="(TR) Prazos continuam em aberto?" name="Verificar existência de prazo em aberto">
+            <condition expression="#{true}"/>
+        </transition>
         <transition to="Término" name="Ignorar e sair da tarefa"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Verificar existência de prazo em aberto')}"/>
