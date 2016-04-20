@@ -63,6 +63,8 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
                 <variable name="sg_fbg_expedir_mandado" mapped-name="sim_nao:sg_fbg_expedir_mandado" access="read,write"/>
                 <variable name="sg_fbg_expedir_alvara" mapped-name="sim_nao:sg_fbg_expedir_alvara" access="read,write"/>
                 <variable name="sg_fbg_expedir_oficio" mapped-name="sim_nao:sg_fbg_expedir_oficio" access="read,write"/>
+                <variable name="sg_fbg_encerrar_expediente" mapped-name="sim_nao:sg_fbg_encerrar_expediente" access="read,write"/>
+                <variable name="sg_fbg_retificar_tipo_documento" mapped-name="sim_nao:sg_fbg_retificar_tipo_documento" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -125,6 +127,24 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label: Expedir alvará
    Escrita: Sim
    Obrig. Não
+   Tipo: Checkbox
+
+11. Variável: sg_fbg_expedir_oficio
+   Label: Expedir ofício
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Checkbox
+
+12. Variável: sg_fbg_encerrar_expediente
+   Label: Encerrar expediente manualmente
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Checkbox
+
+13. Variável: sg_fbg_retificar_tipo_documento
+   Label: Retificar tipo de documento
+   Escrita: Sim
+   Obrig. Não
    Tipo: Checkbox]]></description>
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
@@ -132,7 +152,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Fluxo Básico Geral" name="Nó de Desvio - (SG) Fluxo Básico Geral">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Cumprimento de decisão via análise da secretaria" name="01 - Prosseguir na(s) tarefa(s) selecionada(s)"/>
+        <transition to="(SG) Cumprimento de decisão via análise da secretaria" name="01 - Prosseguir na(s) tarefa(s) acima selecionada(s)"/>
         <transition to="(SG) Preparação de decisão genérica" name="02 - Enviar concluso para decisão"/>
         <transition to="(SG) Preparação de decisão de urgência" name="03 - Enviar concluso para decisão de urgência"/>
         <transition to="(SG) Preparação de decisão de embargos de declaração" name="04 - Enviar concluso para decisão de embargos de declaração"/>
@@ -155,6 +175,8 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_expedir_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_expedir_alvara')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_expedir_oficio')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_encerrar_expediente')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_retificar_tipo_documento')}"/>
         </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
@@ -263,16 +285,16 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <sub-process name="(SG) Cancelamento da distribuição" binding="late"/>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
     </process-state>
+    <process-state name="(SG) Controle de retorno de expediente">
+        <sub-process name="(SG) Controle de Retorno de Expediente" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Fluxo Básico Geral">
         <task name="Nó de Desvio - (SG) Fluxo Básico Geral" swimlane="Nó de Desvio - (SG) Fluxo Básico Geral"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
-    </task-node>
-    <process-state name="(SG) Controle de retorno de expediente">
-        <sub-process name="(SG) Controle de Retorno de Expediente" binding="late"/>
-        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
-    </process-state>  
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

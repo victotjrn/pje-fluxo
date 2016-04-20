@@ -65,12 +65,10 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso]]></description>
-        <transition to="Término" name="Término">
-            <condition expression="#{true}"/>
-        </transition>
         <transition to="Nó de Desvio - (SG) Cancelamento da distribuição" name="Nó de Desvio - (SG) Cancelamento da distribuição">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(SG) Preparação de decisão sobre reativação" name="Enviar concluso sobre reativação"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -78,6 +76,28 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
+    <process-state name="(SG) Preparação de decisão sobre reativação">
+        <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
+        <transition to="(SG) Manter cancelamento da distribuição?" name="(SG) Manter cancelamento da distribuição?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_reativacao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_reativacao')}"/>
+        </event>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:arq:manter_arquivado') == true ? '(SG) ~Cancelamento da distribuição confirmado' : '(SG) Lançar movimento de reativação'}" name="(SG) Manter cancelamento da distribuição?">
+        <transition to="(SG) Lançar movimento de reativação" name="(SG) Lançar movimento de reativação"/>
+        <transition to="(SG) ~Cancelamento da distribuição confirmado" name="(SG) ~Cancelamento da distribuição confirmado"/>
+    </decision>
+    <node name="(SG) Lançar movimento de reativação">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(849).lancarMovimento()}"/>
+        </event>
+    </node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Cancelamento da distribuição">
         <task name="Nó de Desvio - (SG) Cancelamento da distribuição" swimlane="Nó de Desvio - (SG) Cancelamento da distribuição"/>

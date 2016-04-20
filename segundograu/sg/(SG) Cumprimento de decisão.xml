@@ -31,6 +31,8 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) É expedir mandado?" name="(SG) É expedir mandado?"/>
         <transition to="(SG) É expedir alvará?" name="(SG) É expedir alvará?"/>
         <transition to="(SG) É expedir ofício?" name="(SG) É expedir ofício?"/>
+        <transition to="(SG) É encerrar expediente manualmente?" name="(SG) É encerrar expediente manualmente?"/>
+        <transition to="(SG) É retificar tipo de documento?" name="(SG) É retificar tipo de documento?"/>
     </fork>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_apensar_desapensar') == true ? '(SG) Apensamento ou desapensamento - ANALISAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É apensar ou desapensar?">
         <transition to="(SG) Apensamento ou desapensamento - ANALISAR" name="(SG) Apensamento ou desapensamento - ANALISAR"/>
@@ -148,6 +150,65 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <sub-process name="(SG) Preparar Ato de Comunicação de Ofício" binding="late"/>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
     </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_encerrar_expediente') == true ? '(SG) Expedientes - ENCERRAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É encerrar expediente manualmente?">
+        <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
+        <transition to="(SG) Expedientes - ENCERRAR" name="(SG) Expedientes - ENCERRAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Expedientes - ENCERRAR">
+        <task name="(SG) Expedientes - ENCERRAR" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_encerrarExpedienteManual" mapped-name="frame:WEB-INF_xhtml_flx_exped_encerrarExpedienteManual" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: WEB-INF_xhtml_flx_exped_encerrarExpedienteManual
+   Label: Encerrar expediente manualmente
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="(SG) Junção em cumprimento de decisão" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (SG) Cumprimento de decisão" name="Nó de Desvio - (SG) Cumprimento de decisão">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_retificar_tipo_documento') == true ? '(SG) Tipo de documento - RETIFICAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É retificar tipo de documento?">
+        <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
+        <transition to="(SG) Tipo de documento - RETIFICAR" name="(SG) Tipo de documento - RETIFICAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Tipo de documento - RETIFICAR">
+        <task name="(SG) Tipo de documento - RETIFICAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_documento_reclassificar" mapped-name="frame:Processo_Fluxo_documento_reclassificar" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_documento_reclassificar
+   Label: Retificar tipo de documento
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="(SG) Junção em cumprimento de decisão" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (SG) Cumprimento de decisão" name="Nó de Desvio - (SG) Cumprimento de decisão">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar','79,64,63')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Cancelar e sair da tarefa')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar')}"/>
+        </event>
+    </task-node>
     <join name="(SG) Junção em cumprimento de decisão">
         <transition to="Término" name="Término"/>
     </join>
@@ -156,6 +217,8 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <task name="Nó de Desvio - (SG) Cumprimento de decisão" swimlane="Nó de Desvio - (SG) Cumprimento de decisão"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Apensamento ou desapensamento - ANALISAR" name="(SG) Apensamento ou desapensamento - ANALISAR"/>
+        <transition to="(SG) Expedientes - ENCERRAR" name="(SG) Expedientes - ENCERRAR"/>
+        <transition to="(SG) Tipo de documento - RETIFICAR" name="(SG) Tipo de documento - RETIFICAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

@@ -44,9 +44,14 @@
         <transition to="(SG) Controle de prazo de carta" name="(SG) Controle de prazo de carta"/>
         <transition to="(SG) Controle de prazo de mandado" name="(SG) Controle de prazo de mandado"/>
         <transition to="(SG) Controle de prazo de intimação ou citação genérica" name="(SG) Controle de prazo de intimação ou citação genérica"/>
+        <transition to="(SG) Controle de prazo de intimação ou citação ao MP" name="(SG) Controle de prazo de intimação ou citação ao MP"/>
     </fork>
     <process-state name="(SG) Controle de prazo de intimação ou citação genérica">
         <sub-process name="(SG) Controle de prazos" binding="late"/>
+        <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
+    </process-state>
+    <process-state name="(SG) Controle de prazo de intimação ou citação ao MP">
+        <sub-process name="(SG) Controle de prazos do MP" binding="late"/>
         <transition to="(SG) Junção em controle de retorno de expediente" name="(SG) Junção em controle de retorno de expediente"/>
     </process-state>
     <process-state name="(SG) Controle de prazo de ofício">

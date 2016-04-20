@@ -136,45 +136,125 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="(SG) Intimação ou citação ao MP - EXPEDIR">
         <task name="(SG) Intimação ou citação ao MP - EXPEDIR" swimlane="Secretaria">
             <controller>
-                <variable name="prazoIntimacao" mapped-name="number:prazoIntimacao" access="read,write"/>
+                <variable name="labelComboDocumento" mapped-name="textAlert:labelComboDocumento" access="read,write"/>
+                <variable name="comboDocumento" mapped-name="combo_objetos:comboDocumento" access="read,write"/>
+                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="prazoIntimacao" mapped-name="number:prazoIntimacao" access="read,write,required"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: prazoIntimacao
-   Label: Prazo para manifestação - em dias 0 (zero) para sem prazo
+1. Variável: labelComboDocumento
+   Label: Selecione o ato abaixo que deseja intimar
    Escrita: Sim
    Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: comboDocumento
+   Label: #{processoDocumentoManager.recuperaDocumentosJuntados(tramitacaoProcessualService.recuperaProcesso())}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Combo de objetos
+
+3. Variável: label_informacao
+   Label: #{tramitacaoProcessualService.recuperaVariavel('pje:atoProferido') == null ? 'ATENÇÃO! É NECESSÁRIO INFORMAR O ATO QUE DESEJA INTIMAR!' : ''}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+4. Variável: prazoIntimacao
+   Label: Prazo para manifestação (em dias - 0 para sem prazo)
+   Escrita: Sim
+   Obrig.: Sim
    Tipo: Numérico]]></description>
         <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <transition to="(SG) Lançar movimento de expedição de documentos ao MP" name="(SG) Lançar movimento de expedição de documentos ao MP"/>
+        <transition to="(SG) Último ato foi selecionado?" name="Encaminhar para confirmação"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('atoProferidoOriginal', tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacao', 0)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:atoProferido', tramitacaoProcessualService.recuperaVariavelTarefa('combo_objetos:comboDocumento').idProcessoDocumento)}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:atoProferido') == null ? '(SG) Intimação ou citação ao MP - EXPEDIR' : '(SG) Intimação ou citação ao MP - CONFIRMAR'}" name="(SG) Último ato foi selecionado?">
+        <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="(SG) Intimação ou citação ao MP - EXPEDIR"/>
+        <transition to="(SG) Intimação ou citação ao MP - CONFIRMAR" name="(SG) Intimação ou citação ao MP - CONFIRMAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Intimação ou citação ao MP - CONFIRMAR">
+        <task name="(SG) Intimação ou citação ao MP - CONFIRMAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="labelDestinatario" mapped-name="textAlert:labelDestinatario" access="read,write"/>
+                <variable name="labelPrazo" mapped-name="textAlert:labelPrazo" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_visualizarDecisao
+   Label: Ato
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: label_informacao
+   Label: Prazo: Destinatário: MINISTÉRIO PÚBLICO DO ESTADO DO RIO GRANDE DO NORTE
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+3. Variável: label_informacao
+   Label: Prazo: Prazo: #{tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0 ? '(sem prazo)' : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao')}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Lançar movimento de expedição de documentos ao MP" name="Confirmar intimação ou citação"/>
+        <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="Retornar para expedição"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
     </task-node>
     <node name="(SG) Lançar movimento de expedição de documentos ao MP">
+        <description><![CDATA[#{atoComunicacaoService.intimarDestinatarioEletronicamente(tramitacaoProcessualService.recuperaProcess().id_processo, 9999, 'D', tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}]]></description>
         <transition to="(SG) Controle de prazo de intimação ou citação ao MP expedida" name="(SG) Controle de prazo de intimação ou citação ao MP expedida"/>
         <event type="node-enter">
-            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('E', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento()}')}"/>
+            <action expression="#{atoComunicacaoService.intimarDestinatarioEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, 4266, tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
         </event>
     </node>
     <process-state name="(SG) Controle de prazo de intimação ou citação ao MP expedida">
-        <sub-process name="(SG) Controle de prazos" binding="late"/>
+        <sub-process name="(SG) Controle de prazos do MP" binding="late"/>
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:contprazos:intimacao_mp', true)}"/>
         </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:contprazos:intimacao_mp', true)}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:contprazos:intimacao_mp')}"/>
         </event>
     </process-state>
-    <end-state name="Término"/>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{empty tramitacaoProcessualService.recuperaVariavel('atoProferidoOriginal') ? '' : tramitacaoProcessualService.gravaVariavel('pje:atoProferido', tramitacaoProcessualService.recuperaVariavel('atoProferidoOriginal'))}"/>
+        </event>
+    </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
         <task name="Nó de Desvio - (SG) Preparar Ato de Comunicação" swimlane="Nó de Desvio - (SG) Preparar Ato de Comunicação"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Intimação ou citação - EXPEDIR" name="(SG) Intimação ou citação - EXPEDIR"/>
         <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="(SG) Intimação ou citação ao MP - EXPEDIR"/>
         <transition to=" (SG) Intimação ou citação via correios - IMPRIMIR" name=" (SG) Intimação ou citação via correios - IMPRIMIR"/>
+        <transition to="(SG) Intimação ou citação ao MP - CONFIRMAR" name="(SG) Intimação ou citação ao MP - CONFIRMAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
