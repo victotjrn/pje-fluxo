@@ -7,7 +7,7 @@
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
