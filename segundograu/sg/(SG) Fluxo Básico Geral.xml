@@ -57,13 +57,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
                 <variable name="sg_fbg_apensar_desapensar" mapped-name="sim_nao:sg_fbg_apensar_desapensar" access="read,write"/>
                 <variable name="sg_fbg_certificar_decurso_prazo" mapped-name="sim_nao:sg_fbg_certificar_decurso_prazo" access="read,write"/>
                 <variable name="sg_fbg_certificar_transito_julgado" mapped-name="sim_nao:sg_fbg_certificar_transito_julgado" access="read,write"/>
-                <variable name="sg_fbg_intimar_citar" mapped-name="sim_nao:sg_fbg_intimar_citar" access="read,write"/>
-                <variable name="sg_fbg_intimar_citar_mp" mapped-name="sim_nao:sg_fbg_intimar_citar_mp" access="read,write"/>
+                <variable name="sg_fbg_encerrar_expediente" mapped-name="sim_nao:sg_fbg_encerrar_expediente" access="read,write"/>
+                <variable name="sg_fbg_expedir_alvara" mapped-name="sim_nao:sg_fbg_expedir_alvara" access="read,write"/>
                 <variable name="sg_fbg_expedir_carta" mapped-name="sim_nao:sg_fbg_expedir_carta" access="read,write"/>
                 <variable name="sg_fbg_expedir_mandado" mapped-name="sim_nao:sg_fbg_expedir_mandado" access="read,write"/>
-                <variable name="sg_fbg_expedir_alvara" mapped-name="sim_nao:sg_fbg_expedir_alvara" access="read,write"/>
                 <variable name="sg_fbg_expedir_oficio" mapped-name="sim_nao:sg_fbg_expedir_oficio" access="read,write"/>
-                <variable name="sg_fbg_encerrar_expediente" mapped-name="sim_nao:sg_fbg_encerrar_expediente" access="read,write"/>
+                <variable name="sg_fbg_intimar_citar" mapped-name="sim_nao:sg_fbg_intimar_citar" access="read,write"/>
+                <variable name="sg_fbg_intimar_citar_mp" mapped-name="sim_nao:sg_fbg_intimar_citar_mp" access="read,write"/>
                 <variable name="sg_fbg_retificar_tipo_documento" mapped-name="sim_nao:sg_fbg_retificar_tipo_documento" access="read,write"/>
             </controller>
         </task>

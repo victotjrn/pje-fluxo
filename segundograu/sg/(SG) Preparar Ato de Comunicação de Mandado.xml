@@ -45,6 +45,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Existe central de mandados?')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('M')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:pac:taskIdPAC', org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
     <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(SG) Mandado aguardando escolha da central - SELECIONAR' : '(SG) Encaminhar para central de mandados'}" name="(SG) Existe central de mandados?">
@@ -79,7 +80,21 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <sub-process name="(SG) Controle de prazos de mandados" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
-    <end-state name="Término"/>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('variavelErrosConectorEct')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('comunicacaoProcessualAction:idsExpedientes')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaProcuradorias'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaProcuradoriaSelecionada'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaIntimacaoPessoal'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaUmExpedientePorEndereco'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:taskIdPAC')}"/>
+        </event>
+    </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Mandado">
         <task name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Mandado" swimlane="Nó de Desvio - (SG) Preparar Ato de Comunicação de Mandado"/>
         <transition to="Término" name="Término"/>

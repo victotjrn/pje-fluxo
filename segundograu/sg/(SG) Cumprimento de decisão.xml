@@ -167,7 +167,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
-        <transition to="(SG) Junção em cumprimento de decisão" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Junção em cumprimento de decisão" name="Prosseguir e sair da tarefa"/>
         <transition to="Nó de Desvio - (SG) Cumprimento de decisão" name="Nó de Desvio - (SG) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>

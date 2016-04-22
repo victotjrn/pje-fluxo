@@ -49,6 +49,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Separação em preparar ato de comunicação')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,174')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,D,S')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('sg:pac:taskIdPAC', org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
     <fork name="(SG) Separação em preparar ato de comunicação">
@@ -63,13 +64,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </decision>
     <node name="(SG) Registrar movimento de expediçao de AR">
         <description><![CDATA[#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(74).lancarMovimento()}')}]]></description>
-        <transition to=" (SG) Intimação ou citação via correios - IMPRIMIR" name=" (SG) Intimação ou citação via correios - IMPRIMIR"/>
+        <transition to="(SG) Intimação ou citação via correios - IMPRIMIR" name="(SG) Intimação ou citação via correios - IMPRIMIR"/>
         <event type="node-enter">
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(74).lancarMovimento()}')}"/>
         </event>
     </node>
-    <task-node end-tasks="true" name=" (SG) Intimação ou citação via correios - IMPRIMIR">
-        <task name=" (SG) Intimação ou citação via correios - IMPRIMIR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Intimação ou citação via correios - IMPRIMIR">
+        <task name="(SG) Intimação ou citação via correios - IMPRIMIR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_expedientes_correios" mapped-name="frame:Processo_Fluxo_expedientes_correios" access="read,write"/>
             </controller>
@@ -246,6 +247,20 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <end-state name="Término">
         <event type="node-enter">
             <action expression="#{empty tramitacaoProcessualService.recuperaVariavel('atoProferidoOriginal') ? '' : tramitacaoProcessualService.gravaVariavel('pje:atoProferido', tramitacaoProcessualService.recuperaVariavel('atoProferidoOriginal'))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('atoProferidoOriginal')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntimacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('comboDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('variavelErrosConectorEct')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('comunicacaoProcessualAction:idsExpedientes')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaProcuradorias'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaProcuradoriaSelecionada'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaIntimacaoPessoal'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaUmExpedientePorEndereco'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:taskIdPAC')}"/>
         </event>
     </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
@@ -253,7 +268,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Intimação ou citação - EXPEDIR" name="(SG) Intimação ou citação - EXPEDIR"/>
         <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="(SG) Intimação ou citação ao MP - EXPEDIR"/>
-        <transition to=" (SG) Intimação ou citação via correios - IMPRIMIR" name=" (SG) Intimação ou citação via correios - IMPRIMIR"/>
+        <transition to="(SG) Intimação ou citação via correios - IMPRIMIR" name="(SG) Intimação ou citação via correios - IMPRIMIR"/>
         <transition to="(SG) Intimação ou citação ao MP - CONFIRMAR" name="(SG) Intimação ou citação ao MP - CONFIRMAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->

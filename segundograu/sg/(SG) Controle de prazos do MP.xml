@@ -25,12 +25,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Existe expediente com prazo ao MP aberto?" name="(SG) Existe expediente com prazo ao MP aberto?"/>
         <transition to="(SG) Existe intimação ou citação ao MP sem prazo?" name="(SG) Existe intimação ou citação ao MP sem prazo?"/>
     </fork>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa = 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.tipoPrazo != 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? ' (SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR' : '(SG) Junção em controle de prazos do MP'}" name="(SG) Existe expediente com prazo ao MP aberto?">
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa = 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.tipoPrazo != 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR' : '(SG) Junção em controle de prazos do MP'}" name="(SG) Existe expediente com prazo ao MP aberto?">
         <transition to="(SG) Junção em controle de prazos do MP" name="(SG) Junção em controle de prazos do MP"/>
-        <transition to=" (SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" name=" (SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" name="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR"/>
     </decision>
-    <task-node end-tasks="true" name=" (SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR">
-        <task name=" (SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR">
+        <task name="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
             </controller>
@@ -61,12 +61,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa = 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.tipoPrazo != 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '  (SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR' : ' (SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR'}" name="(SG) Intimação ou citação ao MP com prazo continua aberto?">
-        <transition to=" (SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR" name=" (SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR"/>
-        <transition to=" (SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" name=" (SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR"/>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa = 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.tipoPrazo != 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR' : '(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR'}" name="(SG) Intimação ou citação ao MP com prazo continua aberto?">
+        <transition to="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR" name="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR"/>
+        <transition to="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" name="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR"/>
     </decision>
-    <task-node end-tasks="true" name=" (SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR">
-        <task name=" (SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR">
+        <task name="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
             </controller>
@@ -162,8 +162,8 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Intimação ou citação ao MP sem prazo - AGUARDAR" name="(SG) Intimação ou citação ao MP sem prazo - AGUARDAR"/>
         <transition to="(SG) Intimação ou citação ao MP sem prazo e fechado - ANALISAR" name="(SG) Intimação ou citação ao MP sem prazo e fechado - ANALISAR"/>
-        <transition to=" (SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" name=" (SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR"/>
-        <transition to=" (SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR" name=" (SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR"/>
+        <transition to="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" name="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR" name="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
