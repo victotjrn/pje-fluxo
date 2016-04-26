@@ -94,7 +94,7 @@ prazoIntimacaoPassivo: Prazo (em dias - 0 para sem prazo, 99 para não intimar)]]
                 <variable name="advogadosPoloPassivo" mapped-name="textAlert:advogadosPoloPassivo" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[aviso: ATENÇÃO: Existem Advogados que não podem ser intimados via sistema!
+        <description><![CDATA[aviso: ATENÇÃO: Existem críticas na validação da intimação automática!
 poloAtivo:#{tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') != null ? 'Polo ativo:' : ''}
 advogadosPoloAtivo: #{tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') != null ? tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') : ''}
 poloPassivo: #{tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') != null ? 'Polo passivo:' : ''}
