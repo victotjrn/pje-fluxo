@@ -31,7 +31,7 @@
         <transition to="Nó de Desvio - (TR) Preparar Sessão de Julgamento" name="Nó de Desvio - (TR) Preparar Sessão de Julgamento">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TR) Voto vazio?" name="Encaminhar para confirmação">
+        <transition to="(TR) Validar Voto - Relatorio" name="Encaminhar para confirmação">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('tarefaOrigem', '(TR) Elaborar relatório - voto - ementa')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('tarefaDestino', '(TR) Confirmar relatório - voto - ementa')}"/>
         </transition>
@@ -47,14 +47,15 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
         </event>
     </task-node>
-    <decision expression="#{(sessaoProcessoDocumentoVotoHome.instance == null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento == null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento.processoDocumentoBin.modeloDocumento ==  null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento.processoDocumentoBin.modeloDocumento.isEmpty()) ? tramitacaoProcessualService.recuperaVariavel('tarefaOrigem') : tramitacaoProcessualService.recuperaVariavel('tarefaDestino')}" name="(TR) Voto vazio?">
+    <decision expression="#{(util.isEmpty(sessaoProcessoDocumentoHome.carregarDocumento('V')) or sessaoProcessoDocumentoHome.carregarDocumento('V').get(0).processoDocumento == null or empty sessaoProcessoDocumentoHome.carregarDocumento('V').get(0).processoDocumento.processoDocumentoBin.modeloDocumento) or (util.isEmpty(sessaoProcessoDocumentoHome.carregarDocumento('R')) or sessaoProcessoDocumentoHome.carregarDocumento('R').get(0).processoDocumento == null or empty sessaoProcessoDocumentoHome.carregarDocumento('R').get(0).processoDocumento.processoDocumentoBin.modeloDocumento) ? tramitacaoProcessualService.recuperaVariavel('tarefaOrigem') : tramitacaoProcessualService.recuperaVariavel('tarefaDestino')}" name="(TR) Validar Voto - Relatorio">
         <transition to="(TR) Confirmar relatório - voto - ementa" name="(TR) Confirmar relatório - voto - ementa"/>
         <transition to="(TR) Elaborar relatório - voto - ementa" name="(TR) Elaborar relatório - voto - ementa"/>
         <transition to="(TR) Registrar aptidão para julgamento" name="(TR) Registrar aptidão para julgamento"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('tarefaOrigem')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('tarefaDestino')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('avisoVotoRequired', (sessaoProcessoDocumentoVotoHome.instance == null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento == null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento.processoDocumentoBin.modeloDocumento ==  null or sessaoProcessoDocumentoVotoHome.instance.processoDocumento.processoDocumentoBin.modeloDocumento.isEmpty()) ? 'O Voto é obrigatório para prosseguir na tarefa.' : '' ) }"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('avisoVotoRequired', (util.isEmpty(sessaoProcessoDocumentoHome.carregarDocumento('V')) or sessaoProcessoDocumentoHome.carregarDocumento('V').get(0).processoDocumento == null or empty sessaoProcessoDocumentoHome.carregarDocumento('V').get(0).processoDocumento.processoDocumentoBin.modeloDocumento) ? 'O Voto é obrigatório para prosseguir na tarefa.' : '' ) }"/>
+            <action expression="#{util.isEmpty(sessaoProcessoDocumentoHome.carregarDocumento('R')) or sessaoProcessoDocumentoHome.carregarDocumento('R').get(0).processoDocumento == null or empty sessaoProcessoDocumentoHome.carregarDocumento('R').get(0).processoDocumento.processoDocumentoBin.modeloDocumento ? tramitacaoProcessualService.gravaVariavel('avisoVotoRequired', ( ( tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired') != null ) ? tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired').concat(' O Relatório é obrigatório para prosseguir na tarefa.') : 'O Relatório é obrigatório para prosseguir na tarefa.' ) ) : '' }"/>
             <action expression="#{tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired') != null and tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired').isEmpty() ? tramitacaoProcessualService.apagaVariavel('avisoVotoRequired') : '' }"/>
         </event>
     </decision>
@@ -68,7 +69,7 @@
         <transition to="Nó de Desvio - (TR) Preparar Sessão de Julgamento" name="Nó de Desvio - (TR) Preparar Sessão de Julgamento">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TR) Voto vazio?" name="Solicitar inclusão em pauta">
+        <transition to="(TR) Validar Voto - Relatorio" name="Solicitar inclusão em pauta">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('tarefaOrigem', '(TR) Confirmar relatório - voto - ementa')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('tarefaDestino', '(TR) Registrar aptidão para julgamento')}"/>
         </transition>
