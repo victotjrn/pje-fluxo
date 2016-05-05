@@ -57,6 +57,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </transition>
         <transition to="(SG) Concluso para despacho inicial - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
         <transition to="(SG) Concluso para despacho inicial - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
+        <transition to="(SG) Preparação de decisão de urgência inicial" name="Encaminhar para decisão de urgência inicial"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -66,6 +67,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Encaminhar para decisão de urgência inicial')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Concluso para despacho inicial - CONFIRMAR">
@@ -154,6 +156,10 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','63,64')}"/>
         </event>
     </task-node>
+    <process-state name="(SG) Preparação de decisão de urgência inicial">
+        <sub-process name="(SG) Preparar Ato Judicial de Decisão de Urgência Inicial" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato Judicial de Despacho Inicial">
         <task name="Nó de Desvio - (SG) Preparar Ato Judicial de Despacho Inicial" swimlane="Nó de Desvio - (SG) Preparar Ato Judicial de Despacho Inicial"/>

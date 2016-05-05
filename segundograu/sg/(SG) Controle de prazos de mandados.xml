@@ -35,7 +35,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: label_informacao
-   Label: Mandado expedido e encaminhado para central de mandados. Após cumprimento pelo oficial de justiça, favor movimentar o processo através da próxima ação abaixo.
+   Label: Mandado expedido e encaminhado para central de mandados. Após cumprimento pelo oficial de justiça, favor, movimentar o processo através da próxima ação abaixo.
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso

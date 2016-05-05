@@ -125,7 +125,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:expdoc:certidao_transito_julgado') == true ? '(SG) Certidão de trânsito em julgado - EXPEDIR' : '(SG) É alvará?'}" name="(SG) Certidão de trânsito em julgado?">
         <transition to="(SG) Certidão de trânsito em julgado - EXPEDIR" name="(SG) Certidão de trânsito em julgado - EXPEDIR"/>
-        <transition to="Término" name="Término"/>
         <transition to="(SG) É alvará?" name="(SG) É alvará?"/>
     </decision>
     <task-node end-tasks="true" name="(SG) Certidão de trânsito em julgado - EXPEDIR">
@@ -222,6 +221,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:expdoc:alvara') == true ? '(SG) Alvará - EXPEDIR' : 'Término'}" name="(SG) É alvará?">
         <transition to="(SG) Alvará - EXPEDIR" name="(SG) Alvará - EXPEDIR"/>
+        <transition to="Término" name="Término"/>
     </decision>
     <task-node end-tasks="true" name="(SG) Alvará - EXPEDIR">
         <task name="(SG) Alvará - EXPEDIR" swimlane="Secretaria">
@@ -246,7 +246,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Expedição de documentos" name="Nó de Desvio - (SG) Expedição de documentos">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Alvará - ASSINAR" name="Encaminhar para assinatua"/>
+        <transition to="(SG) Alvará - ASSINAR" name="Encaminhar para assinatura"/>
         <transition to="(SG) Apagar minuta não assinada de alvará" name="Cancelar e sair da tarefa"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
@@ -257,6 +257,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('TipoDocumento',91)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','91')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Alvará - ASSINAR">
