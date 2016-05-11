@@ -6,16 +6,16 @@
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469')}"/>
     </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:1470,7:5886,7:5197')}"/>
-    </swimlane>
     <swimlane name="CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5886,6:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:1470,7:5886,7:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="CEJUSC"/>
-        <transition to="(CEJUSC) Verifica se existe audiência designada" name="(CEJUSC) Verifica se existe audiência designada"/>
+        <transition to="(CEJUSC) Deslocar DPVAT" name="(CEJUSC) Deslocar DPVAT"/>
     </start-state>  
     <!-- NODES -->
     <decision expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) == null ? 'Término' : '(CEJUSC) Realizar audiência'}" name="(CEJUSC) Verifica se existe audiência designada">
@@ -149,7 +149,13 @@ aviso2: ATENÇÃO: É necessário SEMPRE clicar no botão "GRAVAR" após preencher os 
         <transition to="Término" name="Término"/>
         <transition to="(CEJUSC) Minutar ata de audiência" name="(CEJUSC) Minutar ata de audiência"/>
         <transition to="(CEJUSC) Realizar audiência" name="(CEJUSC) Realizar audiência"/>
-    </task-node>  
+    </task-node>
+    <node name="(CEJUSC) Deslocar DPVAT">
+        <transition to="(CEJUSC) Verifica se existe audiência designada" name="(CEJUSC) Verifica se existe audiência designada"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(processInstance.contextInstance.getVariable('processo'))}"/>
+        </event>
+    </node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -201,4 +207,3 @@ aviso2: ATENÇÃO: É necessário SEMPRE clicar no botão "GRAVAR" após preencher os 
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
-
