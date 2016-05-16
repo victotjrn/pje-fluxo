@@ -42,13 +42,13 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <transition to="(SG) Voto [não relator] - REVISAR" name="Encaminhar para revisão da minuta"/>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="(SG) Voto [não relator] - CONFIRMAR" name="Encaminhar ao magistrado"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Finalizar sem preparar')}"/>
-            <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
             <action expression="#{taskInstance.deleteVariableLocally('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
+        </event>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e sair da tarefa')}"/>
+            <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Voto [não relator] - REVISAR">
@@ -62,11 +62,11 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Voto [não relator] - MINUTAR" name="Encaminhar para minuta"/>
-        <event type="task-create">
-            <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstance.deleteVariableLocally('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Voto [não relator] - CONFIRMAR">
@@ -90,15 +90,17 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <transition to="(SG) Houve julgamento em painel?" name="(SG) Houve julgamento em painel?">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:flx:votacaoVogal:transicaoAutomatica:papeis')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-start">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Houve julgamento em painel?')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:flx:votacaoVogal:transicaoAutomatica:papeis','magistrado,pje:magistrado')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
             <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:flx:votacaoVogal:transicaoAutomatica:papeis')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
         </event>
     </task-node>
     <decision expression="#{'julgado' == processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao') ? '(SG) Gabinete do relator foi o vencendor?' : '(SG) Sessão de julgamento [outros julgadores] - AGUARDAR'}" name="(SG) Houve julgamento em painel?">
@@ -114,15 +116,15 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Voto [não relator] - MINUTAR" name="Retornar para minuta do voto [não relator]"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Houve julgamento?')}"/>
-            <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('cnj:fluxo:colegiado:aguardaSessao')}"/>
             <action expression="#{taskInstance.deleteVariableLocally('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
-            <action expression="#{taskInstance.deleteVariableLocally('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Houve julgamento?')}"/>
+            <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
         </event>
     </task-node>
     <decision expression="#{'julgado' == processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao') ? 'Teste orgão vencedor' : 'Aguardando a sessão (outros julgadores)'}" name="(SG) Houve julgamento?">

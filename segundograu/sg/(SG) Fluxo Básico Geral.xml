@@ -193,11 +193,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_retificar_tipo_documento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_expedir_outros_documentos')}"/>
         </event>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <process-state name="(SG) Cumprimento de decisão via análise da secretaria">
@@ -315,7 +315,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <node name="(SG) Retornar ao gabinete de origem">
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
         <event type="node-enter">
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj'), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjColegiado'), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjCargo'), true)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj'), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjColegiado'), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjCargo'), false)}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:remadmrec:idOj')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:remadmrec:idOjCargo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:remadmrec:idOjColegiado')}"/>

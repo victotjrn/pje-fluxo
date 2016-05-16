@@ -9,11 +9,11 @@ Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
 Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
-    </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Preparar Ato de Comunicação">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -45,11 +45,22 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Separação em preparar ato de comunicação" name="(SG) Separação em preparar ato de comunicação">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:mapaProcuradorias'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:mapaProcuradoriaSelecionada'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:mapaIntimacaoPessoal'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:mapaUmExpedientePorEndereco'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:mapaInstrumento'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:mapaExpedientes'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:mapaAgrupamentos'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-start">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Separação em preparar ato de comunicação')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,174')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,D,S')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('sg:pac:taskIdPAC', org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
     <fork name="(SG) Separação em preparar ato de comunicação">
@@ -86,11 +97,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Controle de prazo de intimação ou citação expedida" name="Finalizar e sair da tarefa"/>
-        <event type="task-create">
-            <action name="upd" expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'S' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Registrar ciência após expedição' : '(SG) Junção em preparar ato de comunicação'}" name="(SG) É pessoalmente?">
@@ -173,14 +184,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="(SG) Último ato foi selecionado?" name="Encaminhar para confirmação"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('atoProferidoOriginal', tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacao', 0)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:atoProferido', tramitacaoProcessualService.recuperaVariavelTarefa('combo_objetos:comboDocumento').idProcessoDocumento)}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('atoProferidoOriginal', tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacao', 0)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:atoProferido') == null ? '(SG) Intimação ou citação ao MP - EXPEDIR' : '(SG) Intimação ou citação ao MP - CONFIRMAR'}" name="(SG) Último ato foi selecionado?">
@@ -220,11 +231,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="Retornar para expedição"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <node name="(SG) Lançar movimento de expedição de documentos ao MP">
@@ -252,15 +263,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('comboDocumento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('variavelErrosConectorEct')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('comunicacaoProcessualAction:idsExpedientes')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaProcuradorias'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaProcuradoriaSelecionada'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaIntimacaoPessoal'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaUmExpedientePorEndereco'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('sg:pac:taskIdPAC')))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:taskIdPAC')}"/>
         </event>
     </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato de Comunicação">

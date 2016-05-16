@@ -25,6 +25,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <task name="(SG) Suspensão de processo - CONFIRMAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -33,22 +34,39 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label: ATENÇÂO! Após escolha da opção de suspensão abaixo, só será possível encerrar a suspensão do processo após enviá-lo concluso ao magistrado.
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso]]></description>
+   Tipo: Aviso
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Controle de suspensão" name="Nó de Desvio - (SG) Controle de suspensão">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Suspensão de processo pela relatoria - AGUARDAR" name="Suspender e aguardar a relatoria"/>
         <transition to="(SG) Suspensão de processo pela instância superior - AGUARDAR" name="Suspender e aguardar instância superior"/>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Suspensão de processo pela relatoria - AGUARDAR">
-        <task name="(SG) Suspensão de processo pela relatoria - AGUARDAR" swimlane="Secretaria"/>
+        <task name="(SG) Suspensão de processo pela relatoria - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Controle de suspensão" name="Nó de Desvio - (SG) Controle de suspensão">
             <condition expression="#{true}"/>
         </transition>
@@ -58,7 +76,18 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Suspensão de processo pela instância superior - AGUARDAR">
-        <task name="(SG) Suspensão de processo pela instância superior - AGUARDAR" swimlane="Secretaria"/>
+        <task name="(SG) Suspensão de processo pela instância superior - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Controle de suspensão" name="Nó de Desvio - (SG) Controle de suspensão">
             <condition expression="#{true}"/>
         </transition>

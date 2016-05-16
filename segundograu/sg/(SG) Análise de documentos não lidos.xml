@@ -49,12 +49,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Análise de documentos não lidos" name="Nó de Desvio - (SG) Análise de documentos não lidos">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Defensoria Pública') &gt; -1 ? '(SG) Documentos não lidos - Defensoria' : '(SG) Foi juntado pela Procuradoria?'}" name="(SG) Foi juntado pela Defensoria?">
@@ -85,12 +85,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Análise de documentos não lidos" name="Nó de Desvio - (SG) Análise de documentos não lidos">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Procuradoria') &gt; -1 ? '(SG) Documentos não lidos - Procuradoria' : '(SG) Documentos não lidos'}" name="(SG) Foi juntado pela Procuradoria?">
@@ -121,12 +121,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Marcar documento como lido e finalizar a tarefa"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Documentos não lidos">
@@ -153,12 +153,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Marcar documento como lido e finalizar a tarefa"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <end-state name="Término"/>

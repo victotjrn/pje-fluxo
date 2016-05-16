@@ -57,15 +57,18 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </transition>
         <transition to="(SG) Concluso para decisão de admissibilidade de recurso - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
         <transition to="(SG) Concluso para decisão de admissibilidade de recurso - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(SG) Emissão de ato ordinatório" name="Cancelar e emitir ato ordinatório"/>
         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
+            <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
             <action expression="#{not empty processoHome.idProcessoDocumento ? tramitacaoProcessualService.gravaVariavelTarefa('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
         <event type="task-start">
             <action name="upd" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action name="upd" expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e emitir ato ordinatório')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Concluso para decisão de admissibilidade de recurso - CONFIRMAR">
@@ -160,6 +163,14 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
         </event>
     </task-node>
+    <process-state name="(SG) Emissão de ato ordinatório">
+        <sub-process name="(SG) Expedição de ato ordinatório de gabinete" binding="late"/>
+        <transition to="(SG) Cancelou a conclusão?" name="(SG) Cancelou a conclusão?"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_ato_ordinatorio') == true ? 'Término' : '(SG) Concluso para decisão de admissibilidade de recurso - MINUTAR'}" name="(SG) Cancelou a conclusão?">
+        <transition to="(SG) Concluso para decisão de admissibilidade de recurso - MINUTAR" name="(SG) Concluso para decisão de admissibilidade de recurso - MINUTAR"/>
+        <transition to="Término" name="Término"/>
+    </decision>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Admissibilidade de Recurso">
         <task name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Admissibilidade de Recurso" swimlane="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão de Admissibilidade de Recurso"/>

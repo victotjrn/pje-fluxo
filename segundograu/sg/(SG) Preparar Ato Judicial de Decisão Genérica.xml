@@ -57,16 +57,18 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </transition>
         <transition to="(SG) Concluso para decisão - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
         <transition to="(SG) Concluso para decisão - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
-        <transition to="(SG) Emissão de certidão de conclusão sem efeito" name="Cancelar e emitir certidão de conclusão sem efeito"/>
-        <event type="node-leave">
-            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
-        </event>
+        <transition to="(SG) Emissão de ato ordinatório" name="Cancelar e emitir ato ordinatório"/>
         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
+            <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e emitir ato ordinatório')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Concluso para decisão - CONFIRMAR">
@@ -104,12 +106,15 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','63,64')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Concluso para decisão - ASSINAR">
@@ -147,19 +152,22 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </transition>
         <transition to="(SG) Concluso para decisão - MINUTAR" name="Retornar para minuta"/>
         <transition to="(SG) Concluso para decisão - CONFIRMAR" name="Retornar para confirmação da minuta"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','63,64')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
         </event>
     </task-node>
-    <process-state name="(SG) Emissão de certidão de conclusão sem efeito">
-        <sub-process name="(SG) Expedição de certidão de conclusão sem efeito" binding="late"/>
+    <process-state name="(SG) Emissão de ato ordinatório">
+        <sub-process name="(SG) Expedição de ato ordinatório de gabinete" binding="late"/>
         <transition to="(SG) Cancelou a conclusão?" name="(SG) Cancelou a conclusão?"/>
     </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_certidao_sem_efeito') == true ? 'Término' : '(SG) Concluso para decisão - MINUTAR'}" name="(SG) Cancelou a conclusão?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_ato_ordinatorio') == true ? 'Término' : '(SG) Concluso para decisão - MINUTAR'}" name="(SG) Cancelou a conclusão?">
         <transition to="(SG) Concluso para decisão - MINUTAR" name="(SG) Concluso para decisão - MINUTAR"/>
         <transition to="Término" name="Término"/>
     </decision>

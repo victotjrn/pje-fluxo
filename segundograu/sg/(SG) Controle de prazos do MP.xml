@@ -33,6 +33,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <task name="(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -41,7 +42,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label: O processo contém intimação ou citação ao MP com prazo em curso. Após o fechamento de todos os prazos que estão abertos, o processo será encaminhado para tarefa "(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR".
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso]]></description>
+   Tipo: Aviso
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="(SG) Junção em controle de prazos do MP" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (SG) Controle de prazos do MP" name="Nó de Desvio - (SG) Controle de prazos do MP">
             <condition expression="#{true}"/>
@@ -49,16 +56,15 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Intimação ou citação ao MP com prazo continua aberto?" name="(SG) Intimação ou citação ao MP com prazo continua aberto?">
             <condition expression="#{true}"/>
         </transition>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
-        </event>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Intimação ou citação ao MP com prazo continua aberto?')}"/>
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Intimação ou citação ao MP com prazo continua aberto?')}"/>
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa = 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.tipoPrazo != 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR' : '(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR'}" name="(SG) Intimação ou citação ao MP com prazo continua aberto?">
@@ -69,6 +75,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <task name="(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -77,16 +84,22 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label: Intimação ou citação ao MP com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso]]></description>
+   Tipo: Aviso
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="(SG) Junção em controle de prazos do MP" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (SG) Controle de prazos do MP" name="Nó de Desvio - (SG) Controle de prazos do MP">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa = 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.tipoPrazo = 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Intimação ou citação ao MP sem prazo - AGUARDAR' : '(SG) Junção em controle de prazos do MP'}" name="(SG) Existe intimação ou citação ao MP sem prazo?">
@@ -97,6 +110,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <task name="(SG) Intimação ou citação ao MP sem prazo - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -105,7 +119,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label: O processo encontra-se com intimação ou citação ao MP sem prazo. Mantenha-o nesta tarefa caso queira aguardar a resposta ou clique na próxima ação abaixo para cancelar e sair da tarefa.
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso]]></description>
+   Tipo: Aviso
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Controle de prazos do MP" name="Nó de Desvio - (SG) Controle de prazos do MP">
             <condition expression="#{true}"/>
         </transition>
@@ -113,16 +133,15 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Junção em controle de prazos do MP" name="Cancelar e sair da tarefa"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
-        </event>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Intimação ou citação ao MP sem prazo continua aberto?')}"/>
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Intimação ou citação ao MP sem prazo continua aberto?')}"/>
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa = 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.tipoPrazo = 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Intimação ou citação ao MP sem prazo - AGUARDAR' : '(SG) Intimação ou citação ao MP sem prazo e fechado - ANALISAR'}" name="(SG) Intimação ou citação ao MP sem prazo continua aberto?">
@@ -133,6 +152,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <task name="(SG) Intimação ou citação ao MP sem prazo e fechado - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -141,16 +161,22 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label: Intimação ou citação ao MP com prazos fechados. Clique na próxima ação para prosseguir.
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso]]></description>
+   Tipo: Aviso
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Controle de prazos do MP" name="Nó de Desvio - (SG) Controle de prazos do MP">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Junção em controle de prazos do MP" name="Cancelar e sair da tarefa"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <join name="(SG) Junção em controle de prazos do MP">
@@ -213,5 +239,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>

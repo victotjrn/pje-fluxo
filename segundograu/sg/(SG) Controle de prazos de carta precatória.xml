@@ -50,11 +50,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <transition to="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" name="Aguardar devolução da carta"/>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Carta de ordem, precatória e rogatória - AGUARDAR">
@@ -83,11 +83,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR" name="Registrar devolução da carta"/>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="Retornar para encaminhar carta"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR">
@@ -152,16 +152,15 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Junção em carta com ou sem prazo" name="Cancelar e sair da tarefa"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
-        </event>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Os prazos dos expedientes do tipo carta continuam abertos?')}"/>
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Os prazos dos expedientes do tipo carta continuam abertos?')}"/>
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.meioExpedicaoExpediente = 'L' AND ppe.fechado = false AND ppe.tipoPrazo &lt;&gt; 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR' : '(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR'}" name="(SG) Os prazos dos expedientes do tipo carta continuam abertos?">
@@ -192,11 +191,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Junção em carta com ou sem prazo" name="Finalizar e sair da tarefa"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.meioExpedicaoExpediente = 'L' AND ppe.fechado = false AND ppe.tipoPrazo = 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR' : '(SG) Junção em carta com ou sem prazo'}" name="(SG) Existe expediente do tipo carta sem prazo em aberto?">
@@ -227,11 +226,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Junção em carta com ou sem prazo" name="(SG) Junção em carta com ou sem prazo"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <join name="(SG) Junção em carta com ou sem prazo">

@@ -62,11 +62,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <transition to="(SG) Apagar minuta não assinada de decurso de prazo" name="Cancelar e sair da tarefa"/>
         <transition to=" (SG) Certidão de decurso de prazo - ASSINAR" name=" Encaminhar para assinatura"/>
-        <event type="node-leave">
-            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_certidao_decurso_prazo'))}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
@@ -109,12 +112,15 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Certidão de decurso de prazo - EXPEDIR" name="Retornar para minuta de certidão de decurso de prazo"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','167')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
         </event>
     </task-node>
     <node name="(SG) Apagar minuta não assinada de decurso de prazo">
@@ -158,11 +164,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <transition to="(SG) Apagar minuta não assinada de trânsito em julgado" name="Cancelar e sair da tarefa"/>
         <transition to=" (SG) Certidão de trânsito em julgado - ASSINAR" name=" Encaminhar para assinatura"/>
-        <event type="node-leave">
-            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_certidao_transito_julgado'))}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
@@ -205,12 +214,15 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Certidão de trânsito em julgado - EXPEDIR" name="Retornar para minuta de certidão de trânsito em julgado"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','70')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
         </event>
     </task-node>
     <node name="(SG) Apagar minuta não assinada de trânsito em julgado">
@@ -248,11 +260,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <transition to="(SG) Alvará - ASSINAR" name="Encaminhar para assinatura"/>
         <transition to="(SG) Apagar minuta não assinada de alvará" name="Cancelar e sair da tarefa"/>
-        <event type="node-leave">
-            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_alvara'))}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('TipoDocumento',91)}"/>
@@ -294,11 +308,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Lançar movimento de expedição de alvará" name="(SG) Lançar movimento de expedição de alvará">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de expedição de alvará')}"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','91')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de expedição de alvará')}"/>
         </event>
     </task-node>
     <node name="(SG) Apagar minuta não assinada de alvará">

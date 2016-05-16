@@ -42,11 +42,12 @@
         <transition to="Nó de Desvio - (SG) Expedição de outros documentos" name="Nó de Desvio - (SG) Expedição de outros documentos">
             <condition expression="#{true}"/>
         </transition>
-        <event type="node-leave">
-            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_outros_documentos'))}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('TipoDocumento',57, 67)}"/>
@@ -91,11 +92,13 @@
         <transition to="Nó de Desvio - (SG) Expedição de outros documentos" name="Nó de Desvio - (SG) Expedição de outros documentos">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de expedição de outros documentos')}"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de expedição de outros documentos')}"/>
         </event>
     </task-node>
     <node name="(SG) Apagar minuta não assinada de outros documentos">

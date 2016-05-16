@@ -20,7 +20,7 @@ Descrição: Controle de remessa do processo para admissibilidade de recursos pela
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:remadmrec:idOj', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:remadmrec:idOjCargo', tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorCargo.idOrgaoJulgadorCargo)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:remadmrec:idOjColegiado', tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado)}"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),25,10,22,true)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),25,10,22,false)}"/>
         </event>
     </node>
     <process-state name="(SG) Preparação de decisão de admissibilidade">

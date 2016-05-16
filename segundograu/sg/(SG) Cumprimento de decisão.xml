@@ -66,9 +66,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:expdoc:certidao_decurso_prazo', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:expdoc:certidao_transito_julgado', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:expdoc:alvara', false)}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:expdoc:certidao_decurso_prazo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:expdoc:alvara')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:expdoc:certidao_transito_julgado')}"/>
         </event>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_certificar_transito_julgado') == true ? '(SG) Expedição de certidão de trânsito em julgado' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É certificar trânsito em julgado?">
@@ -80,9 +84,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:expdoc:certidao_transito_julgado', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:expdoc:alvara', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:expdoc:certidao_decurso_prazo', false)}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:expdoc:certidao_transito_julgado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:expdoc:alvara')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:expdoc:certidao_decurso_prazo')}"/>
         </event>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_intimar_citar') == true ? '(SG) Expedição de intimação ou citação' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É intimação ou citação genérica?">
@@ -94,9 +102,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:pac:intimar_citar', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:pac:intimar_citar_mp', false)}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:intimar_citar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:intimar_citar_mp')}"/>
         </event>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_intimar_citar_mp') == true ? '(SG) Expedição de intimação ou citação ao MP' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É intimação ou citação ao MP?">
@@ -108,9 +118,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:pac:intimar_citar_mp', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:pac:intimar_citar', false)}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:intimar_citar_mp')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:intimar_citar')}"/>
         </event>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_expedir_carta') == true ? '(SG) Expedição de carta de ordem, precatória e(ou) rogatória' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É expedir carta?">
@@ -138,9 +150,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:expdoc:alvara', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:expdoc:certidao_transito_julgado', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:expdoc:certidao_decurso_prazo', false)}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:expdoc:alvara')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:expdoc:certidao_transito_julgado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:expdoc:certidao_decurso_prazo')}"/>
         </event>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_expedir_oficio') == true ? '(SG) Expedição de ofício' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É expedir ofício?">
@@ -172,11 +188,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Cumprimento de decisão" name="Nó de Desvio - (SG) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_retificar_tipo_documento') == true ? '(SG) Tipo de documento - RETIFICAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É retificar tipo de documento?">
@@ -200,14 +216,15 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Cumprimento de decisão" name="Nó de Desvio - (SG) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar','79,64,63')}"/>
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Cancelar e sair da tarefa')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar','79,64,63')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_expedir_outros_documentos') == true ? '(SG) Expedição de outros documentos' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É expedir outros documentos?">

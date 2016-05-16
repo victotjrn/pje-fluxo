@@ -18,6 +18,7 @@
         <task name="(SG) Retorno de expediente - ENCAMINHAR" swimlane="Secretaria">
             <controller>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -26,17 +27,23 @@
    Label: O controle de retorno de expediente será realizado automaticamente de acordo com cada expediente aberto do processo. Clique em "Encaminhar automaticamente para controle de retorno dos expedientes", para prosseguir.
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso]]></description>
+   Tipo: Aviso
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (SG) Controle de Retorno de Expediente" name="Nó de Desvio - (SG) Controle de Retorno de Expediente">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Separação em controle de retorno de expediente" name="Encaminhar automaticamente para controle de retorno dos expedientes"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <fork name="(SG) Separação em controle de retorno de expediente">

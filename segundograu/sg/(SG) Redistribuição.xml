@@ -41,7 +41,10 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <event type="task-create">
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-start">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Redistribuição recebida de outro relator - ANALISAR')}"/>
         </event>
     </task-node>
@@ -49,6 +52,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <task name="(SG) Redistribuição recebida de outro relator - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -62,11 +66,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Redistribuição" name="Nó de Desvio - (SG) Redistribuição">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <end-state name="Término"/>

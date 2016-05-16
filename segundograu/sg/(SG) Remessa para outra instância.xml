@@ -50,6 +50,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <task name="(SG) Remessa para o STF - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -62,18 +63,19 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Remessa para outra instância" name="Nó de Desvio - (SG) Remessa para outra instância">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Lançar movimento de baixa" name="Registrar baixa do processo devolvido pelo STF"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
+        <transition to="(SG) Lançar movimento de recebido os autos" name="Registrar baixa do processo devolvido pelo STF"/>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Remessa para o STJ - AGUARDAR">
         <task name="(SG) Remessa para o STJ - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -86,18 +88,18 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Remessa para outra instância" name="Nó de Desvio - (SG) Remessa para outra instância">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Lançar movimento de baixa" name="Registrar baixa do processo devolvido pelo STJ"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
+        <transition to="(SG) Lançar movimento de recebido os autos" name="Registrar baixa do processo devolvido pelo STJ"/>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
     </task-node>
-    <node name="(SG) Lançar movimento de baixa">
+    <node name="(SG) Lançar movimento de recebido os autos">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(22).lancarMovimento()}"/>
+            <action expression="#{preencherMovimento.deCodigo(132).lancarMovimento()}"/>
         </event>
     </node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:reminst:remessa_primeiro_grau') == true ? '(SG) Remessa para o primeiro grau - CONFIRMAR' : 'Término'}" name="(SG) É remessa para o primeiro grau?">
@@ -124,6 +126,10 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Remessa para o primeiro grau concluída" name="(SG) Remessa para o primeiro grau concluída">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('comboMotivoRemessa')}"/>
+        </event>
         <event type="task-start">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Remessa para o primeiro grau concluída')}"/>
             <action expression="#{taskInstanceUtil.setVariable('comboMotivoRemessa','18;37,38,39,40,90')}"/>
@@ -148,11 +154,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Remessa para outra instância" name="Nó de Desvio - (SG) Remessa para outra instância">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <end-state name="Término"/>
