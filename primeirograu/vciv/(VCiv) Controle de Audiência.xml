@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de Audiência">
-    <description><![CDATA[Fluxo responsável por controlar as audiências........]]></description>  
+    <description><![CDATA[Fluxo responsável por controlar as audiências.......]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle de Audiência">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -291,7 +291,7 @@
     <task-node end-tasks="true" name="(VCiv) Redesignar audiência">
         <task name="(VCiv) Redesignar audiência" swimlane="Secretaria">
             <controller>
-                <variable name="Processo_Fluxo_abaDesignarAudiencia" mapped-name="frame:Processo_Fluxo_abaDesignarAudiencia" access="read"/>
+                <variable name="Processo_Fluxo_abaDesignarAudiencia" mapped-name="frame:Processo_Fluxo_abaDesignarAudiencia" access="read,write"/>
             </controller>
         </task>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
@@ -441,4 +441,3 @@
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
-
