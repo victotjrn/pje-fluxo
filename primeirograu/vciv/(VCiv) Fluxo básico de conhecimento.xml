@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum..............
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum.........
 Aguardar Perícia / Laudo Técnico / Outros]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
@@ -100,7 +100,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir despacho"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
-        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Despachados')}"/>
         </event>
@@ -238,7 +238,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir despacho"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
-        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Despachados urgentes')}"/>
         </event>
@@ -485,7 +485,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
-        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Despachados sobre homologação e(ou) extinção')}"/>
         </event>
@@ -532,7 +532,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
-        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Despachados sobre desbloqueio')}"/>
         </event>
@@ -553,7 +553,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
-        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Despachados sobre suspensão')}"/>
         </event>
@@ -594,7 +594,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
-        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Sentenciados')}"/>
         </event>
@@ -739,7 +739,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
-        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Sentenciados sobre homologação e extinção')}"/>
         </event>
@@ -760,7 +760,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
-        <transition to="(VCiv) Intimações eletrônicas" name="Intimar Advogados (Automaticamente)"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Sentenciados sobre homologação e extinção')}"/>
         </event>
