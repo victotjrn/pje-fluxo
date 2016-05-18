@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Intimações eletrônicas">
-    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido....................]]></description>  
+    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido...............]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Intimações eletrônicas">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
@@ -22,8 +22,8 @@
                 <variable name="prazoIntimacaoPassivo" mapped-name="number:prazoIntimacaoPassivo" access="read,write,required"/>
             </controller>
         </task>
-        <description><![CDATA[prazoIntimacaoAtivo: Prazo em dias para o(s) advogado(s) do polo ativo (0 - para sem prazo; 99 - para não intimar)*
-prazoIntimacaoPassivo: Prazo em dias para o(s) advogado(s) do polo passivo (0 - para sem prazo; 99 - para não intimar)*]]></description>
+        <description><![CDATA[prazoIntimacaoAtivo: Prazo em dias para o(s) advogado(s) do polo ativo (0 - para sem prazo; 99 - para não intimar)
+prazoIntimacaoPassivo: Prazo em dias para o(s) advogado(s) do polo passivo (0 - para sem prazo; 99 - para não intimar)]]></description>
         <transition to="Nó de Desvio - (VCiv) Intimações eletrônicas" name="Nó de Desvio - (VCiv) Intimações eletrônicas">
             <condition expression="#{true}"/>
         </transition>
@@ -49,7 +49,7 @@ prazoIntimacaoPassivo: Prazo em dias para o(s) advogado(s) do polo passivo (0 - 
         <task name="Nó de Desvio - (VCiv) Intimações eletrônicas" swimlane="Nó de Desvio - (VCiv) Intimações eletrônicas"/>
         <transition to="Término" name="Término"/>
         <transition to="(VCiv) Informar dados de intimação eletrônica" name="(VCiv) Informar dados de intimação eletrônica"/>
-        <transition to="(VCiv) Aviso – Intimar advogados automaticamente" name="(VCiv) Aviso &amp;#150; Intimar advogados automaticamente"/>
+        <transition to="(VCiv) Aviso - Intimar advogados automaticamente" name="(VCiv) Aviso - Intimar advogados automaticamente"/>
     </task-node>
     <fork name="(VCiv) Separação em intimação eletrônica">
         <transition to="(VCiv) Tem polo ativo ?" name="(VCiv) Tem polo ativo ?"/>
@@ -80,12 +80,12 @@ prazoIntimacaoPassivo: Prazo em dias para o(s) advogado(s) do polo passivo (0 - 
             <action expression="#{atoComunicacaoService.naoAptosImtimar(tramitacaoProcessualService.recuperaProcesso(),tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloPassivo()) ,'inaptosPassivo')}"/>
         </event>
     </node>
-    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') or not empty tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') ? '(VCiv) Aviso &amp;#150; Intimar advogados automaticamente' : '(VCiv) Deve realizar intimação ?'}" name="(VCiv) Existem inaptos ?">
-        <transition to="(VCiv) Aviso – Intimar advogados automaticamente" name="(VCiv) Aviso &amp;#150; Intimar advogados automaticamente"/>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') or not empty tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') ? '(VCiv) Aviso - Intimar advogados automaticamente' : '(VCiv) Deve realizar intimação ?'}" name="(VCiv) Existem inaptos ?">
+        <transition to="(VCiv) Aviso - Intimar advogados automaticamente" name="(VCiv) Aviso - Intimar advogados automaticamente"/>
         <transition to="(VCiv) Deve realizar intimação ?" name="(VCiv) Deve realizar intimação ?"/>
     </decision>
-    <task-node end-tasks="true" name="(VCiv) Aviso – Intimar advogados automaticamente">
-        <task name="(VCiv) Aviso – Intimar advogados automaticamente" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(VCiv) Aviso - Intimar advogados automaticamente">
+        <task name="(VCiv) Aviso - Intimar advogados automaticamente" swimlane="Secretaria">
             <controller>
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
                 <variable name="poloAtivo" mapped-name="textAlert:poloAtivo" access="read,write"/>
@@ -102,7 +102,7 @@ advogadosPoloAtivo: #{tramitacaoProcessualService.recuperaVariavel('inaptosAtivo
 poloPassivo: #{tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') != null ? 'Polo passivo:' : ''}
 advogadosPoloPassivo:#{tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') != null ? tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') : ''}
 avisoConfimar: Ao clicar em (Confirmar) o(s) advogado(s) atuante no processo que não tenha a situação regular no sistema PJe não será(ão) intimado(s) do último ato produzido.
-avisoRetornar: Ao clicar em (Retornar) a(s) intimação(ões) eletrônica não mais ocorrerá(ão) e o processo voltará à tarefa de (Despachados) ou (Sentenciados).]]></description>
+avisoRetornar: Ao clicar em (Retornar) a(s) intimação(ões) eletrônica não mais ocorrerá(ão) e o processo voltará à tarefa #{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:saida_intelet_cancelado')}]]></description>
         <transition to="Nó de Desvio - (VCiv) Intimações eletrônicas" name="Nó de Desvio - (VCiv) Intimações eletrônicas">
             <condition expression="#{true}"/>
         </transition>
