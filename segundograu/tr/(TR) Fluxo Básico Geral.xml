@@ -85,6 +85,7 @@
                 <variable name="tr_fbg_certificar_transito" mapped-name="sim_nao:tr_fbg_certificar_transito" access="read,write"/>
                 <variable name="tr_fbg_citar_intimar" mapped-name="sim_nao:tr_fbg_citar_intimar" access="read,write"/>
                 <variable name="tr_fbg_controlar_retorno_expediente" mapped-name="sim_nao:tr_fbg_controlar_retorno_expediente" access="read,write"/>
+                <variable name="tr_fbg_encerrar_prazo" mapped-name="sim_nao:tr_fbg_encerrar_prazo" access="read,write"/>
                 <variable name="tr_fbg_expedir_carta" mapped-name="sim_nao:tr_fbg_expedir_carta" access="read,write"/>
                 <variable name="tr_fbg_expedir_mandado" mapped-name="sim_nao:tr_fbg_expedir_mandado" access="read,write"/>
                 <variable name="tr_fbg_expedir_oficio" mapped-name="sim_nao:tr_fbg_expedir_oficio" access="read,write"/>
@@ -136,6 +137,8 @@
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:tr_fbg_expedir_oficio')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:tr_fbg_intimar_MP')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:tr_fbg_suspender')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('tr:fbg:encerrar:prazo', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:tr_fbg_encerrar_prazo'))}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:tr_fbg_encerrar_prazo')}"/>
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('tr:cumpridec:apesar_desapensar')}"/>
@@ -148,6 +151,7 @@
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('tr:cumpridec:expedir_oficio')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('tr:cumpridec:intimar_MP')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('tr:cumpridec:suspender')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('tr:fbg:encerrar:prazo')}"/>
         </event>
     </task-node>
     <process-state name="(TR) Dar cumprimento a ato judicial">

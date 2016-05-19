@@ -24,6 +24,7 @@
         <transition to="(TR) É expedir ofício?" name="(TR) É expedir ofício?"/>
         <transition to="(TR) É intimar MP?" name="(TR) É intimar MP?"/>
         <transition to="(TR) É suspender processo?" name="(TR) É suspender processo?"/>
+        <transition to="(TR) Encerrar prazo?" name="(TR) Encerrar prazo?"/>
     </fork>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:cumpridec:apesar_desapensar') ? '(TR) Apensar ou desapensar processo' : '(TR) Junção em cumprimento de decisão'}" name="(TR) É apensar ou desapensar processo?">
         <transition to="(TR) Apensar ou desapensar processo" name="(TR) Apensar ou desapensar processo"/>
@@ -215,6 +216,22 @@
         <transition to="Término" name="Término"/>
         <transition to="(TR) Apensar ou desapensar processo" name="(TR) Apensar ou desapensar processo"/>
         <transition to="(TR) Expedir carta precatória ou rogatória" name="(TR) Expedir carta precatória ou rogatória"/>
+        <transition to="(TR) Encerrar prazo" name="(TR) Encerrar prazo"/>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tr:fbg:encerrar:prazo') ? '(TR) Encerrar prazo' : '(TR) Junção em cumprimento de decisão'}" name="(TR) Encerrar prazo?">
+        <transition to="(TR) Encerrar prazo" name="(TR) Encerrar prazo"/>
+        <transition to="(TR) Junção em cumprimento de decisão" name="(TR) Junção em cumprimento de decisão"/>
+    </decision>
+    <task-node end-tasks="true" name="(TR) Encerrar prazo">
+        <task name="(TR) Encerrar prazo" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_encerrarExpedienteManual" mapped-name="frame:WEB-INF_xhtml_flx_exped_encerrarExpedienteManual" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (TR) Cumprimento de decisão" name="Nó de Desvio - (TR) Cumprimento de decisão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(TR) Junção em cumprimento de decisão" name="Cancelar e sair da tarefa"/>
     </task-node>
     <end-state name="Término">
         <event type="node-enter">
