@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC............]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC.............]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="CEJUSC">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886,5:1338,6:1469,6:5197')}"/>
-    </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197')}"/>
+    </swimlane>
+    <swimlane name="CEJUSC">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886,5:1338,6:1469,6:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -74,7 +74,11 @@ expressão p/ quando ativar parnamirim:
         <transition to="(CEJUSC) Audiências não realizadas" name="Devolver - Não realizado"/>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Audiências realizadas sem acordo">
-        <task name="(CEJUSC) Audiências realizadas sem acordo" swimlane="Secretaria"/>
+        <task name="(CEJUSC) Audiências realizadas sem acordo" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
+            </controller>
+        </task>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
@@ -84,7 +88,11 @@ expressão p/ quando ativar parnamirim:
         </event>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Audiências realizadas com acordo">
-        <task name="(CEJUSC) Audiências realizadas com acordo" swimlane="Secretaria"/>
+        <task name="(CEJUSC) Audiências realizadas com acordo" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
+            </controller>
+        </task>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
@@ -94,7 +102,11 @@ expressão p/ quando ativar parnamirim:
         </event>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Audiências não realizadas">
-        <task name="(CEJUSC) Audiências não realizadas" swimlane="Secretaria"/>
+        <task name="(CEJUSC) Audiências não realizadas" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
+            </controller>
+        </task>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
