@@ -101,8 +101,8 @@ poloAtivo:#{tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') != null
 advogadosPoloAtivo: #{tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') != null ? tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') : ''}
 poloPassivo: #{tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') != null ? 'Polo passivo:' : ''}
 advogadosPoloPassivo:#{tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') != null ? tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') : ''}
-avisoConfimar: Ao clicar em CONFIRMAR o(s) advogado(s) atuante no processo que não tenha a situação regular no sistema PJe não será(ão) intimado(s) do último ato produzido.
-avisoRetornar: Ao clicar em RETORNAR a(s) intimação(ões) eletrônica não mais ocorrerá(ão) e o processo voltará à tarefa #{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:saida_intelet_cancelado')}]]></description>
+avisoConfimar: Ao CONFIRMAR, o advogado cadastrado no processo, mas que não tenha a situação regular no sistema PJe, não será intimado deste último ato produzido.
+avisoRetornar: Ao RETORNAR, esta intimação eletrônica não mais ocorrerá e o processo voltará à tarefa de  #{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:saida_intelet_cancelado')}.]]></description>
         <transition to="Nó de Desvio - (VCiv) Intimações eletrônicas" name="Nó de Desvio - (VCiv) Intimações eletrônicas">
             <condition expression="#{true}"/>
         </transition>
