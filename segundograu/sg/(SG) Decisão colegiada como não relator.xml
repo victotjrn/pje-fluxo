@@ -12,7 +12,7 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,599:1469')}"/>
     </swimlane>
     <swimlane name="Assessoria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('599:1469,600:5197')}"/>
@@ -39,9 +39,9 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <transition to="Nó de Desvio - (SG) Decisão colegiada como não relator" name="Nó de Desvio - (SG) Decisão colegiada como não relator">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Voto [não relator] - REVISAR" name="Encaminhar para revisão da minuta"/>
+        <transition to="(SG) Voto [não relator] - CONFIRMAR" name="Encaminhar para revisão da minuta"/>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <transition to="(SG) Voto [não relator] - CONFIRMAR" name="Encaminhar ao magistrado"/>
+        <transition to="(SG) Voto [não relator] - VALIDAR" name="Encaminhar ao magistrado"/>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
             <action expression="#{taskInstance.deleteVariableLocally('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
@@ -51,13 +51,13 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
             <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(SG) Voto [não relator] - REVISAR">
-        <task name="(SG) Voto [não relator] - REVISAR" swimlane="Assessoria">
+    <task-node end-tasks="true" name="(SG) Voto [não relator] - CONFIRMAR">
+        <task name="(SG) Voto [não relator] - CONFIRMAR" swimlane="Assessoria">
             <controller>
                 <variable name="WEB-INF_xhtml_flx_votacaoVogal" mapped-name="frame:WEB-INF_xhtml_flx_votacaoVogal" access="read,write"/>
             </controller>
         </task>
-        <transition to="(SG) Voto [não relator] - CONFIRMAR" name="Encaminhar ao magistrado"/>
+        <transition to="(SG) Voto [não relator] - VALIDAR" name="Encaminhar ao magistrado"/>
         <transition to="Nó de Desvio - (SG) Decisão colegiada como não relator" name="Nó de Desvio - (SG) Decisão colegiada como não relator">
             <condition expression="#{true}"/>
         </transition>
@@ -69,8 +69,8 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
             <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(SG) Voto [não relator] - CONFIRMAR">
-        <task name="(SG) Voto [não relator] - CONFIRMAR" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(SG) Voto [não relator] - VALIDAR">
+        <task name="(SG) Voto [não relator] - VALIDAR" swimlane="Magistrado">
             <controller>
                 <variable name="WEB-INF_xhtml_flx_votacaoVogal" mapped-name="frame:WEB-INF_xhtml_flx_votacaoVogal" access="read,write"/>
             </controller>
@@ -86,7 +86,7 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Voto [não relator] - MINUTAR" name="Devolver para minuta"/>
-        <transition to="(SG) Voto [não relator] - REVISAR" name="Devolver para revisão da minuta"/>
+        <transition to="(SG) Voto [não relator] - CONFIRMAR" name="Devolver para revisão da minuta"/>
         <transition to="(SG) Houve julgamento em painel?" name="(SG) Houve julgamento em painel?">
             <condition expression="#{true}"/>
         </transition>
@@ -167,8 +167,8 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <task name="Nó de Desvio - (SG) Decisão colegiada como não relator" swimlane="Nó de Desvio - (SG) Decisão colegiada como não relator"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Voto [não relator] - MINUTAR" name="(SG) Voto [não relator] - MINUTAR"/>
-        <transition to="(SG) Voto [não relator] - REVISAR" name="(SG) Voto [não relator] - REVISAR"/>
         <transition to="(SG) Voto [não relator] - CONFIRMAR" name="(SG) Voto [não relator] - CONFIRMAR"/>
+        <transition to="(SG) Voto [não relator] - VALIDAR" name="(SG) Voto [não relator] - VALIDAR"/>
         <transition to="(SG) Sessão de julgamento [outros julgadores] - AGUARDAR" name="(SG) Sessão de julgamento [outros julgadores] - AGUARDAR"/>
         <transition to="(SG) Voto [não relator] - ASSINAR" name="(SG) Voto [não relator] - ASSINAR"/>
     </task-node>  
@@ -220,5 +220,6 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>

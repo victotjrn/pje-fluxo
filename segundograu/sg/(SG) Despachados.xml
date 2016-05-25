@@ -44,7 +44,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Movimentação em Lote]]></description>
-        <transition to="Término" name="Prosseguir"/>
+        <transition to="Término" name="Cumprir ato ordinatório do gabinete"/>
         <transition to="Nó de Desvio - (SG) Despachados" name="Nó de Desvio - (SG) Despachados">
             <condition expression="#{true}"/>
         </transition>
@@ -73,6 +73,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig. Não
    Tipo: Frame
+
 2. Variável: MovimentarEmLote
    Label: Movimentar em lote
    Escrita: Sim
@@ -107,6 +108,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig. Não
    Tipo: Frame
+
 2. Variável: MovimentarEmLote
    Label: Movimentar em lote
    Escrita: Sim
@@ -141,6 +143,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig. Não
    Tipo: Frame
+
 2. Variável: MovimentarEmLote
    Label: Movimentar em lote
    Escrita: Sim
@@ -175,6 +178,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig. Não
    Tipo: Frame
+
 2. Variável: MovimentarEmLote
    Label: Movimentar em lote
    Escrita: Sim
@@ -214,6 +218,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig. Não
    Tipo: Frame
+
 2. Variável: MovimentarEmLote
    Label: Movimentar em lote
    Escrita: Sim
@@ -253,6 +258,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig. Não
    Tipo: Frame
+
 2. Variável: MovimentarEmLote
    Label: Movimentar em lote
    Escrita: Sim
@@ -269,9 +275,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_admissibilidade_recurso') == true ? '(SG) Despachado sobre admissibilidade de recurso - ANALISAR' : 'Término'}" name="(SG) É despachado sobre admissibilidade de recurso?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_admissibilidade_recurso') == true ? '(SG) Despachado sobre admissibilidade de recurso - ANALISAR' : '(SG) É despachado sobre cancelamento de voto?'}" name="(SG) É despachado sobre admissibilidade de recurso?">
         <transition to="(SG) Despachado sobre admissibilidade de recurso - ANALISAR" name="(SG) Despachado sobre admissibilidade de recurso - ANALISAR"/>
-        <transition to="Término" name="Término"/>
+        <transition to="(SG) É despachado sobre cancelamento de voto?" name="(SG) É despachado sobre cancelamento de voto?"/>
     </decision>
     <task-node end-tasks="true" name="(SG) Despachado sobre admissibilidade de recurso - ANALISAR">
         <task name="(SG) Despachado sobre admissibilidade de recurso - ANALISAR" swimlane="Secretaria">
@@ -287,6 +293,42 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig. Não
    Tipo: Frame
+
+2. Variável: MovimentarEmLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Término" name="Cumprir determinações"/>
+        <transition to="Nó de Desvio - (SG) Despachados" name="Nó de Desvio - (SG) Despachados">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_cancelamento_voto') == true ? '(SG) Despachado sobre cancelamento de voto' : 'Término'}" name="(SG) É despachado sobre cancelamento de voto?">
+        <transition to="(SG) Despachado sobre cancelamento de voto" name="(SG) Despachado sobre cancelamento de voto"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Despachado sobre cancelamento de voto">
+        <task name="(SG) Despachado sobre cancelamento de voto" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_visualizarDecisao
+   Label: Ato judicial
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame
+
 2. Variável: MovimentarEmLote
    Label: Movimentar em lote
    Escrita: Sim
@@ -315,6 +357,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Despachado sobre agravo regimental ou interno - ANALISAR" name="(SG) Despachado sobre agravo regimental ou interno - ANALISAR"/>
         <transition to="(SG) Despachado por ato ordinatório - ANALISAR" name="(SG) Despachado por ato ordinatório - ANALISAR"/>
         <transition to="(SG) Despachado sobre admissibilidade de recurso - ANALISAR" name="(SG) Despachado sobre admissibilidade de recurso - ANALISAR"/>
+        <transition to="(SG) Despachado sobre cancelamento de voto" name="(SG) Despachado sobre cancelamento de voto"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

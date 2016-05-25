@@ -18,9 +18,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(SG) Tem pedido de urgência?" name="(SG) Tem pedido de urgência?"/>
+        <transition to="(SG) Direciona diretamente para secretaria?" name="(SG) Direciona diretamente para secretaria?"/>
     </start-state>  
     <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:fbg:direcionar_secretaria') == true ? '(SG) Secretaria - ANALISAR' : '(SG) Tem pedido de urgência?'}" name="(SG) Direciona diretamente para secretaria?">
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+        <transition to="(SG) Tem pedido de urgência?" name="(SG) Tem pedido de urgência?"/>
+    </decision>
     <decision expression="#{tramitacaoProcessualService.temUrgencia() == true ? '(SG) Preparação de decisão de urgência inicial' : '(SG) Preparação de despacho inicial'}" name="(SG) Tem pedido de urgência?">
         <transition to="(SG) Preparação de decisão de urgência inicial" name="(SG) Preparação de decisão de urgência inicial"/>
         <transition to="(SG) Preparação de despacho inicial" name="(SG) Preparação de despacho inicial"/>
@@ -66,6 +70,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
                 <variable name="sg_fbg_intimar_citar_mp" mapped-name="sim_nao:sg_fbg_intimar_citar_mp" access="read,write"/>
                 <variable name="sg_fbg_retificar_tipo_documento" mapped-name="sim_nao:sg_fbg_retificar_tipo_documento" access="read,write"/>
                 <variable name="sg_fbg_expedir_outros_documentos" mapped-name="sim_nao:sg_fbg_expedir_outros_documentos" access="read,write"/>
+                <variable name="sg_fbg_publicar_dje" mapped-name="sim_nao:sg_fbg_publicar_dje" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -152,6 +157,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label: Expedir outros documentos
    Escrita: Sim
    Obrig. Não
+   Tipo: Checkbox
+
+15. Variável: sg_fbg_publicar_dje
+   Label: Publicar no Diário da Justiça Eletrônico
+   Escrita: Sim
+   Obrig. Não
    Tipo: Checkbox]]></description>
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
@@ -192,6 +203,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_encerrar_expediente')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_retificar_tipo_documento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_expedir_outros_documentos')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_publicar_dje')}"/>
         </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
