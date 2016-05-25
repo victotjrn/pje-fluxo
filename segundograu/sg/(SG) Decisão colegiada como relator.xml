@@ -56,12 +56,12 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <transition to="(SG) Voto, relatório ou ementa vazio?" name="Encaminhar para validação do magistrado">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:deccolrel:enviarMagistrado', true)}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao',false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:deccolrel:decisaoColegiadaVazia')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao',false)}"/>
         </event>
     </task-node>
     <decision expression="#{(entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoDocumento pd WHERE NOT EXISTS (SELECT 1 FROM ProcessoDocumentoBinPessoaAssinatura pdba WHERE pdba.processoDocumentoBin.idProcessoDocumentoBin = pd.processoDocumentoBin.idProcessoDocumentoBin) AND pd.processo = :processo AND pd.ativo=true AND pd.tipoProcessoDocumento.idTipoProcessoDocumento IN (77,73,72)&quot;).setParameter(&quot;processo&quot;, tramitacaoProcessualService.recuperaProcesso()).getSingleResult() == 3 ? (tramitacaoProcessualService.recuperaVariavel('sg:deccolrel:enviarMagistrado') == true ? '(SG) Voto, relatório e ementa - VALIDAR' : '(SG) Voto, relatório e ementa - CONFIRMAR') : '(SG) Voto, relatório e ementa - MINUTAR')}" name="(SG) Voto, relatório ou ementa vazio?">
@@ -96,11 +96,11 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         </transition>
         <transition to="(SG) Voto, relatório e ementa - VALIDAR" name="Encaminhar para validação do magistrado"/>
         <transition to="(SG) Voto, relatório e ementa - MINUTAR" name="Retornar à assessoria para minutar"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao',false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao',false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Voto, relatório e ementa - VALIDAR">
@@ -128,11 +128,11 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
             <condition expression="#{(tramitacaoProcessualService.recuperaProcesso().selecionadoJulgamento or tramitacaoProcessualService.recuperaProcesso().selecionadoPauta)}"/>
         </transition>
         <transition to="(SG) Houve disponibilização aos demais gabinetes?" name="Liberar para votação antecipada"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao',false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao',false)}"/>
         </event>
     </task-node>
     <node name="(SG) Registrar aptidão para julgamento">
@@ -179,17 +179,17 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
             <condition expression="#{sessaoPautaProcessoTrfManager.isProcessoJulgadoUltimaSessao(processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')))}"/>
         </transition>
         <transition to="(SG) Houve disponibilização aos demais gabinetes?" name="Liberar para votação antecipada"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator', true)}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Houve julgamento?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Encaminhar para preparação de acórdão')}"/>
+        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator', true)}"/>
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Houve julgamento?')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Encaminhar para preparação de acórdão')}"/>
         </event>
     </task-node>
     <node name="(SG) Renovar pedido de inclusão em pauta">
@@ -268,17 +268,17 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <transition to="(SG) Realocar órgão ao relator de origem" name="(SG) Realocar órgão ao relator de origem">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Realocar órgão ao relator de origem')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:voto:permiteIncluir', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir', true)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:voto:permiteIncluir')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Realocar órgão ao relator de origem')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:voto:permiteIncluir', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir', true)}"/>
         </event>
     </task-node>
     <node name="(SG) Realocar órgão ao relator de origem">
@@ -338,11 +338,11 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Prosseguir"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <node name="(SG) Registrar cancelamento de decisão colegiada">

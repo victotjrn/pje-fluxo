@@ -48,11 +48,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Despachados" name="Nó de Desvio - (SG) Despachados">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado') == true ? '(SG) Despachado - ANALISAR' : '(SG) É despachado urgente?'}" name="(SG) É despachado?">
@@ -83,11 +83,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Despachados" name="Nó de Desvio - (SG) Despachados">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_urgente') == true ? '(SG) Despachado urgente - ANALISAR' : '(SG) É despachado sobre embargos de declaração?'}" name="(SG) É despachado urgente?">
@@ -118,11 +118,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Despachados" name="Nó de Desvio - (SG) Despachados">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_embargo_declaracao') == true ? '(SG) Despachado sobre embargos de declaração - ANALISAR' : '(SG) É despachado sobre encerramento de suspensão?'}" name="(SG) É despachado sobre embargos de declaração?">
@@ -153,11 +153,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Cumprir determinações"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_encerramento_suspensao') == true ? '(SG) Despachado sobre encerramento de suspensão - ANALISAR' : '(SG) É despachado sobre reativação?'}" name="(SG) É despachado sobre encerramento de suspensão?">
@@ -193,11 +193,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Despachados" name="Nó de Desvio - (SG) Despachados">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_reativacao') == true ? '(SG) Despachado sobre reativação - ANALISAR' : '(SG) É despachado sobre agravo regimental ou interno?'}" name="(SG) É despachado sobre reativação?">
@@ -233,11 +233,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Despachados" name="Nó de Desvio - (SG) Despachados">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_agravo_regimental_interno') == true ? '(SG) Despachado sobre agravo regimental ou interno - ANALISAR' : '(SG) É despachado sobre admissibilidade de recurso?'}" name="(SG) É despachado sobre agravo regimental ou interno?">
@@ -268,11 +268,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Cumprir determinações"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_admissibilidade_recurso') == true ? '(SG) Despachado sobre admissibilidade de recurso - ANALISAR' : '(SG) É despachado sobre cancelamento de voto?'}" name="(SG) É despachado sobre admissibilidade de recurso?">
@@ -303,11 +303,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Despachados" name="Nó de Desvio - (SG) Despachados">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:desp:despachado_cancelamento_voto') == true ? '(SG) Despachado sobre cancelamento de voto' : 'Término'}" name="(SG) É despachado sobre cancelamento de voto?">
@@ -338,11 +338,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Despachados" name="Nó de Desvio - (SG) Despachados">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <end-state name="Término"/>

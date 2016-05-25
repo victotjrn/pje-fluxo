@@ -21,12 +21,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Foi juntado pelo Ministério Público?" name="(SG) Foi juntado pelo Ministério Público?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Ministério Público') &gt; -1 ? '(SG) Documentos não lidos - Ministério Público' : '(SG) Foi juntado pela Defensoria?'}" name="(SG) Foi juntado pelo Ministério Público?">
+    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Ministério Público') &gt; -1 ? '(SG) Documentos não lidos [Ministério Público] - ANALISAR' : '(SG) Foi juntado pela Defensoria?'}" name="(SG) Foi juntado pelo Ministério Público?">
         <transition to="(SG) Foi juntado pela Defensoria?" name="(SG) Foi juntado pela Defensoria?"/>
-        <transition to="(SG) Documentos não lidos - Ministério Público" name="(SG) Documentos não lidos - Ministério Público"/>
+        <transition to="(SG) Documentos não lidos [Ministério Público] - ANALISAR" name="(SG) Documentos não lidos [Ministério Público] - ANALISAR"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Documentos não lidos - Ministério Público">
-        <task name="(SG) Documentos não lidos - Ministério Público" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Documentos não lidos [Ministério Público] - ANALISAR">
+        <task name="(SG) Documentos não lidos [Ministério Público] - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
@@ -49,20 +49,20 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Análise de documentos não lidos" name="Nó de Desvio - (SG) Análise de documentos não lidos">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
     </task-node>
-    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Defensoria Pública') &gt; -1 ? '(SG) Documentos não lidos - Defensoria' : '(SG) Foi juntado pela Procuradoria?'}" name="(SG) Foi juntado pela Defensoria?">
-        <transition to="(SG) Documentos não lidos - Defensoria" name="(SG) Documentos não lidos - Defensoria"/>
+    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Defensoria Pública') &gt; -1 ? '(SG) Documentos não lidos [Defensoria] - ANALISAR' : '(SG) Foi juntado pela Procuradoria?'}" name="(SG) Foi juntado pela Defensoria?">
+        <transition to="(SG) Documentos não lidos [Defensoria] - ANALISAR" name="(SG) Documentos não lidos [Defensoria] - ANALISAR"/>
         <transition to="(SG) Foi juntado pela Procuradoria?" name="(SG) Foi juntado pela Procuradoria?"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Documentos não lidos - Defensoria">
-        <task name="(SG) Documentos não lidos - Defensoria" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Documentos não lidos [Defensoria] - ANALISAR">
+        <task name="(SG) Documentos não lidos [Defensoria] - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
@@ -85,20 +85,20 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Análise de documentos não lidos" name="Nó de Desvio - (SG) Análise de documentos não lidos">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
     </task-node>
-    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Procuradoria') &gt; -1 ? '(SG) Documentos não lidos - Procuradoria' : '(SG) Documentos não lidos'}" name="(SG) Foi juntado pela Procuradoria?">
-        <transition to="(SG) Documentos não lidos - Procuradoria" name="(SG) Documentos não lidos - Procuradoria"/>
-        <transition to="(SG) Documentos não lidos" name="(SG) Documentos não lidos"/>
+    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Procuradoria') &gt; -1 ? '(SG) Documentos não lidos [Procuradoria] - ANALISAR' : '(SG) Documentos não lidos - ANALISAR'}" name="(SG) Foi juntado pela Procuradoria?">
+        <transition to="(SG) Documentos não lidos [Procuradoria] - ANALISAR" name="(SG) Documentos não lidos [Procuradoria] - ANALISAR"/>
+        <transition to="(SG) Documentos não lidos - ANALISAR" name="(SG) Documentos não lidos - ANALISAR"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Documentos não lidos - Procuradoria">
-        <task name="(SG) Documentos não lidos - Procuradoria" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Documentos não lidos [Procuradoria] - ANALISAR">
+        <task name="(SG) Documentos não lidos [Procuradoria] - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
@@ -121,16 +121,16 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Marcar documento como lido e finalizar a tarefa"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(SG) Documentos não lidos">
-        <task name="(SG) Documentos não lidos" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Documentos não lidos - ANALISAR">
+        <task name="(SG) Documentos não lidos - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
@@ -153,22 +153,22 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Marcar documento como lido e finalizar a tarefa"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Análise de documentos não lidos">
         <task name="Nó de Desvio - (SG) Análise de documentos não lidos" swimlane="Nó de Desvio - (SG) Análise de documentos não lidos"/>
         <transition to="Término" name="Término"/>
-        <transition to="(SG) Documentos não lidos" name="(SG) Documentos não lidos"/>
-        <transition to="(SG) Documentos não lidos - Ministério Público" name="(SG) Documentos não lidos - Ministério Público"/>
-        <transition to="(SG) Documentos não lidos - Defensoria" name="(SG) Documentos não lidos - Defensoria"/>
-        <transition to="(SG) Documentos não lidos - Procuradoria" name="(SG) Documentos não lidos - Procuradoria"/>
+        <transition to="(SG) Documentos não lidos - ANALISAR" name="(SG) Documentos não lidos - ANALISAR"/>
+        <transition to="(SG) Documentos não lidos [Ministério Público] - ANALISAR" name="(SG) Documentos não lidos [Ministério Público] - ANALISAR"/>
+        <transition to="(SG) Documentos não lidos [Defensoria] - ANALISAR" name="(SG) Documentos não lidos [Defensoria] - ANALISAR"/>
+        <transition to="(SG) Documentos não lidos [Procuradoria] - ANALISAR" name="(SG) Documentos não lidos [Procuradoria] - ANALISAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

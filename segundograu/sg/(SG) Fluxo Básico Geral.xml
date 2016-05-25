@@ -171,25 +171,28 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Cumprimento de decisão via análise da secretaria" name="01 - Prosseguir na(s) tarefa(s) acima selecionada(s)"/>
-        <transition to="(SG) Preparação de decisão genérica" name="02 - Enviar concluso para decisão"/>
-        <transition to="(SG) Preparação de decisão de urgência" name="03 - Enviar concluso para decisão de urgência"/>
-        <transition to="(SG) Preparação de decisão de embargos de declaração" name="04 - Enviar concluso para decisão de embargos de declaração"/>
-        <transition to="(SG) Preparação de decisão de agravo regimental ou interno" name="05 - Enviar concluso para decisão de agravo regimental ou interno"/>
-        <transition to="(SG) Preparação de despacho genérico" name="06 - Enviar concluso para despacho"/>
-        <transition to="(SG) Preparação de voto, relatório e ementa" name="07 - Enviar para preparação do voto, relatório e ementa"/>
-        <transition to="(SG) Preparação de decisão de admissibilidade de recurso" name="08 - Enviar concluso para admissibilidade de recurso">
-            <condition expression="#{empty tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj')}"/>
-        </transition>
-        <transition to="(SG) Retornar ao gabinete de origem" name="08 - Devolver ao relator de origem">
+        <transition to="(SG) Controlar suspensão de processo" name="02 - Suspender o processo"/>
+        <transition to="(SG) Preparação de redistribuição" name="03 - Redistribuir"/>
+        <transition to="(SG) Preparação para arquivamento" name="04 - Arquivar o processo"/>
+        <transition to="(SG) Preparação de remessa para instância superior" name="05 - Remeter para instância superior"/>
+        <transition to="(SG) Preparação de remessa para o primeiro grau" name="06 - Remeter para o primeiro grau"/>
+        <transition to="(SG) Confirmar cancelamento da distribuição" name="07 - Cancelar distribuição"/>
+        <transition to="(SG) Controle de retorno de expediente" name="08 - Controlar retorno de expediente"/>
+        <transition to="(SG) Preparação de decisão genérica" name="09 - Enviar concluso para decisão"/>
+        <transition to="(SG) Preparação de decisão de urgência" name="10 - Enviar concluso para decisão de urgência"/>
+        <transition to="(SG) Preparação de decisão de embargos de declaração" name="11 - Enviar concluso para decisão de embargos de declaração"/>
+        <transition to="(SG) Preparação de decisão de agravo regimental ou interno" name="12 - Enviar concluso para decisão de agravo regimental ou interno"/>
+        <transition to="(SG) Preparação de despacho genérico" name="13 - Enviar concluso para despacho"/>
+        <transition to="(SG) Preparação de voto, relatório e ementa" name="14 - Enviar para preparação do voto, relatório e ementa"/>
+        <transition to="(SG) Preparação de decisão sobre admissibilidade de recurso" name="15 - Enviar concluso para admissibilidade de recurso">
             <condition expression="#{!empty tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj')}"/>
         </transition>
-        <transition to="(SG) Controlar suspensão de processo" name="09 - Suspender o processo"/>
-        <transition to="(SG) Preparação de redistribuição" name="10 - Redistribuir"/>
-        <transition to="(SG) Preparação para arquivamento" name="11 - Arquivar o processo"/>
-        <transition to="(SG) Preparação de remessa para instância superior" name="12 - Remeter para instância superior"/>
-        <transition to="(SG) Preparação de remessa para o primeiro grau" name="13 - Remeter para o primeiro grau"/>
-        <transition to="(SG) Confirmar cancelamento da distribuição" name="14 - Cancelar distribuição"/>
-        <transition to="(SG) Controle de retorno de expediente" name="15 - Controlar retorno de expediente"/>
+        <transition to="(SG) Preparação de remessa para admissibilidade de recurso" name="15 - Enviar para análise de admissibilidade">
+            <condition expression="#{empty tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj')}"/>
+        </transition>
+        <transition to="(SG) Retornar ao gabinete de origem" name="16 - Devolver ao relator de origem">
+            <condition expression="#{!empty tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj')}"/>
+        </transition>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_apensar_desapensar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_certificar_decurso_prazo')}"/>
@@ -205,11 +208,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_expedir_outros_documentos')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg_fbg_publicar_dje')}"/>
         </event>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <process-state name="(SG) Cumprimento de decisão via análise da secretaria">
@@ -262,6 +265,18 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_agravo_regimental_interno')}"/>
+        </event>
+    </process-state>
+    <process-state name="(SG) Preparação de decisão sobre admissibilidade de recurso">
+        <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_admissibilidade_recurso', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_admissibilidade_recurso')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
         </event>
     </process-state>
     <process-state name="(SG) Preparação de despacho genérico">
@@ -320,13 +335,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <sub-process name="(SG) Decisão colegiada como relator" binding="late"/>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
     </process-state>
-    <process-state name="(SG) Preparação de decisão de admissibilidade de recurso">
+    <process-state name="(SG) Preparação de remessa para admissibilidade de recurso">
         <sub-process name="(SG) Remessa para admissibilidade de recurso" binding="late"/>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
     </process-state>
     <node name="(SG) Retornar ao gabinete de origem">
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
         <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('relatoria de origem').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(200002).lancarMovimento()}"/>
             <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj'), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjColegiado'), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjCargo'), false)}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:remadmrec:idOj')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:remadmrec:idOjCargo')}"/>

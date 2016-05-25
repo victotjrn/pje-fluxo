@@ -41,6 +41,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Existe central de mandados?" name="(SG) Existe central de mandados?">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Existe central de mandados?')}"/>
+            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65')}"/>
+            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('M')}"/>
+        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:mapaProcuradorias'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
@@ -52,11 +57,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:mapaAgrupamentos'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Existe central de mandados?')}"/>
-            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65')}"/>
-            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('M')}"/>
         </event>
     </task-node>
     <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(SG) Mandado aguardando escolha da central - SELECIONAR' : '(SG) Encaminhar para central de mandados'}" name="(SG) Existe central de mandados?">

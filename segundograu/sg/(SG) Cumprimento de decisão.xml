@@ -189,11 +189,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Cumprimento de decisão" name="Nó de Desvio - (SG) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_retificar_tipo_documento') == true ? '(SG) Tipo de documento - RETIFICAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É retificar tipo de documento?">
@@ -217,15 +217,15 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Cumprimento de decisão" name="Nó de Desvio - (SG) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar','79,64,63')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Cancelar e sair da tarefa')}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar','79,64,63')}"/>
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_expedir_outros_documentos') == true ? '(SG) Expedição de outros documentos' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É expedir outros documentos?">
