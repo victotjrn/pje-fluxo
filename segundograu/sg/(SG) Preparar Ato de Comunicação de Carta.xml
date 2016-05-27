@@ -41,6 +41,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Controle de prazo de carta precatória após expedição" name="(SG) Controle de prazo de carta precatória após expedição">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Controle de prazo de carta precatória após expedição')}"/>
+            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65')}"/>
+            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('L')}"/>
+        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:mapaProcuradorias'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
@@ -52,11 +57,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('prepararAto:mapaAgrupamentos'.concat(org.jboss.seam.bpm.taskInstance.getId()))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Controle de prazo de carta precatória após expedição')}"/>
-            <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65')}"/>
-            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('L')}"/>
         </event>
     </task-node>
     <process-state name="(SG) Controle de prazo de carta precatória após expedição">

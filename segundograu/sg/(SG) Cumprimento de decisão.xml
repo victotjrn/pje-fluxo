@@ -34,6 +34,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) É encerrar expediente manualmente?" name="(SG) É encerrar expediente manualmente?"/>
         <transition to="(SG) É retificar tipo de documento?" name="(SG) É retificar tipo de documento?"/>
         <transition to="(SG) É expedir outros documentos?" name="(SG) É expedir outros documentos?"/>
+        <transition to="(SG) É publicar no DJe?" name="(SG) É publicar no DJe?"/>
     </fork>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_apensar_desapensar') == true ? '(SG) Apensamento ou desapensamento - ANALISAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É apensar ou desapensar?">
         <transition to="(SG) Apensamento ou desapensamento - ANALISAR" name="(SG) Apensamento ou desapensamento - ANALISAR"/>
@@ -188,11 +189,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Cumprimento de decisão" name="Nó de Desvio - (SG) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_retificar_tipo_documento') == true ? '(SG) Tipo de documento - RETIFICAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É retificar tipo de documento?">
@@ -216,15 +217,15 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Cumprimento de decisão" name="Nó de Desvio - (SG) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar','79,64,63')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Cancelar e sair da tarefa')}"/>
+        </event>
         <event type="task-end">
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar','79,64,63')}"/>
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_expedir_outros_documentos') == true ? '(SG) Expedição de outros documentos' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É expedir outros documentos?">
@@ -238,6 +239,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <join name="(SG) Junção em cumprimento de decisão">
         <transition to="Término" name="Término"/>
     </join>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_publicar_dje') == true ? '(SG) Preparar publicação no DJe' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É publicar no DJe?">
+        <transition to="(SG) Preparar publicação no DJe" name="(SG) Preparar publicação no DJe"/>
+        <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
+    </decision>
+    <process-state name="(SG) Preparar publicação no DJe">
+        <sub-process name="(SG) Publicação no DJe" binding="late"/>
+        <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Cumprimento de decisão">
         <task name="Nó de Desvio - (SG) Cumprimento de decisão" swimlane="Nó de Desvio - (SG) Cumprimento de decisão"/>

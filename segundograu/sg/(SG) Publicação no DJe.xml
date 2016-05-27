@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de prazos de mandados">
-    <description><![CDATA[Código do fluxo: SG_CONTPRAZOS_MAND
-
-Descrição: Gestão de retorno/prazos de expedientes do tipo mandado.
-
-Raia        Localização              Papel
-Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
-Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Publicação no DJe">
+    <description><![CDATA[...]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (SG) Controle de prazos de mandados">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+    <swimlane name="Nó de Desvio - (SG) Publicação no DJe">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,599:1469')}"/>
+    </swimlane>
+    <swimlane name="Magistrado">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('599:1469')}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
@@ -18,49 +15,39 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(SG) Existe expediente do tipo mandado pendente de ciência?" name="(SG) Existe expediente do tipo mandado pendente de ciência?"/>
+        <transition to="(SG) Diário da Justiça Eletrônico - PUBLICAR" name="(SG) Diário da Justiça Eletrônico - PUBLICAR"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'M' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Mandado pendente de cumprimento - AGUARDAR' : 'Término'}" name="(SG) Existe expediente do tipo mandado pendente de ciência?">
-        <transition to="(SG) Mandado pendente de cumprimento - AGUARDAR" name="(SG) Mandado pendente de cumprimento - AGUARDAR"/>
-        <transition to="Término" name="Término"/>
-    </decision>
-    <task-node end-tasks="true" name="(SG) Mandado pendente de cumprimento - AGUARDAR">
-        <task name="(SG) Mandado pendente de cumprimento - AGUARDAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Diário da Justiça Eletrônico - PUBLICAR">
+        <task name="(SG) Diário da Justiça Eletrônico - PUBLICAR" swimlane="Secretaria">
             <controller>
-                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_paginaExterna" mapped-name="frame:WEB-INF_xhtml_flx_paginaExterna" access="read,write"/>
                 <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: label_informacao
-   Label: Mandado expedido e encaminhado para central de mandados. Após cumprimento pelo oficial de justiça, favor, movimentar o processo através da próxima ação abaixo.
+1. Variável: WEB-INF_xhtml_flx_paginaExterna
+   Label: Expedientes
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso
-
-2. Variável: MovimentarLote
-   Label: Movimentar em lote
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Habilitar Movimentação em Lote]]></description>
-        <transition to="Nó de Desvio - (SG) Controle de prazos de mandados" name="Nó de Desvio - (SG) Controle de prazos de mandados">
+   Tipo: Frame]]></description>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (SG) Publicação no DJe" name="Nó de Desvio - (SG) Publicação no DJe">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        <event type="task-assign">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:flx:paginaExterna', parametroUtil.getParametro('pje:tjrn:dje:link').concat('expedientes/').concat(tramitacaoProcessualService.obterTokenDJe()) )}"/>
         </event>
         <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:flx:paginaExterna')}"/>
         </event>
     </task-node>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (SG) Controle de prazos de mandados">
-        <task name="Nó de Desvio - (SG) Controle de prazos de mandados" swimlane="Nó de Desvio - (SG) Controle de prazos de mandados"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Publicação no DJe">
+        <task name="Nó de Desvio - (SG) Publicação no DJe" swimlane="Nó de Desvio - (SG) Publicação no DJe"/>
         <transition to="Término" name="Término"/>
-        <transition to="(SG) Mandado pendente de cumprimento - AGUARDAR" name="(SG) Mandado pendente de cumprimento - AGUARDAR"/>
+        <transition to="(SG) Diário da Justiça Eletrônico - PUBLICAR" name="(SG) Diário da Justiça Eletrônico - PUBLICAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
@@ -110,5 +97,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>

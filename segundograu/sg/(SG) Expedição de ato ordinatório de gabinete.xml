@@ -47,16 +47,16 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <transition to="(SG) Lançar movimento de juntada de ato ordinatório" name="(SG) Lançar movimento de juntada de ato ordinatório">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','67')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e retornar para minuta')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de juntada de ato ordinatório')}"/>
+        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditSignature:ato_ordinatorio_em_elaboracao') ? tramitacaoProcessualService.gravaVariavel('pje:atoProferido', tramitacaoProcessualService.recuperaVariavelTarefa('textEditSignature:ato_ordinatorio_em_elaboracao')) : ''}"/>
-        </event>
-        <event type="task-start">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','67')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e retornar para minuta')}"/>
-            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de juntada de ato ordinatório')}"/>
         </event>
     </task-node>
     <node name="(SG) Lançar movimento de juntada de ato ordinatório">
