@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum.................
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum.........
 Aguardar Perícia / Laudo Técnico / Outros]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
@@ -100,6 +100,14 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir despacho"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Despachados')}"/>
+        </event>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:intelet:cancelou')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:saida_intelet_cancelado')}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Análise da secretaria">
         <task name="(VCiv) Análise da secretaria" swimlane="Secretaria">
@@ -234,6 +242,14 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir despacho"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Despachados urgentes')}"/>
+        </event>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:intelet:cancelou')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:saida_intelet_cancelado')}"/>
+        </event>
     </task-node>
     <process-state name="(VCiv) Conclusão para decisão de urgência">
         <sub-process name="(VCiv) Preparar Ato Judicial" binding="late"/>
@@ -473,6 +489,14 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Despachados sobre homologação e(ou) extinção')}"/>
+        </event>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:intelet:cancelou')}"/>
+            <action/>
+        </event>
     </task-node>
     <process-state name="(VCiv) Conclusão para decisão sobre desbloqueio">
         <sub-process name="(VCiv) Preparar Ato Judicial" binding="late"/>
@@ -512,6 +536,14 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Despachados sobre desbloqueio')}"/>
+        </event>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:intelet:cancelou')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:saida_intelet_cancelado')}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Despachados sobre suspensão">
         <task name="(VCiv) Despachados sobre suspensão" swimlane="Secretaria">
@@ -525,6 +557,14 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Despachados sobre suspensão')}"/>
+        </event>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:intelet:cancelou')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:saida_intelet_cancelado')}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="(VCIv) Sentenciados">
         <task name="(VCIv) Sentenciados" swimlane="Secretaria">
@@ -538,6 +578,13 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Sentenciados')}"/>
+        </event>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:intelet:cancelou')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:saida_intelet_cancelado')}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Sentenciados">
         <task name="(VCiv) Sentenciados" swimlane="Secretaria">
@@ -551,6 +598,10 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Sentenciados')}"/>
+        </event>
     </task-node>
     <decision expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 62 ? '(VCiv) Sentenciados' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença ?">
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
@@ -692,6 +743,14 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Sentenciados sobre homologação e extinção')}"/>
+        </event>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:intelet:cancelou')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:saida_intelet_cancelado')}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Sentenciados sobre homologação e extinção">
         <task name="(VCiv) Sentenciados sobre homologação e extinção" swimlane="Secretaria">
@@ -705,6 +764,10 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Cumprir sentença"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+        <transition to="(VCiv) Intimações eletrônicas" name="Intimar advogados (automaticamente)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:saida_intelet_cancelado','(VCiv) Sentenciados sobre homologação e extinção')}"/>
+        </event>
     </task-node>
     <decision expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 62 ? '(VCiv) Sentenciados sobre homologação e extinção' : '(VCiv) Emissão de certidão sem efeito?'}" name="(VCIv) Tem sentença extinção ?">
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
@@ -717,7 +780,21 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
     <process-state name="(VCiv) Controlar audiência">
         <sub-process name="(VCiv) Controle de Audiência" binding="late"/>
         <transition to="(VCiv) Análise da secretaria" name="(VCiv) Análise da secretaria"/>
-    </process-state>  
+    </process-state>
+    <process-state name="(VCiv) Intimações eletrônicas">
+        <sub-process name="(VCiv) Intimações eletrônicas" binding="late"/>
+        <transition to="(VCiv) Cancelou intelet ?" name="(VCiv) Cancelou intelet ?"/>
+    </process-state>
+    <decision expression="${tramitacaoProcessualService.recuperaVariavel('vciv:intelet:cancelou') ? (tramitacaoProcessualService.recuperaVariavel('vciv:fbc:saida_intelet_cancelado') != null ? tramitacaoProcessualService.recuperaVariavel('vciv:fbc:saida_intelet_cancelado') : '(VCiv) Análise da secretaria') : '(VCiv) Análise da secretaria'}" name="(VCiv) Cancelou intelet ?">
+        <transition to="(VCiv) Análise da secretaria" name="(VCiv) Análise da secretaria"/>
+        <transition to="(VCiv) Despachados sobre homologação e(ou) extinção" name="(VCiv) Despachados sobre homologação e(ou) extinção"/>
+        <transition to="(VCiv) Despachados sobre desbloqueio" name="(VCiv) Despachados sobre desbloqueio"/>
+        <transition to="(VCiv) Sentenciados sobre homologação e extinção" name="(VCiv) Sentenciados sobre homologação e extinção"/>
+        <transition to="(VCiv) Sentenciados" name="(VCiv) Sentenciados"/>
+        <transition to="(VCiv) Despachados" name="(VCiv) Despachados"/>
+        <transition to="(VCiv) Despachados urgentes" name="(VCiv) Despachados urgentes"/>
+        <transition to="(VCiv) Despachados sobre suspensão" name="(VCiv) Despachados sobre suspensão"/>
+    </decision>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
