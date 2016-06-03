@@ -340,7 +340,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
     </process-state>
     <node name="(SG) Retornar ao gabinete de origem">
-        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+        <transition to="(SG) Preparação de decisão sobre reanálise de acórdão" name="(SG) Preparação de decisão sobre reanálise de acórdão"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('relatoria de origem').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(200002).lancarMovimento()}"/>
             <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj'), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjColegiado'), tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjCargo'), false)}"/>
@@ -349,6 +349,18 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:remadmrec:idOjColegiado')}"/>
         </event>
     </node>
+    <process-state name="(SG) Preparação de decisão sobre reanálise de acórdão">
+        <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_reanalise_acordao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_reanalise_acordao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
+        </event>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Fluxo Básico Geral">
         <task name="Nó de Desvio - (SG) Fluxo Básico Geral" swimlane="Nó de Desvio - (SG) Fluxo Básico Geral"/>

@@ -76,7 +76,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
-        <transition to="(SG) Encaminhar para central de mandados" name="(SG) Encaminhar para central de mandados"/>
+        <transition to="(SG) Encaminhar para central de mandados" name="Encaminhar para central de mandados"/>
         <transition to="Nó de Desvio - (SG) Preparar Ato de Comunicação de Mandado" name="Nó de Desvio - (SG) Preparar Ato de Comunicação de Mandado">
             <condition expression="#{true}"/>
         </transition>

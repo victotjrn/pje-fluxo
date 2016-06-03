@@ -61,7 +61,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </transition>
         <transition to="(SG) Concluso para decisão de urgência - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
         <transition to="(SG) Concluso para decisão de urgência - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="(SG) Emissão de ato ordinatório" name="Cancelar e emitir ato ordinatório"/>
+        <transition to="(SG) Emissão de ato ordinatório" name="Cancelar através de ato ordinatório"/>
         <event type="task-create">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
@@ -478,7 +478,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </transition>
         <transition to="(SG) Concluso para decisão de embargos de declaração - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
         <transition to="(SG) Concluso para decisão de embargos de declaração - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="(SG) Emissão de ato ordinatório" name="Cancelar e emitir ato ordinatório"/>
+        <transition to="(SG) Emissão de ato ordinatório" name="Cancelar através de ato ordinatório"/>
         <event type="task-create">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
@@ -619,7 +619,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </transition>
         <transition to="(SG) Concluso para decisão de agravo regimental ou interno - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
         <transition to="(SG) Concluso para decisão de agravo regimental ou interno - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="(SG) Emissão de ato ordinatório" name="Cancelar e emitir ato ordinatório"/>
+        <transition to="(SG) Emissão de ato ordinatório" name="Cancelar através de ato ordinatório"/>
         <event type="task-create">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
@@ -760,7 +760,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </transition>
         <transition to="(SG) Concluso para despacho sobre cancelamento de voto - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
         <transition to="(SG) Concluso para despacho sobre cancelamento de voto - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="(SG) Emissão de ato ordinatório" name="Cancelar e emitir ato ordinatório"/>
+        <transition to="(SG) Emissão de ato ordinatório" name="Cancelar através de ato ordinatório"/>
         <event type="task-create">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>

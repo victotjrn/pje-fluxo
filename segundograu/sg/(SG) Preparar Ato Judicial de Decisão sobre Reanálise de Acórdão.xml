@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar Ato Judicial de Decisão Genérica">
-    <description><![CDATA[Código do fluxo: SG_PAJ_DEC_GEN
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar Ato Judicial de Decisão sobre Reanálise de Acórdão">
+    <description><![CDATA[Código do fluxo: SG_PAJ_DEC_REA_ACO
 
-Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.
+Descrição: Fluxo destinado ao preparo de atos judiciais de decisões sobre.
 
 Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessoria
@@ -11,7 +11,7 @@ Assessoria  Assessoria Segundo Grau  Assessoria
 Magistrado  Assessoria Segundo Grau  Assessoria
             Gabinete Segundo Grau    Magistrado]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão Genérica">
+    <swimlane name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão sobre Reanálise de Acórdão">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
     </swimlane>
     <swimlane name="Assessoria">
@@ -23,11 +23,11 @@ Magistrado  Assessoria Segundo Grau  Assessoria
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Assessoria"/>
-        <transition to="(SG) Concluso para decisão - MINUTAR" name="(SG) Concluso para decisão - MINUTAR"/>
+        <transition to="(SG) Concluso para decisão sobre reanálise do acórdão - MINUTAR" name="(SG) Concluso para decisão sobre reanálise do acórdão - MINUTAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(SG) Concluso para decisão - MINUTAR">
-        <task name="(SG) Concluso para decisão - MINUTAR" swimlane="Assessoria">
+    <task-node end-tasks="true" name="(SG) Concluso para decisão sobre reanálise do acórdão - MINUTAR">
+        <task name="(SG) Concluso para decisão sobre reanálise do acórdão - MINUTAR" swimlane="Assessoria">
             <controller>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
@@ -52,16 +52,16 @@ Magistrado  Assessoria Segundo Grau  Assessoria
 1. Tipo do evento: Sair da tarefa
    Agrupamento eventos: Magistrado
    Condição para lançamento temporário: #{true}]]></description>
-        <transition to="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão Genérica" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão Genérica">
+        <transition to="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão sobre Reanálise de Acórdão" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão sobre Reanálise de Acórdão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Concluso para decisão - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="(SG) Concluso para decisão - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
+        <transition to="(SG) Concluso para decisão sobre reanálise do acórdão - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
+        <transition to="(SG) Concluso para decisão sobre reanálise do acórdão - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
         <transition to="(SG) Emissão de ato ordinatório" name="Cancelar através de ato ordinatório"/>
         <event type="task-create">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e emitir ato ordinatório')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e emitir ato ordinatório')}"/>
         </event>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
@@ -71,8 +71,8 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(SG) Concluso para decisão - CONFIRMAR">
-        <task name="(SG) Concluso para decisão - CONFIRMAR" swimlane="Assessoria">
+    <task-node end-tasks="true" name="(SG) Concluso para decisão sobre reanálise do acórdão - CONFIRMAR">
+        <task name="(SG) Concluso para decisão sobre reanálise do acórdão - CONFIRMAR" swimlane="Assessoria">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
@@ -98,14 +98,14 @@ Magistrado  Assessoria Segundo Grau  Assessoria
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Assinatura em Lote]]></description>
-        <transition to="(SG) Concluso para decisão - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão Genérica" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão Genérica">
+        <transition to="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão sobre Reanálise de Acórdão" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão sobre Reanálise de Acórdão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Concluso para decisão - MINUTAR" name="Retornar para minuta"/>
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(SG) Concluso para decisão sobre reanálise do acórdão - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(SG) Concluso para decisão sobre reanálise do acórdão - MINUTAR" name="Retornar para minuta"/>
         <event type="task-create">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','63,64')}"/>
@@ -117,8 +117,8 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(SG) Concluso para decisão - ASSINAR">
-        <task name="(SG) Concluso para decisão - ASSINAR" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(SG) Concluso para decisão sobre reanálise do acórdão - ASSINAR">
+        <task name="(SG) Concluso para decisão sobre reanálise do acórdão - ASSINAR" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
@@ -147,11 +147,11 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão Genérica" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão Genérica">
+        <transition to="(SG) Concluso para decisão sobre reanálise do acórdão - MINUTAR" name="Retornar para minuta"/>
+        <transition to="(SG) Concluso para decisão sobre reanálise do acórdão - CONFIRMAR" name="Retornar para confirmação da minuta"/>
+        <transition to="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão sobre Reanálise de Acórdão" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão sobre Reanálise de Acórdão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Concluso para decisão - MINUTAR" name="Retornar para minuta"/>
-        <transition to="(SG) Concluso para decisão - CONFIRMAR" name="Retornar para confirmação da minuta"/>
         <event type="task-create">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','63,64')}"/>
@@ -167,17 +167,17 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <sub-process name="(SG) Expedição de ato ordinatório de gabinete" binding="late"/>
         <transition to="(SG) Cancelou a conclusão?" name="(SG) Cancelou a conclusão?"/>
     </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_ato_ordinatorio') == true ? 'Término' : '(SG) Concluso para decisão - MINUTAR'}" name="(SG) Cancelou a conclusão?">
-        <transition to="(SG) Concluso para decisão - MINUTAR" name="(SG) Concluso para decisão - MINUTAR"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:eccse:assinou_ato_ordinatorio') == true ? 'Término' : '(SG) Concluso para decisão sobre reanálise do acórdão - MINUTAR'}" name="(SG) Cancelou a conclusão?">
+        <transition to="(SG) Concluso para decisão sobre reanálise do acórdão - MINUTAR" name="(SG) Concluso para decisão sobre reanálise do acórdão - MINUTAR"/>
         <transition to="Término" name="Término"/>
     </decision>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão Genérica">
-        <task name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão Genérica" swimlane="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão Genérica"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão sobre Reanálise de Acórdão">
+        <task name="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão sobre Reanálise de Acórdão" swimlane="Nó de Desvio - (SG) Preparar Ato Judicial de Decisão sobre Reanálise de Acórdão"/>
         <transition to="Término" name="Término"/>
-        <transition to="(SG) Concluso para decisão - MINUTAR" name="(SG) Concluso para decisão - MINUTAR"/>
-        <transition to="(SG) Concluso para decisão - ASSINAR" name="(SG) Concluso para decisão - ASSINAR"/>
-        <transition to="(SG) Concluso para decisão - CONFIRMAR" name="(SG) Concluso para decisão - CONFIRMAR"/>
+        <transition to="(SG) Concluso para decisão sobre reanálise do acórdão - MINUTAR" name="(SG) Concluso para decisão sobre reanálise do acórdão - MINUTAR"/>
+        <transition to="(SG) Concluso para decisão sobre reanálise do acórdão - CONFIRMAR" name="(SG) Concluso para decisão sobre reanálise do acórdão - CONFIRMAR"/>
+        <transition to="(SG) Concluso para decisão sobre reanálise do acórdão - ASSINAR" name="(SG) Concluso para decisão sobre reanálise do acórdão - ASSINAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

@@ -310,7 +310,7 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
 
 1. Tipo do evento: Sair Tarefa
    Agrupamento eventos: Julgamento]]></description>
-        <transition to="(SG) Acórdão assinado - ANALISAR" name="(SG) Acórdão assinado - ANALISAR"/>
+        <transition to="(SG) Acórdão assinado - ANALISAR" name="Lançar movimentação"/>
         <transition to="Nó de Desvio - (SG) Decisão colegiada como relator" name="Nó de Desvio - (SG) Decisão colegiada como relator">
             <condition expression="#{true}"/>
         </transition>

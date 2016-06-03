@@ -17,7 +17,7 @@
     <task-node end-tasks="true" name="(SG) Outros documentos - EXPEDIR">
         <task name="(SG) Outros documentos - EXPEDIR" swimlane="Secretaria">
             <controller>
-                <variable name="minuta_outros_documentos" mapped-name="textEditCombo:minuta_outros_documentos" access="read,write"/>
+                <variable name="minuta_outros_documentos" mapped-name="textEditCombo:minuta_outros_documentos" access="read,write,required"/>
                 <variable name="MinutaemLote" mapped-name="minutarLote:MinutaemLote" access="read,write"/>
             </controller>
         </task>
