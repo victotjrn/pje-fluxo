@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC...]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197')}"/>
-    </swimlane>
     <swimlane name="CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886,5:1338,6:1469,6:5197')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -18,9 +18,9 @@
         <transition to="(CEJUSC) É CEJUSC ?" name="É intimar CEJUSC ?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{(' 3 10 19 8 14 16 7 9 11 17 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia).concat(' '))) ? '(CEJUSC) Aviso CEJUSC' : '(CEJUSC) Designar audiência'}" name="(CEJUSC) É CEJUSC ?">
-        <transition to="(CEJUSC) Designar audiência" name="(CEJUSC) Designar audiência"/>
+    <decision expression="#{(' 3 10 19 8 14 16 7 9 11 17 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia).concat(' '))) ? '(CEJUSC) Aviso CEJUSC' : '(CEJUSC) É Natal ?'}" name="(CEJUSC) É CEJUSC ?">
         <transition to="(CEJUSC) Aviso CEJUSC" name="(CEJUSC) Aviso CEJUSC"/>
+        <transition to="(CEJUSC) É Natal ?" name="(CEJUSC) É Natal ?"/>
     </decision>
     <task-node end-tasks="true" name="(CEJUSC) Designar audiência">
         <task name="(CEJUSC) Designar audiência" swimlane="CEJUSC">
@@ -51,9 +51,7 @@ expressão p/ quando ativar parnamirim:
         <transition to="(CEJUSC) Análise do CEJUSC" name="Análise do CEJUSC"/>
         <transition to="(CEJUSC) Intimar da audiência" name="Intimar via mandado/correios/sistema/pessoalmente"/>
         <transition to="(CEJUSC) Elaborar documento" name="Expedir Ato Ordinatório"/>
-        <transition to="(CEJUSC) Desclocar DPVAT" name="Designar CEJUSC DPVAT">
-            <condition expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;)}"/>
-        </transition>
+        <transition to="(CEJUSC) Desclocar DPVAT" name="Designar CEJUSC DPVAT"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('CEJUSC').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('juizo de origem').lancarMovimento()}"/>
         </event>
@@ -74,10 +72,15 @@ expressão p/ quando ativar parnamirim:
         <transition to="(CEJUSC) Realização da audiência" name="Realizar Audiência">
             <condition expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null}"/>
         </transition>
-        <transition to="(CEJUSC) Designar audiência" name="Designar/Cancelar audiência"/>
+        <transition to="(CEJUSC) Designar audiência" name="Designar/Cancelar audiência">
+            <condition expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador) != 106}"/>
+        </transition>
         <transition to="(CEJUSC) Elaborar documento" name="Elaborar documento"/>
         <transition to="(CEJUSC) Intimar da audiência" name="Intimar mandado/correio/sistema/pessoalmente"/>
         <transition to="(CEJUSC) Audiências não realizadas" name="Devolver - Não realizado"/>
+        <transition to="(CEJUSC) Desclocar DPVAT" name="Designar audiência - DPVAT">
+            <condition expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador) == 106}"/>
+        </transition>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('cancelou:aud:cejusc')}"/>
         </event>
@@ -277,6 +280,7 @@ expressão p/ quando ativar parnamirim:
         <transition to="(CEJUSC) Escolher tipo de devolução" name="(CEJUSC) Escolher tipo de devolução"/>
         <transition to="(CEJUSC) Aviso CEJUSC" name="(CEJUSC) Aviso CEJUSC"/>
         <transition to="(CEJUSC) Designar audiência DPVAT" name="(CEJUSC) Designar audiência DPVAT"/>
+        <transition to="(CEJUSC) Selecionar CEJUSC" name="(CEJUSC) Selecionar CEJUSC"/>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Informar conteúdo DJe">
         <task name="(CEJUSC) Informar conteúdo DJe" swimlane="CEJUSC">
@@ -404,7 +408,10 @@ expressão p/ quando ativar parnamirim:
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Designar audiência" name="Cancelar audiência"/>
+        <transition to="(CEJUSC) Designar audiência" name="Designar/Cancelar audiência">
+            <condition expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador) != 106}"/>
+        </transition>
+        <transition to="(CEJUSC) Análise do CEJUSC" name="Análise do CEJUSC"/>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('cancelou:aud:cejusc')}"/>
         </event>
@@ -467,6 +474,29 @@ expressão p/ quando ativar parnamirim:
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('cancelou:aud:cejusc') != null ? '(CEJUSC) Análise do CEJUSC':'(CEJUSC) Escolher tipo de devolução'}" name="(CEJUSC) Cancelou realizar audiência ?">
         <transition to="(CEJUSC) Análise do CEJUSC" name="(CEJUSC) Análise do CEJUSC"/>
         <transition to="(CEJUSC) Escolher tipo de devolução" name="(CEJUSC) Escolher tipo de devolução"/>
+    </decision>
+    <task-node end-tasks="true" name="(CEJUSC) Selecionar CEJUSC">
+        <task name="(CEJUSC) Selecionar CEJUSC" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+                <variable name="aviso3" mapped-name="textAlert:aviso3" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[aviso:Selecione para qual CEJUSC deseja encaminhar o processo:
+aviso2:A opção "CEJUSC" encaminhará o processo para a marcação de audiência de conciliação cível ou família, bem como mediação cível ou família.
+aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiência de conciliação específica do DPVAT.]]></description>
+        <transition to="(CEJUSC) Designar audiência" name="CEJUSC"/>
+        <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(CEJUSC) Desclocar DPVAT" name="CEJUSC - DPVAT">
+            <condition expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;)}"/>
+        </transition>
+    </task-node>
+    <decision expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) ? '(CEJUSC) Selecionar CEJUSC' : '(CEJUSC) Designar audiência'}" name="(CEJUSC) É Natal ?">
+        <transition to="(CEJUSC) Selecionar CEJUSC" name="(CEJUSC) Selecionar CEJUSC"/>
+        <transition to="(CEJUSC) Designar audiência" name="(CEJUSC) Designar audiência"/>
     </decision>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
