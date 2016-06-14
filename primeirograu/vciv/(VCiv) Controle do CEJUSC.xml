@@ -6,11 +6,11 @@
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="CEJUSC">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886,5:1338,6:1469,6:5197')}"/>
-    </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197')}"/>
+    </swimlane>
+    <swimlane name="CEJUSC">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886,5:1338,6:1469,6:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -72,13 +72,13 @@ expressão p/ quando ativar parnamirim:
             <condition expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null}"/>
         </transition>
         <transition to="(CEJUSC) Designar audiência" name="Designar/Cancelar audiência">
-            <condition expression="#{!(' 106 107 108 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat(' ') )}"/>
+            <condition expression="#{!authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;DPVAT&quot;)}"/>
         </transition>
         <transition to="(CEJUSC) Elaborar documento" name="Elaborar documento"/>
         <transition to="(CEJUSC) Intimar da audiência" name="Intimar mandado/correio/sistema/pessoalmente"/>
         <transition to="(CEJUSC) Audiências não realizadas" name="Devolver - Não realizado"/>
-        <transition to="(CEJUSC) Desclocar DPVAT NATAL" name="Designar/Cancelar audiência - DPVAT">
-            <condition expression="#{(' 106 107 108 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat(' ') )}"/>
+        <transition to="(CEJUSC) É NATAL ?" name="Designar/Cancelar audiência - DPVAT">
+            <condition expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;DPVAT&quot;)}"/>
         </transition>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('cancelou:aud:cejusc')}"/>
@@ -412,9 +412,12 @@ expressão p/ quando ativar parnamirim:
             <condition expression="#{true}"/>
         </transition>
         <transition to="(CEJUSC) Designar audiência" name="Designar/Cancelar audiência">
-            <condition expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador) != 106}"/>
+            <condition expression="#{!authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;DPVAT&quot;)}"/>
         </transition>
         <transition to="(CEJUSC) Análise do CEJUSC" name="Análise do CEJUSC"/>
+        <transition to="(CEJUSC) É NATAL ?" name="Designar/Cancelar audiência - DPVAT">
+            <condition expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;DPVAT&quot;)}"/>
+        </transition>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('cancelou:aud:cejusc')}"/>
         </event>
