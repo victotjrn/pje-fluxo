@@ -62,7 +62,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <event type="task-create">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Encaminhar para despacho inicial,Cancelar e emitir ato ordinatório')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Encaminhar para despacho inicial,Cancelar através de ato ordinatório')}"/>
         </event>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>

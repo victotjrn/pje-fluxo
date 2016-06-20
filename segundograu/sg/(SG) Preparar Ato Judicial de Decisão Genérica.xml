@@ -60,8 +60,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <transition to="(SG) Emissão de ato ordinatório" name="Cancelar através de ato ordinatório"/>
         <event type="task-create">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
-            <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e emitir ato ordinatório')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar através de ato ordinatório')}"/>
         </event>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
@@ -69,6 +68,9 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('condicaoLancamentoMovimentosTemporario')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Concluso para decisão - CONFIRMAR">
@@ -106,7 +108,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
+        <event type="node-enter">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','63,64')}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
@@ -152,7 +154,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </transition>
         <transition to="(SG) Concluso para decisão - MINUTAR" name="Retornar para minuta"/>
         <transition to="(SG) Concluso para decisão - CONFIRMAR" name="Retornar para confirmação da minuta"/>
-        <event type="task-create">
+        <event type="node-enter">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','63,64')}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>

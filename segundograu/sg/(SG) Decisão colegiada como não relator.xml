@@ -20,9 +20,45 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Assessoria"/>
-        <transition to="(SG) Voto [não relator] - MINUTAR" name="(SG) Voto [não relator] - MINUTAR"/>
+        <transition to="(SG) Voto [não relator] - VOTAR" name="(SG) Voto [não relator] - VOTAR"/>
     </start-state>  
     <!-- NODES -->
+    <task-node end-tasks="true" name="(SG) Voto [não relator] - VOTAR">
+        <task name="(SG) Voto [não relator] - VOTAR" swimlane="Magistrado">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_votacaoVogal" mapped-name="frame:WEB-INF_xhtml_flx_votacaoVogal" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: WEB-INF_xhtml_flx_votacaoVogal
+   Label: Apreciação colegiada como não relator
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (SG) Decisão colegiada como não relator" name="Nó de Desvio - (SG) Decisão colegiada como não relator">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Voto [não relator] - MINUTAR" name="Encaminhar para assessoria"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Houve julgamento em painel?" name="(SG) Houve julgamento em painel?">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Houve julgamento em painel?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:flx:votacaoVogal:transicaoAutomatica:papeis','magistrado,pje:magistrado')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
+            <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e sair da tarefa')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:flx:votacaoVogal:transicaoAutomatica:papeis')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
+            <action expression="#{taskInstance.deleteVariableLocally('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+        </event>
+    </task-node>
     <task-node end-tasks="true" name="(SG) Voto [não relator] - MINUTAR">
         <task name="(SG) Voto [não relator] - MINUTAR" swimlane="Assessoria">
             <controller>
@@ -32,45 +68,24 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: WEB-INF_xhtml_flx_votacaoVogal
-   Label: Apreciação colegiada por não relator
+   Label: Apreciação colegiada como não relator
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
+        <transition to="(SG) Voto [não relator] - CONFIRMAR" name="Encaminhar para confirmação"/>
         <transition to="Nó de Desvio - (SG) Decisão colegiada como não relator" name="Nó de Desvio - (SG) Decisão colegiada como não relator">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Voto [não relator] - CONFIRMAR" name="Encaminhar para revisão da minuta"/>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <transition to="(SG) Voto [não relator] - VALIDAR" name="Encaminhar ao magistrado"/>
+        <transition to="(SG) Voto [não relator] - VOTAR" name="Encaminhar para votação"/>
         <event type="task-create">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e sair da tarefa')}"/>
             <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
             <action expression="#{taskInstance.deleteVariableLocally('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Voto [não relator] - CONFIRMAR">
-        <task name="(SG) Voto [não relator] - CONFIRMAR" swimlane="Assessoria">
-            <controller>
-                <variable name="WEB-INF_xhtml_flx_votacaoVogal" mapped-name="frame:WEB-INF_xhtml_flx_votacaoVogal" access="read,write"/>
-            </controller>
-        </task>
-        <transition to="(SG) Voto [não relator] - VALIDAR" name="Encaminhar ao magistrado"/>
-        <transition to="Nó de Desvio - (SG) Decisão colegiada como não relator" name="Nó de Desvio - (SG) Decisão colegiada como não relator">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="(SG) Voto [não relator] - MINUTAR" name="Encaminhar para minuta"/>
-        <event type="task-create">
-            <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{taskInstance.deleteVariableLocally('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
-        </event>
-    </task-node>
-    <task-node end-tasks="true" name="(SG) Voto [não relator] - VALIDAR">
-        <task name="(SG) Voto [não relator] - VALIDAR" swimlane="Magistrado">
+        <task name="(SG) Voto [não relator] - CONFIRMAR" swimlane="Magistrado">
             <controller>
                 <variable name="WEB-INF_xhtml_flx_votacaoVogal" mapped-name="frame:WEB-INF_xhtml_flx_votacaoVogal" access="read,write"/>
             </controller>
@@ -78,29 +93,20 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: WEB-INF_xhtml_flx_votacaoVogal
-   Label: Apreciação colegiada por não relator
+   Label: Apreciação colegiada como não relator
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
         <transition to="Nó de Desvio - (SG) Decisão colegiada como não relator" name="Nó de Desvio - (SG) Decisão colegiada como não relator">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Voto [não relator] - MINUTAR" name="Devolver para minuta"/>
-        <transition to="(SG) Voto [não relator] - CONFIRMAR" name="Devolver para revisão da minuta"/>
-        <transition to="(SG) Houve julgamento em painel?" name="(SG) Houve julgamento em painel?">
-            <condition expression="#{true}"/>
-        </transition>
+        <transition to="(SG) Voto [não relator] - VOTAR" name="Encaminhar para votação"/>
+        <transition to="(SG) Voto [não relator] - MINUTAR" name="Retornar para elaboração da minuta"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Houve julgamento em painel?')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:flx:votacaoVogal:transicaoAutomatica:papeis','magistrado,pje:magistrado')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
             <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:flx:votacaoVogal:transicaoAutomatica:papeis')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
     <decision expression="#{'julgado' == processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao') ? '(SG) Gabinete do relator foi o vencendor?' : '(SG) Sessão de julgamento [outros julgadores] - AGUARDAR'}" name="(SG) Houve julgamento em painel?">
@@ -108,26 +114,30 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <transition to="(SG) Gabinete do relator foi o vencendor?" name="(SG) Gabinete do relator foi o vencendor?"/>
     </decision>
     <task-node end-tasks="true" name="(SG) Sessão de julgamento [outros julgadores] - AGUARDAR">
-        <task name="(SG) Sessão de julgamento [outros julgadores] - AGUARDAR" swimlane="Assessoria"/>
+        <task name="(SG) Sessão de julgamento [outros julgadores] - AGUARDAR" swimlane="Assessoria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_votacaoVogal" mapped-name="frame:WEB-INF_xhtml_flx_votacaoVogal" access="read,write"/>
+            </controller>
+        </task>
         <transition to="(SG) Houve julgamento?" name="(SG) Houve julgamento?">
             <condition expression="#{true}"/>
         </transition>
         <transition to="Nó de Desvio - (SG) Decisão colegiada como não relator" name="Nó de Desvio - (SG) Decisão colegiada como não relator">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Voto [não relator] - MINUTAR" name="Retornar para minuta do voto [não relator]"/>
+        <transition to="(SG) Voto [não relator] - VOTAR" name="Retornar para minuta do voto [não relator]"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Houve julgamento?')}"/>
             <action expression="#{taskInstance.setVariable('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('cnj:fluxo:colegiado:aguardaSessao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
             <action expression="#{taskInstance.deleteVariableLocally('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
-    <decision expression="#{'julgado' == processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao') ? 'Teste orgão vencedor' : 'Aguardando a sessão (outros julgadores)'}" name="(SG) Houve julgamento?">
+    <decision expression="#{'julgado' == processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao') ? '(SG) Gabinete do relator foi o vencendor?' : '(SG) Sessão de julgamento [outros julgadores] - AGUARDAR'}" name="(SG) Houve julgamento?">
         <transition to="(SG) Gabinete do relator foi o vencendor?" name="(SG) Gabinete do relator foi o vencendor?"/>
         <transition to="(SG) Sessão de julgamento [outros julgadores] - AGUARDAR" name="(SG) Sessão de julgamento [outros julgadores] - AGUARDAR"/>
     </decision>
@@ -148,7 +158,7 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: WEB-INF_xhtml_flx_votacaoVogal
-   Label: Apreciação colegiada por não relator
+   Label: Apreciação colegiada como não relator
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
@@ -166,9 +176,9 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Decisão colegiada como não relator">
         <task name="Nó de Desvio - (SG) Decisão colegiada como não relator" swimlane="Nó de Desvio - (SG) Decisão colegiada como não relator"/>
         <transition to="Término" name="Término"/>
+        <transition to="(SG) Voto [não relator] - VOTAR" name="(SG) Voto [não relator] - VOTAR"/>
         <transition to="(SG) Voto [não relator] - MINUTAR" name="(SG) Voto [não relator] - MINUTAR"/>
         <transition to="(SG) Voto [não relator] - CONFIRMAR" name="(SG) Voto [não relator] - CONFIRMAR"/>
-        <transition to="(SG) Voto [não relator] - VALIDAR" name="(SG) Voto [não relator] - VALIDAR"/>
         <transition to="(SG) Sessão de julgamento [outros julgadores] - AGUARDAR" name="(SG) Sessão de julgamento [outros julgadores] - AGUARDAR"/>
         <transition to="(SG) Voto [não relator] - ASSINAR" name="(SG) Voto [não relator] - ASSINAR"/>
     </task-node>  

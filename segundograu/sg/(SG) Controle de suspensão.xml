@@ -73,6 +73,10 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Preparação de decisão sobre encerramento de suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:consusp:suspensao_relatoria', true)}"/>
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Suspensão de processo pela instância superior - AGUARDAR">
@@ -94,6 +98,10 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Preparação de decisão sobre encerramento de suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:consusp:suspensao_instancia_superior', true)}"/>
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <process-state name="(SG) Preparação de decisão sobre encerramento de suspensão">
