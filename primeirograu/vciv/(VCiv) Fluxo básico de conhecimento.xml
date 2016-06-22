@@ -612,6 +612,12 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="(VCiv) Análise da secretaria" name="(VCiv) Análise da secretaria"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:citar_intimar', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:publicar_dje', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:expedir_mandado', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:expedir_carta_precatoria', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:intimar_mp', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:expedir_carta_rogatoria', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:citar_intimar_reativacao', false)}"/>
         </event>
     </process-state>
     <task-node end-tasks="true" name="Processos recebidos do fluxo antigo">
