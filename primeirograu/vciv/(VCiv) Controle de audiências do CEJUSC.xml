@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de audiências do CEJUSC">
-    <description><![CDATA[Fluxo responsável por controlar as audiências no CEJUSC......]]></description>  
+    <description><![CDATA[Fluxo responsável por controlar as audiências no CEJUSC.....]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469')}"/>
     </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:1470,7:5886,7:5197')}"/>
-    </swimlane>
     <swimlane name="CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5886,6:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:1470,7:5886,7:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="CEJUSC"/>
-        <transition to="(CEJUSC) Deslocar DPVAT" name="(CEJUSC) Deslocar DPVAT"/>
+        <transition to="(CEJUSC) Verifica se existe audiência designada" name="(CEJUSC) Verifica se existe audiência designada"/>
     </start-state>  
     <!-- NODES -->
     <decision expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) == null ? 'Término' : '(CEJUSC) Realizar audiência'}" name="(CEJUSC) Verifica se existe audiência designada">
@@ -63,11 +63,10 @@ minuta_audiencia: Minutar ata de audiência]]></description>
     <task-node end-tasks="true" name="(CEJUSC) Realizar audiência">
         <task name="(CEJUSC) Realizar audiência" swimlane="CEJUSC"/>
         <transition to="(CEJUSC) Minutar ata de audiência" name="Minutar ata de audiência"/>
-        <transition to="Término" name="Cancelar/Redesignar audiência"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Sinalizar cancelar audiencia" name="Análise do CEJUSC"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
         </event>
@@ -151,19 +150,7 @@ aviso2: ATENÇÃO: É necessário SEMPRE clicar no botão "GRAVAR" após preencher os 
         <transition to="Término" name="Término"/>
         <transition to="(CEJUSC) Minutar ata de audiência" name="(CEJUSC) Minutar ata de audiência"/>
         <transition to="(CEJUSC) Realizar audiência" name="(CEJUSC) Realizar audiência"/>
-    </task-node>
-    <node name="(CEJUSC) Deslocar DPVAT">
-        <transition to="(CEJUSC) Verifica se existe audiência designada" name="(CEJUSC) Verifica se existe audiência designada"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(processInstance.contextInstance.getVariable('processo'))}"/>
-        </event>
-    </node>
-    <node name="(CEJUSC) Sinalizar cancelar audiencia">
-        <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('cancelou:aud:cejusc', 'true')}"/>
-        </event>
-    </node>  
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
