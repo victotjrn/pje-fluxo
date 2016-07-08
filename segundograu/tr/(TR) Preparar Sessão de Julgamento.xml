@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Preparar Sessão de Julgamento">
     <description><![CDATA[Controle de processos antes e depois da sessão de julgamento.
 (TR) Confirmar relatório - voto - ementa - avisoVotoRequired - #{tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired')}
-(TR) Elaborar relatório - voto - ementa - avisoVotoRequired - #{tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired')}]]></description>    
+(TR) Elaborar relatório - voto - ementa - avisoVotoRequired - #{tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired')}]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria Segundo Grau">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('8:1338,8:5483')}"/>
@@ -139,6 +139,7 @@
         <task name="(TR) Assinar inteiro teor" swimlane="Assessoria">
             <controller>
                 <variable name="WEB-INF_xhtml_flx_elaborarAcordao" mapped-name="frame:WEB-INF_xhtml_flx_elaborarAcordao" access="read,write"/>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (TR) Preparar Sessão de Julgamento" name="Nó de Desvio - (TR) Preparar Sessão de Julgamento">
