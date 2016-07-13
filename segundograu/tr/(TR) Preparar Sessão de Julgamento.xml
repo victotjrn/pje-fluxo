@@ -5,12 +5,12 @@
 (TR) Confirmar relatório - voto - ementa - avisoVotoRequired - #{tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired')}
 (TR) Elaborar relatório - voto - ementa - avisoVotoRequired - #{tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired')}]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Secretaria Segundo Grau">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('8:1338,8:5483')}"/>
-    </swimlane>
-    <swimlane name="Nó de Desvio - (TR) Preparar Sessão de Julgamento"/>
     <swimlane name="Assessoria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5197,6:1469,8:1338')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (TR) Preparar Sessão de Julgamento"/>
+    <swimlane name="Secretaria Segundo Grau">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('8:1338,8:5483')}"/>
     </swimlane>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5197,6:1469,8:1338')}"/>
@@ -139,7 +139,7 @@
         <task name="(TR) Assinar inteiro teor" swimlane="Assessoria">
             <controller>
                 <variable name="WEB-INF_xhtml_flx_elaborarAcordao" mapped-name="frame:WEB-INF_xhtml_flx_elaborarAcordao" access="read,write"/>
-                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="AssinaturaEmLote" mapped-name="assinarInteiroTeorLote:AssinaturaEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (TR) Preparar Sessão de Julgamento" name="Nó de Desvio - (TR) Preparar Sessão de Julgamento">
