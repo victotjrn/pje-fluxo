@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Intimações eletrônicas">
-    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido...............]]></description>  
+    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido.............]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Intimações eletrônicas">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
@@ -114,7 +114,7 @@ avisoRetornar: Ao RETORNAR, esta intimação eletrônica não mais ocorrerá e o proc
         <transition to="(VCiv) Enviar passivo ?" name="(VCiv) Enviar passivo ?"/>
     </fork>
     <join name="(VCiv) Junção execução intimação">
-        <transition to="(VCiv) Informar DJe" name="(VCiv) Informar DJe"/>
+        <transition to="(VCiv) É fazenda ?" name="(VCiv) É fazenda ?"/>
     </join>
     <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('enviarAtivo') &amp;&amp; tramitacaoProcessualService.recuperaVariavel('enviarAtivo') ? '(VCiv) Executar intimação ativos' : '(VCiv) Junção execução intimação'}" name="(VCiv) Enviar ativo ?">
         <transition to="(VCiv) Executar intimação ativos" name="(VCiv) Executar intimação ativos"/>
@@ -159,6 +159,10 @@ avisoRetornar: Ao RETORNAR, esta intimação eletrônica não mais ocorrerá e o proc
     <decision expression="#{not (not empty tramitacaoProcessualService.recuperaVariavel('enviarAtivo') &amp;&amp; tramitacaoProcessualService.recuperaVariavel('enviarAtivo')) &amp;&amp;  not (not empty tramitacaoProcessualService.recuperaVariavel('enviarPassivo') &amp;&amp; tramitacaoProcessualService.recuperaVariavel('enviarPassivo')) ? '(VCiv) Sinalizar cancelamento' : '(VCiv) Separação execução intimação'}" name="(VCiv) Deve realizar intimação ?">
         <transition to="(VCiv) Separação execução intimação" name="(VCiv) Separação execução intimação"/>
         <transition to="(VCiv) Sinalizar cancelamento" name="(VCiv) Sinalizar cancelamento"/>
+    </decision>
+    <decision expression="#{processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10) ? '(VCiv) Controle de Prazo' : '(VCiv) Informar DJe'}" name="(VCiv) É fazenda ?">
+        <transition to="(VCiv) Controle de Prazo" name="(VCiv) Controle de Prazo"/>
+        <transition to="(VCiv) Informar DJe" name="(VCiv) Informar DJe"/>
     </decision>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
