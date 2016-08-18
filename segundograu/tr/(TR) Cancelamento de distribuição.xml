@@ -29,18 +29,41 @@
     </node>
     <task-node end-tasks="true" name="(TR) Processos com distribuição cancelada">
         <task name="(TR) Processos com distribuição cancelada" swimlane="Secretaria"/>
-        <transition to="Término" name="Cancelar e sair da tarefa">
-            <condition expression="#{true}"/>
-        </transition>
         <transition to="Nó de Desvio - (TR) Cancelamento de distribuição" name="Nó de Desvio - (TR) Cancelamento de distribuição">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TR) Conclusão para decisão de reativação" name="Enviar concluso para decisão de reativação"/>
+    </task-node>
+    <process-state name="(TR) Conclusão para decisão de reativação">
+        <sub-process name="(TR) Preparar Ato Judicial" binding="late"/>
+        <transition to="(TR) Despachados sobre reativação de cancelamento de distribuição" name="(TR) Despachados sobre reativação de cancelamento de distribuição"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tr:paj:decisao','true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tr:paj:decisao_reativacao','true')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tr:paj:decisao_reativacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tr:paj:decisao')}"/>
+        </event>
+    </process-state>
+    <task-node end-tasks="true" name="(TR) Despachados sobre reativação de cancelamento de distribuição">
+        <task name="(TR) Despachados sobre reativação de cancelamento de distribuição" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (TR) Cancelamento de distribuição" name="Nó de Desvio - (TR) Cancelamento de distribuição">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(TR) Processos com distribuição cancelada" name="Manter distribuição cancelada"/>
     </task-node>
     <task-node end-tasks="true" name="Nó de Desvio - (TR) Cancelamento de distribuição">
         <task name="Nó de Desvio - (TR) Cancelamento de distribuição" swimlane="Nó de Desvio - (TR) Cancelamento de distribuição"/>
         <transition to="Término" name="Término"/>
         <transition to="(TR) Cancelar distribuição" name="(TR) Cancelar distribuição"/>
         <transition to="(TR) Processos com distribuição cancelada" name="(TR) Processos com distribuição cancelada"/>
+        <transition to="(TR) Despachados sobre reativação de cancelamento de distribuição" name="(TR) Despachados sobre reativação de cancelamento de distribuição"/>
     </task-node>
     <end-state name="Término"/>  
     <!-- PROCESS-EVENTS -->
