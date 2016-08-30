@@ -70,6 +70,8 @@ No exemplo acima, temos a sigla **(SG)** que indica que é um fluxo do segundo g
 
 A **ação** é indicada por um **verbo no infinitivo e em caixa alta** (MINUTAR, ANALISAR, etc).
 
+> **Atenção!** _Não é permitido criar nós de tarefa com o mesmo nome, mesmo que em fluxos diferentes._
+
 #### **Nome em nós de decisão**
 Os nós de decisão vem sempre acompanhado por uma interrogação no final, que indica se a condição que está sendo verificada será atendida ou não.
 
