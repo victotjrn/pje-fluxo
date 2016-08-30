@@ -19,7 +19,7 @@ O código do fluxo é definido com o seguinte formato:
 
 > **Exemplo:** SG\_FBG
 
-O trecho onde tem **SG\_**, indica a sigla do fluxo, que nesse refere-se um fluxo do segundo grau, logo em seguida, vem as iniciais do nome do fluxo (Fluxo básico de conhecimento) separados por underline.
+O trecho onde tem **SG\_**, indica a sigla do fluxo, que nesse caso refere-se um fluxo do segundo grau, logo em seguida, vem as iniciais do nome do fluxo (Fluxo básico de conhecimento) separados por underline.
 
 > **Atenção!** Códigos dos fluxos não permitem espaços e caracteres especiais.
 
