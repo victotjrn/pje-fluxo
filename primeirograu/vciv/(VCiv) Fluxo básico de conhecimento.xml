@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum.........
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum........
 Aguardar Perícia / Laudo Técnico / Outros]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
@@ -120,7 +120,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
                 <variable name="vciv_fbc_certificar_transito" mapped-name="sim_nao:vciv_fbc_certificar_transito" access="read,write"/>
                 <variable name="vciv_fbc_citar_intimar" mapped-name="sim_nao:vciv_fbc_citar_intimar" access="read,write"/>
                 <variable name="vciv_fbc_controlar_audiencia" mapped-name="sim_nao:vciv_fbc_controlar_audiencia" access="read,write"/>
-                <variable name="vciv_fbg_controlar_retorno_expediente" mapped-name="sim_nao:vciv_fbg_controlar_retorno_expediente" access="read,write"/>
+                <variable name="vciv_fbc_controlar_retorno_expediente" mapped-name="sim_nao:vciv_fbc_controlar_retorno_expediente" access="read,write"/>
                 <variable name="vciv_fbc_encaminhar_cejusc" mapped-name="sim_nao:vciv_fbc_encaminhar_cejusc" access="read,write"/>
                 <variable name="vciv_fbc_encerrar_prazo" mapped-name="sim_nao:vciv_fbc_encerrar_prazo" access="read,write"/>
                 <variable name="vciv_fbc_expedir_alvara" mapped-name="sim_nao:vciv_fbc_expedir_alvara" access="read,write"/>
@@ -189,7 +189,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_decurso_prazo', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_decurso_prazo'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:intimar_mp', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_intimar_mp'))}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_carta_rogatoria', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_rogatoria'))}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:controlar_retorno_expediente', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbg_controlar_retorno_expediente'))}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:controlar_retorno_expediente', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_controlar_retorno_expediente'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_precatorio_rpv', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_precatorio_rpv'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:encaminar_cejusc',tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_encaminhar_cejusc'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:encerrar_prazo',tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_encerrar_prazo'))}"/>
@@ -204,6 +204,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_certificar_transito')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_citar_intimar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_controlar_audiencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_controlar_retorno_expediente')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_alvara')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_precatoria')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_mandado')}"/>
@@ -632,7 +633,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
                 <variable name="vciv_fbc_certificar_transito" mapped-name="sim_nao:vciv_fbc_certificar_transito" access="read,write"/>
                 <variable name="vciv_fbc_citar_intimar" mapped-name="sim_nao:vciv_fbc_citar_intimar" access="read,write"/>
                 <variable name="vciv_fbc_controlar_audiencia" mapped-name="sim_nao:vciv_fbc_controlar_audiencia" access="read,write"/>
-                <variable name="vciv_fbg_controlar_retorno_expediente" mapped-name="sim_nao:vciv_fbg_controlar_retorno_expediente" access="read,write"/>
+                <variable name="vciv_fbc_controlar_retorno_expediente" mapped-name="sim_nao:vciv_fbc_controlar_retorno_expediente" access="read,write"/>
                 <variable name="vciv_fbc_expedir_alvara" mapped-name="sim_nao:vciv_fbc_expedir_alvara" access="read,write"/>
                 <variable name="vciv_fbc_expedir_carta_precatoria" mapped-name="sim_nao:vciv_fbc_expedir_carta_precatoria" access="read,write"/>
                 <variable name="vciv_fbc_expedir_carta_rogatoria" mapped-name="sim_nao:vciv_fbc_expedir_carta_rogatoria" access="read,write"/>
@@ -695,7 +696,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_decurso_prazo', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_decurso_prazo'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:intimar_mp', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_intimar_mp'))}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_carta_rogatoria', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_rogatoria'))}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:controlar_retorno_expediente', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbg_controlar_retorno_expediente'))}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cumpridec:controlar_retorno_expediente', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_controlar_retorno_expediente'))}"/>
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_aguardar_laudo_tecnico')}"/>
@@ -724,7 +725,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:cancelar_distribuicao')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:encaminhar_instancia_superior')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_rogatoria')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbg_controlar_retorno_expediente')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_controlar_retorno_expediente')}"/>
         </event>
     </task-node>
     <process-state name="(VCiv) Dar cumprimento a ato judicial de central de calculos">
