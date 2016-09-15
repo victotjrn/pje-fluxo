@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum........
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum.........
 Aguardar Perícia / Laudo Técnico / Outros]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
@@ -13,7 +13,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(VCiv) Vem de outro fluxo?" name="(VCiv) Vem de outro fluxo?"/>
+        <transition to="(VCiv) Redistribuido ?" name="(VCiv) Redistribuido ?"/>
     </start-state>  
     <!-- NODES -->
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:certidaosemefeito') ? '(VCiv) Análise da secretaria' : tramitacaoProcessualService.recuperaVariavel('vciv:fbc:saida_nao_sentenciado')}" name="(VCiv) Emissão de certidão sem efeito?">
@@ -801,6 +801,10 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="(VCiv) Despachados" name="(VCiv) Despachados"/>
         <transition to="(VCiv) Despachados urgentes" name="(VCiv) Despachados urgentes"/>
         <transition to="(VCiv) Despachados sobre suspensão" name="(VCiv) Despachados sobre suspensão"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:redistribuir') ? '(VCiv) Análise da secretaria':'(VCiv) Vem de outro fluxo?'}" name="(VCiv) Redistribuido ?">
+        <transition to="(VCiv) Análise da secretaria" name="(VCiv) Análise da secretaria"/>
+        <transition to="(VCiv) Vem de outro fluxo?" name="(VCiv) Vem de outro fluxo?"/>
     </decision>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

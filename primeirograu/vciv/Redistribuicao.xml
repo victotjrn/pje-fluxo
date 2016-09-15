@@ -21,7 +21,7 @@
     </decision>
     <task-node end-tasks="true" name="Processos Redistribuídos de outras varas">
         <task name="Processos Redistribuídos de outras varas" swimlane="Secretária"/>
-        <transition to="Enviar concluso para decisão inicial e_ou urgência inicial" name="Enviar concluso para decisão inicial e/ou urgência inicial"/>
+        <transition to="Enviar concluso para decisão inicial e_ou urgência inicial" name="Encaminhar para Análise da Secretaria"/>
         <transition to="Nó de Desvio - Redistribuíção" name="Nó de Desvio - Redistribuíção">
             <condition expression="#{true}"/>
         </transition>
