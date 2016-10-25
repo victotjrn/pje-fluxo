@@ -10,7 +10,7 @@ Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
 Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Redistribuição">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
@@ -30,7 +30,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: Processo_Fluxo_abaRedistribuicaoProcesso
-   Label: Redistribuir processo
+   Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
@@ -42,35 +42,41 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Redistribuição recebida de outro relator - ANALISAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Redistribuição recebida de outro relator - ANALISAR')}"/>
         </event>
         <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Redistribuição recebida de outro relator - ANALISAR">
         <task name="(SG) Redistribuição recebida de outro relator - ANALISAR" swimlane="Secretaria">
             <controller>
-                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
-                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: label_informacao
+1. Variável: aviso1
    Label: Processo recebido de outro gabinete. Clique em Prosseguir para seguir normalmente no fluxo.
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso]]></description>
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar movimentação em lote]]></description>
         <transition to="Término" name="Prosseguir"/>
         <transition to="Nó de Desvio - (SG) Redistribuição" name="Nó de Desvio - (SG) Redistribuição">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <end-state name="Término"/>

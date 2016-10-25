@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Expedição de outros documentos"> 
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Expedição de outros documentos">
+    <description><![CDATA[Código do fluxo: SG_EXP_OUTROSDOC
+
+Descrição: Fluxo destinado a expedição de outros documentos (certidão, ato ordinatório da secretaria, etc)..
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Expedição de outros documentos">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}"/>
@@ -18,7 +25,7 @@
         <task name="(SG) Outros documentos - EXPEDIR" swimlane="Secretaria">
             <controller>
                 <variable name="minuta_outros_documentos" mapped-name="textEditCombo:minuta_outros_documentos" access="read,write,required"/>
-                <variable name="MinutaemLote" mapped-name="minutarLote:MinutaemLote" access="read,write"/>
+                <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -29,8 +36,8 @@
    Obrig.: Sim
    Tipo: Editor
 
-2. Variável: MinutaemLote
-   Label: Minutar em lote
+2. Variável: minutarLote
+   Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Minutar em Lote]]></description>
@@ -43,8 +50,8 @@
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tipoDocumento.set('TipoDocumento',57, 67)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',57, 67, 174)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e sair da tarefa')}"/>
         </event>
         <event type="task-end">
@@ -59,26 +66,26 @@
         <task name="(SG) Outros documentos - ASSINAR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
-                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
-                <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
 1. Variável: Processo_Fluxo_revisarMinuta
-   Label: Assinar Minuta
+   Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame
 
-2. Variável: MovimentarEmLote
-   Label: Movimentar em lote
+2. Variável: movimentacaoLote
+   Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote
 
-3. Variável: AssinaturaEmLote
-   Label: Assinar em lote
+3. Variável: assinaturaLote
+   Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Assinatura em Lote]]></description>
@@ -93,12 +100,14 @@
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174')}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de expedição de outros documentos')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('condicaoLancamentoMovimentosTemporario', '${true}')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
         </event>
     </task-node>
     <node name="(SG) Apagar minuta não assinada de outros documentos">
@@ -110,7 +119,7 @@
     <node name="(SG) Lançar movimento de expedição de outros documentos">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 67 ? preencherMovimento.deCodigo(11383).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).lancarMovimento() : preencherMovimento.deCodigo(60).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento()}"/>
+            <action expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 67 ?  preencherMovimento.deCodigo(11383).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).lancarMovimento() :  documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 57 ?  preencherMovimento.deCodigo(60).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(107).lancarMovimento() :  preencherMovimento.deCodigo(60).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento()}"/>
         </event>
     </node>
     <end-state name="Término"/>
@@ -168,5 +177,6 @@
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>

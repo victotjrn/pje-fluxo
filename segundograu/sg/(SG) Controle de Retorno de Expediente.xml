@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de Retorno de Expediente"> 
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de Retorno de Expediente">
+    <description><![CDATA[Código do fluxo: SG_CONTRETEXP
+
+Descrição: Fluxo destinado a gestão de retorno de expedientes dos processos..
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Nó de Desvio - (SG) Controle de Retorno de Expediente">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -17,20 +24,20 @@
     <task-node end-tasks="true" name="(SG) Retorno de expediente - ENCAMINHAR">
         <task name="(SG) Retorno de expediente - ENCAMINHAR" swimlane="Secretaria">
             <controller>
-                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
-                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: label_informacao
+1. Variável: aviso1
    Label: O controle de retorno de expediente será realizado automaticamente de acordo com cada expediente aberto do processo. Clique em "Encaminhar automaticamente para controle de retorno dos expedientes", para prosseguir.
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso
 
-2. Variável: MovimentarLote
-   Label: Movimentar em lote
+2. Variável: movimentacaoLote
+   Label:
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote]]></description>
@@ -40,10 +47,10 @@
         </transition>
         <transition to="(SG) Separação em controle de retorno de expediente" name="Encaminhar automaticamente para controle de retorno dos expedientes"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <fork name="(SG) Separação em controle de retorno de expediente">

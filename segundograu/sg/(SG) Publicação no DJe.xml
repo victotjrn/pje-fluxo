@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Publicação no DJe">
-    <description><![CDATA[...]]></description>  
+    <description><![CDATA[Código do fluxo: SG_PUBDJE
+ 
+Descrição: Fluxo destinado a publicação de expedientes no diário da justiça eletrônico.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Publicação no DJe">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,599:1469')}"/>
-    </swimlane>
-    <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('599:1469')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
@@ -31,7 +33,13 @@
    Label: Expedientes
    Escrita: Sim
    Obrig.: Não
-   Tipo: Frame]]></description>
+   Tipo: Frame
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (SG) Publicação no DJe" name="Nó de Desvio - (SG) Publicação no DJe">
             <condition expression="#{true}"/>

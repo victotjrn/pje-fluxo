@@ -13,7 +13,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Nó de Desvio - (SG) Cumprimento de decisão">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -36,12 +36,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) É expedir outros documentos?" name="(SG) É expedir outros documentos?"/>
         <transition to="(SG) É publicar no DJe?" name="(SG) É publicar no DJe?"/>
     </fork>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_apensar_desapensar') == true ? '(SG) Apensamento ou desapensamento - ANALISAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É apensar ou desapensar?">
-        <transition to="(SG) Apensamento ou desapensamento - ANALISAR" name="(SG) Apensamento ou desapensamento - ANALISAR"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_apensar_desapensar') == true ? '(SG) Apensamento ou desapensamento - ANALISAR - antiga' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É apensar ou desapensar?">
+        <transition to="(SG) Apensamento ou desapensamento - ANALISAR - antiga" name="(SG) Apensamento ou desapensamento - ANALISAR - antiga"/>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Apensamento ou desapensamento - ANALISAR">
-        <task name="(SG) Apensamento ou desapensamento - ANALISAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Apensamento ou desapensamento - ANALISAR - antiga">
+        <task name="(SG) Apensamento ou desapensamento - ANALISAR - antiga" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_associarProcessos" mapped-name="frame:Processo_Fluxo_associarProcessos" access="read,write"/>
             </controller>
@@ -99,39 +99,23 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
     </decision>
     <process-state name="(SG) Expedição de intimação ou citação">
-        <sub-process name="(SG) Preparar Ato de Comunicação" binding="late"/>
+        <sub-process name="(SG) Preparar ato de comunicação" binding="late"/>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:pac:intimar_citar', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:pac:intimar_citar_mp', false)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:intimar_citar')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:intimar_citar_mp')}"/>
-        </event>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_intimar_citar_mp') == true ? '(SG) Expedição de intimação ou citação ao MP' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É intimação ou citação ao MP?">
         <transition to="(SG) Expedição de intimação ou citação ao MP" name="(SG) Expedição de intimação ou citação ao MP"/>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
     </decision>
     <process-state name="(SG) Expedição de intimação ou citação ao MP">
-        <sub-process name="(SG) Preparar Ato de Comunicação" binding="late"/>
+        <sub-process name="(SG) Preparar ato de comunicação ao MP" binding="late"/>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:pac:intimar_citar_mp', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:pac:intimar_citar', false)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:intimar_citar_mp')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:pac:intimar_citar')}"/>
-        </event>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_expedir_carta') == true ? '(SG) Expedição de carta de ordem, precatória e(ou) rogatória' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É expedir carta?">
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
         <transition to="(SG) Expedição de carta de ordem, precatória e(ou) rogatória" name="(SG) Expedição de carta de ordem, precatória e(ou) rogatória"/>
     </decision>
     <process-state name="(SG) Expedição de carta de ordem, precatória e(ou) rogatória">
-        <sub-process name="(SG) Preparar Ato de Comunicação de Carta" binding="late"/>
+        <sub-process name="(SG) Expedição de Carta de ordem, precatória ou rogatória" binding="late"/>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_expedir_mandado') == true ? '(SG) Expedição de mandado' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É expedir mandado?">
@@ -139,7 +123,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
     </decision>
     <process-state name="(SG) Expedição de mandado">
-        <sub-process name="(SG) Preparar Ato de Comunicação de Mandado" binding="late"/>
+        <sub-process name="(SG) Preparar ato de comunicação de mandado" binding="late"/>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_expedir_alvara') == true ? '(SG) Expedição de alvará' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É expedir alvará?">
@@ -165,15 +149,15 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Expedição de ofício" name="(SG) Expedição de ofício"/>
     </decision>
     <process-state name="(SG) Expedição de ofício">
-        <sub-process name="(SG) Preparar Ato de Comunicação de Ofício" binding="late"/>
+        <sub-process name="(SG) Preparar ato de comunicação de ofício" binding="late"/>
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
     </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_encerrar_expediente') == true ? '(SG) Expedientes - ENCERRAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É encerrar expediente manualmente?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_encerrar_expediente') == true ? '(SG) Expedientes - ENCERRAR - antiga' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É encerrar expediente manualmente?">
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
-        <transition to="(SG) Expedientes - ENCERRAR" name="(SG) Expedientes - ENCERRAR"/>
+        <transition to="(SG) Expedientes - ENCERRAR - antiga" name="(SG) Expedientes - ENCERRAR - antiga"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Expedientes - ENCERRAR">
-        <task name="(SG) Expedientes - ENCERRAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Expedientes - ENCERRAR - antiga">
+        <task name="(SG) Expedientes - ENCERRAR - antiga" swimlane="Secretaria">
             <controller>
                 <variable name="WEB-INF_xhtml_flx_exped_encerrarExpedienteManual" mapped-name="frame:WEB-INF_xhtml_flx_exped_encerrarExpedienteManual" access="read,write"/>
             </controller>
@@ -196,12 +180,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_retificar_tipo_documento') == true ? '(SG) Tipo de documento - RETIFICAR' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É retificar tipo de documento?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg_fbg_retificar_tipo_documento') == true ? '(SG) Tipo de documento - RETIFICAR - antiga' : '(SG) Junção em cumprimento de decisão'}" name="(SG) É retificar tipo de documento?">
         <transition to="(SG) Junção em cumprimento de decisão" name="(SG) Junção em cumprimento de decisão"/>
-        <transition to="(SG) Tipo de documento - RETIFICAR" name="(SG) Tipo de documento - RETIFICAR"/>
+        <transition to="(SG) Tipo de documento - RETIFICAR - antiga" name="(SG) Tipo de documento - RETIFICAR - antiga"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Tipo de documento - RETIFICAR">
-        <task name="(SG) Tipo de documento - RETIFICAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Tipo de documento - RETIFICAR - antiga">
+        <task name="(SG) Tipo de documento - RETIFICAR - antiga" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_documento_reclassificar" mapped-name="frame:Processo_Fluxo_documento_reclassificar" access="read,write"/>
             </controller>
@@ -251,9 +235,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Cumprimento de decisão">
         <task name="Nó de Desvio - (SG) Cumprimento de decisão" swimlane="Nó de Desvio - (SG) Cumprimento de decisão"/>
         <transition to="Término" name="Término"/>
-        <transition to="(SG) Apensamento ou desapensamento - ANALISAR" name="(SG) Apensamento ou desapensamento - ANALISAR"/>
-        <transition to="(SG) Expedientes - ENCERRAR" name="(SG) Expedientes - ENCERRAR"/>
-        <transition to="(SG) Tipo de documento - RETIFICAR" name="(SG) Tipo de documento - RETIFICAR"/>
+        <transition to="(SG) Apensamento ou desapensamento - ANALISAR - antiga" name="(SG) Apensamento ou desapensamento - ANALISAR - antiga"/>
+        <transition to="(SG) Expedientes - ENCERRAR - antiga" name="(SG) Expedientes - ENCERRAR - antiga"/>
+        <transition to="(SG) Tipo de documento - RETIFICAR - antiga" name="(SG) Tipo de documento - RETIFICAR - antiga"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

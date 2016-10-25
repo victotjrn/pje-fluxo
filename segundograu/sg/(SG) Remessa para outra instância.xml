@@ -10,7 +10,7 @@ Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
 Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Remessa para outra instância">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
@@ -59,41 +59,53 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label: Movimento de remessa foi lançado no processo. Aguarde-se o julgamento até que o processo seja devolvido pela instância superior correspondente. Após isso, registre a baixa e siga normalmente no fluxo.
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso]]></description>
+   Tipo: Aviso
+
+2. Variável: MovimentarLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar movimentação em lote]]></description>
         <transition to="Nó de Desvio - (SG) Remessa para outra instância" name="Nó de Desvio - (SG) Remessa para outra instância">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Lançar movimento de recebido os autos" name="Registrar baixa do processo devolvido pelo STF"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Remessa para o STJ - AGUARDAR">
         <task name="(SG) Remessa para o STJ - AGUARDAR" swimlane="Secretaria">
             <controller>
-                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
-                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: label_informacao
+1. Variável: aviso1
    Label: Movimento de remessa foi lançado no processo. Aguarde-se o julgamento até que o processo seja devolvido pela instância superior correspondente. Após isso, registre a baixa e siga normalmente no fluxo.
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso]]></description>
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar movimentação em lote]]></description>
         <transition to="Nó de Desvio - (SG) Remessa para outra instância" name="Nó de Desvio - (SG) Remessa para outra instância">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Lançar movimento de recebido os autos" name="Registrar baixa do processo devolvido pelo STJ"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <node name="(SG) Lançar movimento de recebido os autos">
@@ -115,7 +127,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: Intercomunicacao_retornoProcesso
-   Label: Remessa ao primeiro grau
+   Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
@@ -127,23 +139,23 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Remessa para o primeiro grau concluída')}"/>
-            <action expression="#{taskInstanceUtil.setVariable('comboMotivoRemessa','18;37,38,39,40,90')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Remessa para o primeiro grau concluída')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('comboMotivoRemessa', '18;37,38,39,40,90')}"/>
         </event>
         <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('comboMotivoRemessa')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Remessa para o primeiro grau concluída">
         <task name="(SG) Remessa para o primeiro grau concluída" swimlane="Secretaria">
             <controller>
-                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: label_informacao
+1. Variável: aviso1
    Label: Processo devolvido ao primeiro grau.
    Escrita: Sim
    Obrig.: Não
@@ -155,10 +167,10 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <end-state name="Término"/>

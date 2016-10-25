@@ -10,7 +10,7 @@ Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
 Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Controle de prazos de mandados">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
@@ -28,20 +28,20 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="(SG) Mandado pendente de cumprimento - AGUARDAR">
         <task name="(SG) Mandado pendente de cumprimento - AGUARDAR" swimlane="Secretaria">
             <controller>
-                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
-                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: label_informacao
+1. Variável: aviso1
    Label: Mandado expedido e encaminhado para central de mandados. Após cumprimento pelo oficial de justiça, favor, movimentar o processo através da próxima ação abaixo.
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso
 
-2. Variável: MovimentarLote
-   Label: Movimentar em lote
+2. Variável: movimentacaoLote
+   Label:
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote]]></description>
@@ -49,18 +49,186 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Separação em mandado com ou sem prazo" name="Verificar existência de prazo"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
+    <fork name="(SG) Separação em mandado com ou sem prazo">
+        <transition to="(SG) Existe prazo de mandado em aberto?" name="(SG) Existe prazo de mandado em aberto?"/>
+        <transition to="(SG) Existe mandado sem prazo?" name="(SG) Existe mandado sem prazo?"/>
+    </fork>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = 65 OR pe.tipoProcessoDocumento.idTipoProcessoDocumento = 60 AND pe.meioExpedicaoExpediente IN ('M') AND ppe.dtCienciaParte IS NOT NULL AND ppe.fechado = false AND ppe.tipoPrazo &lt;&gt; 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa com prazo?' : '(SG) Junção em mandado com ou sem prazo'}" name="(SG) Existe prazo de mandado em aberto?">
+        <transition to="(SG) Junção em mandado com ou sem prazo" name="(SG) Junção em mandado com ou sem prazo"/>
+        <transition to="(SG) Existe registro do processo na tarefa com prazo?" name="(SG) Existe registro do processo na tarefa com prazo?"/>
+    </decision>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(SG) Mandado com prazo em curso - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Junção em mandado com ou sem prazo' : '(SG) Mandado com prazo em curso - AGUARDAR'}" name="(SG) Existe registro do processo na tarefa com prazo?">
+        <transition to="(SG) Mandado com prazo em curso - AGUARDAR" name="(SG) Mandado com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Junção em mandado com ou sem prazo" name="(SG) Junção em mandado com ou sem prazo"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Mandado com prazo em curso - AGUARDAR">
+        <task name="(SG) Mandado com prazo em curso - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo contém mandado com prazo em curso. Após o fechamento de todos os prazos que estão abertos dos mandados, o processo será encaminhado automaticamente para tarefa "(SG) Mandado com prazo decorrido".
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (SG) Controle de prazos de mandados" name="Nó de Desvio - (SG) Controle de prazos de mandados">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Junção em mandado com ou sem prazo" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Ainda existe prazo de mandado em aberto?" name="Verificar existência de prazo">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Verificar existência de prazo')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = 60 OR pe.tipoProcessoDocumento.idTipoProcessoDocumento = 65 AND pe.meioExpedicaoExpediente IN ('M') AND ppe.fechado = false AND ppe.tipoPrazo &lt;&gt; 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Mandado com prazo em curso - AGUARDAR' : '(SG) Mandado com prazo decorrido - ANALISAR'}" name="(SG) Ainda existe prazo de mandado em aberto?">
+        <transition to="(SG) Mandado com prazo em curso - AGUARDAR" name="(SG) Mandado com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Mandado com prazo decorrido - ANALISAR" name="(SG) Mandado com prazo decorrido - ANALISAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Mandado com prazo decorrido - ANALISAR">
+        <task name="(SG) Mandado com prazo decorrido - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Mandados com prazos decorridos. Clique na próxima ação para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (SG) Controle de prazos de mandados" name="Nó de Desvio - (SG) Controle de prazos de mandados">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Junção em mandado com ou sem prazo" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = 60 OR pe.tipoProcessoDocumento.idTipoProcessoDocumento = 65 AND pe.meioExpedicaoExpediente IN ('M') AND ppe.dtCienciaParte IS NOT NULL AND ppe.fechado = false AND ppe.tipoPrazo = 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa sem prazo?' : '(SG) Junção em mandado com ou sem prazo'}" name="(SG) Existe mandado sem prazo?">
+        <transition to="(SG) Junção em mandado com ou sem prazo" name="(SG) Junção em mandado com ou sem prazo"/>
+        <transition to="(SG) Existe registro do processo na tarefa sem prazo?" name="(SG) Existe registro do processo na tarefa sem prazo?"/>
+    </decision>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(SG) Mandado sem prazo pendente de resposta - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Junção em mandado com ou sem prazo' : '(SG) Mandado sem prazo pendente de resposta - AGUARDAR'}" name="(SG) Existe registro do processo na tarefa sem prazo?">
+        <transition to="(SG) Mandado sem prazo pendente de resposta - AGUARDAR" name="(SG) Mandado sem prazo pendente de resposta - AGUARDAR"/>
+        <transition to="(SG) Junção em mandado com ou sem prazo" name="(SG) Junção em mandado com ou sem prazo"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Mandado sem prazo pendente de resposta - AGUARDAR">
+        <task name="(SG) Mandado sem prazo pendente de resposta - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo encontra-se com mandado expedido sem prazo. Mantenha-o nesta tarefa caso queira aguardar a resposta ou clique na próxima ação abaixo para cancelar e sair da tarefa.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (SG) Controle de prazos de mandados" name="Nó de Desvio - (SG) Controle de prazos de mandados">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Junção em mandado com ou sem prazo" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Existe mandado sem prazo ainda aberto?" name="(SG) Existe mandado sem prazo ainda aberto?">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Existe mandado sem prazo ainda aberto?')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = 60 OR pe.tipoProcessoDocumento.idTipoProcessoDocumento = 65 AND pe.meioExpedicaoExpediente IN ('M') AND ppe.fechado = false AND ppe.tipoPrazo = 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Mandado sem prazo e fechado - ANALISAR' : '(SG) Mandado sem prazo pendente de resposta - AGUARDAR'}" name="(SG) Existe mandado sem prazo ainda aberto?">
+        <transition to="(SG) Mandado sem prazo e fechado - ANALISAR" name="(SG) Mandado sem prazo e fechado - ANALISAR"/>
+        <transition to="(SG) Mandado sem prazo pendente de resposta - AGUARDAR" name="(SG) Mandado sem prazo pendente de resposta - AGUARDAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Mandado sem prazo e fechado - ANALISAR">
+        <task name="(SG) Mandado sem prazo e fechado - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Mandados com prazos fechados. Clique na próxima ação para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="(SG) Junção em mandado com ou sem prazo" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (SG) Controle de prazos de mandados" name="Nó de Desvio - (SG) Controle de prazos de mandados">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <join name="(SG) Junção em mandado com ou sem prazo">
+        <transition to="Término" name="Término"/>
+    </join>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Controle de prazos de mandados">
         <task name="Nó de Desvio - (SG) Controle de prazos de mandados" swimlane="Nó de Desvio - (SG) Controle de prazos de mandados"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Mandado pendente de cumprimento - AGUARDAR" name="(SG) Mandado pendente de cumprimento - AGUARDAR"/>
+        <transition to="(SG) Mandado com prazo em curso - AGUARDAR" name="(SG) Mandado com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Mandado com prazo decorrido - ANALISAR" name="(SG) Mandado com prazo decorrido - ANALISAR"/>
+        <transition to="(SG) Mandado sem prazo pendente de resposta - AGUARDAR" name="(SG) Mandado sem prazo pendente de resposta - AGUARDAR"/>
+        <transition to="(SG) Mandado sem prazo e fechado - ANALISAR" name="(SG) Mandado sem prazo e fechado - ANALISAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
@@ -110,5 +278,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>

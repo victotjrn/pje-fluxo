@@ -10,7 +10,7 @@ Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
 Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Cancelamento da distribuição">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
@@ -38,18 +38,20 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Lançar movimento de cancelamento da distribuição" name="Confirmar cancelamento da distribuição"/>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <node name="(SG) Lançar movimento de cancelamento da distribuição">
         <transition to="(SG) ~Cancelamento da distribuição confirmado" name="(SG) ~Cancelamento da distribuição confirmado"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(488).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:andamento')}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:arquivado')}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="(SG) ~Cancelamento da distribuição confirmado">
@@ -70,14 +72,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <transition to="(SG) Preparação de decisão sobre reativação" name="Enviar concluso sobre reativação"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <process-state name="(SG) Preparação de decisão sobre reativação">
-        <sub-process name="(SG) Preparar Ato Judicial" binding="late"/>
+        <sub-process name="(SG) Preparar ato judicial" binding="late"/>
         <transition to="(SG) Manter cancelamento da distribuição?" name="(SG) Manter cancelamento da distribuição?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
@@ -93,9 +95,17 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) ~Cancelamento da distribuição confirmado" name="(SG) ~Cancelamento da distribuição confirmado"/>
     </decision>
     <node name="(SG) Lançar movimento de reativação">
-        <transition to="Término" name="Término"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(849).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:arquivado')}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:andamento')}"/>
+        </event>
+    </node>
+    <node name="(SG) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:arq:manter_arquivado')}"/>
         </event>
     </node>
     <end-state name="Término"/>

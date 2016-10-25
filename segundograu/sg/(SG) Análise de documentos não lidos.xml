@@ -10,7 +10,7 @@ Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
 Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Análise de documentos não lidos">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:-1')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}"/>
@@ -28,20 +28,20 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="(SG) Documentos não lidos [Ministério Público] - ANALISAR">
         <task name="(SG) Documentos não lidos [Ministério Público] - ANALISAR" swimlane="Secretaria">
             <controller>
-                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: MovimentarLote
-   Label: Movimentar em lote
+1. Variável: movimentacaoLote
+   Label:
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote
 
 2. Variável: WEB-INF_xhtml_flx_visualizarPeticao
-   Label: Documento não lido
+   Label:
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
@@ -50,11 +50,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Defensoria Pública') &gt; -1 ? '(SG) Documentos não lidos [Defensoria] - ANALISAR' : '(SG) Foi juntado pela Procuradoria?'}" name="(SG) Foi juntado pela Defensoria?">
@@ -64,20 +64,20 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="(SG) Documentos não lidos [Defensoria] - ANALISAR">
         <task name="(SG) Documentos não lidos [Defensoria] - ANALISAR" swimlane="Secretaria">
             <controller>
-                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: MovimentarLote
-   Label: Movimentar em lote
+1. Variável: movimentacaoLote
+   Label:
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote
 
 2. Variável: WEB-INF_xhtml_flx_visualizarPeticao
-   Label: Documento não lido
+   Label:
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
@@ -86,11 +86,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Procuradoria') &gt; -1 ? '(SG) Documentos não lidos [Procuradoria] - ANALISAR' : '(SG) Documentos não lidos - ANALISAR'}" name="(SG) Foi juntado pela Procuradoria?">
@@ -100,20 +100,20 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="(SG) Documentos não lidos [Procuradoria] - ANALISAR">
         <task name="(SG) Documentos não lidos [Procuradoria] - ANALISAR" swimlane="Secretaria">
             <controller>
-                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: MovimentarLote
-   Label: Movimentar em lote
+1. Variável: movimentacaoLote
+   Label:
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote
 
 2. Variável: WEB-INF_xhtml_flx_visualizarPeticao
-   Label: Documento não lido
+   Label:
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
@@ -122,30 +122,30 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <transition to="Término" name="Marcar documento como lido e finalizar a tarefa"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Documentos não lidos - ANALISAR">
         <task name="(SG) Documentos não lidos - ANALISAR" swimlane="Secretaria">
             <controller>
-                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
                 <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: MovimentarLote
-   Label: Movimentar em lote
+1. Variável: movimentacaoLote
+   Label:
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote
 
 2. Variável: WEB-INF_xhtml_flx_visualizarPeticao
-   Label: Documento não lido
+   Label:
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
@@ -154,11 +154,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </transition>
         <transition to="Término" name="Marcar documento como lido e finalizar a tarefa"/>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
             <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <end-state name="Término"/>
