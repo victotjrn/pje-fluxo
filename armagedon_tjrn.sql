@@ -1,4 +1,8 @@
-﻿begin;
+﻿/*
+Versões compatíveis do PJe: 1.7.2.x
+*/
+
+begin;
 
 create temporary table armagedon_proc ( id integer ) on commit delete rows;
 insert into armagedon_proc
