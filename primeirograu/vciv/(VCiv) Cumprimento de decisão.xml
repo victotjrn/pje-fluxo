@@ -6,11 +6,11 @@
     <swimlane name="Nó de Desvio - (VCiv) Cumprimento de decisão">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Conciliação">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,7:5197,7:5886,6:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria e Servidor de cálculo">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:5891')}"/>
@@ -203,7 +203,7 @@
         </transition>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="Ignorar envio à instância superior"/>
         <transition to="(VCiv) Encaminhar para instância superior - eletronicamente" name="Encaminhar para instância superior - eletronicamente">
-            <condition expression="#{processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10)}"/>
+            <condition expression="#{processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10) || ' 49 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat(' '))}"/>
         </transition>
         <transition to="(VCiv) Encaminhar para instância superior - fisicamente" name="Encaminhar para instância superior - fisicamente"/>
     </task-node>
