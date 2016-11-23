@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Preparar Ato Judicial">
-    <description><![CDATA[Permite elaborar minuta de atos judiciais (decisões e despachos)...]]></description>  
+    <description><![CDATA[Permite elaborar minuta de atos judiciais (decisões e despachos).....]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (TR) Preparar Ato Judicial"/>
     <swimlane name="Assessoria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5197,6:1469,8:1338')}" actor-id="#{actor.id}"/>
     </swimlane>
+    <swimlane name="Nó de Desvio - (TR) Preparar Ato Judicial"/>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:5197,8:1338')}"/>
     </swimlane>  
@@ -14,6 +14,9 @@
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Assessoria"/>
         <transition to="(TR) É decisão?" name="(TR) É decisão?"/>
+        <event type="node-enter">
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
+        </event>
     </start-state>  
     <!-- NODES -->
     <task-node end-tasks="true" name="Nó de Desvio - (TR) Preparar Ato Judicial">
@@ -98,6 +101,7 @@
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:paj:decisao_urgencia') ? '(TR) Concluso para decisão de urgência' : '(TR) É decisão genérica?'}" name="(TR) É decisão de urgência?">
@@ -152,6 +156,7 @@
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:paj:decisao_generica') ? '(TR) Concluso para decisão' : '(TR) É decisão de agravo regimental?'}" name="(TR) É decisão genérica?">
@@ -206,6 +211,7 @@
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:paj:decisao_agravo_regimental') ? '(TR) Concluso para decisão de agravo regimental' : '(TR) É decisão de agravo interno?'}" name="(TR) É decisão de agravo regimental?">
@@ -260,6 +266,7 @@
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:paj:decisao_agravo_interno') ? '(TR) Concluso para decisão de agravo interno' : '(TR) É decisão de extinção?'}" name="(TR) É decisão de agravo interno?">
@@ -314,6 +321,7 @@
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:paj:decisao_extincao') ? '(TR) Concluso para decisão de extinção' : '(TR) É decisão de reativação?'}" name="(TR) É decisão de extinção?">
@@ -368,6 +376,7 @@
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:paj:decisao_reativacao') ? '(TR) Concluso para decisão de reativação' : '(TR) É decisão de embargos de declaração?'}" name="(TR) É decisão de reativação?">
@@ -422,6 +431,7 @@
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:paj:decisao_embargos_declaracao') ? '(TR) Concluso para decisão de embargos de declaração' : 'Término'}" name="(TR) É decisão de embargos de declaração?">
@@ -476,6 +486,7 @@
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:paj:despacho') ? '(TR) Lançar movimento conclusos para despacho' : 'Término'}" name="(TR) É despacho?">
@@ -533,6 +544,9 @@
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
         </event>
+        <event type="task-start">
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+        </event>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:paj:despacho_generico') ? '(TR) Concluso para despacho' : '(TR) É despacho de cumprimento de acórdão?'}" name="(TR) É despacho genérico?">
         <transition to="(TR) Concluso para despacho" name="(TR) Concluso para despacho"/>
@@ -585,6 +599,7 @@
         </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('Processo_Fluxo_revisarMinuta','63,64')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(TR) Certificar Conclusão sem Efeito">
