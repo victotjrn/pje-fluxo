@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Remessa para a presidência">
-    <description><![CDATA[..]]></description>  
+    <description><![CDATA[...]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (TR) Remessa para a presidência">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -18,7 +18,7 @@
     <node name="(TR) Enviar para a presidência">
         <transition to="(TR) É decisão para presidência?" name="(TR) É decisão para presidência?"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado == 2 ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino',4) : (tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado == 3 ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino',7) : tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino',9))}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado == 2 ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino',4) : (tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado == 3 ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino',5) : tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino',9))}"/>
             <action expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado == 2 ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino',7) : (tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado == 3 ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino',10) : tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino',9))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino',tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado)}"/>
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
