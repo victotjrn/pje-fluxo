@@ -356,6 +356,13 @@ select id_papel, membro_do_grupo from (select 5679 as id_papel, 5238 as membro_d
 select id_papel, membro_do_grupo from (select 5200 as id_papel, 5001 as membro_do_grupo ) /* Perito > /pages/Painel/Perito/listView.seam */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
 select id_papel, membro_do_grupo from (select 5200 as id_papel, 5322 as membro_do_grupo ) /* Perito > Página Perícia/Solicitação de Antecipação de Pagamento (Perito) */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
 
+-- Jus Postulandi
+select id_papel, membro_do_grupo from (select 5788 as id_papel, 5238 as membro_do_grupo ) /* Jus Postulandi > Página Audiência/Pauta de Audiência */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
+select id_papel, membro_do_grupo from (select 5788 as id_papel, 5807 as membro_do_grupo ) /* Jus Postulandi > Página Processo/Cadastro/jusPostulandi.menutext */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
+select id_papel, membro_do_grupo from (select 5788 as id_papel, 5327 as membro_do_grupo ) /* Jus Postulandi > Página Processo/Consulta/Processos Não Protocolados */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
+select id_papel, membro_do_grupo from (select 5788 as id_papel, 5837 as membro_do_grupo ) /* Jus Postulandi > Minhas Assinaturas Push */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
+select id_papel, membro_do_grupo from (select 5788 as id_papel, 5238 as membro_do_grupo ) /* Jus Postulandi > Página Audiência/Pauta de Audiência */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
+
 select 0,0 where 1=0;
 
 commit;
