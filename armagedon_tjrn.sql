@@ -1,14 +1,15 @@
 ﻿/*
 Versões compatíveis do PJe: 1.7.2.x
-*/
 
--- select * from tb_processo_evento_temp limit 10
+Melhor executado via psql.
+*/
 
 begin;
 
-create temporary table armagedon_proc ( id integer ) on commit delete rows;
+create temporary table armagedon_proc ( id integer ) on commit drop;
 insert into armagedon_proc
-select id_processo_trf from tb_processo_trf where dt_autuacao between '2014-05-04 00:00:00.000' and '2014-05-05 23:59:59.999';
+select id_processo_trf from tb_processo_trf where dt_autuacao between '2014-05-05 00:00:00.000' and '2014-05-05 07:59:59.999'
+order by id_processo_trf;
 
 delete from tb_sessao_comp_processo where id_processo_trf in ( select id from armagedon_proc );
 delete from tb_sessao_proc_doc_voto where id_processo_trf in ( select id from armagedon_proc );
@@ -69,6 +70,7 @@ delete from tb_proc_doc_ptcao_nao_lida where id_processo_documento in ( select i
 delete from tb_sessao_proc_doc_voto where id_sessao_proc_documento_voto in ( select id_sessao_processo_documento from tb_sessao_proc_documento where id_processo_documento in ( select id_processo_documento from tb_processo_documento where id_processo in ( select id from armagedon_proc ) ) );
 delete from tb_sessao_proc_documento where id_processo_documento in ( select id_processo_documento from tb_processo_documento where id_processo in ( select id from armagedon_proc ) );
 delete from tb_complemento_segmentado where id_movimento_processo in ( select id_processo_evento from tb_processo_evento where id_processo in ( select id from armagedon_proc ) );
+
 delete from tb_processo_evento where id_processo in ( select id from armagedon_proc );
 delete from tb_doc_validacao_hash where id_processo_documento in ( select id_processo_documento from tb_processo_documento where id_processo in ( select id from armagedon_proc ) );
 delete from tb_resposta_expediente where id_processo_documento in ( select id_processo_documento from tb_processo_documento where id_processo in ( select id from armagedon_proc ) );
