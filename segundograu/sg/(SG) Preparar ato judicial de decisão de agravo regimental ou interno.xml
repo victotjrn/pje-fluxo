@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar ato judicial de decisão de agravo regimental ou interno">
+    <description><![CDATA[Código do fluxo: SG_PAJ_DEC_AGR_REG_INT.
+
+Descrição: Fluxo destinado ao preparo de atos judiciais de decisões de agravo regimental ou interno.
+
+Raia        Localização              Papel
+Assessoria  Assessoria Segundo Grau  Assessoria
+            Assessoria Segundo Grau  Assessor Chefe
+            Assessoria Segundo Grau  Assessor para Votação Antecipada
+            Gabinete Segundo Grau    Magistrado
+Magistrado  Assessoria Segundo Grau  Assessoria
+            Assessoria Segundo Grau  Assessor Chefe
+            Assessoria Segundo Grau  Assessor para Votação Antecipada
+            Gabinete Segundo Grau    Magistrado]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SG) Preparar ato judicial de decisão de agravo regimental ou interno">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Assessoria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Magistrado">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Assessoria"/>
+        <transition to="(SG) Concluso para decisão de agravo regimental ou interno - MINUTAR" name="(SG) Concluso para decisão de agravo regimental ou interno - MINUTAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(SG) Concluso para decisão de agravo regimental ou interno - MINUTAR">
+        <task name="(SG) Concluso para decisão de agravo regimental ou interno - MINUTAR" swimlane="Assessoria">
+            <controller>
+                <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
+                <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: minuta_ato_judicial
+   Label: Minuta em elaboração
+   Escrita: Sim
+   Obrig. Sim
+   Tipo: Editor
+
+2. Variável: minutarLote
+   Label: Minutar em lote
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Minutar em Lote
+
+*Eventos de Tarefa*
+
+1. Tipo do evento: Sair Tarefa
+   Agrupamento eventos: Magistrado
+   Condição para lançamento temporário: #{true}]]></description>
+        <transition to="(SG) Concluso para decisão de agravo regimental ou interno - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(SG) Concluso para decisão de agravo regimental ou interno - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
+        <transition to="(SG) Gravar variável de cancelamento de conclusão" name="Alterar escolha do tipo de conclusão"/>
+        <transition to="Nó de Desvio - (SG) Preparar ato judicial de decisão de agravo regimental ou interno" name="Nó de Desvio - (SG) Preparar ato judicial de decisão de agravo regimental ou interno">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar escolha do tipo de conclusão')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+        </event>
+        <event type="task-start">
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Concluso para decisão de agravo regimental ou interno - CONFIRMAR">
+        <task name="(SG) Concluso para decisão de agravo regimental ou interno - CONFIRMAR" swimlane="Assessoria">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Movimentação em Lote
+
+3. Variável: assinaturaLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="(SG) Concluso para decisão de agravo regimental ou interno - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(SG) Concluso para decisão de agravo regimental ou interno - MINUTAR" name="Retornar para minuta"/>
+        <transition to="(SG) Enviar autos à secretaria" name="(SG) Enviar autos à secretaria">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Enviar autos à secretaria" name="Documento já assinado! Encaminhar para secretaria">
+            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <transition to="Nó de Desvio - (SG) Preparar ato judicial de decisão de agravo regimental ou interno" name="Nó de Desvio - (SG) Preparar ato judicial de decisão de agravo regimental ou interno">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Enviar autos à secretaria')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Concluso para decisão de agravo regimental ou interno - ASSINAR">
+        <task name="(SG) Concluso para decisão de agravo regimental ou interno - ASSINAR" swimlane="Magistrado">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Movimentação em Lote
+
+3. Variável: assinaturaLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="(SG) Concluso para decisão de agravo regimental ou interno - MINUTAR" name="Retornar para minuta"/>
+        <transition to="(SG) Concluso para decisão de agravo regimental ou interno - CONFIRMAR" name="Retornar para confirmação da minuta"/>
+        <transition to="(SG) Enviar autos à secretaria" name="(SG) Enviar autos à secretaria">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Enviar autos à secretaria" name="Documento já assinado! Encaminhar para secretaria">
+            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <transition to="Nó de Desvio - (SG) Preparar ato judicial de decisão de agravo regimental ou interno" name="Nó de Desvio - (SG) Preparar ato judicial de decisão de agravo regimental ou interno">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Enviar autos à secretaria')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <process-state name="(SG) Enviar autos à secretaria">
+        <sub-process name="(SG) Autos recebidos do gabinete" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <node name="(SG) Gravar variável de cancelamento de conclusão">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:conclusao_cancelada', true)}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar ato judicial de decisão de agravo regimental ou interno">
+        <task name="Nó de Desvio - (SG) Preparar ato judicial de decisão de agravo regimental ou interno" swimlane="Nó de Desvio - (SG) Preparar ato judicial de decisão de agravo regimental ou interno"/>
+        <transition to="(SG) Concluso para decisão de agravo regimental ou interno - MINUTAR" name="(SG) Concluso para decisão de agravo regimental ou interno - MINUTAR"/>
+        <transition to="(SG) Concluso para decisão de agravo regimental ou interno - CONFIRMAR" name="(SG) Concluso para decisão de agravo regimental ou interno - CONFIRMAR"/>
+        <transition to="(SG) Concluso para decisão de agravo regimental ou interno - ASSINAR" name="(SG) Concluso para decisão de agravo regimental ou interno - ASSINAR"/>
+        <transition to="Término" name="Término"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>

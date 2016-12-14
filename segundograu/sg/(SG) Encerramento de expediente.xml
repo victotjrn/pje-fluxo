@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Publicação no DJe">
-    <description><![CDATA[Código do fluxo: SG_PUBDJE
- 
-Descrição: Fluxo destinado a publicação de expedientes no diário da justiça eletrônico.
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Encerramento de expediente">
+    <description><![CDATA[Código do fluxo: SG_ENC_EXP
+
+Descrição: Fluxo destinado ao encerramento de expedientes. 
 
 Raia        Localização              Papel
-Secretaria  Secretaria Segundo Grau  Chefe de Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (SG) Publicação no DJe">
+    <swimlane name="Nó de Desvio - (SG) Encerramento de expediente">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
@@ -17,49 +18,38 @@ Secretaria  Secretaria Segundo Grau  Chefe de Secretaria  Secretaria Segundo Gra
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(SG) É sistema?" name="(SG) É sistema?"/>
+        <transition to="(SG) Expedientes - ENCERRAR" name="(SG) Expedientes - ENCERRAR"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'E' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Diário da Justiça Eletrônico - PUBLICAR' : 'Término'}" name="(SG) É sistema?">
-        <transition to="(SG) Diário da Justiça Eletrônico - PUBLICAR" name="(SG) Diário da Justiça Eletrônico - PUBLICAR"/>
-        <transition to="Término" name="Término"/>
-    </decision>
-    <task-node end-tasks="true" name="(SG) Diário da Justiça Eletrônico - PUBLICAR">
-        <task name="(SG) Diário da Justiça Eletrônico - PUBLICAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Expedientes - ENCERRAR">
+        <task name="(SG) Expedientes - ENCERRAR" swimlane="Secretaria">
             <controller>
-                <variable name="WEB-INF_xhtml_flx_paginaExterna" mapped-name="frame:WEB-INF_xhtml_flx_paginaExterna" access="read,write"/>
-                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_exped_encerrarExpedienteManual" mapped-name="frame:WEB-INF_xhtml_flx_exped_encerrarExpedienteManual" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: WEB-INF_xhtml_flx_paginaExterna
-   Label: Expedientes
+1. Variável: WEB-INF_xhtml_flx_exped_encerrarExpedienteManual
+   Label: Encerrar expediente manualmente
    Escrita: Sim
    Obrig.: Não
-   Tipo: Frame
-
-2. Variável: movimentacaoLote
-   Label: 
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Habilitar Movimentação em Lote]]></description>
+   Tipo: Frame]]></description>
         <transition to="Término" name="Finalizar"/>
-        <transition to="Nó de Desvio - (SG) Publicação no DJe" name="Nó de Desvio - (SG) Publicação no DJe">
+        <transition to="Nó de Desvio - (SG) Encerramento de expediente" name="Nó de Desvio - (SG) Encerramento de expediente">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-assign">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:flx:paginaExterna', parametroUtil.getParametro('pje:tjrn:dje:link').concat('expedientes/').concat(tramitacaoProcessualService.obterTokenDJe()) )}"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:flx:paginaExterna')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (SG) Publicação no DJe">
-        <task name="Nó de Desvio - (SG) Publicação no DJe" swimlane="Nó de Desvio - (SG) Publicação no DJe"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Encerramento de expediente">
+        <task name="Nó de Desvio - (SG) Encerramento de expediente" swimlane="Nó de Desvio - (SG) Encerramento de expediente"/>
         <transition to="Término" name="Término"/>
-        <transition to="(SG) Diário da Justiça Eletrônico - PUBLICAR" name="(SG) Diário da Justiça Eletrônico - PUBLICAR"/>
+        <transition to="(SG) Expedientes - ENCERRAR" name="(SG) Expedientes - ENCERRAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
@@ -74,10 +64,10 @@ Secretaria  Secretaria Segundo Grau  Chefe de Secretaria  Secretaria Segundo Gra
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
+    <event type="before-signal">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="process-start">
@@ -109,6 +99,5 @@ Secretaria  Secretaria Segundo Grau  Chefe de Secretaria  Secretaria Segundo Gra
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>  
-    <!-- ACTIONS --> 
+    </event> 
 </process-definition>

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Expedição de carta de ordem, precatória ou rogatória">
+    <description><![CDATA[Código do fluxo: SG_EXP_CARTA
+
+Descrição: Preparar cartas de ordem, precatória ou rogatória. Uma vez que não está sendo usado o PAC, os prazos deverão ser controlados manualmente.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral
+Magistrado  Gabinete Segundo Grau    Magistrado
+Magistrado  Assessoria Segundo Grau  Assessor
+Magistrado  Assessoria Segundo Grau  Assessor Chefe
+Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Magistrado">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR" name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR">
+        <task name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR" swimlane="Secretaria">
+            <controller>
+                <variable name="minuta_carta" mapped-name="textEditCombo:minuta_carta" access="read,write,required"/>
+                <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: minuta_carta
+   Label: Minuta em elaboração de carta
+   Escrita: Sim
+   Obrig.: Sim
+   Tipo: Editor
+
+2. Variável: minutarLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Minutar em Lote]]></description>
+        <transition to="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória" name="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - ASSINAR" name="Encaminhar para assinatura"/>
+        <transition to="(SG) Apagar minuta não assinada de carta" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tipoDocumento.set('TipoDocumento',94,201,200)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','94,201,200')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_carta'))}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória - ASSINAR">
+        <task name="(SG) Carta de ordem, precatória ou rogatória - ASSINAR" swimlane="Magistrado">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+                <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: Assinar Minuta
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: MovimentarEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+3. Variável: AssinaturaEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória" name="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR" name="Retornar para minuta de carta de ordem, precatória ou rogatória"/>
+        <transition to="(SG) Lançar movimento de expedição de carta de ordem, precatória ou rogatória" name="(SG) Lançar movimento de expedição de carta de ordem, precatória ou rogatória">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','94,201,200')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de expedição de carta de ordem, precatória ou rogatória')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <node name="(SG) Lançar movimento de expedição de carta de ordem, precatória ou rogatória">
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória - AGUARDAR"/>
+        <event type="node-enter">
+            <action expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 178 ? preencherMovimento.deCodigo(60).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(75).lancarMovimento() : ''}"/>
+            <action expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 94 ? preencherMovimento.deCodigo(60).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(76).lancarMovimento() : ''}"/>
+            <action expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 179 ? preencherMovimento.deCodigo(60).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(77).lancarMovimento() : ''}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória - AGUARDAR">
+        <task name="(SG) Carta de ordem, precatória ou rogatória - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: label_informacao
+   Label: O processo encontra-se aguardando a devolução da carta. Ao ser devolvida, junte o Aviso de Recebimento aos autos e finalize a tarefa, caso ainda não haja nenhuma pendência.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória" name="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(SG) Apagar minuta não assinada de carta">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_carta')}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória">
+        <task name="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória" swimlane="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR" name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - ASSINAR" name="(SG) Carta de ordem, precatória ou rogatória - ASSINAR"/>
+        <transition to="(SG) Carta de ordem, precatória ou rogatória - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória - AGUARDAR"/>
+    </task-node>
+    <end-state name="Término"/>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

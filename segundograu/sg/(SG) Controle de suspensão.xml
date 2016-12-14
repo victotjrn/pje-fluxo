@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de suspensão">
     <description><![CDATA[Código do fluxo: SG_CONSUSP
 
-Descrição: Controle de suspensão processual.
+Descrição: Controle de suspensão processual. 
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
@@ -44,9 +44,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Controle de suspensão" name="Nó de Desvio - (SG) Controle de suspensão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Suspensão de processo pela relatoria - AGUARDAR" name="Suspender e aguardar a relatoria"/>
-        <transition to="(SG) Suspensão de processo pela instância superior - AGUARDAR" name="Suspender e aguardar instância superior"/>
         <transition to="(SG) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Alterar situação do processo para suspenso [relatoria]" name="Suspender e aguardar a relatoria"/>
+        <transition to="(SG) Alterar situação do processo para suspenso [Inst. Sup.]" name="Suspender e aguardar instância superior"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -54,10 +54,18 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
+    <node name="(SG) Alterar situação do processo para suspenso [relatoria]">
+        <transition to="(SG) Suspensão de processo pela relatoria - AGUARDAR" name="(SG) Suspensão de processo pela relatoria - AGUARDAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:andamento')}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+        </event>
+    </node>
     <task-node end-tasks="true" name="(SG) Suspensão de processo pela relatoria - AGUARDAR">
         <task name="(SG) Suspensão de processo pela relatoria - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -66,7 +74,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label:
    Escrita: Sim
    Obrig.: Não
-   Tipo: Habilitar Movimentação em Lote]]></description>
+   Tipo: Habilitar Movimentação em Lote
+
+2. Variável: aviso1
+   Label: O processo encontra-se suspenso, podendo ser reativado após conclusão ao magistrado.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
         <transition to="Nó de Desvio - (SG) Controle de suspensão" name="Nó de Desvio - (SG) Controle de suspensão">
             <condition expression="#{true}"/>
         </transition>
@@ -79,10 +93,18 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
+    <node name="(SG) Alterar situação do processo para suspenso [Inst. Sup.]">
+        <transition to="(SG) Suspensão de processo pela instância superior - AGUARDAR" name="(SG) Suspensão de processo pela instância superior - AGUARDAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:andamento')}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+        </event>
+    </node>
     <task-node end-tasks="true" name="(SG) Suspensão de processo pela instância superior - AGUARDAR">
         <task name="(SG) Suspensão de processo pela instância superior - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -91,7 +113,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
    Label: 
    Escrita: Sim
    Obrig.: Não
-   Tipo: Habilitar Movimentação em Lote]]></description>
+   Tipo: Habilitar Movimentação em Lote
+
+2. Variável: aviso1
+   Label: O processo encontra-se suspenso, podendo ser reativado após conclusão ao magistrado.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
         <transition to="Nó de Desvio - (SG) Controle de suspensão" name="Nó de Desvio - (SG) Controle de suspensão">
             <condition expression="#{true}"/>
         </transition>
@@ -128,6 +156,8 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(9001).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:suspenso')}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:andamento')}"/>
         </event>
     </node>
     <node name="(SG) Apagar variáveis do fluxo">

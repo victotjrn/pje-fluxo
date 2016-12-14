@@ -18,12 +18,24 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(SG) Existe intimação ou citação via correios pendente de ciência?" name="(SG) Existe intimação ou citação via correios pendente de ciência?"/>
+        <transition to="(SG) Separação em intimação ou citação" name="(SG) Separação em intimação ou citação"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa != 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'C' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Intimação ou citação pendente de AR - AGUARDAR' : '(SG) Separação em intimação ou citação com ou sem prazo'}" name="(SG) Existe intimação ou citação via correios pendente de ciência?">
+    <fork name="(SG) Separação em intimação ou citação">
+        <transition to="(SG) Existe intimação ou citação via correios pendente de ciência?" name="(SG) Existe intimação ou citação via correios pendente de ciência?"/>
+        <transition to="(SG) Existe intimação ou citação via sistema pendente de ciência?" name="(SG) Existe intimação ou citação via sistema pendente de ciência?"/>
+    </fork>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(SG) Intimação ou citação pendente de AR - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Separação em intimação ou citação com ou sem prazo' : '(SG) Intimação ou citação pendente de AR - AGUARDAR'}" name="(SG) Existe registro do processo na tarefa de aguardar AR?">
         <transition to="(SG) Intimação ou citação pendente de AR - AGUARDAR" name="(SG) Intimação ou citação pendente de AR - AGUARDAR"/>
         <transition to="(SG) Separação em intimação ou citação com ou sem prazo" name="(SG) Separação em intimação ou citação com ou sem prazo"/>
+    </decision>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa != 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'C' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa de aguardar AR?' : '(SG) Separação em intimação ou citação com ou sem prazo'}" name="(SG) Existe intimação ou citação via correios pendente de ciência?">
+        <transition to="(SG) Separação em intimação ou citação com ou sem prazo" name="(SG) Separação em intimação ou citação com ou sem prazo"/>
+        <transition to="(SG) Existe registro do processo na tarefa de aguardar AR?" name="(SG) Existe registro do processo na tarefa de aguardar AR?"/>
+    </decision>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa != 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'E' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Separação em intimação ou citação com ou sem prazo' : '(SG) Junção em intimação ou citação'}" name="(SG) Existe intimação ou citação via sistema pendente de ciência?">
+        <transition to="(SG) Separação em intimação ou citação com ou sem prazo" name="(SG) Separação em intimação ou citação com ou sem prazo"/>
+        <transition to="(SG) Junção em intimação ou citação" name="(SG) Junção em intimação ou citação"/>
     </decision>
     <task-node end-tasks="true" name="(SG) Intimação ou citação pendente de AR - AGUARDAR">
         <task name="(SG) Intimação ou citação pendente de AR - AGUARDAR" swimlane="Secretaria">
@@ -85,7 +97,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Existe expediente com prazo em aberto?" name="(SG) Existe expediente com prazo em aberto?"/>
         <transition to="(SG) Existe intimação ou citação sem prazo?" name="(SG) Existe intimação ou citação sem prazo?"/>
     </fork>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa != 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.dtCienciaParte IS NOT NULL AND ppe.tipoPrazo != 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa com prazo?' : '(SG) Junção em intimação ou citação com ou sem prazo'}" name="(SG) Existe expediente com prazo em aberto?">
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa != 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.tipoPrazo != 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa com prazo?' : '(SG) Junção em intimação ou citação com ou sem prazo'}" name="(SG) Existe expediente com prazo em aberto?">
         <transition to="(SG) Junção em intimação ou citação com ou sem prazo" name="(SG) Junção em intimação ou citação com ou sem prazo"/>
         <transition to="(SG) Existe registro do processo na tarefa com prazo?" name="(SG) Existe registro do processo na tarefa com prazo?"/>
     </decision>
@@ -166,7 +178,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa != 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.dtCienciaParte IS NOT NULL AND ppe.tipoPrazo = 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa sem prazo?' : '(SG) Junção em intimação ou citação com ou sem prazo'}" name="(SG) Existe intimação ou citação sem prazo?">
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa != 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.tipoPrazo = 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa sem prazo?' : '(SG) Junção em intimação ou citação com ou sem prazo'}" name="(SG) Existe intimação ou citação sem prazo?">
         <transition to="(SG) Junção em intimação ou citação com ou sem prazo" name="(SG) Junção em intimação ou citação com ou sem prazo"/>
         <transition to="(SG) Existe registro do processo na tarefa sem prazo?" name="(SG) Existe registro do processo na tarefa sem prazo?"/>
     </decision>
@@ -248,6 +260,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </event>
     </task-node>
     <join name="(SG) Junção em intimação ou citação com ou sem prazo">
+        <transition to="(SG) Junção em intimação ou citação" name="(SG) Junção em intimação ou citação"/>
+    </join>
+    <join name="(SG) Junção em intimação ou citação">
         <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
     </join>
     <node name="(SG) Apagar variáveis do fluxo">

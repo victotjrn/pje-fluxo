@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de prazos de carta precatória">
     <description><![CDATA[Código do fluxo: SG_CONT_PRAZOS_CARTA
 
-Descrição: Gestão de retorno e prazos de carta precatórias.
+Descrição: Gestão de retorno e prazos de carta precatórias. 
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
@@ -124,6 +124,10 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.meioExpedicaoExpediente = 'L' AND ppe.dtCienciaParte IS NOT NULL AND ppe.fechado = false AND ppe.tipoPrazo &lt;&gt; 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa com prazo?' : '(SG) Junção em carta com ou sem prazo'}" name="(SG) Existe prazo de expediente do tipo carta em aberto?">
         <transition to="(SG) Junção em carta com ou sem prazo" name="(SG) Junção em carta com ou sem prazo"/>
         <transition to="(SG) Existe registro do processo na tarefa com prazo?" name="(SG) Existe registro do processo na tarefa com prazo?"/>
+    </decision>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Junção em carta com ou sem prazo' : '(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR'}" name="(SG) Existe registro do processo na tarefa com prazo?">
+        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Junção em carta com ou sem prazo" name="(SG) Junção em carta com ou sem prazo"/>
     </decision>
     <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR">
         <task name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" swimlane="Secretaria">
@@ -246,11 +250,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
         <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR"/>
         <transition to="(SG) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR" name="(SG) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR"/>
-    </task-node>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Junção em carta com ou sem prazo' : '(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR'}" name="(SG) Existe registro do processo na tarefa com prazo?">
-        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
-        <transition to="(SG) Junção em carta com ou sem prazo" name="(SG) Junção em carta com ou sem prazo"/>
-    </decision>  
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

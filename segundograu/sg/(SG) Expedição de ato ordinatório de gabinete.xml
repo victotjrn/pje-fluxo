@@ -3,16 +3,19 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Expedição de ato ordinatório de gabinete">
     <description><![CDATA[Código do fluxo: SG_EAOG
 
-Descrição: Expedição de ato ordinatório, para retirada de concluso dispensando assinatura pelo magistrado.
+Descrição: Expedição de ato ordinatório, para retirada de concluso dispensando assinatura pelo magistrado. 
 
 Raia        Localização              Papel
-Assessoria  Assessoria Segundo Grau  Assessor]]></description>  
+Assessoria  Assessoria Segundo Grau  Assessor
+Assessoria  Assessoria Segundo Grau  Assessor Chefe
+Assessoria  Assessoria Segundo Grau  Assessor para Votação Antecipada
+Assessoria  Gabinete Segundo Grau    Magistrado]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Expedição de ato ordinatório de gabinete">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Assessoria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,600:5896')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,600:5898,600:5899,599:1469')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -23,22 +26,22 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
     <task-node end-tasks="true" name="(SG) Ato ordinatório do gabinete - EXPEDIR">
         <task name="(SG) Ato ordinatório do gabinete - EXPEDIR" swimlane="Assessoria">
             <controller>
-                <variable name="ato_ordinatorio_em_elaboracao" mapped-name="textEditSignature:ato_ordinatorio_em_elaboracao" access="read,write"/>
+                <variable name="minuta_ato_judicial" mapped-name="textEditSignature:minuta_ato_judicial" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
-                <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
+                <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: ato_ordinatorio_em_elaboracao
-   Label: Ato ordinatório
+1. Variável: minuta_ato_judicial
+   Label: Minuta em elaboração
    Escrita: Sim
    Obrig.: Não
    Tipo: Editor com Assinatura
 
 2. Variável: movimentacaoLote
-   Label: Movimentar em lote
+   Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote
@@ -50,41 +53,90 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
    Tipo: Habilitar Minutar em Lote
 
 4. Variável: assinaturaLote
-   Label: Movimentar em lote
+   Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Assinatura em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Expedição de ato ordinatório de gabinete" name="Nó de Desvio - (SG) Expedição de ato ordinatório de gabinete">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Remover ato ordinatório não assinado e sinalizar cancelamento" name="Cancelar e retornar para minuta"/>
-        <transition to="(SG) Lançar movimento de juntada de ato ordinatório" name="(SG) Lançar movimento de juntada de ato ordinatório">
-            <condition expression="#{true}"/>
-        </transition>
+        <transition to="(SG) Remover ato ordinatório não assinado e sinalizar cancelamento" name="Alterar escolha do tipo de conclusão"/>
+        <transition to="(SG) Ato ordinatório do gabinete - ASSINAR" name="Encaminhar para assinatura"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','67')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e retornar para minuta')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Lançar movimento de juntada de ato ordinatório')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar escolha do tipo de conclusão')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditSignature:ato_ordinatorio_em_elaboracao') ? tramitacaoProcessualService.gravaVariavel('pje:atoProferido', tramitacaoProcessualService.recuperaVariavelTarefa('textEditSignature:ato_ordinatorio_em_elaboracao')) : ''}"/>
         </event>
     </task-node>
+    <task-node end-tasks="true" name="(SG) Ato ordinatório do gabinete - ASSINAR">
+        <task name="(SG) Ato ordinatório do gabinete - ASSINAR" swimlane="Assessoria">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: Minuta em elaboração
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+4. Variável: assinaturaLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="Nó de Desvio - (SG) Expedição de ato ordinatório de gabinete" name="Nó de Desvio - (SG) Expedição de ato ordinatório de gabinete">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Lançar movimento de juntada de ato ordinatório" name="(SG) Lançar movimento de juntada de ato ordinatório">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Ato ordinatório do gabinete - EXPEDIR" name="Retornar para elaboração da minuta"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Lançar movimento de juntada de ato ordinatório')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','67')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+        </event>
+    </task-node>
     <node name="(SG) Lançar movimento de juntada de ato ordinatório">
-        <transition to="Término" name="Término"/>
+        <transition to="(SG) Enviar autos à secretaria" name="(SG) Enviar autos à secretaria"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(11383).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).associarAoProcesso(tramitacaoProcessualService.recuperaProcesso()).lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:eaog:assinou_ato_ordinatorio', true)}"/>
         </event>
     </node>
-    <node name="(SG) Remover ato ordinatório não assinado e sinalizar cancelamento">
+    <process-state name="(SG) Enviar autos à secretaria">
+        <sub-process name="(SG) Autos recebidos do gabinete" binding="late"/>
         <transition to="Término" name="Término"/>
+    </process-state>
+    <node name="(SG) Remover ato ordinatório não assinado e sinalizar cancelamento">
+        <transition to="(SG) Gravar variável de cancelamento de ato ordinatório" name="(SG) Gravar variável de cancelamento de ato ordinatório"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:eaog:assinou_ato_ordinatorio', false)}"/>
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('ato_ordinatorio_em_elaboracao')}"/>
+        </event>
+    </node>
+    <node name="(SG) Gravar variável de cancelamento de ato ordinatório">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:conclusao_cancelada', true)}"/>
         </event>
     </node>
     <end-state name="Término">
@@ -96,6 +148,7 @@ Assessoria  Assessoria Segundo Grau  Assessor]]></description>
         <task name="Nó de Desvio - (SG) Expedição de ato ordinatório de gabinete" swimlane="Nó de Desvio - (SG) Expedição de ato ordinatório de gabinete"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Ato ordinatório do gabinete - EXPEDIR" name="(SG) Ato ordinatório do gabinete - EXPEDIR"/>
+        <transition to="(SG) Ato ordinatório do gabinete - ASSINAR" name="(SG) Ato ordinatório do gabinete - ASSINAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

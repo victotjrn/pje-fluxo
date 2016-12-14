@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar ato de comunicação ao MP">
+    <description><![CDATA[Fluxo "Preparar Ato de comunicação ao MP".
+
+A separação do PAC geral deu-se em função da necessidade de preparar intimações por outros meios quando não for possível realizar a intimação de pauta eletrônicamente. Logo, com a separação, pôde-se deixar o PAC isolado para ser chamado quando uma pauta for fechada.]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SG) Preparar ato de comunicação ao MP">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="(SG) Intimação ou citação ao MP - EXPEDIR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(SG) Intimação ou citação ao MP - EXPEDIR">
+        <task name="(SG) Intimação ou citação ao MP - EXPEDIR" swimlane="Secretaria">
+            <controller>
+                <variable name="labelComboDocumento" mapped-name="textAlert:labelComboDocumento" access="read,write"/>
+                <variable name="comboDocumento" mapped-name="combo_objetos:comboDocumento" access="read,write"/>
+                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
+                <variable name="prazoIntimacao" mapped-name="number:prazoIntimacao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[1. Variável: labelComboDocumento
+   Label: Selecione o ato abaixo que deseja intimar
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: comboDocumento
+   Label: #{processoDocumentoDAO.getDocumentosPorTipoAssinadosApos(tramitacaoProcessualService.recuperaProcesso(), dateUtil.stringToDate('01/01/2000', 'dd/MM/yyyy'), 63,64,67)}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Combo de objetos
+
+3. Variável: label_informacao
+   Label: #{tramitacaoProcessualService.recuperaVariavel('pje:atoProferido') == null ? 'ATENÇÃO! É NECESSÁRIO INFORMAR O ATO QUE DESEJA INTIMAR!' : ''}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+4. Variável: prazoIntimacao
+   Label: Prazo para manifestação (em dias - 0 para sem prazo)
+   Escrita: Sim
+   Obrig.: Sim
+   Tipo: Numérico]]></description>
+        <transition to="Nó de Desvio - (SG) Preparar ato de comunicação ao MP" name="Nó de Desvio - (SG) Preparar ato de comunicação ao MP">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Último ato foi selecionado?" name="Encaminhar para confirmação"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('atoProferidoOriginal', tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacao', 0)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:atoProferido', tramitacaoProcessualService.recuperaVariavelTarefa('combo_objetos:comboDocumento').idProcessoDocumento)}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:atoProferido') == null ? '(SG) Intimação ou citação ao MP - EXPEDIR' : '(SG) Intimação ou citação ao MP - CONFIRMAR'}" name="(SG) Último ato foi selecionado?">
+        <transition to="(SG) Intimação ou citação ao MP - CONFIRMAR" name="(SG) Intimação ou citação ao MP - CONFIRMAR"/>
+        <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="(SG) Intimação ou citação ao MP - EXPEDIR"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Intimação ou citação ao MP - CONFIRMAR">
+        <task name="(SG) Intimação ou citação ao MP - CONFIRMAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="labelDestinatario" mapped-name="textAlert:labelDestinatario" access="read,write"/>
+                <variable name="labelPrazo" mapped-name="textAlert:labelPrazo" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[1. Variável: Processo_Fluxo_visualizarDecisao
+   Label: Ato de comunicação
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: label_informacao
+   Label: Destinatário: MINISTÉRIO PÚBLICO DO ESTADO DO RIO GRANDE DO NORTE
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+3. Variável: label_informacao
+   Label: Prazo: #{tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0 ? '(sem prazo)' : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao')}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="Retornar para expedição"/>
+        <transition to="Nó de Desvio - (SG) Preparar ato de comunicação ao MP" name="Nó de Desvio - (SG) Preparar ato de comunicação ao MP">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Lançar movimento de expedição de documentos ao MP" name="Confirmar intimação ou citação"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(SG) Lançar movimento de expedição de documentos ao MP">
+        <transition to="(SG) Controle de prazo de intimação ou citação ao MP expedida" name="(SG) Controle de prazo de intimação ou citação ao MP expedida"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarDestinatarioEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, 4266, tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+        </event>
+    </node>
+    <process-state name="(SG) Controle de prazo de intimação ou citação ao MP expedida">
+        <sub-process name="(SG) Controle de prazos do MP" binding="late"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:contprazos:intimacao_mp', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:contprazos:intimacao_mp')}"/>
+        </event>
+    </process-state>
+    <node name="(SG) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{empty tramitacaoProcessualService.recuperaVariavel('atoProferidoOriginal') ? '' : tramitacaoProcessualService.gravaVariavel('pje:atoProferido', tramitacaoProcessualService.recuperaVariavel('atoProferidoOriginal'))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('atoProferidoOriginal')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntimacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('comboDocumento')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar ato de comunicação ao MP">
+        <task name="Nó de Desvio - (SG) Preparar ato de comunicação ao MP" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Intimação ou citação ao MP - EXPEDIR" name="(SG) Intimação ou citação ao MP - EXPEDIR"/>
+        <transition to="(SG) Intimação ou citação ao MP - CONFIRMAR" name="(SG) Intimação ou citação ao MP - CONFIRMAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

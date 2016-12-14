@@ -116,7 +116,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         </event>
     </task-node>
     <process-state name="(SG) Preparação de decisão sobre reativação">
-        <sub-process name="(SG) Preparar ato judicial" binding="late"/>
+        <sub-process name="(SG) Preparar ato judicial de decisão sobre reativação" binding="late"/>
         <transition to="(SG) Manter arquivado definitivamente?" name="(SG) Manter arquivado definitivamente?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>

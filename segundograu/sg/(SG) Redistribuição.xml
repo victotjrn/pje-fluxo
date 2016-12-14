@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Redistribuição">
     <description><![CDATA[Código do fluxo: SG_REDIST
 
-Descrição: Controle de redistribuição de processo.
+Descrição: Controle de redistribuição de processo. 
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
@@ -58,7 +58,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: aviso1
-   Label: Processo recebido de outro gabinete. Clique em Prosseguir para seguir normalmente no fluxo.
+   Label: Processo recebido de outro gabinete através de redistribuição. Clique em Prosseguir para seguir normalmente no fluxo.
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso

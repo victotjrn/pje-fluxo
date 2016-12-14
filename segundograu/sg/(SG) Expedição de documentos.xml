@@ -3,14 +3,17 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Expedição de documentos">
     <description><![CDATA[Código do fluxo: SG_EXPDOC
 
-Descrição: Fluxo responsável pela expedição de documentos.
+Descrição: Fluxo responsável pela expedição de documentos. 
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
-Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
+Secretaria  Secretaria Segundo Grau  Servidor Geral
+Magistrado  Assessoria Segundo Grau  Assessor
+Magistrado  Assessoria Segundo Grau  Assessor Chefe
+Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5896')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899')}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
@@ -144,7 +147,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
 1. Variável: minuta_certidao_transito_julgado
    Label: Minuta em elaboração de certidão de trânsito em julgado
    Escrita: Sim
-   Obrig.: Não
+   Obrig.: Sim
    Tipo: Editor
 
 2. Variável: minutarLote

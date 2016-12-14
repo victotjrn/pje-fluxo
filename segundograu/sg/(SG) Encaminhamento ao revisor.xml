@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Encaminhamento ao revisor">
+    <description><![CDATA[Código do fluxo: SG_ENC_REVISOR
+
+Descrição: Fluxo destinado ao encaminhamento de processo ao revisor correspondente. 
+
+Raia        Localização              Papel
+Assessoria  Assessoria Segundo Grau  Assessor
+Assessoria  Assessoria Segundo Grau  Assessor Chefe
+Assessoria  Assessoria Segundo Grau  Assessor para Votação Antecipada
+Assessoria  Gabinete Segundo Grau    Magistrado
+Magistrado  Assessoria Segundo Grau  Assessor
+Magistrado  Assessoria Segundo Grau  Assessor Chefe
+Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada
+Magistrado  Gabinete Segundo Grau    Magistrado]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SG) Encaminhamento ao revisor">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Gabinete">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,600:5898,599:1469,600:5899')}"/>
+    </swimlane>
+    <swimlane name="Assessoria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,600:5898,599:1469,600:5899')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Assessoria"/>
+        <transition to="(SG) Deslocar órgão ao revisor" name="(SG) Deslocar órgão ao revisor"/>
+    </start-state>  
+    <!-- NODES -->
+    <node name="(SG) Deslocar órgão ao revisor">
+        <transition to="(SG) Autos recebidos para revisão - ANALISAR" name="(SG) Autos recebidos para revisão - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', orgaoJulgadorColegiadoOrgaoJulgadorDAO.recuperarPorOrgaoJulgadorColegiadoEhOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado, tramitacaoProcessualService.recuperaProcesso().orgaoJulgador).orgaoJulgadorRevisor.orgaoJulgador.idOrgaoJulgador)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', orgaoJulgadorCargoManager.recuperaAtivos(orgaoJulgadorColegiadoOrgaoJulgadorDAO.recuperarPorOrgaoJulgadorColegiadoEhOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado, tramitacaoProcessualService.recuperaProcesso().orgaoJulgador).orgaoJulgadorRevisor.orgaoJulgador, true).get(0).idOrgaoJulgadorCargo)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaVariavel('processo'))}"/>
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto(orgaoJulgadorColegiadoOrgaoJulgadorDAO.recuperarPorOrgaoJulgadorColegiadoEhOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado, tramitacaoProcessualService.recuperaProcesso().orgaoJulgador).orgaoJulgadorRevisor.orgaoJulgador.orgaoJulgador).comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(200004).lancarMovimento()}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(SG) Autos recebidos para revisão - ANALISAR">
+        <task name="(SG) Autos recebidos para revisão - ANALISAR" swimlane="Assessoria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_votacaoColegiado" mapped-name="frame:WEB-INF_xhtml_flx_votacaoColegiado" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="mensagemRevisorRelator" mapped-name="text:mensagemRevisorRelator" access="read,write,required"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Autos recebidos pelo relator para revisão do relatório. Após, clique na próxima ação desejada.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: WEB-INF_xhtml_flx_votacaoColegiado
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+3. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+
+4. Variável: mensagemRevisorRelator
+   Label: Em caso de cancelamento da revisão, informe abaixo uma mensagem ao relator do processo:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Texto]]></description>
+        <transition to="Nó de Desvio - (SG) Encaminhamento ao revisor" name="Nó de Desvio - (SG) Encaminhamento ao revisor">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Deslocar órgão ao relator" name="Solicitar inclusão em pauta"/>
+        <transition to="(SG) Sinalizar cancelamento da revisão" name="Cancelar revisão e retornar ao relator"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encrevisor:revisaoCancelada', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:ocultaVoto', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:ocultaEmenta', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:permiteAssinarRelatorio', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Solicitar inclusão em pauta')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:ocultaVoto')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:ocultaEmenta')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:permiteAssinarRelatorio')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{empty tramitacaoProcessualService.recuperaVariavelTarefa('text:mensagemRevisorRelator') ? tramitacaoProcessualService.gravaVariavelTarefa('text:mensagemRevisorRelator', ' ') : ''}"/>
+        </event>
+    </task-node>
+    <node name="(SG) Sinalizar cancelamento da revisão">
+        <transition to="(SG) Deslocar órgão ao relator" name="(SG) Deslocar órgão ao relator"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encrevisor:revisaoCancelada', true)}"/>
+        </event>
+    </node>
+    <node name="(SG) Deslocar órgão ao relator">
+        <transition to="(SG) Revisão cancelada?" name="(SG) Revisão cancelada?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorCargo.idOrgaoJulgadorCargo)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaVariavel('processo'))}"/>
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.orgaoJulgador).comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(200003).lancarMovimento()}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:encrevisor:revisaoCancelada') == true ? '(SG) Autos devolvidos da revisão - ANALISAR' : '(SG) Apagar variáveis do fluxo'}" name="(SG) Revisão cancelada?">
+        <transition to="(SG) Autos devolvidos da revisão - ANALISAR" name="(SG) Autos devolvidos da revisão - ANALISAR"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Autos devolvidos da revisão - ANALISAR">
+        <task name="(SG) Autos devolvidos da revisão - ANALISAR" swimlane="Assessoria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Processo devolvido pelo revisor sem solicitação de inclusão em pauta. Abaixo, segue a mensagem enviada pelo do revisor:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: aviso2
+   Label: #{tramitacaoProcessualService.recuperaVariavel('mensagemRevisorRelator')}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Nó de Desvio - (SG) Encaminhamento ao revisor" name="Nó de Desvio - (SG) Encaminhamento ao revisor">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Apagar variáveis do fluxo" name="Retornar para validação do relatório, voto e ementa."/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(SG) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:colegiadoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('mensagemRevisorRelator')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Encaminhamento ao revisor">
+        <task name="Nó de Desvio - (SG) Encaminhamento ao revisor" swimlane="Nó de Desvio - (SG) Encaminhamento ao revisor"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Autos recebidos para revisão - ANALISAR" name="(SG) Autos recebidos para revisão - ANALISAR"/>
+        <transition to="(SG) Autos devolvidos da revisão - ANALISAR" name="(SG) Autos devolvidos da revisão - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

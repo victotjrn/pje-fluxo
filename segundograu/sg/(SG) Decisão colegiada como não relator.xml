@@ -3,22 +3,22 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Decisão colegiada como não relator">
     <description><![CDATA[Código do fluxo: SG_DECCOLNREL
 
-Descrição: Fluxo destinado a preparação de decisões colegiadas como não relator do processo.
+Descrição: Fluxo destinado a preparação de decisões colegiadas como não relator do processo. 
 
 Raia        Localização              Papel
-Assessoria  Assessoria Segundo Grau  Assessor
-Assessoria  Gabinete Segundo Grau    Magistrado
-Magistrado  Assessoria Segundo Grau  Assessor
-Magistrado  Gabinete Segundo Grau    Magistrado]]></description>  
+Assessoria  Assessoria Segundo Grau  Assessor para Votação Antecipada
+            Gabinete Segundo Grau    Magistrado
+Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada
+            Gabinete Segundo Grau    Magistrado]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Decisão colegiada como não relator">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Assessoria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5896')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('599:1469,600:5899')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5896')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('599:1469,600:5899')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">

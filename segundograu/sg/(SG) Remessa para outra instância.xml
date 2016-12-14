@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Remessa para outra instância">
     <description><![CDATA[Código do fluxo: SG_REMINST
 
-Descrição: Controle de remessa de processo para instância superior e primeiro grau.
+Descrição: Controle de remessa de processo para instância superior e primeiro grau. 
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
@@ -49,20 +49,20 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="(SG) Remessa para o STF - AGUARDAR">
         <task name="(SG) Remessa para o STF - AGUARDAR" swimlane="Secretaria">
             <controller>
-                <variable name="label_informacao" mapped-name="textAlert:label_informacao" access="read,write"/>
-                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: label_informacao
+1. Variável: aviso1
    Label: Movimento de remessa foi lançado no processo. Aguarde-se o julgamento até que o processo seja devolvido pela instância superior correspondente. Após isso, registre a baixa e siga normalmente no fluxo.
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso
 
-2. Variável: MovimentarLote
-   Label: Movimentar em lote
+2. Variável: movimentacaoLote
+   Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar movimentação em lote]]></description>

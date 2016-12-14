@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar ato judicial">
+    <description><![CDATA[Código do fluxo: SG_PAJ_NOVO
+
+Descrição: Fluxo destinado ao controle de atos judicias.]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SG) Preparar ato judicial">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(SG) Concluso para decisão?" name="(SG) Concluso para decisão?"/>
+        <transition to="Nó de Desvio - (SG) Preparar ato judicial" name="Nó de Desvio - (SG) Preparar ato judicial"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao') == true ? '(SG) Lançar movimento conclusos para decisão' : '(SG) Concluso para despacho?'}" name="(SG) Concluso para decisão?">
+        <transition to="(SG) Concluso para despacho?" name="(SG) Concluso para despacho?"/>
+        <transition to="(SG) Lançar movimento conclusos para decisão" name="(SG) Lançar movimento conclusos para decisão"/>
+    </decision>
+    <node name="(SG) Lançar movimento conclusos para decisão">
+        <transition to="(SG) Concluso para decisão de urgência inicial?" name="(SG) Concluso para decisão de urgência inicial?"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_urgencia_inicial') == true ? '(SG) Preparação de decisão de urgência inicial' : '(SG) Concluso para decisão sobre encerramento de suspensão?'}" name="(SG) Concluso para decisão de urgência inicial?">
+        <transition to="(SG) Preparação de decisão de urgência inicial" name="(SG) Preparação de decisão de urgência inicial"/>
+        <transition to="(SG) Concluso para decisão sobre encerramento de suspensão?" name="(SG) Concluso para decisão sobre encerramento de suspensão?"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão de urgência inicial">
+        <sub-process name="(SG) Preparar ato judicial de decisão de urgência inicial" binding="late"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_encerramento_suspensao') == true ? '(SG) Preparação de decisão de encerramento de suspensão' : '(SG) Concluso para decisão sobre reativação?'}" name="(SG) Concluso para decisão sobre encerramento de suspensão?">
+        <transition to="(SG) Preparação de decisão de encerramento de suspensão" name="(SG) Preparação de decisão de encerramento de suspensão"/>
+        <transition to="(SG) Concluso para decisão sobre reativação?" name="(SG) Concluso para decisão sobre reativação?"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão de encerramento de suspensão">
+        <sub-process name="(SG) Preparar ato judicial de decisão sobre encerramento de suspensão" binding="late"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_reativacao') == true ? '(SG) Preparação de decisão sobre reativação' : '(SG) Concluso para decisão de admissibilidade de recurso?'}" name="(SG) Concluso para decisão sobre reativação?">
+        <transition to="(SG) Preparação de decisão sobre reativação" name="(SG) Preparação de decisão sobre reativação"/>
+        <transition to="(SG) Concluso para decisão de admissibilidade de recurso?" name="(SG) Concluso para decisão de admissibilidade de recurso?"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão sobre reativação">
+        <sub-process name="(SG) Preparar ato judicial de decisão sobre reativação" binding="late"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_admissibilidade_recurso') == true ? '(SG) Preparação de decisão de admissibilidade de recurso' : '(SG) Concluso para decisão sobre reexame do acórdão?'}" name="(SG) Concluso para decisão de admissibilidade de recurso?">
+        <transition to="(SG) Preparação de decisão de admissibilidade de recurso" name="(SG) Preparação de decisão de admissibilidade de recurso"/>
+        <transition to="(SG) Concluso para decisão sobre reexame do acórdão?" name="(SG) Concluso para decisão sobre reexame do acórdão?"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão de admissibilidade de recurso">
+        <sub-process name="(SG) Preparar ato judicial de decisão de admissibilidade de recurso" binding="late"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_reanalise_acordao') == true ? '(SG) Preparação de decisão sobre reexame do acórdão' : '(SG) Concluso para decisão mediante encaminhamento?'}" name="(SG) Concluso para decisão sobre reexame do acórdão?">
+        <transition to="(SG) Preparação de decisão sobre reexame do acórdão" name="(SG) Preparação de decisão sobre reexame do acórdão"/>
+        <transition to="(SG) Concluso para decisão mediante encaminhamento?" name="(SG) Concluso para decisão mediante encaminhamento?"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão sobre reexame do acórdão">
+        <sub-process name="(SG) Preparar ato judicial de decisão sobre reexame de acórdão" binding="late"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_encaminhamento') == true ? '(SG) Preparação de decisão mediante encaminhamento' : '(SG) Enviar para autos recebidos da secretaria'}" name="(SG) Concluso para decisão mediante encaminhamento?">
+        <transition to="(SG) Preparação de decisão mediante encaminhamento" name="(SG) Preparação de decisão mediante encaminhamento"/>
+        <transition to="(SG) Enviar para autos recebidos da secretaria" name="(SG) Enviar para autos recebidos da secretaria"/>
+    </decision>
+    <process-state name="(SG) Preparação de decisão mediante encaminhamento">
+        <sub-process name="(SG) Preparar ato judicial de decisão mediante encaminhamento" binding="late"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:despacho') == true ? '(SG) Lançar movimento conclusos para despacho' : '(SG) Concluso para julgamento?'}" name="(SG) Concluso para despacho?">
+        <transition to="(SG) Lançar movimento conclusos para despacho" name="(SG) Lançar movimento conclusos para despacho"/>
+        <transition to="(SG) Concluso para julgamento?" name="(SG) Concluso para julgamento?"/>
+    </decision>
+    <node name="(SG) Lançar movimento conclusos para despacho">
+        <transition to="(SG) Concluso para despacho inicial?" name="(SG) Concluso para despacho inicial?"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(5).lancarMovimento()}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:despacho_inicial') == true ? '(SG) Preparação de despacho inicial' : '(SG) Enviar para autos recebidos da secretaria'}" name="(SG) Concluso para despacho inicial?">
+        <transition to="(SG) Preparação de despacho inicial" name="(SG) Preparação de despacho inicial"/>
+        <transition to="(SG) Enviar para autos recebidos da secretaria" name="(SG) Enviar para autos recebidos da secretaria"/>
+    </decision>
+    <process-state name="(SG) Preparação de despacho inicial">
+        <sub-process name="(SG) Preparar ato judicial de despacho inicial" binding="late"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:julgamento') == true ? '(SG) Lançar movimento conclusos para julgamento' : '(SG) Apagar variáveis do fluxo'}" name="(SG) Concluso para julgamento?">
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+        <transition to="(SG) Lançar movimento conclusos para julgamento" name="(SG) Lançar movimento conclusos para julgamento"/>
+    </decision>
+    <node name="(SG) Lançar movimento conclusos para julgamento">
+        <transition to="(SG) Enviar para autos recebidos da secretaria" name="(SG) Enviar para autos recebidos da secretaria"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento()}"/>
+        </event>
+    </node>
+    <process-state name="(SG) Enviar para autos recebidos da secretaria">
+        <sub-process name="(SG) Autos recebidos da secretaria" binding="late"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </process-state>
+    <node name="(SG) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:eaog:assinou_ato_ordinatorio')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_ato_judicial')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar ato judicial">
+        <task name="Nó de Desvio - (SG) Preparar ato judicial" swimlane="Nó de Desvio - (SG) Preparar ato judicial"/>
+        <transition to="Término" name="Término"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

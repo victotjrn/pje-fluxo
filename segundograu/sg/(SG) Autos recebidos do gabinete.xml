@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Autos recebidos do gabinete">
+    <description><![CDATA[Código do fluxo: SG_AUT_REC_GABINETE
+
+Descrição: Fluxo destinado à análise de processos devolvidos do gabinete para a secretaria.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SG) Autos recebidos do gabinete">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(SG) É urgente?" name="(SG) É urgente?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:urgente') ? '(SG) Autos recebidos do gabinete [Urgente] - ANALISAR' : '(SG) Autos recebidos do gabinete - ANALISAR' }" name="(SG) É urgente?">
+        <transition to="(SG) Autos recebidos do gabinete - ANALISAR" name="(SG) Autos recebidos do gabinete - ANALISAR"/>
+        <transition to="(SG) Autos recebidos do gabinete [Urgente] - ANALISAR" name="(SG) Autos recebidos do gabinete [Urgente] - ANALISAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Autos recebidos do gabinete - ANALISAR">
+        <task name="(SG) Autos recebidos do gabinete - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[####]]></description>
+        <transition to="Nó de Desvio - (SG) Autos recebidos do gabinete" name="Nó de Desvio - (SG) Autos recebidos do gabinete">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cumprir determinações">
+            <condition expression="#{tramitacaoProcessualService.temSituacao('jus:andamento')}"/>
+        </transition>
+        <transition to="(SG) Citar e(ou) intimar sobre reativação" name="Citar e(ou) intimar sobre reativação">
+            <condition expression="#{tramitacaoProcessualService.temSituacao('jus:arquivado') or tramitacaoProcessualService.temSituacao('jus:suspenso')}"/>
+        </transition>
+        <transition to="(SG) Manter arquivamento" name="Manter processo arquivado">
+            <condition expression="#{tramitacaoProcessualService.temSituacao('jus:arquivado')}"/>
+        </transition>
+        <transition to="(SG) Desarquivar" name="Desarquivar processo">
+            <condition expression="#{tramitacaoProcessualService.temSituacao('jus:arquivado')}"/>
+        </transition>
+        <transition to="(SG) Manter suspensão" name="Manter processo suspenso">
+            <condition expression="#{tramitacaoProcessualService.temSituacao('jus:suspenso')}"/>
+        </transition>
+        <transition to="(SG) Encerrar suspensão" name="Encerrar suspensão">
+            <condition expression="#{tramitacaoProcessualService.temSituacao('jus:suspenso')}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Autos recebidos do gabinete [Urgente] - ANALISAR">
+        <task name="(SG) Autos recebidos do gabinete [Urgente] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (SG) Autos recebidos do gabinete" name="Nó de Desvio - (SG) Autos recebidos do gabinete">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cumprir determinações"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <process-state name="(SG) Citar e(ou) intimar sobre reativação">
+        <sub-process name="(SG) Preparar ato de comunicação" binding="late"/>
+        <transition to="(SG) Autos recebidos do gabinete - ANALISAR" name="(SG) Autos recebidos do gabinete - ANALISAR"/>
+    </process-state>
+    <node name="(SG) Manter arquivamento">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:arq:manter_arquivado', true)}"/>
+        </event>
+    </node>
+    <node name="(SG) Desarquivar">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:arq:manter_arquivado', false)}"/>
+        </event>
+    </node>
+    <node name="(SG) Manter suspensão">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:consusp:manter_suspensao', true)}"/>
+        </event>
+    </node>
+    <node name="(SG) Encerrar suspensão">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:consusp:manter_suspensao', false)}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Autos recebidos do gabinete">
+        <task name="Nó de Desvio - (SG) Autos recebidos do gabinete" swimlane="Nó de Desvio - (SG) Autos recebidos do gabinete"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Autos recebidos do gabinete [Urgente] - ANALISAR" name="(SG) Autos recebidos do gabinete [Urgente] - ANALISAR"/>
+        <transition to="(SG) Autos recebidos do gabinete - ANALISAR" name="(SG) Autos recebidos do gabinete - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
