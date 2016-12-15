@@ -11,7 +11,7 @@ try:
     con = psycopg2.connect(host=env.DB_HOST, user=env.DB_USER, password=env.DB_PASS, database=env.DB_NAME, port=env.DB_PORT)
 
     cur = con.cursor()
-    cur.execute("SELECT ds_fluxo, ds_xml FROM tb_fluxo WHERE ds_fluxo ilike '%" + env.SQL_LIKE_CRITERIA + "%'")
+    cur.execute("SELECT ds_fluxo, ds_xml FROM tb_fluxo WHERE in_ativo = true AND ds_fluxo ilike '%" + env.SQL_LIKE_CRITERIA + "%'")
 except psycopg2.DatabaseError, e:
     print 'Erro ao tentar conexão com o banco. Por favor, verifique o erro apresentado abaixo:\n%s' % e
     raise SystemExit(0)
