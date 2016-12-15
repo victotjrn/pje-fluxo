@@ -155,14 +155,14 @@ Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada]]></descri
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_carta')}"/>
         </event>
     </node>
+    <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória">
         <task name="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória" swimlane="Nó de Desvio - (SG) Expedição de carta de ordem, precatória ou rogatória"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR" name="(SG) Carta de ordem, precatória ou rogatória - EXPEDIR"/>
         <transition to="(SG) Carta de ordem, precatória ou rogatória - ASSINAR" name="(SG) Carta de ordem, precatória ou rogatória - ASSINAR"/>
         <transition to="(SG) Carta de ordem, precatória ou rogatória - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória - AGUARDAR"/>
-    </task-node>
-    <end-state name="Término"/>  
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

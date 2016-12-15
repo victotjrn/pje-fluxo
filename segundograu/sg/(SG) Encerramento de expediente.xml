@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Encerramento de expediente">
     <description><![CDATA[Código do fluxo: SG_ENC_EXP
 
-Descrição: Fluxo destinado ao encerramento de expedientes. 
+Descrição: Fluxo destinado ao encerramento de expedientes.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria

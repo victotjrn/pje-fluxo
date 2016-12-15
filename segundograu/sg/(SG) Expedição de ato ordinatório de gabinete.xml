@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Expedição de ato ordinatório de gabinete">
     <description><![CDATA[Código do fluxo: SG_EAOG
 
-Descrição: Expedição de ato ordinatório, para retirada de concluso dispensando assinatura pelo magistrado. 
+Descrição: Expedição de ato ordinatório, para retirada de concluso dispensando assinatura pelo magistrado.
 
 Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessor

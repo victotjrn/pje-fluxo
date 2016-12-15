@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de prazos de ofícios">
     <description><![CDATA[Código do fluxo: SG_CONTPRAZOS_OFI
 
-Descrição: Gestão de recebimento/prazos de ofícios. 
+Descrição: Gestão de recebimento/prazos de ofícios.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria

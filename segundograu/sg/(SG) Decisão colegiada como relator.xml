@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Decisão colegiada como relator">
     <description><![CDATA[Código do fluxo: SG_DECCOLREL
 
-Descrição: Fluxo destinado a preparação de decisões colegiadas como relator do processo. 
+Descrição: Fluxo destinado a preparação de decisões colegiadas como relator do processo.
 
 Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessor

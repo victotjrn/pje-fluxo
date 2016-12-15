@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de prazos de carta precatória">
     <description><![CDATA[Código do fluxo: SG_CONT_PRAZOS_CARTA
 
-Descrição: Gestão de retorno e prazos de carta precatórias. 
+Descrição: Gestão de retorno e prazos de carta precatórias.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria

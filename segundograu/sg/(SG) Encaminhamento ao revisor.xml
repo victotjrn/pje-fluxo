@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Encaminhamento ao revisor">
     <description><![CDATA[Código do fluxo: SG_ENC_REVISOR
 
-Descrição: Fluxo destinado ao encaminhamento de processo ao revisor correspondente. 
+Descrição: Fluxo destinado ao encaminhamento de processo ao revisor correspondente.
 
 Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessor

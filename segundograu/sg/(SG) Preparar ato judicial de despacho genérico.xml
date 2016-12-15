@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar ato judicial de despacho genérico">
     <description><![CDATA[Código do fluxo: SG_PAJ_DESP_GEN.
 
-Descrição: Fluxo destinado ao preparo de atos judiciais de despachos genéricos. 
+Descrição: Fluxo destinado ao preparo de atos judiciais de despachos genéricos.
 
 Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessoria

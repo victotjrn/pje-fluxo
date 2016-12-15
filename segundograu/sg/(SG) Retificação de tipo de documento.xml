@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Retificação de tipo de documento">
     <description><![CDATA[Código do fluxo: SG_RET_DOC
 
-Descrição: Fluxo destinado a retificação de tipos de documentos do processo.
+Descrição: Fluxo destinado a retificação de tipos de documentos do processo. 
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria

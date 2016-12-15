@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar ato judicial de decisão sobre encerramento de suspensão">
     <description><![CDATA[Código do fluxo: SG_PAJ_DEC_ENC_SUSP.
 
-Descrição: Fluxo destinado ao preparo de atos judiciais de decisões sobre encerramento de suspensão. 
+Descrição: Fluxo destinado ao preparo de atos judiciais de decisões sobre encerramento de suspensão.
 
 Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessoria

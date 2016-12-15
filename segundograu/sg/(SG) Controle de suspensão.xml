@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de suspensão">
     <description><![CDATA[Código do fluxo: SG_CONSUSP
 
-Descrição: Controle de suspensão processual. 
+Descrição: Controle de suspensão processual.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria

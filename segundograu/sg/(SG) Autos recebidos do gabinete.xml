@@ -32,7 +32,19 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[####]]></description>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_visualizarDecisao
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Autos recebidos do gabinete" name="Nó de Desvio - (SG) Autos recebidos do gabinete">
             <condition expression="#{true}"/>
         </transition>
@@ -68,6 +80,19 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_visualizarDecisao
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (SG) Autos recebidos do gabinete" name="Nó de Desvio - (SG) Autos recebidos do gabinete">
             <condition expression="#{true}"/>
         </transition>

@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Fluxo básico geral">
     <description><![CDATA[Código do fluxo: SG_FBG
 
-Descrição: Fluxo básico geral de entrada dos processos. 
+Descrição: Fluxo básico geral de entrada dos processos.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
@@ -191,9 +191,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Fluxo básico geral" name="Nó de Desvio - (SG) Fluxo básico geral">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Cumprimento de decisão via análise da secretaria" name="01 - [ANTIGO] Prosseguir na(s) tarefa(s) acima selecionada(s)">
-            <condition expression="#{true}"/>
-        </transition>
         <transition to="(SG) Lançar fluxos" name="01 - Prosseguir na(s) tarefa(s) acima selecionada(s)"/>
         <transition to="(SG) Gravar variavel fluxo unico - Suspender o processo" name="02 - Suspender o processo"/>
         <transition to="(SG) Gravar variavel fluxo unico - Redistribuir" name="03 - Redistribuir"/>
@@ -273,10 +270,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:sg_fbg_controlar_retorno_expediente')}"/>
         </event>
     </task-node>
-    <process-state name="(SG) Cumprimento de decisão via análise da secretaria">
-        <sub-process name="(SG) Cumprimento de decisão" binding="late"/>
-        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
-    </process-state>
     <process-state name="(SG) Lançar fluxos">
         <sub-process name="(SG) Lançador de fluxo" binding="late"/>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>

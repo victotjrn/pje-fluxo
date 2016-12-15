@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Expedição de documentos">
     <description><![CDATA[Código do fluxo: SG_EXPDOC
 
-Descrição: Fluxo responsável pela expedição de documentos. 
+Descrição: Fluxo responsável pela expedição de documentos.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria

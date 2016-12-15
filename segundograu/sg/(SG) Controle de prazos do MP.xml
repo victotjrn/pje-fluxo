@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de prazos do MP">
     <description><![CDATA[Código do fluxo: SG_CONTPRAZOS_MP
 
-Descrição: Controle de prazos de intimações e citações ao MP.  
+Descrição: Controle de prazos de intimações e citações ao MP.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria

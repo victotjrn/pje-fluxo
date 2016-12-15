@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar ato de comunicação ao MP">
     <description><![CDATA[Fluxo "Preparar Ato de comunicação ao MP".
 
-A separação do PAC geral deu-se em função da necessidade de preparar intimações por outros meios quando não for possível realizar a intimação de pauta eletrônicamente. Logo, com a separação, pôde-se deixar o PAC isolado para ser chamado quando uma pauta for fechada.]]></description>  
+A separação do PAC geral deu-se em função da necessidade de preparar intimações por outros meios quando não for possível realizar a intimação de pauta eletronicamente. Logo, com a separação, pôde-se deixar o PAC isolado para ser chamado quando uma pauta for fechada.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Preparar ato de comunicação ao MP">
         <assignment actor-id="#{actor.id}"/>

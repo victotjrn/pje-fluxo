@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Pedido de vista">
     <description><![CDATA[Código do fluxo: SG_PED_VISTA
 
-Descrição: Fluxo destinado à análise de pedido de vista. 
+Descrição: Fluxo destinado à análise de pedido de vista.
 
 Raia        Localização              Papel
 Magistrado  Assessoria Segundo Grau  Assessoria
@@ -37,7 +37,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <description><![CDATA[*Variáveis*
 
 1. Variável: aviso
-   Label: Neste processo consta um pedido de vista referente à última seesão de julgamento. Analise os autos disponibilizados nas pastas compartilhadas para essa finalidade e, ao término da análise, encaminhe o processo à próxima sessão de julgamento.
+   Label: Neste processo consta um pedido de vista referente à última sessão de julgamento. Analise os autos disponibilizados nas pastas compartilhadas para essa finalidade e, ao término da análise, encaminhe o processo à próxima sessão de julgamento.
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso]]></description>

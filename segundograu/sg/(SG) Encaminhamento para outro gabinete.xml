@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Encaminhamento para outro gabinete">
     <description><![CDATA[Código do fluxo: SG_ENC_GAB
 
-Descrição: Fluxo destinado para o encaminhamento do processo a outros gabinetes. 
+Descrição: Fluxo destinado para o encaminhamento do processo a outros gabinetes.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
