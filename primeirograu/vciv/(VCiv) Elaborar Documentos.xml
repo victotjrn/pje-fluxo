@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Elaborar Documentos">
-    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros................]]></description>  
+    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros.............]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:1338,8:5852,8:5853,6:5901')}"/>
@@ -244,6 +244,7 @@
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção em Elaborar Documentos')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
         <event type="task-end">
             <action expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(), null, papelDAO.findByCodeName('admin'), null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 57 ? preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(107).lancarMovimento() : ( processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(), null, papelDAO.findByCodeName('admin'), null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 67 ? preencherMovimento.deCodigo(11383).lancarMovimento() : preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento() )}"/>
