@@ -268,6 +268,9 @@ select id_papel, membro_do_grupo from (select 5197 as id_papel, 5302 as membro_d
 select id_papel, membro_do_grupo from (select 5197 as id_papel, 5316 as membro_do_grupo ) /* Assessor > Página Painel/Organização do Painel (Caixas) */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
 select id_papel, membro_do_grupo from (select 5197 as id_papel, 5894 as membro_do_grupo ) /* Assessor > Popup de análise de prevenção */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
 
+-- Chefe de Secretaria
+select id_papel, membro_do_grupo from (select 1338 as id_papel, 5802 as membro_do_grupo ) /* Chefe de Secretaria > Página Processo/Consulta/Log da Distribuição */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
+
 -- Servidor Geral
 select id_papel, membro_do_grupo from (select 5483 as id_papel, 5317 as membro_do_grupo ) /* Servidor Geral > Página Painel/Painel do Usuário */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
 select id_papel, membro_do_grupo from (select 5483 as id_papel, 5332 as membro_do_grupo ) /* Servidor Geral > Página Processo/Cadastro/Processo */ pg where not exists( select 1 from tb_papel_grupo pg2 where pg2.id_papel = pg.id_papel and pg2.membro_do_grupo = pg.membro_do_grupo ) union
