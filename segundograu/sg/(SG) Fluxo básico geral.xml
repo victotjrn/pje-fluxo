@@ -207,9 +207,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Gravar variavel fluxo unico - Enviar concluso para decisão de urgência" name="09 - Enviar concluso para decisão de urgência"/>
         <transition to="(SG) Gravar variavel fluxo unico - Enviar concluso para despacho" name="10 - Enviar concluso para despacho"/>
         <transition to="(SG) Gravar variavel fluxo unico - Enviar para preparação do voto, relatório e ementa" name="11 - Enviar concluso para julgamento"/>
-        <transition to="(SG) Gravar variavel fluxo unico - Encaminhar processo para outro gabinete" name="12 - Encaminhar processo para outro gabinete"/>
+        <transition to="(SG) Gravar variavel fluxo unico - Encaminhar processo para outro gabinete" name="12 - Encaminhar processo para outro gabinete">
+            <condition expression="#{empty tramitacaoProcessualService.recuperaVariavel('sg:encgab:idOjOrigem')}"/>
+        </transition>
         <transition to="(SG) Gravar variavel fluxo unico - Devolver ao relator de origem do encaminhamento" name="12 - Devolver ao relator de origem do encaminhamento">
-            <condition expression="#{!empty tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj')}"/>
+            <condition expression="#{!empty tramitacaoProcessualService.recuperaVariavel('sg:encgab:idOjOrigem')}"/>
         </transition>
         <transition to="(SG) Gravar variavel fluxo unico - Enviar para análise de admissibilidade" name="13 - Enviar para análise de admissibilidade">
             <condition expression="#{empty tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj') and !orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(32))}"/>
