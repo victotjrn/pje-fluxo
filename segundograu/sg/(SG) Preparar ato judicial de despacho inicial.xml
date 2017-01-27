@@ -61,9 +61,9 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </transition>
         <transition to="(SG) Concluso para despacho inicial - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
         <transition to="(SG) Concluso para despacho inicial - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
-        <transition to="(SG) Gravar variável de cancelamento de conclusão" name="Alterar escolha do tipo de conclusão"/>
+        <transition to="(SG) Conclusão para decisão de urgência inicial" name="Alterar para decisão de urgência inicial"/>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Encaminhar para decisão de urgência inicial,Prosseguir através de ato ordinatório')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar para decisão de urgência inicial')}"/>
         </event>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
@@ -176,12 +176,10 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <sub-process name="(SG) Autos recebidos do gabinete" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
-    <node name="(SG) Gravar variável de cancelamento de conclusão">
+    <process-state name="(SG) Conclusão para decisão de urgência inicial">
+        <sub-process name="(SG) Preparar ato judicial de decisão de urgência inicial" binding="late"/>
         <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:conclusao_cancelada', true)}"/>
-        </event>
-    </node>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar ato judicial de despacho inicial">
         <task name="Nó de Desvio - (SG) Preparar ato judicial de despacho inicial" swimlane="Nó de Desvio - (SG) Preparar ato judicial de despacho inicial"/>
