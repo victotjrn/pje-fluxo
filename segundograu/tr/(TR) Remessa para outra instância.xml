@@ -76,6 +76,7 @@
         <transition to="(TR) Processos recebidos do primeiro grau" name="(TR) Processos recebidos do primeiro grau">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TR) Encaminhar para concluso para decisão de reativação" name="Encaminhar para concluso para decisão de reativação"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Processos recebidos do primeiro grau')}"/>
         </event>
@@ -88,6 +89,7 @@
         <transition to="(TR) Encaminhar ao primeiro grau" name="(TR) Encaminhar ao primeiro grau"/>
         <transition to="(TR) Remetidos ao primeiro grau" name="(TR) Remetidos ao primeiro grau"/>
         <transition to="(TR) Processos recebidos do primeiro grau" name="(TR) Processos recebidos do primeiro grau"/>
+        <transition to="(TR) Despachados sobre reativação pós remessa" name="(TR) Despachados sobre reativação pós remessa"/>
     </task-node>
     <task-node end-tasks="true" name="(TR) Processos recebidos do primeiro grau">
         <task name="(TR) Processos recebidos do primeiro grau" swimlane="Secretaria"/>
@@ -96,6 +98,36 @@
             <condition expression="#{true}"/>
         </transition>
     </task-node>
+    <process-state name="(TR) Encaminhar para concluso para decisão de reativação">
+        <sub-process name="(TR) Preparar Ato Judicial" binding="late"/>
+        <transition to="(TR) Despachados sobre reativação pós remessa" name="(TR) Despachados sobre reativação pós remessa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tr:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tr:paj:decisao_reativacao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tr:paj:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tr:paj:decisao_reativacao')}"/>
+        </event>
+    </process-state>
+    <task-node end-tasks="true" name="(TR) Despachados sobre reativação pós remessa">
+        <task name="(TR) Despachados sobre reativação pós remessa" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (TR) Remessa para outra instância" name="Nó de Desvio - (TR) Remessa para outra instância">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(TR) Lançar movimento de reativação" name="Encaminhar para Análise da secretaria"/>
+        <transition to="(TR) Remetidos ao primeiro grau" name="Encaminhar para Remetidos ao primeiro grau"/>
+    </task-node>
+    <node name="(TR) Lançar movimento de reativação">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(849).lancarMovimento()}"/>
+        </event>
+    </node>
     <end-state name="Término">
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('tr:reminst:instancia_superior')}"/>
