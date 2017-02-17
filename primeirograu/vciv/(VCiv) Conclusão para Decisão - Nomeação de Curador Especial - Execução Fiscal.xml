@@ -18,7 +18,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
     </start-state>  
     <!-- NODES -->
     <task-node end-tasks="true" name="(VCiv) Concluso para decisão - Nomeação de curador especial">
-        <task name="(VCiv) Concluso para decisão - Nomeação de curador especial">
+        <task name="(VCiv) Concluso para decisão - Nomeação de curador especial" swimlane="Assessor">
             <controller>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
@@ -47,6 +47,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
         <transition to="Nó de Desvio - (VCiv) Conclusão para Decisão - Nomeação de Curador Especial - Execução Fiscal" name="Nó de Desvio - (VCiv) Conclusão para Decisão - Nomeação de Curador Especial - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(VCiv) Selecionar outro tipo de conclusão" name="Alterar escolha do tipo de conclusão"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar escolha do tipo de conclusão')}"/>
         </event>
