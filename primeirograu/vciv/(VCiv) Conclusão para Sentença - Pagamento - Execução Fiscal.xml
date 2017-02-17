@@ -123,7 +123,11 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
         <sub-process name="(VCiv) Sentenças - Pagamento - Execução Fiscal" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>  
-    <!-- PROCESS-EVENTS -->
+    <process-state name="(VCiv) Selecionar outro tipo de conclusão">
+        <sub-process name="(VCiv) Seleção de conclusão - Execução Fiscal" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state> 
+<!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
