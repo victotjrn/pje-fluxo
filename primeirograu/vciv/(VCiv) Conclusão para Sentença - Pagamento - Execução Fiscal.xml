@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Conclusão para Sentença - Pagamento - Execução Fiscal">
     <description><![CDATA[Código do fluxo: VCiv_PAJ_EXEF_SENT_PAG
 
-Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]></description>  
+Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Assessor">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,7:5197,5:1338,8:5852,8:5853')}" actor-id="#{actor.id}"/>
@@ -50,6 +50,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
         <transition to="(VCiv) Selecionar outro tipo de conclusão" name="Alterar escolha do tipo de conclusão"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar escolha do tipo de conclusão')}"/>
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento()}"/>
         </event>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
@@ -122,12 +123,12 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
     <process-state name="(VCiv) Encaminhar para sentenciados">
         <sub-process name="(VCiv) Sentenças - Pagamento - Execução Fiscal" binding="late"/>
         <transition to="Término" name="Término"/>
-    </process-state>  
+    </process-state>
     <process-state name="(VCiv) Selecionar outro tipo de conclusão">
         <sub-process name="(VCiv) Seleção de conclusão - Execução Fiscal" binding="late"/>
         <transition to="Término" name="Término"/>
-    </process-state> 
-<!-- PROCESS-EVENTS -->
+    </process-state>  
+    <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
