@@ -26,11 +26,14 @@
         <transition to="Nó de Desvio - (VCiv) Despachos - Alteração de RENAJUD - Execução Fiscal" name="Nó de Desvio - (VCiv) Despachos - Alteração de RENAJUD - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="Término" name="Término"/>
     </task-node>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Despachos - Alteração de RENAJUD - Execução Fiscal">
         <task name="Nó de Desvio - (VCiv) Despachos - Alteração de RENAJUD - Execução Fiscal" swimlane="Nó de Desvio - (VCiv) Despachos - Alteração de RENAJUD - Execução Fiscal"/>
         <transition to="(VCiv) Despachados - Alteração de RENAJUD" name="(VCiv) Despachados - Alteração de RENAJUD"/>
-    </task-node>  
+        <transition to="Término" name="Término"/>
+    </task-node>
+    <end-state name="Término"/>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

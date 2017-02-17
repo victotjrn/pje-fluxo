@@ -26,11 +26,14 @@
         <transition to="Nó de Desvio - (VCiv) Despachos - Nomeação de Curador Especial - Execução Fiscal" name="Nó de Desvio - (VCiv) Despachos - Nomeação de Curador Especial - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="Término" name="Término"/>
     </task-node>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Despachos - Nomeação de Curador Especial - Execução Fiscal">
         <task name="Nó de Desvio - (VCiv) Despachos - Nomeação de Curador Especial - Execução Fiscal" swimlane="Nó de Desvio - (VCiv) Despachos - Nomeação de Curador Especial - Execução Fiscal"/>
         <transition to="(VCiv) Despachados - Nomeação de Curador Especial" name="(VCiv) Despachados - Nomeação de Curador Especial"/>
-    </task-node>  
+        <transition to="Término" name="Término"/>
+    </task-node>
+    <end-state name="Término"/>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

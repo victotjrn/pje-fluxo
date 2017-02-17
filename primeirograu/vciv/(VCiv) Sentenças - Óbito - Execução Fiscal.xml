@@ -26,11 +26,14 @@
         <transition to="Nó de Desvio - (VCiv) Sentenças - Óbito - Execução Fiscal" name="Nó de Desvio - (VCiv) Sentenças - Óbito - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="Término" name="Término"/>
     </task-node>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Sentenças - Óbito - Execução Fiscal">
         <task name="Nó de Desvio - (VCiv) Sentenças - Óbito - Execução Fiscal" swimlane="Nó de Desvio - (VCiv) Sentenças - Óbito - Execução Fiscal"/>
         <transition to="(VCiv) Sentenciados - Óbito" name="(VCiv) Sentenciados - Óbito"/>
-    </task-node>  
+        <transition to="Término" name="Término"/>
+    </task-node>
+    <end-state name="Término"/>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

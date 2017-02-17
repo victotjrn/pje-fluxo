@@ -18,27 +18,27 @@
     <!-- NODES -->
     <task-node end-tasks="true" name="(VCiv) Selecionar tipo de conclusão - Execução Fiscal">
         <task name="(VCiv) Selecionar tipo de conclusão - Execução Fiscal" swimlane="Secretaria"/>
-        <transition to="(VCiv) Conclusão para Decisão - Alteração de RENAJUD - Execução Fiscal" name="1 - Alteração de RENAJUD"/>
-        <transition to="(VCiv) Conclusão para Decisão - Alvará - Execução Fiscal" name="2 - Alvará"/>
-        <transition to="(VCiv) Conclusão para Decisão - Arresto - Execução Fiscal" name="3 - Arresto"/>
-        <transition to="(VCiv) Conclusão para Decisão - ART 40 - Execução Fiscal" name="4 - ART 40"/>
-        <transition to="(VCiv) Conclusão para Decisão - BACENJUD - Execução Fiscal" name="5 - BACENJUD"/>
-        <transition to="(VCiv) Conclusão para Decisão - Edital - Execução Fiscal" name="6 - Edital"/>
-        <transition to="(VCiv) Conclusão para Decisão - Exceção de Pré-Executividade - Execução Fiscal" name="7 - Exceção de Pré-Executividade"/>
-        <transition to="(VCiv) Conclusão para Decisão - Genérica - Execução Fiscal" name="8 - Genérica"/>
-        <transition to="(VCiv) Conclusão para Decisão - Hasta Pública - Execução Fiscal" name="9 - Hasta Pública"/>
-        <transition to="(VCiv) Conclusão para Decisão - INFOJUD INFOSEG - Execução Fiscal" name="10 - INFOJUD INFOSEG"/>
-        <transition to="(VCiv) Conclusão para Decisão - Impenhorabilidade - Execução Fiscal" name="11 - Impenhorabilidade"/>
-        <transition to="(VCiv) Conclusão para Decisão - Nomeação de Curador Especial - Execução Fiscal" name="12 - Nomeação de Curador Especial"/>
-        <transition to="(VCiv) Conclusão para Decisão - RENAJUD - Execução Fiscal" name="13 - RENAJUD"/>
-        <transition to="(VCiv) Conclusão para Decisão - Recurso - Execução Fiscal" name="14 - Recurso"/>
-        <transition to="(VCiv) Conclusão para Decisão - Redirecionamento - Execução Fiscal" name="15 - Redirecionamento"/>
-        <transition to="(VCiv) Conclusão para Decisão - Suspensão - Execução Fiscal" name="16 - Suspensão"/>
-        <transition to="(VCiv) Conclusão para Sentença - Óbito - Execução Fiscal" name="17 - Óbito"/>
-        <transition to="(VCiv) Conclusão para Sentença - Abandono - Execução Fiscal" name="18 - Abandono"/>
-        <transition to="(VCiv) Conclusão para Sentença - Cancelamento CDA - Execução Fiscal" name="19 - Cancelamento de CDA"/>
-        <transition to="(VCiv) Conclusão para Sentença - Genérica - Execução Fiscal" name="20 - Genérica"/>
-        <transition to="(VCiv) Conclusão para Sentença - Pagamento - Execução Fiscal" name="21 - Pagamento"/>
+        <transition to="(VCiv) Conclusão para Decisão - Alteração de RENAJUD - Execução Fiscal" name="Alteração de RENAJUD"/>
+        <transition to="(VCiv) Conclusão para Decisão - Alvará - Execução Fiscal" name="Alvará"/>
+        <transition to="(VCiv) Conclusão para Decisão - Arresto - Execução Fiscal" name="Arresto"/>
+        <transition to="(VCiv) Conclusão para Decisão - ART 40 - Execução Fiscal" name="ART 40"/>
+        <transition to="(VCiv) Conclusão para Decisão - BACENJUD - Execução Fiscal" name="BACENJUD"/>
+        <transition to="(VCiv) Conclusão para Decisão - Edital - Execução Fiscal" name="Edital"/>
+        <transition to="(VCiv) Conclusão para Decisão - Exceção de Pré-Executividade - Execução Fiscal" name="Exceção de Pré-Executividade"/>
+        <transition to="(VCiv) Conclusão para Decisão - Genérica - Execução Fiscal" name="Genérica"/>
+        <transition to="(VCiv) Conclusão para Decisão - Hasta Pública - Execução Fiscal" name="Hasta Pública"/>
+        <transition to="(VCiv) Conclusão para Decisão - INFOJUD INFOSEG - Execução Fiscal" name="INFOJUD INFOSEG"/>
+        <transition to="(VCiv) Conclusão para Decisão - Impenhorabilidade - Execução Fiscal" name="Impenhorabilidade"/>
+        <transition to="(VCiv) Conclusão para Decisão - Nomeação de Curador Especial - Execução Fiscal" name="Nomeação de Curador Especial"/>
+        <transition to="(VCiv) Conclusão para Decisão - RENAJUD - Execução Fiscal" name="RENAJUD"/>
+        <transition to="(VCiv) Conclusão para Decisão - Recurso - Execução Fiscal" name="Recurso"/>
+        <transition to="(VCiv) Conclusão para Decisão - Redirecionamento - Execução Fiscal" name="Redirecionamento"/>
+        <transition to="(VCiv) Conclusão para Decisão - Suspensão - Execução Fiscal" name="Suspensão"/>
+        <transition to="(VCiv) Conclusão para Sentença - Óbito - Execução Fiscal" name="Óbito"/>
+        <transition to="(VCiv) Conclusão para Sentença - Abandono - Execução Fiscal" name="Abandono"/>
+        <transition to="(VCiv) Conclusão para Sentença - Cancelamento CDA - Execução Fiscal" name="Cancelamento de CDA"/>
+        <transition to="(VCiv) Conclusão para Sentença - Genérica - Execução Fiscal" name="Genérica"/>
+        <transition to="(VCiv) Conclusão para Sentença - Pagamento - Execução Fiscal" name="Pagamento"/>
         <transition to="Nó de Desvio - (VCiv) Seleção de conclusão - Execução Fiscal" name="Nó de Desvio - (VCiv) Seleção de conclusão - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
