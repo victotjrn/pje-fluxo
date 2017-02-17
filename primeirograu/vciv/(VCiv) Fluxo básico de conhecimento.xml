@@ -166,6 +166,9 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="(VCiv) Dar cumprimento a ato judicial de central de calculos" name="17 - Enviar para central de calculos">
             <condition expression="#{' 38 39 102 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat(' '))}"/>
         </transition>
+        <transition to="(VCiv) Selecionar conclusão - Execução Fiscal" name="18 - Selecionar conclusão - Execução Fiscal">
+            <condition expression="#{(' 8 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia).concat(' ')))}"/>
+        </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_laudo_tecnico', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_laudo_tecnico'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_audiencia', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_audiencia'))}"/>
@@ -836,7 +839,11 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:encaminar_cejusc')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:encerrar_prazo')}"/>
         </event>
-    </node>  
+    </node>
+    <process-state name="(VCiv) Selecionar conclusão - Execução Fiscal">
+        <sub-process name="(VCiv) Seleção de conclusão - Execução Fiscal" binding="late"/>
+        <transition to="(VCiv) Análise da secretaria" name="(VCiv) Análise da secretaria"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
