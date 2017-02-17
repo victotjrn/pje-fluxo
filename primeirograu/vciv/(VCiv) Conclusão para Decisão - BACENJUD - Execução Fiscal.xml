@@ -89,17 +89,17 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
    Obrig. Não
    Tipo: Habilitar Assinatura em Lote]]></description>
         <transition to="(VCiv) Concluso para decisão - BACENJUD" name="Retornar para minuta"/>
-        <transition to="(VCiv) Enviar autos à secretaria" name="(VCiv) Enviar autos à secretaria">
+        <transition to="(VCiv) Encaminhar para despachados" name="(VCiv) Encaminhar para despachados">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Enviar autos à secretaria" name="Documento já assinado! Encaminhar para secretaria">
+        <transition to="(VCiv) Encaminhar para despachados" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="Nó de Desvio - (VCiv) Conclusão para Decisão - BACENJUD - Execução Fiscal" name="Nó de Desvio - (VCiv) Conclusão para Decisão - BACENJUD - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Enviar autos à secretaria')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Encaminhar para despachados')}"/>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
         </event>
@@ -108,17 +108,17 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
-    <process-state name="(VCiv) Enviar autos à secretaria">
-        <sub-process name="(VCiv) Autos recebidos do gabinete" binding="late"/>
-        <transition to="Término" name="Término"/>
-    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Conclusão para Decisão - BACENJUD - Execução Fiscal">
         <task name="Nó de Desvio - (VCiv) Conclusão para Decisão - BACENJUD - Execução Fiscal"/>
         <transition to="(VCiv) Concluso para decisão - BACENJUD" name="(VCiv) Concluso para decisão - BACENJUD"/>
         <transition to="(VCiv) Assinar decisão - BACENJUD" name="(VCiv) Assinar decisão - BACENJUD"/>
         <transition to="Término" name="Término"/>
-    </task-node>  
+    </task-node>
+    <process-state name="(VCiv) Encaminhar para despachados">
+        <sub-process name="(VCiv) Despachos - BACENJUD - Execução Fiscal" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
