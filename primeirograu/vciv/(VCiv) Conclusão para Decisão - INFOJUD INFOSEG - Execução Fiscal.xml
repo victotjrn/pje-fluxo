@@ -107,6 +107,9 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
+        <event type="task-start">
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+        </event>
     </task-node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Conclusão para Decisão - INFOJUD INFOSEG - Execução Fiscal">
