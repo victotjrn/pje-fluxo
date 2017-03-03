@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Conclusão para Decisão - Alvará - Execução Fiscal">
-    <description><![CDATA[Código do fluxo: VCiv_PAJ_EXEF_ALV
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VEF) Conclusão para Decisão - Alvará - Execução Fiscal">
+    <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_ALV
 
 Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]]></description>  
     <!-- SWIMLANES -->
@@ -14,11 +14,11 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(VCiv) Concluso para decisão - Alvará" name="(VCiv) Concluso para decisão - Alvará"/>
+        <transition to="(VEF) Concluso para decisão - Alvará" name="(VEF) Concluso para decisão - Alvará"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(VCiv) Concluso para decisão - Alvará">
-        <task name="(VCiv) Concluso para decisão - Alvará" swimlane="Assessor">
+    <task-node end-tasks="true" name="(VEF) Concluso para decisão - Alvará">
+        <task name="(VEF) Concluso para decisão - Alvará" swimlane="Assessor">
             <controller>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
@@ -43,11 +43,11 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
 1. Tipo do evento: Sair Tarefa
    Agrupamento eventos: Magistrado
    Condição para lançamento temporário: #{true}]]></description>
-        <transition to="(VCiv) Assinar decisão - Alvará" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="Nó de Desvio - (VCiv) Conclusão para Decisão - Alvará - Execução Fiscal" name="Nó de Desvio - (VCiv) Conclusão para Decisão - Alvará - Execução Fiscal">
+        <transition to="(VEF) Assinar decisão - Alvará" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="Nó de Desvio - (VEF) Conclusão para Decisão - Alvará - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Decisão - Alvará - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Selecionar outro tipo de conclusão" name="Alterar escolha do tipo de conclusão"/>
+        <transition to="(VEF) Selecionar outro tipo de conclusão" name="Alterar escolha do tipo de conclusão"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar escolha do tipo de conclusão')}"/>
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
@@ -63,8 +63,8 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
             <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(VCiv) Assinar decisão - Alvará">
-        <task name="(VCiv) Assinar decisão - Alvará" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(VEF) Assinar decisão - Alvará">
+        <task name="(VEF) Assinar decisão - Alvará" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -90,18 +90,18 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Assinatura em Lote]]></description>
-        <transition to="(VCiv) Concluso para decisão - Alvará" name="Retornar para minuta"/>
-        <transition to="(VCiv) Encaminhar para despachados" name="(VCiv) Encaminhar para despachados">
+        <transition to="(VEF) Concluso para decisão - Alvará" name="Retornar para minuta"/>
+        <transition to="(VEF) Encaminhar para despachados" name="(VEF) Encaminhar para despachados">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Encaminhar para despachados" name="Documento já assinado! Encaminhar para secretaria">
+        <transition to="(VEF) Encaminhar para despachados" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <transition to="Nó de Desvio - (VCiv) Conclusão para Decisão - Alvará - Execução Fiscal" name="Nó de Desvio - (VCiv) Conclusão para Decisão - Alvará - Execução Fiscal">
+        <transition to="Nó de Desvio - (VEF) Conclusão para Decisão - Alvará - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Decisão - Alvará - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Encaminhar para despachados')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VEF) Encaminhar para despachados')}"/>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
         </event>
@@ -114,18 +114,18 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
         </event>
     </task-node>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Conclusão para Decisão - Alvará - Execução Fiscal">
-        <task name="Nó de Desvio - (VCiv) Conclusão para Decisão - Alvará - Execução Fiscal"/>
-        <transition to="(VCiv) Concluso para decisão - Alvará" name="(VCiv) Concluso para decisão - Alvará"/>
-        <transition to="(VCiv) Assinar decisão - Alvará" name="(VCiv) Assinar decisão - Alvará"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VEF) Conclusão para Decisão - Alvará - Execução Fiscal">
+        <task name="Nó de Desvio - (VEF) Conclusão para Decisão - Alvará - Execução Fiscal"/>
+        <transition to="(VEF) Concluso para decisão - Alvará" name="(VEF) Concluso para decisão - Alvará"/>
+        <transition to="(VEF) Assinar decisão - Alvará" name="(VEF) Assinar decisão - Alvará"/>
         <transition to="Término" name="Término"/>
     </task-node>
-    <process-state name="(VCiv) Encaminhar para despachados">
-        <sub-process name="(VCiv) Despachos - Alvará - Execução Fiscal" binding="late"/>
+    <process-state name="(VEF) Encaminhar para despachados">
+        <sub-process name="(VEF) Despachos - Alvará - Execução Fiscal" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
-    <process-state name="(VCiv) Selecionar outro tipo de conclusão">
-        <sub-process name="(VCiv) Seleção de conclusão - Execução Fiscal" binding="late"/>
+    <process-state name="(VEF) Selecionar outro tipo de conclusão">
+        <sub-process name="(VEF) Seleção de conclusão - Execução Fiscal" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>  
     <!-- PROCESS-EVENTS -->
