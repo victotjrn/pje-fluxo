@@ -1,39 +1,36 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Sentenças - Desistência (Lei 152) - Execução Fiscal">
-    <description><![CDATA[Código do fluxo: VCiv_PAJ_EXEF_SNT_SENT_DESIST_L152]]></description>  
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VEF) Sentenças - Óbito - Execução Fiscal">
+    <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_SNT_SENT_OBT]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (VCiv) Sentenças - Desistência (Lei 152) - Execução Fiscal">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
-    </swimlane>
-    <swimlane name="Nó de Desvio - (VCiv) Sentenças - Genérico - Execução Fiscal">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
-    </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (VEF) Sentenças - Óbito - Execução Fiscal">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(VCiv) Sentenciados - Genérico" name="(VCiv) Sentenciados - Genérico"/>
+        <transition to="(VEF) Sentenciados - Óbito" name="(VEF) Sentenciados - Óbito"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(VCiv) Sentenciados - Genérico">
-        <task name="(VCiv) Sentenciados - Genérico" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(VEF) Sentenciados - Óbito">
+        <task name="(VEF) Sentenciados - Óbito" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
                 <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[]]></description>
-        <transition to="Nó de Desvio - (VCiv) Sentenças - Desistência (Lei 152) - Execução Fiscal" name="Nó de Desvio - (VCiv) Sentenças - Desistência (Lei 152) - Execução Fiscal">
+        <transition to="Nó de Desvio - (VEF) Sentenças - Óbito - Execução Fiscal" name="Nó de Desvio - (VEF) Sentenças - Óbito - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Término"/>
     </task-node>
-    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Sentenças - Desistência (Lei 152) - Execução Fiscal">
-        <task name="Nó de Desvio - (VCiv) Sentenças - Desistência (Lei 152) - Execução Fiscal" swimlane="Nó de Desvio - (VCiv) Sentenças - Desistência (Lei 152) - Execução Fiscal"/>
-        <transition to="(VCiv) Sentenciados - Genérico" name="(VCiv) Sentenciados - Genérico"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VEF) Sentenças - Óbito - Execução Fiscal">
+        <task name="Nó de Desvio - (VEF) Sentenças - Óbito - Execução Fiscal" swimlane="Nó de Desvio - (VEF) Sentenças - Óbito - Execução Fiscal"/>
+        <transition to="(VEF) Sentenciados - Óbito" name="(VEF) Sentenciados - Óbito"/>
         <transition to="Término" name="Término"/>
     </task-node>
     <end-state name="Término"/>  

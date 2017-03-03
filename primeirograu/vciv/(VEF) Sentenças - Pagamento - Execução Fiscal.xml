@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Despachos - Suspensão - Execução Fiscal">
-    <description><![CDATA[Código do fluxo: VCiv_PAJ_EXEF_DSP_SPS]]></description>  
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VEF) Sentenças - Pagamento - Execução Fiscal">
+    <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_SNT_SENT_PAG]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (VCiv) Despachos - Suspensão - Execução Fiscal">
+    <swimlane name="Nó de Desvio - (VEF) Sentenças - Pagamento - Execução Fiscal">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
     <swimlane name="Secretaria">
@@ -12,25 +12,25 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(VCiv) Despachados - Suspensão" name="(VCiv) Despachados - Suspensão"/>
+        <transition to="(VEF) Sentenciados - Pagamento" name="(VEF) Sentenciados - Pagamento"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(VCiv) Despachados - Suspensão">
-        <task name="(VCiv) Despachados - Suspensão" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(VEF) Sentenciados - Pagamento">
+        <task name="(VEF) Sentenciados - Pagamento" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
                 <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[]]></description>
-        <transition to="Nó de Desvio - (VCiv) Despachos - Suspensão - Execução Fiscal" name="Nó de Desvio - (VCiv) Despachos - Suspensão - Execução Fiscal">
+        <transition to="Nó de Desvio - (VEF) Sentenças - Pagamento - Execução Fiscal" name="Nó de Desvio - (VEF) Sentenças - Pagamento - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Término"/>
     </task-node>
-    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Despachos - Suspensão - Execução Fiscal">
-        <task name="Nó de Desvio - (VCiv) Despachos - Suspensão - Execução Fiscal" swimlane="Nó de Desvio - (VCiv) Despachos - Suspensão - Execução Fiscal"/>
-        <transition to="(VCiv) Despachados - Suspensão" name="(VCiv) Despachados - Suspensão"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VEF) Sentenças - Pagamento - Execução Fiscal">
+        <task name="Nó de Desvio - (VEF) Sentenças - Pagamento - Execução Fiscal" swimlane="Nó de Desvio - (VEF) Sentenças - Pagamento - Execução Fiscal"/>
+        <transition to="(VEF) Sentenciados - Pagamento" name="(VEF) Sentenciados - Pagamento"/>
         <transition to="Término" name="Término"/>
     </task-node>
     <end-state name="Término"/>  
