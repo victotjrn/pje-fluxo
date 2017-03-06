@@ -14,11 +14,11 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG" name="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG"/>
+        <transition to="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - MINUTAR" name="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - MINUTAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG">
-        <task name="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG" swimlane="Assessor">
+    <task-node end-tasks="true" name="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - MINUTAR">
+        <task name="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - MINUTAR" swimlane="Assessor">
             <controller>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
@@ -43,7 +43,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
 1. Tipo do evento: Sair Tarefa
    Agrupamento eventos: Magistrado
    Condição para lançamento temporário: #{true}]]></description>
-        <transition to="(VEF) Assinar decisão - INFOJUD e(ou) INFOSEG" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
         <transition to="Nó de Desvio - (VEF) Conclusão para Decisão - INFOJUD INFOSEG - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Decisão - INFOJUD INFOSEG - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
@@ -63,8 +63,8 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
             <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(VEF) Assinar decisão - INFOJUD e(ou) INFOSEG">
-        <task name="(VEF) Assinar decisão - INFOJUD e(ou) INFOSEG" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - ASSINAR">
+        <task name="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - ASSINAR" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -90,7 +90,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Assinatura em Lote]]></description>
-        <transition to="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG" name="Retornar para minuta"/>
+        <transition to="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - MINUTAR" name="Retornar para minuta"/>
         <transition to="(VEF) Encaminhar para despachados" name="(VEF) Encaminhar para despachados">
             <condition expression="#{true}"/>
         </transition>
@@ -116,8 +116,8 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (VEF) Conclusão para Decisão - INFOJUD INFOSEG - Execução Fiscal">
         <task name="Nó de Desvio - (VEF) Conclusão para Decisão - INFOJUD INFOSEG - Execução Fiscal"/>
-        <transition to="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG" name="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG"/>
-        <transition to="(VEF) Assinar decisão - INFOJUD e(ou) INFOSEG" name="(VEF) Assinar decisão - INFOJUD e(ou) INFOSEG"/>
+        <transition to="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - MINUTAR" name="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - MINUTAR"/>
+        <transition to="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - ASSINAR" name="(VEF) Concluso para decisão - INFOJUD e(ou) INFOSEG - ASSINAR"/>
         <transition to="Término" name="Término"/>
     </task-node>
     <process-state name="(VEF) Encaminhar para despachados">

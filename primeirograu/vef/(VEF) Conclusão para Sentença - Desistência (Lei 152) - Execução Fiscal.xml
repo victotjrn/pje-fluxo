@@ -14,11 +14,11 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(VEF) Concluso para sentença - Fila genérica" name="(VEF) Concluso para sentença - Fila genérica"/>
+        <transition to="(VEF) Concluso para sentença - Fila genérica - MINUTAR" name="(VEF) Concluso para sentença - Fila genérica - MINUTAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(VEF) Concluso para sentença - Fila genérica">
-        <task name="(VEF) Concluso para sentença - Fila genérica" swimlane="Assessor">
+    <task-node end-tasks="true" name="(VEF) Concluso para sentença - Fila genérica - MINUTAR">
+        <task name="(VEF) Concluso para sentença - Fila genérica - MINUTAR" swimlane="Assessor">
             <controller>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
@@ -43,7 +43,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
 1. Tipo do evento: Sair Tarefa
    Agrupamento eventos: Magistrado
    Condição para lançamento temporário: #{true}]]></description>
-        <transition to="(VEF) Assinar sentença - Fila genérica" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(VEF) Concluso para sentença - Fila genérica - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
         <transition to="Término" name="Escolher outro tipo de conclusão"/>
         <transition to="Nó de Desvio - (VEF) Conclusão para Sentença - Desistência (Lei 152) - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Sentença - Desistência (Lei 152) - Execução Fiscal">
             <condition expression="#{true}"/>
@@ -64,8 +64,8 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
             <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(VEF) Assinar sentença - Fila genérica">
-        <task name="(VEF) Assinar sentença - Fila genérica" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(VEF) Concluso para sentença - Fila genérica - ASSINAR">
+        <task name="(VEF) Concluso para sentença - Fila genérica - ASSINAR" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -91,7 +91,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Assinatura em Lote]]></description>
-        <transition to="(VEF) Concluso para sentença - Fila genérica" name="Retornar para minuta"/>
+        <transition to="(VEF) Concluso para sentença - Fila genérica - MINUTAR" name="Retornar para minuta"/>
         <transition to="(VEF) Encaminhar para sentenciados" name="(VEF) Encaminhar para sentenciados">
             <condition expression="#{true}"/>
         </transition>
@@ -117,8 +117,8 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (VEF) Conclusão para Sentença - Desistência (Lei 152) - Execução Fiscal">
         <task name="Nó de Desvio - (VEF) Conclusão para Sentença - Desistência (Lei 152) - Execução Fiscal"/>
-        <transition to="(VEF) Concluso para sentença - Fila genérica" name="(VEF) Concluso para sentença - Fila genérica"/>
-        <transition to="(VEF) Assinar sentença - Fila genérica" name="(VEF) Assinar sentença - Fila genérica"/>
+        <transition to="(VEF) Concluso para sentença - Fila genérica - MINUTAR" name="(VEF) Concluso para sentença - Fila genérica - MINUTAR"/>
+        <transition to="(VEF) Concluso para sentença - Fila genérica - ASSINAR" name="(VEF) Concluso para sentença - Fila genérica - ASSINAR"/>
         <transition to="Término" name="Término"/>
     </task-node>
     <process-state name="(VEF) Encaminhar para sentenciados">

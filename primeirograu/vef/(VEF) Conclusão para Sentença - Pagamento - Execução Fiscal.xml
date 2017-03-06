@@ -14,11 +14,11 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(VEF) Concluso para sentença - Pagamento" name="(VEF) Concluso para sentença - Pagamento"/>
+        <transition to="(VEF) Concluso para sentença - Pagamento - MINUTAR" name="(VEF) Concluso para sentença - Pagamento - MINUTAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(VEF) Concluso para sentença - Pagamento">
-        <task name="(VEF) Concluso para sentença - Pagamento" swimlane="Assessor">
+    <task-node end-tasks="true" name="(VEF) Concluso para sentença - Pagamento - MINUTAR">
+        <task name="(VEF) Concluso para sentença - Pagamento - MINUTAR" swimlane="Assessor">
             <controller>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
@@ -43,7 +43,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
 1. Tipo do evento: Sair Tarefa
    Agrupamento eventos: Magistrado
    Condição para lançamento temporário: #{true}]]></description>
-        <transition to="(VEF) Assinar decisão - Pagamento" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(VEF) Concluso para sentença - Pagamento - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
         <transition to="Nó de Desvio - (VEF) Conclusão para Sentença - Pagamento - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Sentença - Pagamento - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
@@ -63,8 +63,8 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
             <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(VEF) Assinar decisão - Pagamento">
-        <task name="(VEF) Assinar decisão - Pagamento" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(VEF) Concluso para sentença - Pagamento - ASSINAR">
+        <task name="(VEF) Concluso para sentença - Pagamento - ASSINAR" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -90,7 +90,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Assinatura em Lote]]></description>
-        <transition to="(VEF) Concluso para sentença - Pagamento" name="Retornar para minuta"/>
+        <transition to="(VEF) Concluso para sentença - Pagamento - MINUTAR" name="Retornar para minuta"/>
         <transition to="(VEF) Encaminhar para sentenciados" name="(VEF) Encaminhar para sentenciados">
             <condition expression="#{true}"/>
         </transition>
@@ -116,8 +116,8 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (VEF) Conclusão para Sentença - Pagamento - Execução Fiscal">
         <task name="Nó de Desvio - (VEF) Conclusão para Sentença - Pagamento - Execução Fiscal"/>
-        <transition to="(VEF) Concluso para sentença - Pagamento" name="(VEF) Concluso para sentença - Pagamento"/>
-        <transition to="(VEF) Assinar decisão - Pagamento" name="(VEF) Assinar decisão - Pagamento"/>
+        <transition to="(VEF) Concluso para sentença - Pagamento - MINUTAR" name="(VEF) Concluso para sentença - Pagamento - MINUTAR"/>
+        <transition to="(VEF) Concluso para sentença - Pagamento - ASSINAR" name="(VEF) Concluso para sentença - Pagamento - ASSINAR"/>
         <transition to="Término" name="Término"/>
     </task-node>
     <process-state name="(VEF) Encaminhar para sentenciados">
