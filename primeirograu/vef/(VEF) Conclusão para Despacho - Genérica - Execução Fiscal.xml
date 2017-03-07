@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VEF) Conclusão para Decisão - Arresto - Execução Fiscal">
-    <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_ARRST
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VEF) Conclusão para Despacho - Genérica - Execução Fiscal">
+    <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_DSPCH_GEN
 
-Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]></description>  
+Descrição: Fluxo destinado ao preparo de atos judiciais de despacho genérico .]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Assessor">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,7:5197,5:1338,8:5852,8:5853')}" actor-id="#{actor.id}"/>
@@ -14,11 +14,11 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(VEF) Concluso para decisão - Arresto - MINUTAR" name="(VEF) Concluso para decisão - Arresto - MINUTAR"/>
+        <transition to="(VEF) Concluso para despacho - Fila genérica - MINUTAR" name="(VEF) Concluso para despacho - Fila genérica - MINUTAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(VEF) Concluso para decisão - Arresto - MINUTAR">
-        <task name="(VEF) Concluso para decisão - Arresto - MINUTAR" swimlane="Assessor">
+    <task-node end-tasks="true" name="(VEF) Concluso para despacho - Fila genérica - MINUTAR">
+        <task name="(VEF) Concluso para despacho - Fila genérica - MINUTAR" swimlane="Assessor">
             <controller>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
@@ -43,8 +43,8 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
 1. Tipo do evento: Sair Tarefa
    Agrupamento eventos: Magistrado
    Condição para lançamento temporário: #{true}]]></description>
-        <transition to="(VEF) Concluso para decisão - Arresto - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="Nó de Desvio - (VEF) Conclusão para Decisão - Arresto - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Decisão - Arresto - Execução Fiscal">
+        <transition to="(VEF) Concluso para Despacho - Fila genérica - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="Nó de Desvio - (VEF) Conclusão para Despacho - Genérica - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Despacho - Genérica - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VEF) Selecionar outro tipo de conclusão" name="Alterar escolha do tipo de conclusão"/>
@@ -63,8 +63,8 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
             <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(VEF) Concluso para decisão - Arresto - ASSINAR">
-        <task name="(VEF) Concluso para decisão - Arresto - ASSINAR" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(VEF) Concluso para Despacho - Fila genérica - ASSINAR">
+        <task name="(VEF) Concluso para Despacho - Fila genérica - ASSINAR" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -90,14 +90,14 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Assinatura em Lote]]></description>
-        <transition to="(VEF) Concluso para decisão - Arresto - MINUTAR" name="Retornar para minuta"/>
+        <transition to="(VEF) Concluso para despacho - Fila genérica - MINUTAR" name="Retornar para minuta"/>
         <transition to="(VEF) Encaminhar para despachados" name="(VEF) Encaminhar para despachados">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VEF) Encaminhar para despachados" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <transition to="Nó de Desvio - (VEF) Conclusão para Decisão - Arresto - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Decisão - Arresto - Execução Fiscal">
+        <transition to="Nó de Desvio - (VEF) Conclusão para Despacho - Genérica - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Despacho - Genérica - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
@@ -114,14 +114,14 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
         </event>
     </task-node>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (VEF) Conclusão para Decisão - Arresto - Execução Fiscal">
-        <task name="Nó de Desvio - (VEF) Conclusão para Decisão - Arresto - Execução Fiscal"/>
-        <transition to="(VEF) Concluso para decisão - Arresto - MINUTAR" name="(VEF) Concluso para decisão - Arresto - MINUTAR"/>
-        <transition to="(VEF) Concluso para decisão - Arresto - ASSINAR" name="(VEF) Concluso para decisão - Arresto - ASSINAR"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VEF) Conclusão para Despacho - Genérica - Execução Fiscal">
+        <task name="Nó de Desvio - (VEF) Conclusão para Despacho - Genérica - Execução Fiscal"/>
+        <transition to="(VEF) Concluso para despacho - Fila genérica - MINUTAR" name="(VEF) Concluso para despacho - Fila genérica - MINUTAR"/>
+        <transition to="(VEF) Concluso para Despacho - Fila genérica - ASSINAR" name="(VEF) Concluso para Despacho - Fila genérica - ASSINAR"/>
         <transition to="Término" name="Término"/>
     </task-node>
     <process-state name="(VEF) Encaminhar para despachados">
-        <sub-process name="(VEF) Despachos - Arresto - Execução Fiscal" binding="late"/>
+        <sub-process name="(VEF) Despachos - Genérica - Execução Fiscal" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
     <process-state name="(VEF) Selecionar outro tipo de conclusão">
