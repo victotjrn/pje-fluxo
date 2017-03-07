@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum...........
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum.............
 Aguardar Perícia / Laudo Técnico / Outros]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
@@ -152,22 +152,34 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="(VCiv) Arquivamento de processo" name="03 - Arquivar processo"/>
         <transition to="(VCiv) Cancelamento de distribuição" name="04 - Cancelar distribuição"/>
         <transition to="(VCiv) Encaminhamento para instância superior" name="05 - Encaminhar para instância superior"/>
-        <transition to="(VCiv) Conclusão para decisão" name="06 - Enviar concluso para decisão"/>
+        <transition to="(VCiv) Conclusão para decisão" name="06 - Enviar concluso para decisão">
+            <condition expression="#{! parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) }"/>
+        </transition>
+        <transition to="(VCiv) Encaminhar gabinete - decisão" name="06 - Enviar concluso para decisão - Execução Fiscal">
+            <condition expression="#{ parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) }"/>
+        </transition>
         <transition to="(VCiv) Conclusão para decisão de urgência" name="07 - Enviar concluso para decisão de urgência"/>
         <transition to="(VCiv) Conclusão para decisão de Emb. de Declaração" name="08 - Enviar concluso para decisão de Emb. de Declaração"/>
         <transition to="(VCiv) Conclusão para decisão sobre recurso" name="09 - Enviar concluso para decisão sobre recurso"/>
         <transition to="(VCiv) Conclusão para decisão de penhora online" name="10 - Enviar concluso para decisão de penhora online"/>
         <transition to="(VCiv) Conclusão para decisão sobre desbloqueio" name="11 - Enviar concluso para decisão de desbloqueio"/>
         <transition to="(VCiv) Conclusão para decisão sobre suspensão" name="12 - Enviar concluso para decisão de suspensão"/>
-        <transition to="(VCiv) Conclusão para despacho" name="13 - Enviar concluso para despacho"/>
+        <transition to="(VCiv) Conclusão para despacho" name="13 - Enviar concluso para despacho">
+            <condition expression="#{! parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) }"/>
+        </transition>
+        <transition to="(VCiv) Encaminhar gabinete - despacho" name="13 - Enviar concluso para despacho - Execução Fiscal">
+            <condition expression="#{ parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) }"/>
+        </transition>
         <transition to="(VCiv) Conclusão para despacho de cumprimento de sentença" name="14 - Enviar concluso para despacho de cumprimento de sentença"/>
-        <transition to="(VCiv) Conclusão para sentença" name="15 - Enviar concluso para sentença"/>
+        <transition to="(VCiv) Conclusão para sentença" name="15 - Enviar concluso para sentença">
+            <condition expression="#{! parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) }"/>
+        </transition>
+        <transition to="(VCiv) Encaminhar gabinete - sentença" name="15 - Enviar concluso para sentença - Execução Fiscal">
+            <condition expression="#{ parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) }"/>
+        </transition>
         <transition to="(VCiv) Conclusão para sentença de homologação e(ou) extinção" name="16 - Enviar concluso para sentença de homologação e/ou extinção"/>
         <transition to="(VCiv) Dar cumprimento a ato judicial de central de calculos" name="17 - Enviar para central de calculos">
             <condition expression="#{' 38 39 102 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat(' '))}"/>
-        </transition>
-        <transition to="(VCiv) Selecionar conclusão - Execução Fiscal" name="17 - Selecionar conclusão - Execução Fiscal">
-            <condition expression="#{(' 8 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia).concat(' ')))}"/>
         </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_laudo_tecnico', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_laudo_tecnico'))}"/>
@@ -840,10 +852,33 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:encerrar_prazo')}"/>
         </event>
     </node>
-    <process-state name="(VCiv) Selecionar conclusão - Execução Fiscal">
-        <sub-process name="(VCiv) Seleção de conclusão - Execução Fiscal" binding="late"/>
+    <process-state name="(VCiv) Encaminhar para o Gabinete VEF">
+        <sub-process name="(VEF) Autos recebidos da secretaria - Execução Fiscal" binding="late"/>
         <transition to="(VCiv) Análise da secretaria" name="(VCiv) Análise da secretaria"/>
-    </process-state>  
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:vef:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:vef:despacho')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:vef:sentenca')}"/>
+        </event>
+    </process-state>
+    <node name="(VCiv) Encaminhar gabinete - despacho">
+        <transition to="(VCiv) Encaminhar para o Gabinete VEF" name="(VCiv) Encaminhar para o Gabinete VEF"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:vef:despacho', 'true')}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Encaminhar gabinete - decisão">
+        <transition to="(VCiv) Encaminhar para o Gabinete VEF" name="(VCiv) Encaminhar para o Gabinete VEF"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:vef:decisao', 'true')}"/>
+        </event>
+    </node>
+    <node name="(VCiv) Encaminhar gabinete - sentença">
+        <transition to="(VCiv) Encaminhar para o Gabinete VEF" name="(VCiv) Encaminhar para o Gabinete VEF"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:vef:sentenca', 'true')}"/>
+        </event>
+    </node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
