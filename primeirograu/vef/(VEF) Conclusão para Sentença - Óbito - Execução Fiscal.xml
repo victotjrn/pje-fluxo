@@ -69,6 +69,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
                 <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
+                <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -89,7 +90,13 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
    Label: 
    Escrita: Sim
    Obrig. Não
-   Tipo: Habilitar Assinatura em Lote]]></description>
+   Tipo: Habilitar Assinatura em Lote
+
+4. Variável: confirmarMovimentacao
+   Label: Confirma Movimentação
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Homologador de Movimentos Temporários]]></description>
         <transition to="(VEF) Concluso para sentença - Óbito - MINUTAR" name="Retornar para minuta"/>
         <transition to="(VEF) Encaminhar para sentenciados" name="(VEF) Encaminhar para sentenciados">
             <condition expression="#{true}"/>
@@ -101,16 +108,13 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VEF) Encaminhar para sentenciados')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VEF) Encaminhar para despachados')}"/>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-        </event>
-        <event type="task-start">
-            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
     </task-node>
     <end-state name="Término"/>
@@ -124,10 +128,12 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
         <sub-process name="(VEF) Sentenças - Óbito - Execução Fiscal" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
-    <process-state name="(VEF) Selecionar outro tipo de conclusão">
-        <sub-process name="(VEF) Seleção de conclusão - Execução Fiscal" binding="late"/>
+    <node name="(VEF) Selecionar outro tipo de conclusão">
         <transition to="Término" name="Término"/>
-    </process-state>  
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:vef:cancelou', true)}"/>
+        </event>
+    </node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
