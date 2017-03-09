@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VEF) Conclusão para Decisão - RENAJUD (Alteração) - Execução Fiscal">
     <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_RNJDALT
 
-Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]]></description>  
+Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas...]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Assessor">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,7:5197,5:1338,8:5852,8:5853')}" actor-id="#{actor.id}"/>

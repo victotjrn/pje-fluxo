@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VEF) Sentenças - Desistência (Lei 152) - Execução Fiscal">
-    <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_SNT_SENT_DST_L152]]></description>  
+    <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_SNT_SENT_DST_L152
+..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VEF) Sentenças - Desistência (Lei 152) - Execução Fiscal">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -12,11 +13,11 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(VEF) Sentenciados - Genérico" name="(VEF) Sentenciados - Genérico"/>
+        <transition to="(VEF) Sentenciados - Desistência (Lei 152)" name="(VEF) Sentenciados - Desistência (Lei 152)"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(VEF) Sentenciados - Genérico">
-        <task name="(VEF) Sentenciados - Genérico" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(VEF) Sentenciados - Desistência (Lei 152)">
+        <task name="(VEF) Sentenciados - Desistência (Lei 152)" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
                 <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
@@ -26,11 +27,11 @@
         <transition to="Nó de Desvio - (VEF) Sentenças - Desistência (Lei 152) - Execução Fiscal" name="Nó de Desvio - (VEF) Sentenças - Desistência (Lei 152) - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Término"/>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
     </task-node>
     <task-node end-tasks="true" name="Nó de Desvio - (VEF) Sentenças - Desistência (Lei 152) - Execução Fiscal">
         <task name="Nó de Desvio - (VEF) Sentenças - Desistência (Lei 152) - Execução Fiscal" swimlane="Nó de Desvio - (VEF) Sentenças - Desistência (Lei 152) - Execução Fiscal"/>
-        <transition to="(VEF) Sentenciados - Genérico" name="(VEF) Sentenciados - Genérico"/>
+        <transition to="(VEF) Sentenciados - Desistência (Lei 152)" name="(VEF) Sentenciados - Desistência (Lei 152)"/>
         <transition to="Término" name="Término"/>
     </task-node>
     <end-state name="Término"/>  

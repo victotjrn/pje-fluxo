@@ -44,7 +44,6 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
    Agrupamento eventos: Magistrado
    Condição para lançamento temporário: #{true}]]></description>
         <transition to="(VEF) Concluso para sentença - Desistência (Lei 152) - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="Término" name="Escolher outro tipo de conclusão"/>
         <transition to="Nó de Desvio - (VEF) Conclusão para Sentença - Desistência (Lei 152) - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Sentença - Desistência (Lei 152) - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>

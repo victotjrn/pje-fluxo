@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VEF) Sentenças - Óbito - Execução Fiscal">
-    <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_SNT_SENT_OBT]]></description>  
+    <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_SNT_SENT_OBT
+..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
