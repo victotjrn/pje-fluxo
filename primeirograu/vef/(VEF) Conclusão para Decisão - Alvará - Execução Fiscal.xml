@@ -68,7 +68,6 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
                 <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
-                <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
