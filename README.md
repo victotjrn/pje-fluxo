@@ -60,7 +60,7 @@ Os nomes dos nós são definidos de forma semelhante ao nome dos fluxos:
 > **Exemplo**: (SG) Lançar movimentação conclusos para decisão
 
 #### **Nome em nós de tarefa**
-Os nós de tarefa seguem a notação básica de nomenclaturas de nós, sendo que ao nomear o nó, além da sigla precedendo o seu nome, segue o padrão abaixo:
+Os nós de tarefa seguem a notação básica de nomenclaturas de nós, sendo que ao nomear o nó, além da sigla precedendo o seu nome, indicar a ação no final. Segue o padrão abaixo:
 
 > **Padrão**: (SIGLA) FASE - AÇÃO
 
