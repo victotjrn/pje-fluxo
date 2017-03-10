@@ -4,7 +4,7 @@ Fluxos processuais do primeiro e segundo graus no PJe do Tribunal de Justiça do
 
 Atenção
 -------
-Fluxos no formato XML carregam eventos de tarefa, nem o conteúdo da label das variáveis. Logo, ao inserir um fluxo pela primeira vez na aplicação, verifique a necessidade de criação de seus eventos de tarefas, quando houver a presença da EL <kbd>#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}</kbd> nos nós de tarefa, bem como ajustes nas labels das variáveis para conter suas respectivas denominações.
+Fluxos no formato XML não carregam eventos de tarefa, nem o conteúdo da label das variáveis. Logo, ao inserir um fluxo pela primeira vez na aplicação, verifique a necessidade de criação de seus eventos de tarefas, quando houver a presença da EL <kbd>#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}</kbd> nos nós de tarefa, bem como ajustes nas labels das variáveis para conter suas respectivas denominações.
 
 
 ## **Procedimentos para desenvolvimento de fluxo no PJe**
