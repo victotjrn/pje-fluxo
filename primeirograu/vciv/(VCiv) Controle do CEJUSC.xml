@@ -77,6 +77,10 @@ expressão p/ quando ativar parnamirim:
         <transition to="(CEJUSC) É NATAL ?" name="Designar/Cancelar audiência - DPVAT">
             <condition expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;DPVAT&quot;)}"/>
         </transition>
+        <transition to="(CEJUSC) Audiências realizadas sem acordo" name="Devolver - Sem acordo"/>
+        <transition to="(CEJUSC) Audiências realizadas com acordo" name="Devolver - Com acordo"/>
+        <transition to="(CEJUSC) Audiências realizadas com ausência parcial das partes" name="Devolver - Ausência parcial das partes"/>
+        <transition to="(CEJUSC) Audiências realizadas com acordo parcial" name="Devolver - Acordo parcial"/>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('cancelou:aud:cejusc')}"/>
         </event>
@@ -293,6 +297,8 @@ expressão p/ quando ativar parnamirim:
         <transition to="(CEJUSC) Aviso CEJUSC" name="(CEJUSC) Aviso CEJUSC"/>
         <transition to="(CEJUSC) Designar audiência DPVAT" name="(CEJUSC) Designar audiência DPVAT"/>
         <transition to="(CEJUSC) Selecionar CEJUSC" name="(CEJUSC) Selecionar CEJUSC"/>
+        <transition to="(CEJUSC) Audiências realizadas com ausência parcial das partes" name="(CEJUSC) Audiências realizadas com ausência parcial das partes"/>
+        <transition to="(CEJUSC) Audiências realizadas com acordo parcial" name="(CEJUSC) Audiências realizadas com acordo parcial"/>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Informar conteúdo DJe">
         <task name="(CEJUSC) Informar conteúdo DJe" swimlane="CEJUSC">
@@ -417,6 +423,8 @@ expressão p/ quando ativar parnamirim:
         <transition to="(CEJUSC) Audiências realizadas sem acordo" name="Devolver - Sem acordo"/>
         <transition to="(CEJUSC) Audiências realizadas com acordo" name="Devolver - Com acordo"/>
         <transition to="(CEJUSC) Audiências não realizadas" name="Devolver - Não realizado"/>
+        <transition to="(CEJUSC) Audiências realizadas com ausência parcial das partes" name="Devolver - Ausência parcial das partes"/>
+        <transition to="(CEJUSC) Audiências realizadas com acordo parcial" name="Devolver - Acordo parcial"/>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
@@ -546,7 +554,29 @@ aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiên
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('CEJUSC').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('juizo de origem').lancarMovimento()}"/>
         </event>
-    </node>  
+    </node>
+    <task-node end-tasks="true" name="(CEJUSC) Audiências realizadas com ausência parcial das partes">
+        <task name="(CEJUSC) Audiências realizadas com ausência parcial das partes" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+    </task-node>
+    <task-node end-tasks="true" name="(CEJUSC) Audiências realizadas com acordo parcial">
+        <task name="(CEJUSC) Audiências realizadas com acordo parcial" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
