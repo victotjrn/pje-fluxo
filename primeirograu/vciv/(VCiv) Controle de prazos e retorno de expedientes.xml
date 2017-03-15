@@ -196,9 +196,11 @@
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Verificar existência de prazo em aberto')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaCiencia', 'true')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaCiencia')}"/>
         </event>
     </task-node>
     <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 ? '(VCiv) Processos com prazo em curso' : '(VCiv) Processos com prazos decorridos'}" name="(VCiv) Prazos continuam em aberto?">
