@@ -54,8 +54,8 @@ Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada]]></descri
         <transition to="(SG) Carta de ordem, precatória ou rogatória - ASSINAR" name="Encaminhar para assinatura"/>
         <transition to="(SG) Apagar minuta não assinada de carta" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
-            <action expression="#{tipoDocumento.set('TipoDocumento',94,201,200)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','94,201,200')}"/>
+            <action name="upd" expression="#{tipoDocumento.set('TipoDocumento',94,203,204)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','94,203,204')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
         </event>
         <event type="task-end">
@@ -102,7 +102,7 @@ Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada]]></descri
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','94,201,200')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','94,203,204')}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de expedição de carta de ordem, precatória ou rogatória')}"/>
         </event>
         <event type="task-end">
@@ -211,5 +211,6 @@ Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada]]></descri
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>
