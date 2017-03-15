@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Encaminhamento para outro gabinete">
     <description><![CDATA[Código do fluxo: SG_ENC_GAB
 
-Descrição: Fluxo destinado para o encaminhamento do processo a outros gabinetes.
+Descrição: Fluxo destinado para o encaminhamento do processo a outros gabinetes..
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
@@ -26,7 +26,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Encaminhamento para outro gabinete" name="Nó de Desvio - (SG) Encaminhamento para outro gabinete">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Encaminhar para CCv1Gab1" name="Encaminhar para Gab. Des. Expedito Ferreira de Souza na Câmara Cível">
+        <transition to="(SG) Encaminhar para CCv1Gab1" name="Encaminhar para Gab. Des. Cláudio Santos na Câmara Cível">
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(15))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv1Gab2" name="Encaminhar para Gab. Des. Dilermando Mota na Câmara Cível">
@@ -45,59 +45,58 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(18))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv3Gab1" name="Encaminhar para Gab. Des. Amaury Moura Sobrinho na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(11))}"/>
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(42))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv3Gab2" name="Encaminhar para Gab. Des. João Rebouças na Câmara Cível">
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(19))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv3Gab3" name="Encaminhar para Gab. Des. Vivaldo Pinheiro na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(27))}"/>
-        </transition>
-        <transition to="(SG) Encaminhar para CCv3Gab4" name="Encaminhar para Gab. Des. Amílcar Maia na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(25))}"/>
-        </transition>
-        <transition to="(SG) Encaminhar para PlenoGab01" name="Encaminhar para Gab. Des. Amaury Moura Sobrinho no Pleno">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(31))}"/>
-        </transition>
-        <transition to="(SG) Encaminhar para PlenoGab02" name="Encaminhar para Gab. Desª. Judite Nunes no Pleno">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(38))}"/>
-        </transition>
-        <transition to="(SG) Encaminhar para PlenoGab03" name="Encaminhar para Gab. Des. Cláudio Santos no Pleno"/>
-        <transition to="(SG) Encaminhar para PlenoGab04" name="Encaminhar para Gab. Des. Expedito Ferreira de Souza no Pleno">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(45))}"/>
-        </transition>
-        <transition to="(SG) Encaminhar para PlenoGab05" name="Encaminhar para Gab. Des. João Rebouças no Pleno">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(29))}"/>
-        </transition>
-        <transition to="(SG) Encaminhar para PlenoGab06" name="Encaminhar para Gab. Des. Vivaldo Pinheiro no Pleno">
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(24))}"/>
         </transition>
-        <transition to="(SG) Encaminhar para PlenoGab07" name="Encaminhar para Gab. Des. Saraiva Sobrinho no Pleno">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(22))}"/>
-        </transition>
-        <transition to="(SG) Encaminhar para PlenoGab08" name="Encaminhar para Gab. Des. Amílcar Maia no Pleno">
+        <transition to="(SG) Encaminhar para CCv3Gab4" name="Encaminhar para Gab. Des. Amílcar Maia na Câmara Cível">
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(12))}"/>
         </transition>
-        <transition to="(SG) Encaminhar para PlenoGab09" name="Encaminhar para Gab. Des. Dilermando Mota no Pleno">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(43))}"/>
+        <transition to="(SG) Encaminhar para PlenoGab01" name="Encaminhar para Gab. Des. Amaury Moura Sobrinho no Pleno">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(11))}"/>
         </transition>
-        <transition to="(SG) Encaminhar para PlenoGab10" name="Encaminhar para Gab. Des. Virgílio Macêdo Junior no Pleno">
+        <transition to="(SG) Encaminhar para PlenoGab02" name="Encaminhar para Gab. Desª. Judite Nunes no Pleno">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(40))}"/>
+        </transition>
+        <transition to="(SG) Encaminhar para PlenoGab03" name="Encaminhar para Gab. Des. Cláudio Santos no Pleno">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(30))}"/>
+        </transition>
+        <transition to="(SG) Encaminhar para PlenoGab04" name="Encaminhar para Gab. Des. João Rebouças no Pleno">
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(35))}"/>
         </transition>
-        <transition to="(SG) Encaminhar para PlenoGab11" name="Encaminhar para Gab. Desª. Zeneide Bezerra no Pleno">
+        <transition to="(SG) Encaminhar para PlenoGab05" name="Encaminhar para Gab. Des. Vivaldo Pinheiro no Pleno">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(39))}"/>
+        </transition>
+        <transition to="(SG) Encaminhar para PlenoGab06" name="Encaminhar para Gab. Des. Saraiva Sobrinho no Pleno">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(22))}"/>
+        </transition>
+        <transition to="(SG) Encaminhar para PlenoGab07" name="Encaminhar para Gab. Des. Amílcar Maia no Pleno">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(27))}"/>
+        </transition>
+        <transition to="(SG) Encaminhar para PlenoGab08" name="Encaminhar para Gab. Des. Dilermando Mota no Pleno">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(29))}"/>
+        </transition>
+        <transition to="(SG) Encaminhar para PlenoGab09" name="Encaminhar para Gab. Des. Virgílio Macêdo Junior no Pleno">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(38))}"/>
+        </transition>
+        <transition to="(SG) Encaminhar para PlenoGab10" name="Encaminhar para Gab. Desª. Zeneide Bezerra no Pleno">
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(21))}"/>
         </transition>
-        <transition to="(SG) Encaminhar para PlenoGab12" name="Encaminhar para Gab. Des. Ibanez Monteiro no Pleno">
+        <transition to="(SG) Encaminhar para PlenoGab11" name="Encaminhar para Gab. Des. Ibanez Monteiro no Pleno">
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(33))}"/>
         </transition>
-        <transition to="(SG) Encaminhar para PlenoGab13" name="Encaminhar para Gab. Des. Glauber Rêgo no Pleno">
+        <transition to="(SG) Encaminhar para PlenoGab12" name="Encaminhar para Gab. Des. Glauber Rêgo no Pleno">
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(17))}"/>
         </transition>
-        <transition to="(SG) Encaminhar para PlenoGab14" name="Encaminhar para Gab. Des. Gilson Barbosa no Pleno">
+        <transition to="(SG) Encaminhar para PlenoGab13" name="Encaminhar para Gab. Des. Gilson Barbosa no Pleno">
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(16))}"/>
         </transition>
-        <transition to="(SG) Encaminhar para PlenoGab15" name="Encaminhar para Gab. Des. Cornélio Alves no Pleno">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(40))}"/>
+        <transition to="(SG) Encaminhar para PlenoGab14" name="Encaminhar para Gab. Des. Cornélio Alves no Pleno">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(28))}"/>
         </transition>
         <transition to="(SG) Encaminhar para SCvGab01" name="Encaminhar para Gab. Des. Amaury Moura Sobrinho na Seção Cível">
             <condition expression="#{true}"/>
@@ -141,7 +140,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <node name="(SG) Encaminhar para CCv1Gab1">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Expedito Ferreira de Souza na Câmara Cível') }"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Cláudio Santos na Câmara Cível') }"/>
             <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),15,5,15,false)}"/>
         </event>
     </node>
@@ -156,7 +155,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Cornélio Alves na Câmara Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),41,5,45,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),41,5,29,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para CCv2Gab1">
@@ -184,133 +183,126 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Amaury Moura Sobrinho na Câmara Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),11,7,16,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),42,7,33,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para CCv3Gab2">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. João Rebouças na Câmara Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),19,7,33,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),19,7,39,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para CCv3Gab3">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Vivaldo Pinheiro na Câmara Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),27,7,31,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),24,7,42,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para CCv3Gab4">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Amílcar Maia na Câmara Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),25,7,28,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),12,7,14,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab01">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Amaury Moura Sobrinho no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),31,8,36,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),11,8,16,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab02">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Desª. Judite Nunes no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),38,8,42,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),40,8,43,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab03">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Cláudio Santos no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),13,11,23,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),30,8,31,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab04">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Expedito Ferreira de Souza no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),45,8,49,false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. João Rebouças no Pleno') }"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),35,8,40,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab05">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. João Rebouças no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),29,8,34,false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Vivaldo Pinheiro no Pleno') }"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),39,8,44,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab06">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Vivaldo Pinheiro no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),24,8,30,false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Saraiva Sobrinho no Pleno') }"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),22,8,41,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab07">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Saraiva Sobrinho no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),22,8,56,false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Amílcar Maia no Pleno') }"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),27,8,35,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab08">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Amílcar Maia no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),12,8,14,false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Dilermando Mota no Pleno') }"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),29,8,36,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab09">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Dilermando Mota no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),43,8,47,false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Virgílio Macêdo Junior no Pleno') }"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),38,8,28,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab10">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Virgílio Macêdo Junior no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),35,8,40,false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Desª. Zeneide Bezerra no Pleno') }"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),21,8,45,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab11">
-        <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Desª. Zeneide Bezerra no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),21,8,53,false)}"/>
-        </event>
-    </node>
-    <node name="(SG) Encaminhar para PlenoGab12">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Ibanez Monteiro no Pleno') }"/>
             <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),33,8,38,false)}"/>
         </event>
     </node>
-    <node name="(SG) Encaminhar para PlenoGab13">
+    <node name="(SG) Encaminhar para PlenoGab12">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Glauber Rêgo no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),17,8,52,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),17,8,37,false)}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab13">
+        <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Gilson Barbosa no Pleno') }"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),16,8,32,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para PlenoGab14">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Gilson Barbosa no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),16,8,51,false)}"/>
-        </event>
-    </node>
-    <node name="(SG) Encaminhar para PlenoGab15">
-        <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
-        <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Cornélio Alves no Pleno') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),40,8,44,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),28,8,30,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para SCvGab01">
@@ -393,7 +385,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <node name="(SG) Registrar movimentação de remessa">
         <transition to="(SG) Conclusão para decisão mediante encaminhamento" name="(SG) Conclusão para decisão mediante encaminhamento"/>
         <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto(tramitacaoProcessualService.recuperaVariavel('sg:encgab:OrgJulgadorDestino')).comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(200001).lancarMovimento()}"/>
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto(tramitacaoProcessualService.recuperaVariavel('sg:encgab:OrgJulgadorDestino')).comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(200005).lancarMovimento()}"/>
         </event>
     </node>
     <process-state name="(SG) Conclusão para decisão mediante encaminhamento">

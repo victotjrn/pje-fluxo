@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar ato judicial de decisão de urgência inicial">
     <description><![CDATA[Código do fluxo: SG_PAJ_DEC_URG_INI
 
-Descrição: Fluxo destinado ao preparo de atos judiciais de decisão de urgência inicial.
+Descrição: Fluxo destinado ao preparo de atos judiciais de decisão de urgência inicial..
 
 Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessoria
@@ -62,8 +62,9 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <transition to="(SG) Concluso para decisão de urgência inicial - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
         <transition to="(SG) Concluso para decisão de urgência inicial - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
         <transition to="(SG) Conclusão para despacho inicial" name="Alterar para despacho inicial"/>
+        <transition to="(SG) Expedir ato ordinatório" name="Prosseguir através de ato ordinatório"/>
         <event type="task-create">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar para despacho inicial')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Prosseguir através de ato ordinatório,Alterar para despacho inicial')}"/>
         </event>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
@@ -181,6 +182,17 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <sub-process name="(SG) Preparar ato judicial de despacho inicial" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
+    <process-state name="(SG) Expedir ato ordinatório">
+        <sub-process name="(SG) Expedição de ato ordinatório de gabinete" binding="late"/>
+        <transition to="(SG) Ato ordinatório cancelado?" name="(SG) Ato ordinatório cancelado?"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:conclusao_cancelada') == true ? '(SG) Concluso para decisão de urgência inicial - MINUTAR' : 'Término'}" name="(SG) Ato ordinatório cancelado?">
+        <transition to="(SG) Concluso para decisão de urgência inicial - MINUTAR" name="(SG) Concluso para decisão de urgência inicial - MINUTAR"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sg:paj:conclusao_cancelada')}"/>
+        </event>
+    </decision>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar ato judicial de decisão de urgência inicial">
         <task name="Nó de Desvio - (SG) Preparar ato judicial de decisão de urgência inicial" swimlane="Nó de Desvio - (SG) Preparar ato judicial de decisão de urgência inicial"/>

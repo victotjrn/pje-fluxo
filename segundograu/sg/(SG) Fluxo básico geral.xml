@@ -22,7 +22,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </start-state>  
     <!-- NODES -->
     <node name="(SG) Acrescentar situação do processo em andamento">
-        <transition to="(SG) Tem pedido de urgência?" name="(SG) Tem pedido de urgência?"/>
+        <transition to="(SG) É apelação?" name="(SG) É apelação?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:andamento')}"/>
         </event>
@@ -30,6 +30,10 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:fbg:direcionar_secretaria') == true ? '(SG) Secretaria - ANALISAR' : '(SG) Acrescentar situação do processo em andamento'}" name="(SG) Direciona diretamente para secretaria?">
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
         <transition to="(SG) Acrescentar situação do processo em andamento" name="(SG) Acrescentar situação do processo em andamento"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial == 198 ? '(SG) Preparação de despacho inicial' : '(SG) Tem pedido de urgência?'}" name="(SG) É apelação?">
+        <transition to="(SG) Tem pedido de urgência?" name="(SG) Tem pedido de urgência?"/>
+        <transition to="(SG) Preparação de despacho inicial" name="(SG) Preparação de despacho inicial"/>
     </decision>
     <decision expression="#{tramitacaoProcessualService.temUrgencia() == true ? '(SG) Preparação de decisão de urgência inicial' : '(SG) Preparação de despacho inicial'}" name="(SG) Tem pedido de urgência?">
         <transition to="(SG) Preparação de decisão de urgência inicial" name="(SG) Preparação de decisão de urgência inicial"/>
@@ -528,7 +532,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <node name="(SG) Retornar ao gabinete de origem do encaminhamento">
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
         <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto(tramitacaoProcessualService.recuperaVariavel('sg:encgab:OrgJulgadorOrigem')).comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(200002).lancarMovimento()}"/>
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto(tramitacaoProcessualService.recuperaVariavel('sg:encgab:OrgJulgadorOrigem')).comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(200003).lancarMovimento()}"/>
             <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('sg:encgab:idOjOrigem'), tramitacaoProcessualService.recuperaVariavel('sg:encgab:idOjcOrigem'), tramitacaoProcessualService.recuperaVariavel('sg:encgab:idOjCargoOrigem'), false)}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:encgab:idOjOrigem')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:encgab:idOjCargoOrigem')}"/>
