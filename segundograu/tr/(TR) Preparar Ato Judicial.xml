@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Preparar Ato Judicial">
-    <description><![CDATA[Permite elaborar minuta de atos judiciais (decisões e despachos)......]]></description>  
+    <description><![CDATA[Permite elaborar minuta de atos judiciais (decisões e despachos).......]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (TR) Preparar Ato Judicial"/>
     <swimlane name="Assessoria">
@@ -70,6 +70,9 @@
         </transition>
         <transition to="(TR) Assinar decisão de urgência inicial" name="Encaminhar para assinatura"/>
         <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Emitir certidão de conclusão sem efeito')}"/>
+        </event>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para decisão de urgência inicial')}"/>
@@ -517,6 +520,9 @@
         </transition>
         <transition to="(TR) Assinar despacho inicial" name="Encaminhar para assinatura"/>
         <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Emitir certidão de conclusão sem efeito')}"/>
+        </event>
         <event type="node-leave">
             <action name="upd" expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para despacho inicial')}"/>
@@ -621,6 +627,7 @@
         <transition to="(TR) Retornar pra qual concluso?" name="Retornar para minuta"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Tem documento assinado?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Retornar para minuta')}"/>
         </event>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
