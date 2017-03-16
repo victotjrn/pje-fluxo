@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Preparar Ato Judicial">
-    <description><![CDATA[Permite elaborar minuta de atos judiciais (decisões e despachos).....]]></description>  
+    <description><![CDATA[Permite elaborar minuta de atos judiciais (decisões e despachos)......]]></description>  
     <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (TR) Preparar Ato Judicial"/>
     <swimlane name="Assessoria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5197,6:1469,8:1338')}" actor-id="#{actor.id}"/>
     </swimlane>
-    <swimlane name="Nó de Desvio - (TR) Preparar Ato Judicial"/>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:5197,8:1338')}"/>
     </swimlane>  
@@ -69,8 +69,10 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar decisão de urgência inicial" name="Encaminhar para assinatura"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para decisão de urgência inicial')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
@@ -514,8 +516,10 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar despacho inicial" name="Encaminhar para assinatura"/>
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action name="upd" expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para despacho inicial')}"/>
         </event>
         <event type="task-end">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial'))}"/>
@@ -638,6 +642,8 @@
         <transition to="(TR) Concluso para decisão de reativação" name="(TR) Concluso para decisão de reativação"/>
         <transition to="(TR) Concluso para decisão de embargos de declaração" name="(TR) Concluso para decisão de embargos de declaração"/>
         <transition to="(TR) Concluso para despacho" name="(TR) Concluso para despacho"/>
+        <transition to="(TR) Concluso para decisão de urgência inicial" name="(TR) Concluso para decisão de urgência inicial"/>
+        <transition to="(TR) Concluso para despacho inicial" name="(TR) Concluso para despacho inicial"/>
     </decision>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:idDocAssinado') ? '(TR) Remover documento temporário decisão_despacho_sentença' : '(TR) Certificar Conclusão sem Efeito'}" name="(TR) Tem documento assinado?">
         <transition to="(TR) Remover documento temporário decisão_despacho_sentença" name="(TR) Remover documento temporário decisão_despacho_sentença"/>
