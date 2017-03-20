@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC....]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC..............]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -565,6 +565,12 @@ aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiên
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Audiências realizadas com acordo parcial">
         <task name="(CEJUSC) Audiências realizadas com acordo parcial" swimlane="Secretaria">
@@ -576,6 +582,12 @@ aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiên
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
