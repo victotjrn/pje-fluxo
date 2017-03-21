@@ -69,7 +69,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar decisão de urgência inicial" name="Encaminhar para assinatura"/>
-        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
+        <transition to="(TR) Limpar movimentos temporários" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para decisão de urgência inicial')}"/>
@@ -517,7 +517,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Assinar despacho inicial" name="Encaminhar para assinatura"/>
-        <transition to="(TR) Certificar Conclusão sem Efeito" name="Emitir certidão de conclusão sem efeito"/>
+        <transition to="(TR) Limpar movimentos temporários" name="Emitir certidão de conclusão sem efeito"/>
         <event type="node-leave">
             <action name="upd" expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:tiporetornominuta', '(TR) Concluso para despacho inicial')}"/>
@@ -663,6 +663,13 @@
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_semefeito')}"/>
+        </event>
+    </node>
+    <node name="(TR) Limpar movimentos temporários">
+        <transition to="(TR) Certificar Conclusão sem Efeito" name="(TR) Certificar Conclusão sem Efeito"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('MovimentosLancadosTemporariamente')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('AgrupamentosLancadosTemporariamente')}"/>
         </event>
     </node>
     <end-state name="Término">
