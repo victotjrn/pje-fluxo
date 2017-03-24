@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC..]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC...]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -524,7 +524,6 @@ aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiên
             <condition expression="#{true}"/>
         </transition>
         <transition to="(CEJUSC) É NATAL ?" name="CEJUSC - DPVAT"/>
-        <transition to="Redirecionar Processo 1" name="Redirecionar Processo 1"/>
     </task-node>
     <decision expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) || authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;MOSSOR&quot;) || authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;PARNAMIRIM&quot;) ? '(CEJUSC) Selecionar CEJUSC' : '(CEJUSC) Designar audiência'}" name="(CEJUSC) É Natal Mossoró Ou Parnamirim ?">
         <transition to="(CEJUSC) Selecionar CEJUSC" name="(CEJUSC) Selecionar CEJUSC"/>
@@ -547,11 +546,7 @@ aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiên
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('CEJUSC').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('juizo de origem').lancarMovimento()}"/>
         </event>
-    </node>
-    <process-state name="Redirecionar Processo 1">
-        <sub-process name="(VCiv) Processo 1" binding="late"/>
-        <transition to="(CEJUSC) Selecionar CEJUSC" name="(CEJUSC) Selecionar CEJUSC"/>
-    </process-state>  
+    </node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

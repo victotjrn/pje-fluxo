@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de audiências do CEJUSC">
-    <description><![CDATA[Fluxo responsável por controlar as audiências no CEJUSC.....]]></description>  
+    <description><![CDATA[Fluxo responsável por controlar as audiências no CEJUSC......]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469')}"/>
@@ -15,9 +15,16 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="CEJUSC"/>
-        <transition to="(CEJUSC) Verifica se existe audiência designada" name="(CEJUSC) Verifica se existe audiência designada"/>
+        <transition to="(CEJUSC) Limpar movimentos temporários" name="(CEJUSC) Limpar movimentos temporários"/>
     </start-state>  
     <!-- NODES -->
+    <node name="(CEJUSC) Limpar movimentos temporários">
+        <transition to="(CEJUSC) Verifica se existe audiência designada" name="(CEJUSC) Verifica se existe audiência designada"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('MovimentosLancadosTemporariamente')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('AgrupamentosLancadosTemporariamente')}"/>
+        </event>
+    </node>
     <decision expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) == null ? 'Término' : '(CEJUSC) Realizar audiência'}" name="(CEJUSC) Verifica se existe audiência designada">
         <transition to="(CEJUSC) Realizar audiência" name="(CEJUSC) Realizar audiência"/>
         <transition to="Término" name="Término"/>
