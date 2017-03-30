@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(HTE) Fluxo básico geral">
+    <description><![CDATA[Código do fluxo: HTE_FBG
+
+Descrição: Fluxo básico geral de entrada dos processos.
+
+Raia        Localização              Papel
+Secretaria  Secretaria               Chefe de Secretaria
+            Gabinete                 Magistrado
+            Assessoria               Assessor]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (HTE) Fluxo básico geral">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,7:5197')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(HTE) Preparação de sentença genérica" name="(HTE) Preparação de sentença genérica"/>
+    </start-state>  
+    <!-- NODES -->
+    <process-state name="(HTE) Preparação de sentença genérica">
+        <sub-process name="(HTE) Preparar ato judicial" binding="late"/>
+        <transition to="(HTE) Secretaria - ANALISAR" name="(HTE) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('hte:paj:julgamento', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('hte:paj:julgamento')}"/>
+        </event>
+    </process-state>
+    <task-node end-tasks="true" name="(HTE) Secretaria - ANALISAR">
+        <task name="(HTE) Secretaria - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (HTE) Fluxo básico geral" name="Nó de Desvio - (HTE) Fluxo básico geral">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(HTE) Preparação de despacho genérico" name="Enviar concluso para despacho"/>
+        <transition to="(HTE) Preparação de decisão genérica" name="Enviar concluso para decisão"/>
+        <transition to="(HTE) Preparação para arquivamento" name="Arquivar o processo"/>
+        <transition to="Término" name="Término">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(HTE) Intimar as partes" name="Intimar as partes"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <process-state name="(HTE) Preparação de despacho genérico">
+        <sub-process name="(HTE) Preparar ato judicial" binding="late"/>
+        <transition to="(HTE) Secretaria - ANALISAR" name="(HTE) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('hte:paj:despacho', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('hte:paj:despacho_generico', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('hte:paj:despacho')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('hte:paj:despacho_generico')}"/>
+        </event>
+    </process-state>
+    <process-state name="(HTE) Preparação de decisão genérica">
+        <sub-process name="(HTE) Preparar ato judicial" binding="late"/>
+        <transition to="(HTE) Secretaria - ANALISAR" name="(HTE) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('hte:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('hte:paj:decisao_generica', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('hte:paj:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('hte:paj:decisao_generica')}"/>
+        </event>
+    </process-state>
+    <process-state name="(HTE) Preparação para arquivamento">
+        <sub-process name="(HTE) Arquivamento" binding="late"/>
+        <transition to="(HTE) Secretaria - ANALISAR" name="(HTE) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(HTE) Intimar as partes">
+        <sub-process name="(HTE) Preparar ato de comunicação" binding="late"/>
+        <transition to="(HTE) Secretaria - ANALISAR" name="(HTE) Secretaria - ANALISAR"/>
+    </process-state>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (HTE) Fluxo básico geral">
+        <task name="Nó de Desvio - (HTE) Fluxo básico geral" swimlane="Nó de Desvio - (HTE) Fluxo básico geral"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(HTE) Secretaria - ANALISAR" name="(HTE) Secretaria - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
