@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle do NCM">
+    <description><![CDATA[Código do fluxo: SG_CONT_NCM
+
+Descrição: Fluxo responsável pelo controle de processos enviados para conciliação e mediação no NCM.
+
+Raia                              Localização              Papel
+Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Núcleo de Conciliação e Mediação">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Controle do NCM">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Núcleo de Conciliação e Mediação"/>
+        <transition to="(SG) Lançar movimento de remessa" name="(SG) Lançar movimento de remessa"/>
+    </start-state>  
+    <!-- NODES -->
+    <node name="(SG) Lançar movimento de remessa">
+        <transition to="(SG) Deslocar órgão julgador ao NCM" name="(SG) Deslocar órgão julgador ao NCM"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Núcleo de Conciliação e Mediação').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('em análise').lancarMovimento()}"/>
+        </event>
+    </node>
+    <node name="(SG) Deslocar órgão julgador ao NCM">
+        <transition to="(SG) Autos recebidos da secretaria pelo NCM" name="(SG) Autos recebidos da secretaria pelo NCM"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 11)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 43)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 47)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaVariavel('processo'))}"/>
+        </event>
+    </node>
+    <process-state name="(SG) Autos recebidos da secretaria pelo NCM">
+        <sub-process name="(SG) Autos recebidos da secretaria pelo NCM" binding="late"/>
+        <transition to="(SG) Expedição de outros documentos" name="(SG) Expedição de outros documentos"/>
+    </process-state>
+    <process-state name="(SG) Expedição de outros documentos">
+        <sub-process name="(SG) Expedição de outros documentos" binding="late"/>
+        <transition to="(SG) Designar audiência" name="(SG) Designar audiência"/>
+    </process-state>
+    <process-state name="(SG) Designar audiência">
+        <sub-process name="(SG) Controle de audiências do NCM" binding="late"/>
+        <transition to="(SG) Lançar movimento de devolução de remessa" name="(SG) Lançar movimento de devolução de remessa"/>
+    </process-state>
+    <node name="(SG) Lançar movimento de devolução de remessa">
+        <transition to="(SG) Deslocar órgão julgador à origem" name="(SG) Deslocar órgão julgador à origem"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Secretaria do Segundo Grau').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(39).lancarMovimento()}"/>
+        </event>
+    </node>
+    <node name="(SG) Deslocar órgão julgador à origem">
+        <transition to="(SG) Enviar autos à secretaria" name="(SG) Enviar autos à secretaria"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorCargo.idOrgaoJulgadorCargo)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaVariavel('processo'))}"/>
+        </event>
+    </node>
+    <process-state name="(SG) Enviar autos à secretaria">
+        <sub-process name="(SG) Autos recebidos do NCM" binding="late"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </process-state>
+    <node name="(SG) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:colegiadoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Controle do NCM">
+        <task name="Nó de Desvio - (SG) Controle do NCM" swimlane="Nó de Desvio - (SG) Controle do NCM"/>
+        <transition to="Término" name="Término"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

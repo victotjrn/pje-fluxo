@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de audiências a serem realizadas pelo NCM">
+    <description><![CDATA[Código do fluxo: SG_AUD_REAL_NCM
+
+Descrição: Fluxo responsável por controlar as audiências que serão realizadas no NCM
+
+Raia                              Localização              Papel
+Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria
+Magistrado                        Gabinete Segundo Grau    Magistrado]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Núcleo de Conciliação e Mediação">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Magistrado">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('599:1469')}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Núcleo de Conciliação e Mediação"/>
+        <transition to="(SG) Audiência - REALIZAR" name="(SG) Audiência - REALIZAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(SG) Audiência - REALIZAR">
+        <task name="(SG) Audiência - REALIZAR" swimlane="Núcleo de Conciliação e Mediação"/>
+        <transition to="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM" name="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Audiência pendente de ata - MINUTAR" name="Minutar ata da audiência"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="Cancelar realização de audiência"/>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Audiência pendente de ata - MINUTAR">
+        <task name="(SG) Audiência pendente de ata - MINUTAR" swimlane="Núcleo de Conciliação e Mediação">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="minuta_audiencia" mapped-name="textEditCombo:minuta_audiencia" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variaveis*
+
+1. Variável: aviso 
+   Label: Próxima audiência: #{processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)}
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Aviso
+
+2. Variável: minuta_audiencia
+   Label: Minutar ata da audiência
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Editor]]></description>
+        <transition to="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM" name="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Audiência pendente de informação - PREENCHER" name="Informar dados da audiência"/>
+        <transition to="(SG) Apagar minuta em elaboração" name="Apagar minuta em elaboração"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:audienciaSelecionada', processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()))}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_audiencia'))}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '87')}"/>
+        </event>
+    </task-node>
+    <node name="(SG) Apagar minuta em elaboração">
+        <transition to="(SG) Audiência - REALIZAR" name="(SG) Audiência - REALIZAR"/>
+        <event type="node-enter">
+            <action expression="#{documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_audiencia')}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(SG) Audiência pendente de informação - PREENCHER">
+        <task name="(SG) Audiência pendente de informação - PREENCHER" swimlane="Núcleo de Conciliação e Mediação">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="ProcessoAudiencia_informarDadosAudiencia" mapped-name="frame:ProcessoAudiencia_informarDadosAudiencia" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variaveis*
+
+1. Variável: aviso1
+   Label: Audiência: #{processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)}
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Aviso
+
+2. Variável: ProcessoAudiencia_informarDadosAudiencia
+   Label: Informar dados da audiência
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame
+
+3. Variável: aviso2
+   Label: ATENÇÃO: É necessário SEMPRE clicar no botão "GRAVAR" após preencher os dados da audiência.
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Aviso]]></description>
+        <transition to="(SG) Audiência pendente de ata - MINUTAR" name="Retornar para minuta"/>
+        <transition to="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM" name="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Preencheu dados da audiência?" name="Encaminhar para assinatura do conciliador"/>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:audienciaSelecionada') == null ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:audienciaSelecionada',processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 43)}"/>
+        </event>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(SG) Audiência pendente de ata - ASSINAR' : '(SG) Audiência pendente de informação - PREENCHER'}" name="(SG) Preencheu dados da audiência?">
+        <description><![CDATA[#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(SG) Audiência pendente de ata - ASSINAR' : '(SG) Audiência pendente de informação - PREENCHER'}]]></description>
+        <transition to="(SG) Audiência pendente de ata - ASSINAR" name="(SG) Audiência pendente de ata - ASSINAR"/>
+        <transition to="(SG) Audiência pendente de informação - PREENCHER" name="(SG) Audiência pendente de informação - PREENCHER"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Audiência pendente de ata - ASSINAR">
+        <task name="(SG) Audiência pendente de ata - ASSINAR" swimlane="Núcleo de Conciliação e Mediação">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variaveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: Assinar ata de audiência pelo conciliador
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame
+
+2. Variável: assinaturaLote
+   Label: Assinar em lote
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM" name="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Apagar variáveis do fluxo" name="Prosseguir"/>
+        <transition to="(SG) Audiência pendente de ata - MINUTAR" name="Retornar para minuta"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="Documento já assinado">
+            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <event type="node-leave">
+            <action expression="#{processoAudienciaHome.instance.setStatusAudiencia(tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada'))}"/>
+            <action expression="#{processoAudienciaHome.update()}"/>
+            <action expression="#{processoAudienciaHome.registrarMovimentoAudiencia()}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '87')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Prosseguir')}"/>
+        </event>
+    </task-node>
+    <node name="(SG) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:audienciaSelecionada')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:idOrgaoJulgador')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:statusAudienciaSelecionada')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM">
+        <task name="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM" swimlane="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Audiência - REALIZAR" name="(SG) Audiência - REALIZAR"/>
+        <transition to="(SG) Audiência pendente de ata - MINUTAR" name="(SG) Audiência pendente de ata - MINUTAR"/>
+        <transition to="(SG) Audiência pendente de informação - PREENCHER" name="(SG) Audiência pendente de informação - PREENCHER"/>
+        <transition to="(SG) Audiência pendente de ata - ASSINAR" name="(SG) Audiência pendente de ata - ASSINAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
