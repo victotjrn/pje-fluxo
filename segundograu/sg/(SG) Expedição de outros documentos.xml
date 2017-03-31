@@ -45,7 +45,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Outros documentos - ASSINAR" name="Encaminhar para assinatura"/>
-        <transition to="(SG) Apagar minuta não assinada de outros documentos" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Apagar minuta não assinada de outros documentos" name="Cancelar e sair da tarefa">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino') == null or tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino') != 43}"/>
+        </transition>
         <transition to="Nó de Desvio - (SG) Expedição de outros documentos" name="Nó de Desvio - (SG) Expedição de outros documentos">
             <condition expression="#{true}"/>
         </transition>

@@ -223,6 +223,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Gravar variavel fluxo unico - Devolver ao relator de origem" name="13 - Devolver ao relator de origem">
             <condition expression="#{!empty tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj')}"/>
         </transition>
+        <transition to="(SG) Gravar variavel fluxo unico - Encaminhamento ao núcleo de conciliação e mediação" name="14 - Encaminhar ao núcleo de conciliação e mediação"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -373,6 +374,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:sub_fluxo_unico', '(SG) Retornar ao gabinete de origem')}"/>
         </event>
     </node>
+    <node name="(SG) Gravar variavel fluxo unico - Encaminhamento ao núcleo de conciliação e mediação">
+        <transition to="(SG) Pode ir para subfluxo único?" name="(SG) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:sub_fluxo_unico', '(SG) Encaminhamento ao núcleo de conciliação e mediação')}"/>
+        </event>
+    </node>
     <decision expression="#{entityManager.createNativeQuery(&quot;select count(*) from vs_situacao_processo_new s where s.nm_tarefa &lt;&gt; '(SG) Secretaria - ANALISAR' AND s.id_processo_trf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Gravar mensagem nao pode entrar no fluxo' : tramitacaoProcessualService.recuperaVariavel('sg:paj:sub_fluxo_unico')}" name="(SG) Pode ir para subfluxo único?">
         <transition to="(SG) Controlar suspensão de processo" name="(SG) Controlar suspensão de processo"/>
         <transition to="(SG) Preparação de redistribuição" name="(SG) Preparação de redistribuição"/>
@@ -391,6 +398,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Preparação de voto, relatório e ementa" name="(SG) Preparação de voto, relatório e ementa"/>
         <transition to="(SG) Retornar ao gabinete de origem do encaminhamento" name="(SG) Retornar ao gabinete de origem do encaminhamento"/>
         <transition to="(SG) Gravar mensagem nao pode entrar no fluxo" name="(SG) Gravar mensagem nao pode entrar no fluxo"/>
+        <transition to="(SG) Encaminhamento ao núcleo de conciliação e mediação" name="(SG) Encaminhamento ao núcleo de conciliação e mediação"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:sub_fluxo_unico')}"/>
         </event>
@@ -527,6 +535,10 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     </process-state>
     <process-state name="(SG) Encaminhamento para outro gabinete">
         <sub-process name="(SG) Encaminhamento para outro gabinete" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(SG) Encaminhamento ao núcleo de conciliação e mediação">
+        <sub-process name="(SG) Controle do NCM" binding="late"/>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
     </process-state>
     <node name="(SG) Retornar ao gabinete de origem do encaminhamento">

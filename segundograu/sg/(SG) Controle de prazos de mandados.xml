@@ -21,9 +21,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Existe expediente do tipo mandado pendente de ciência?" name="(SG) Existe expediente do tipo mandado pendente de ciência?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'M' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa de aguardar OJ?' : '(SG) Junção em mandado com ou sem prazo'}" name="(SG) Existe expediente do tipo mandado pendente de ciência?">
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'M' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa de aguardar OJ?' : 'Término'}" name="(SG) Existe expediente do tipo mandado pendente de ciência?">
         <transition to="(SG) Existe registro do processo na tarefa de aguardar OJ?" name="(SG) Existe registro do processo na tarefa de aguardar OJ?"/>
-        <transition to="(SG) Junção em mandado com ou sem prazo" name="(SG) Junção em mandado com ou sem prazo"/>
+        <transition to="Término" name="Término"/>
     </decision>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(SG) Mandado pendente de cumprimento pelo OJ - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Separação em mandado com ou sem prazo' : '(SG) Mandado pendente de cumprimento pelo OJ - AGUARDAR'}" name="(SG) Existe registro do processo na tarefa de aguardar OJ?">
         <transition to="(SG) Mandado pendente de cumprimento pelo OJ - AGUARDAR" name="(SG) Mandado pendente de cumprimento pelo OJ - AGUARDAR"/>
@@ -53,7 +53,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Separação em mandado com ou sem prazo" name="Verificar existência de prazo"/>
-        <transition to="(SG) Junção em mandado com ou sem prazo" name="Cancelar e sair da tarefa"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
