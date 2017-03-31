@@ -74,6 +74,7 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Realizar audiência" name="Realizar audiência"/>
+        <transition to="(SG) Audiência - CANCELAR" name="Cancelar audiência"/>
     </task-node>
     <task-node end-tasks="true" name="(SG) Audiência - CANCELAR">
         <task name="(SG) Audiência - CANCELAR" swimlane="Núcleo de Conciliação e Mediação">

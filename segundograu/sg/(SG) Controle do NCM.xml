@@ -8,11 +8,11 @@ Descrição: Fluxo responsável pelo controle de processos enviados para conciliaçã
 Raia                              Localização              Papel
 Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Núcleo de Conciliação e Mediação">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338')}" actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Nó de Desvio - (SG) Controle do NCM">
         <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Núcleo de Conciliação e Mediação">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -52,7 +52,7 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
     <node name="(SG) Lançar movimento de devolução de remessa">
         <transition to="(SG) Deslocar órgão julgador à origem" name="(SG) Deslocar órgão julgador à origem"/>
         <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Secretaria do Segundo Grau').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(39).lancarMovimento()}"/>
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Secretaria do Segundo Grau').comComplementoDeCodigo(18).preencherComTexto('por devolução').lancarMovimento()}"/>
         </event>
     </node>
     <node name="(SG) Deslocar órgão julgador à origem">
