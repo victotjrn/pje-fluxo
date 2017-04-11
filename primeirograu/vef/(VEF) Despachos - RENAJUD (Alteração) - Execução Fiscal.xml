@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VEF) Despachos - RENAJUD (Alteração) - Execução Fiscal">
+    <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_DSP_RNJDALT]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (VEF) Despachos - RENAJUD (Alteração) - Execução Fiscal">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(VEF) Despachados - RENAJUD (Alteração)" name="(VEF) Despachados - RENAJUD (Alteração)"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(VEF) Despachados - RENAJUD (Alteração)">
+        <task name="(VEF) Despachados - RENAJUD (Alteração)" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[]]></description>
+        <transition to="Nó de Desvio - (VEF) Despachos - RENAJUD (Alteração) - Execução Fiscal" name="Nó de Desvio - (VEF) Despachos - RENAJUD (Alteração) - Execução Fiscal">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+    </task-node>
+    <task-node end-tasks="true" name="Nó de Desvio - (VEF) Despachos - RENAJUD (Alteração) - Execução Fiscal">
+        <task name="Nó de Desvio - (VEF) Despachos - RENAJUD (Alteração) - Execução Fiscal" swimlane="Nó de Desvio - (VEF) Despachos - RENAJUD (Alteração) - Execução Fiscal"/>
+        <transition to="(VEF) Despachados - RENAJUD (Alteração)" name="(VEF) Despachados - RENAJUD (Alteração)"/>
+        <transition to="Término" name="Término"/>
+    </task-node>
+    <end-state name="Término"/>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
