@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VEF) Conclusão para Sentença - Desistência - Execução Fiscal">
     <description><![CDATA[Código do fluxo: VEF_PAJ_EXEF_SENT_DESIST
 
-Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]]></description>  
+Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas...]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Assessor">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,7:5197,5:1338,8:5852,8:5853')}" actor-id="#{actor.id}"/>
@@ -44,14 +44,12 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
    Agrupamento eventos: Magistrado
    Condição para lançamento temporário: #{true}]]></description>
         <transition to="(VEF) Concluso para sentença - Desistência - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="Término" name="Escolher outro tipo de conclusão"/>
         <transition to="Nó de Desvio - (VEF) Conclusão para Sentença - Desistência - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Sentença - Desistência - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VEF) Selecionar outro tipo de conclusão" name="Alterar escolha do tipo de conclusão"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar escolha do tipo de conclusão')}"/>
-            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento()}"/>
         </event>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
@@ -108,7 +106,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VEF) Encaminhar para despachados')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VEF) Encaminhar para sentenciados')}"/>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
         </event>
