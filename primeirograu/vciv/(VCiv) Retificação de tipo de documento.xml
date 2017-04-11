@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Retificação de tipo de documento">
+    <description><![CDATA[Código do fluxo: VCiv_RET_DOC
+
+Descrição: Fluxo destinado a retificação de tipos de documentos do processo. 
+
+Raia        Localização              Papel
+Secretaria  Secretaria   Chefe de Secretaria
+Secretaria  Secretaria   Servidor Geral]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (VCiv) Retificação de tipo de documento">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(VCiv) Tipo de documento - RETIFICAR" name="(VCiv) Tipo de documento - RETIFICAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(VCiv) Tipo de documento - RETIFICAR">
+        <task name="(VCiv) Tipo de documento - RETIFICAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_documento_reclassificar" mapped-name="frame:Processo_Fluxo_documento_reclassificar" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_documento_reclassificar
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (VCiv) Retificação de tipo de documento" name="Nó de Desvio - (VCiv) Retificação de tipo de documento">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar', '79,64,63')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Cancelar e sair da tarefa')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:reclassificarDocumento:idsTipoDocumentoProibidoAlterar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Retificação de tipo de documento">
+        <task name="Nó de Desvio - (VCiv) Retificação de tipo de documento" swimlane="Nó de Desvio - (VCiv) Retificação de tipo de documento"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Tipo de documento - RETIFICAR" name="(VCiv) Tipo de documento - RETIFICAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
