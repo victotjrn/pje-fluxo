@@ -56,7 +56,6 @@ Magistrado                        Gabinete Segundo Grau    Magistrado]]></descri
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Audiência pendente de informação - PREENCHER" name="Informar dados da audiência"/>
-        <transition to="(SG) Apagar minuta em elaboração" name="Apagar minuta em elaboração"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:audienciaSelecionada', processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()))}"/>
         </event>
@@ -70,12 +69,6 @@ Magistrado                        Gabinete Segundo Grau    Magistrado]]></descri
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '87')}"/>
         </event>
     </task-node>
-    <node name="(SG) Apagar minuta em elaboração">
-        <transition to="(SG) Audiência - REALIZAR" name="(SG) Audiência - REALIZAR"/>
-        <event type="node-enter">
-            <action expression="#{documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_audiencia')}"/>
-        </event>
-    </node>
     <task-node end-tasks="true" name="(SG) Audiência pendente de informação - PREENCHER">
         <task name="(SG) Audiência pendente de informação - PREENCHER" swimlane="Núcleo de Conciliação e Mediação">
             <controller>
@@ -108,9 +101,13 @@ Magistrado                        Gabinete Segundo Grau    Magistrado]]></descri
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Preencheu dados da audiência?" name="Encaminhar para assinatura do conciliador"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:audienciaSelecionada') == null ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:audienciaSelecionada',processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)) : ''}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 43)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(SG) Audiência pendente de ata - ASSINAR' : '(SG) Audiência pendente de informação - PREENCHER'}" name="(SG) Preencheu dados da audiência?">

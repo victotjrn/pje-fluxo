@@ -26,19 +26,17 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Audiência - DESIGNAR" name="01 - Designar audiência"/>
-        <transition to="(SG) Audiência - AGUARDAR" name="07 - Aguardar audiência">
+        <transition to="(SG) Audiência - AGUARDAR" name="05 - Aguardar audiência">
             <condition expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null}"/>
         </transition>
-        <transition to="(SG) Audiência - CANCELAR" name="08 - Cancelar audiência">
+        <transition to="(SG) Audiência - CANCELAR" name="06 - Cancelar audiência">
             <condition expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null}"/>
         </transition>
-        <transition to="(SG) Realizar audiência" name="06 - Realizar audiência">
+        <transition to="(SG) Realizar audiência" name="04 - Realizar audiência">
             <condition expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null}"/>
         </transition>
-        <transition to="(SG) Apagar variáveis do fluxo" name="05 - Devolver à secretaria"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="03 - Devolver à secretaria"/>
         <transition to="(SG) Intimar as partes" name="02 - Intimar as partes"/>
-        <transition to="(SG) Expedir mandado" name="03 - Expedir mandado"/>
-        <transition to="(SG) Expedir carta" name="04 - Expedir carta"/>
     </task-node>
     <task-node end-tasks="true" name="(SG) Audiência - DESIGNAR">
         <task name="(SG) Audiência - DESIGNAR" swimlane="Núcleo de Conciliação e Mediação">
@@ -57,8 +55,6 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Intimar as partes" name="Intimar as partes"/>
-        <transition to="(SG) Expedir mandado" name="Expedir mandado"/>
-        <transition to="(SG) Expedir carta" name="Expedir carta"/>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
@@ -96,21 +92,19 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
         <event type="task-assign">
             <action expression="#{processoAudienciaHome.setEtapaAudiencia(null)}"/>
         </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
     </task-node>
     <process-state name="(SG) Realizar audiência">
         <sub-process name="(SG) Controle de audiências a serem realizadas pelo NCM" binding="late"/>
         <transition to="(SG) Audiência - ANALISAR" name="(SG) Audiência - ANALISAR"/>
     </process-state>
     <process-state name="(SG) Intimar as partes">
-        <sub-process name="(SG) Preparar ato de comunicação" binding="late"/>
-        <transition to="(SG) Audiência - AGUARDAR" name="(SG) Audiência - AGUARDAR"/>
-    </process-state>
-    <process-state name="(SG) Expedir mandado">
-        <sub-process name="(SG) Preparar ato de comunicação de mandado" binding="late"/>
-        <transition to="(SG) Audiência - AGUARDAR" name="(SG) Audiência - AGUARDAR"/>
-    </process-state>
-    <process-state name="(SG) Expedir carta">
-        <sub-process name="(SG) Expedição de carta de ordem, precatória ou rogatória" binding="late"/>
+        <sub-process name="(SG) Preparar ato de comunicação genérico" binding="late"/>
         <transition to="(SG) Audiência - AGUARDAR" name="(SG) Audiência - AGUARDAR"/>
     </process-state>
     <node name="(SG) Apagar variáveis do fluxo">

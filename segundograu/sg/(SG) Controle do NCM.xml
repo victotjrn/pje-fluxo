@@ -8,11 +8,11 @@ Descrição: Fluxo responsável pelo controle de processos enviados para conciliaçã
 Raia                              Localização              Papel
 Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (SG) Controle do NCM">
-        <assignment actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Núcleo de Conciliação e Mediação">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Controle do NCM">
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -39,14 +39,6 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
     </node>
     <process-state name="(SG) Autos recebidos da secretaria pelo NCM">
         <sub-process name="(SG) Autos recebidos da secretaria pelo NCM" binding="late"/>
-        <transition to="(SG) Expedição de outros documentos" name="(SG) Expedição de outros documentos"/>
-    </process-state>
-    <process-state name="(SG) Expedição de outros documentos">
-        <sub-process name="(SG) Expedição de outros documentos" binding="late"/>
-        <transition to="(SG) Designar audiência" name="(SG) Designar audiência"/>
-    </process-state>
-    <process-state name="(SG) Designar audiência">
-        <sub-process name="(SG) Controle de audiências do NCM" binding="late"/>
         <transition to="(SG) Lançar movimento de devolução de remessa" name="(SG) Lançar movimento de devolução de remessa"/>
     </process-state>
     <node name="(SG) Lançar movimento de devolução de remessa">
