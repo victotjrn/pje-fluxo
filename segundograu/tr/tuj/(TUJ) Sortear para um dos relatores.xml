@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Sortear para um dos relatores"> 
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (TUJ) Sortear para um dos relatores">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="secretaria"/>
+        <transition to="(TUJ) Sortear para um dos relatores" name="(TUJ) Sortear para um dos relatores"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(TUJ) Sortear para um dos relatores">
+        <task name="(TUJ) Sortear para um dos relatores" swimlane="secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_abaRedistribuicaoProcesso" mapped-name="frame:Processo_Fluxo_abaRedistribuicaoProcesso" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_abaRedistribuicaoProcesso
+   Label: Sortear para um dos relatores
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame]]></description>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (TUJ) Sortear para um dos relatores" name="Nó de Desvio - (TUJ) Sortear para um dos relatores">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TUJ) Autos recebidos da admissibilidade')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Sortear para um dos relatores">
+        <task name="Nó de Desvio - (TUJ) Sortear para um dos relatores" swimlane="Nó de Desvio - (TUJ) Sortear para um dos relatores"/>
+        <transition to="(TUJ) Sortear para um dos relatores" name="(TUJ) Sortear para um dos relatores"/>
+        <transition to="Término" name="Término"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

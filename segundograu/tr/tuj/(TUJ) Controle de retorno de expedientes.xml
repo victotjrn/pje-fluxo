@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Controle de retorno de expedientes">
+    <description><![CDATA[.]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (TUJ) Controle de retorno de expedientes">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338,1342:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(TUJ) Tem expediente sistema?" name="(TUJ) Tem expediente sistema?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').contains('{tuj_fbg_expediente_sistema}') == true ? '(TUJ) Lançar fluxo TUJ_CONTPRAZOS_SISTEMA' : '(TUJ) Tem expediente Correios?'}" name="(TUJ) Tem expediente sistema?">
+        <transition to="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_SISTEMA" name="(TUJ) Lançar fluxo TUJ_CP"/>
+        <transition to="(TUJ) Tem expediente Correios?" name="(TUJ) Tem expediente Correios?"/>
+    </decision>
+    <node name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_SISTEMA">
+        <transition to="(TUJ) Tem expediente Correios?" name="(TUJ) Tem expediente Correios?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:retexp:expediente_sistema', true)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'TUJ_CONTPRAZOS_SISTEMA', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:retexp:expediente_sistema')}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').contains('{tuj_fbg_expediente_correios}') == true ? '(TUJ) Lançar fluxo TUJ_CONTPRAZOS_CORREIOS' : '(TUJ) Tem expediente edital?'}" name="(TUJ) Tem expediente Correios?">
+        <transition to="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_CORREIOS" name="TUJ_CONTPRAZOS_CORREIOS"/>
+        <transition to="(TUJ) Tem expediente edital?" name="(TUJ) Tem expediente edital?"/>
+    </decision>
+    <node name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_CORREIOS">
+        <transition to="(TUJ) Tem expediente edital?" name="(TUJ) Tem expediente edital?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:retexp:expediente_correios', true)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'TUJ_CONTPRAZOS_CORREIOS', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:retexp:expediente_correios')}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').contains('{tuj_fbg_expediente_edital}') == true ? '(TUJ) Lançar fluxo TUJ_CONTPRAZOS_EDITAL' : '(TUJ) Tem expediente pessoalmente?'}" name="(TUJ) Tem expediente edital?">
+        <transition to="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_EDITAL" name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_EDITAL"/>
+        <transition to="(TUJ) Tem expediente pessoalmente?" name="(TUJ) Tem expediente pessoalmente?"/>
+    </decision>
+    <node name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_EDITAL">
+        <transition to="(TUJ) Tem expediente pessoalmente?" name="(TUJ) Tem expediente pessoalmente?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:retexp:expediente_edital', true)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'TUJ_CONTPRAZOS_EDITAL', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:retexp:expediente_edital')}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').contains('{tuj_fbg_expediente_pessoalmente}') == true ? '(TUJ) Lançar fluxo TUJ_CONTPRAZOS_PESS' : '(TUJ) Tem expediente central de mandados?'}" name="(TUJ) Tem expediente pessoalmente?">
+        <transition to="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_PESS" name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_PESS"/>
+        <transition to="(TUJ) Tem expediente central de mandados?" name="(TUJ) Tem expediente central de mandados?"/>
+    </decision>
+    <node name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_PESS">
+        <transition to="(TUJ) Tem expediente central de mandados?" name="(TUJ) Tem expediente central de mandados?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:retexp:expediente_pessoalmente', true)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'TUJ_CONTPRAZOS_PESS', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:retexp:expediente_pessoalmente')}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').contains('{tuj_fbg_expediente_central_mandados}') == true ? '(TUJ) Lançar fluxo TUJ_CONTPRAZOS_MAND' : '(TUJ) Tem expediente carta precatória?'}" name="(TUJ) Tem expediente central de mandados?">
+        <transition to="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_MAND" name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_MAND"/>
+        <transition to="(TUJ) Tem expediente carta precatória?" name="(TUJ) Tem expediente carta precatória?"/>
+    </decision>
+    <node name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_MAND">
+        <transition to="(TUJ) Tem expediente carta precatória?" name="(TUJ) Tem expediente carta precatória?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:retexp:expediente_central_mandados', true)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'TUJ_CONTPRAZOS_MAND', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:retexp:expediente_central_mandados')}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').contains('{tuj_fbg_expediente_carta_precatoria}') == true ? '(TUJ) Lançar fluxo TUJ_CONTPRAZOS_CARTA' : 'Término'}" name="(TUJ) Tem expediente carta precatória?">
+        <transition to="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_CARTA" name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_CARTA"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <node name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_CARTA">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:retexp:expediente_carta_precatoria', true)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'TUJ_CONTPRAZOS_CARTA', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:retexp:expediente_carta_precatoria')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Controle de retorno de expedientes">
+        <task name="Nó de Desvio - (TUJ) Controle de retorno de expedientes" swimlane="Nó de Desvio - (TUJ) Controle de retorno de expedientes"/>
+        <transition to="Término" name="Término"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
