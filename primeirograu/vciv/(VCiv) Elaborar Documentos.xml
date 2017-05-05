@@ -143,8 +143,9 @@
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Assinar Ofício" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Assinar Ofício" name="Encaminhar para assinatura - Chefe de Secretaria"/>
         <transition to="(VCiv) Remover documento temporário ofício" name="Ignorar expedição de ofício"/>
+        <transition to="(VCiv) Deslocar gabinete oficio" name="Encaminhar para assinatura - Magistrado"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -163,16 +164,16 @@
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
             </controller>
         </task>
-        <transition to="(VCiv) Imprimir Ofício" name="(VCiv) Imprimir Ofício">
-            <condition expression="#{true}"/>
-        </transition>
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Expedir Ofício" name="Retornar para expedição de ofício">
+        <transition to="(VCiv) Deslocar secretaria unificada oficio" name="Retornar para expedição de ofício">
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <transition to="(VCiv) Imprimir Ofício" name="Documento já assinado! Encaminhar para secretaria">
+        <transition to="(VCiv) Deslocar secretaria unificada imprimir oficio" name="(VCiv) Imprimir Ofício">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Deslocar secretaria unificada imprimir oficio" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
@@ -513,6 +514,18 @@
     <process-state name="(VCiv) Deslocar secretaria unificada entrega alvara">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Entregar Alvará" name="(VCiv) Entregar Alvará"/>
+    </process-state>
+    <process-state name="(VCiv) Deslocar secretaria unificada oficio">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="(VCiv) Expedir Ofício" name="(VCiv) Expedir Ofício"/>
+    </process-state>
+    <process-state name="(VCiv) Deslocar gabinete oficio">
+        <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
+        <transition to="(VCiv) Assinar Ofício" name="(VCiv) Assinar Ofício"/>
+    </process-state>
+    <process-state name="(VCiv) Deslocar secretaria unificada imprimir oficio">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="(VCiv) Imprimir Ofício" name="(VCiv) Imprimir Ofício"/>
     </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
