@@ -76,8 +76,8 @@
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Assinar Alvará" name="Encaminhar para assinatura"/>
         <transition to="(VCiv) Remover documento temporário alvará" name="Ignorar expedição de alvará"/>
+        <transition to="(VCiv) Deslocar gabinete alvara" name="Encaminhar para assinatura"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -96,16 +96,16 @@
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
             </controller>
         </task>
-        <transition to="(VCiv) Entregar Alvará" name="(VCiv) Entregar Alvará">
-            <condition expression="#{true}"/>
-        </transition>
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Expedir Alvará" name="Retornar para expedição de alvará">
+        <transition to="(VCiv) Deslocar secretaria unificada alvara" name="Retornar para expedição de alvará">
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <transition to="(VCiv) Entregar Alvará" name="Documento já assinado! Encaminhar para secretaria">
+        <transition to="(VCiv) Deslocar secretaria unificada entrega alvara" name="(VCiv) Entregar Alvará">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Deslocar secretaria unificada entrega alvara" name="Documento já assinado! Encaminhar para secretaria 2">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
@@ -443,14 +443,14 @@
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Expedir outros documentos" name="Retornar para expedição de outros documentos">
+        <transition to="(VCiv) Deslocar secretaria unificada precatória e rogatória" name="Retornar para expedição de outros documentos">
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <transition to="(VCiv) Imprimir outros documentos" name="(VCiv) Imprimir outros documentos">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="(VCiv) Imprimir outros documentos" name="Documento já assinado! Encaminhar para secretaria">
+        <transition to="(VCiv) Deslocar secretaria unificada entrega precatória e rogatória" name="Documento já assinado! Encaminhar para secretaria 2">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <transition to="(VCiv) Deslocar secretaria unificada entrega precatória e rogatória" name="(VCiv) Imprimir outros documentos">
+            <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir outros documentos')}"/>
@@ -459,10 +459,10 @@
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',94,205)}"/>
         </event>
     </task-node>
-    <decision expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')).getTipoProcessoDocumento().idTipoProcessoDocumento == 94 ? '(VCiv) Assinar Carta Precatória e(ou) Rogatória' : ( documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')).getTipoProcessoDocumento().idTipoProcessoDocumento == 205 ? '(VCiv) Assinar Carta Precatória e(ou) Rogatória' : ( documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')).getTipoProcessoDocumento().idTipoProcessoDocumento == 172 ? '(VCiv) Assinar Edital' : '(VCiv) Assinar outros documentos'))}" name="(VCiv) Tem Carta Precatória ou Rogatória?">
+    <decision expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')).getTipoProcessoDocumento().idTipoProcessoDocumento == 94 ? '(VCiv) Deslocar gabinete' : ( documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')).getTipoProcessoDocumento().idTipoProcessoDocumento == 205 ? '(VCiv) Deslocar gabinete' : ( documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')).getTipoProcessoDocumento().idTipoProcessoDocumento == 172 ? '(VCiv) Assinar Edital' : '(VCiv) Assinar outros documentos'))}" name="(VCiv) Tem Carta Precatória ou Rogatória?">
         <transition to="(VCiv) Assinar outros documentos" name="(VCiv) Assinar outros documentos"/>
-        <transition to="(VCiv) Assinar Carta Precatória e(ou) Rogatória" name="(VCiv) Assinar Carta Precatória e(ou) Rogatória"/>
         <transition to="(VCiv) Assinar Edital" name="(VCiv) Assinar Edital"/>
+        <transition to="(VCiv) Deslocar gabinete precatória e rogatoria" name="(VCiv) Deslocar gabinete"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Assinar Edital">
         <task name="(VCiv) Assinar Edital" swimlane="Magistrado">
@@ -489,7 +489,31 @@
         <event type="task-start">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',172)}"/>
         </event>
-    </task-node>  
+    </task-node>
+    <process-state name="(VCiv) Deslocar gabinete precatória e rogatoria">
+        <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
+        <transition to="(VCiv) Assinar Carta Precatória e(ou) Rogatória" name="(VCiv) Assinar Carta Precatória e(ou) Rogatória"/>
+    </process-state>
+    <process-state name="(VCiv) Deslocar gabinete alvara">
+        <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
+        <transition to="(VCiv) Assinar Alvará" name="(VCiv) Assinar Alvará"/>
+    </process-state>
+    <process-state name="(VCiv) Deslocar secretaria unificada alvara">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="(VCiv) Expedir Alvará" name="(VCiv) Expedir Alvará"/>
+    </process-state>
+    <process-state name="(VCiv) Deslocar secretaria unificada precatória e rogatória">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="(VCiv) Expedir outros documentos" name="(VCiv) Expedir outros documentos"/>
+    </process-state>
+    <process-state name="(VCiv) Deslocar secretaria unificada entrega precatória e rogatória">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="(VCiv) Imprimir outros documentos" name="(VCiv) Imprimir outros documentos"/>
+    </process-state>
+    <process-state name="(VCiv) Deslocar secretaria unificada entrega alvara">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="(VCiv) Entregar Alvará" name="(VCiv) Entregar Alvará"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
