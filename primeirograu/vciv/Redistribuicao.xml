@@ -15,7 +15,7 @@
         <transition to="Eh Cejusc?" name="Eh Cejusc?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:EhDoCejusc') ? 'Processos Redistribuídos do Cejusc' : 'Processos Redistribuídos de outras varas'}" name="Eh Cejusc?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:EhDoCejusc') ? 'Processos Redistribuídos do Cejusc' : 'Deslocar secretaria unificada'}" name="Eh Cejusc?">
         <transition to="Processos Redistribuídos do Cejusc" name="Processos Redistribuídos do Cejusc"/>
         <transition to="Deslocar secretaria unificada" name="Deslocar secretaria unificada"/>
     </decision>

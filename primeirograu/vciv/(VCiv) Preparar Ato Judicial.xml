@@ -16,7 +16,7 @@
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Assessor"/>
         <description><![CDATA[]]></description>
-        <transition to="(VCiv) Bifurcação de atos judiciais" name="(VCiv) Bifurcação de atos judiciais"/>
+        <transition to="(VCiv) Deslocar OJ origem" name="(VCiv) Deslocar OJ origem"/>
     </start-state>  
     <!-- NODES -->
     <end-state name="Término">
@@ -1020,7 +1020,7 @@
         </event>
     </node>
     <node name="(VCiv) Remover documento temporário decisão_despacho_sentença">
-        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
         <event type="node-enter">
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_despacho')}"/>
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_decisao')}"/>
@@ -1029,7 +1029,7 @@
         </event>
     </node>
     <node name="(VCiv) Remover documento temporário sem efeito">
-        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
         <event type="node-enter">
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_semefeito')}"/>
         </event>
@@ -1037,7 +1037,15 @@
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:paj:idDocAssinado') ? '(VCiv) Remover documento temporário decisão_despacho_sentença' : '(VCiv) Certificar Conclusão sem Efeito'}" name="(VCiv) Tem documento assinado?">
         <transition to="(VCiv) Certificar Conclusão sem Efeito" name="(VCiv) Certificar Conclusão sem Efeito"/>
         <transition to="(VCiv) Remover documento temporário decisão_despacho_sentença" name="(VCiv) Remover documento temporário decisão_despacho_sentença"/>
-    </decision>  
+    </decision>
+    <process-state name="(VCiv) Deslocar OJ origem">
+        <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
+        <transition to="(VCiv) Bifurcação de atos judiciais" name="(VCiv) Bifurcação de atos judiciais"/>
+    </process-state>
+    <process-state name="(VCiv) Deslocar secretaria unificada">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
