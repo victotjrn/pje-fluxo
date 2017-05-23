@@ -20,15 +20,15 @@
         <task name="Nó de Desvio - (REDIST) Fluxo para redistribuição por extinção de juizados especiais da Fazenda" swimlane="Nó de Desvio - (REDIST) Fluxo para redistribuição por extinção de juizados especiais da Fazenda"/>
         <transition to="Término" name="Término"/>
     </task-node>
-    <decision name="(REDIST) É 1 JEF ?">
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador == 38 ? '(REDIST) Redistribuir 1 JEF' : '(REDIST) É 2 JEF ?' }" name="(REDIST) É 1 JEF ?">
         <transition to="(REDIST) É 2 JEF ?" name="(REDIST) É 2 JEF ?"/>
         <transition to="(REDIST) Redistribuir 1 JEF" name="(REDIST) Redistribuir 1 JEF"/>
     </decision>
-    <decision name="(REDIST) É 2 JEF ?">
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador == 39 ? '(REDIST) Redistribuir 2 JEF' : '(REDIST) É 3 JEF ?' }" name="(REDIST) É 2 JEF ?">
         <transition to="(REDIST) É 3 JEF ?" name="(REDIST) É 3 JEF ?"/>
         <transition to="(REDIST) Redistribuir 2 JEF" name="(REDIST) Redistribuir 2 JEF"/>
     </decision>
-    <decision name="(REDIST) É 3 JEF ?">
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador == 102 ? '(REDIST) Redistribuir 3 JEF' : 'Término' }" name="(REDIST) É 3 JEF ?">
         <transition to="Término" name="Término"/>
         <transition to="(REDIST) Redistribuir 3 JEF" name="(REDIST) Redistribuir 3 JEF"/>
     </decision>

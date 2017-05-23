@@ -182,6 +182,9 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="(VCiv) Dar cumprimento a ato judicial de central de calculos" name="17 - Enviar para central de calculos">
             <condition expression="#{' 38 39 102 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat(' '))}"/>
         </transition>
+        <transition to="(VCiv) Redistribuição por extinção de órgão" name="17 - Redistribuir por extinção/criação de órgão">
+            <condition expression="#{parametroUtil.getParametro('pje:tjrn:OrgaosRedistribuicao').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat('_'))}"/>
+        </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_laudo_tecnico', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_laudo_tecnico'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_audiencia', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_audiencia'))}"/>
@@ -247,6 +250,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:aguardar_central_calculos')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_encerrar_prazo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:encerrar_prazo')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('01 - Prosseguir na(s) tarefa(s) selecionada(s)')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Despachados urgentes">
@@ -881,7 +885,11 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:vef:sentenca', 'true')}"/>
         </event>
-    </node>  
+    </node>
+    <process-state name="(VCiv) Redistribuição por extinção de órgão">
+        <sub-process name="(REDIST) Fluxo básico geral para redistribuição por extinção" binding="late"/>
+        <transition to="(VCiv) Análise da secretaria" name="(VCiv) Análise da secretaria"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

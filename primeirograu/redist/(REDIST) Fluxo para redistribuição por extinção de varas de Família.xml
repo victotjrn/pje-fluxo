@@ -58,49 +58,73 @@
     <node name="(REDIST) Redistribuir 1 Vara de Família">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{processoTrfRedistribuicaoHome.carregarTipoDistribuicaoProcesso()}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.getInstance().setInTipoDistribuicao('CE')}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setJurisdicaoRedistribuicao(jurisdicaoService.getJurisdicaoByOrgaoJulgador(orgaoJulgadorService.findById(69)))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setOrgaoJulgadorRedistribuicao(orgaoJulgadorService.findById(69))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.gravarRedistribuicaoExtincaoUnidadeJudiciaria()}"/>
         </event>
     </node>
     <node name="(REDIST) Redistribuir 2 Vara de Família">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{processoTrfRedistribuicaoHome.carregarTipoDistribuicaoProcesso()}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.getInstance().setInTipoDistribuicao('CE')}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setJurisdicaoRedistribuicao(jurisdicaoService.getJurisdicaoByOrgaoJulgador(orgaoJulgadorService.findById(65)))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setOrgaoJulgadorRedistribuicao(orgaoJulgadorService.findById(65))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.gravarRedistribuicaoExtincaoUnidadeJudiciaria()}"/>
         </event>
     </node>
     <node name="(REDIST) Redistribuir 3 Vara de Família">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{processoTrfRedistribuicaoHome.carregarTipoDistribuicaoProcesso()}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.getInstance().setInTipoDistribuicao('CE')}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setJurisdicaoRedistribuicao(jurisdicaoService.getJurisdicaoByOrgaoJulgador(orgaoJulgadorService.findById(67)))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setOrgaoJulgadorRedistribuicao(orgaoJulgadorService.findById(67))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.gravarRedistribuicaoExtincaoUnidadeJudiciaria()}"/>
         </event>
     </node>
     <node name="(REDIST) Redistribuir 4 Vara de Família">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{processoTrfRedistribuicaoHome.carregarTipoDistribuicaoProcesso()}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.getInstance().setInTipoDistribuicao('CE')}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setJurisdicaoRedistribuicao(jurisdicaoService.getJurisdicaoByOrgaoJulgador(orgaoJulgadorService.findById(60)))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setOrgaoJulgadorRedistribuicao(orgaoJulgadorService.findById(60))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.gravarRedistribuicaoExtincaoUnidadeJudiciaria()}"/>
         </event>
     </node>
     <node name="(REDIST) Redistribuir 5 Vara de Família">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{processoTrfRedistribuicaoHome.carregarTipoDistribuicaoProcesso()}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.getInstance().setInTipoDistribuicao('CE')}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setJurisdicaoRedistribuicao(jurisdicaoService.getJurisdicaoByOrgaoJulgador(orgaoJulgadorService.findById(63)))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setOrgaoJulgadorRedistribuicao(orgaoJulgadorService.findById(63))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.gravarRedistribuicaoExtincaoUnidadeJudiciaria()}"/>
         </event>
     </node>
     <node name="(REDIST) Redistribuir 6 Vara de Família">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{processoTrfRedistribuicaoHome.carregarTipoDistribuicaoProcesso()}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.getInstance().setInTipoDistribuicao('CE')}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setJurisdicaoRedistribuicao(jurisdicaoService.getJurisdicaoByOrgaoJulgador(orgaoJulgadorService.findById(66)))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setOrgaoJulgadorRedistribuicao(orgaoJulgadorService.findById(66))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.gravarRedistribuicaoExtincaoUnidadeJudiciaria()}"/>
         </event>
     </node>
     <node name="(REDIST) Redistribuir 8 Vara de Família">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{processoTrfRedistribuicaoHome.carregarTipoDistribuicaoProcesso()}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.getInstance().setInTipoDistribuicao('CE')}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setJurisdicaoRedistribuicao(jurisdicaoService.getJurisdicaoByOrgaoJulgador(orgaoJulgadorService.findById(64)))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setOrgaoJulgadorRedistribuicao(orgaoJulgadorService.findById(64))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.gravarRedistribuicaoExtincaoUnidadeJudiciaria()}"/>
         </event>
     </node>
     <node name="(REDIST) Redistribuir 9 Vara de Família">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{processoTrfRedistribuicaoHome.carregarTipoDistribuicaoProcesso()}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.getInstance().setInTipoDistribuicao('CE')}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setJurisdicaoRedistribuicao(jurisdicaoService.getJurisdicaoByOrgaoJulgador(orgaoJulgadorService.findById(62)))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setOrgaoJulgadorRedistribuicao(orgaoJulgadorService.findById(62))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.gravarRedistribuicaoExtincaoUnidadeJudiciaria()}"/>
         </event>
     </node>
     <end-state name="Término"/>

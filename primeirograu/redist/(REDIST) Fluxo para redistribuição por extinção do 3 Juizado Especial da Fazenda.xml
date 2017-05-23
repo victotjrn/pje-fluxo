@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(REDIST) Fluxo para redistribuição por extinção do 3 Juizado Especial da Fazenda">
-    <description><![CDATA[.]]></description>  
+    <description><![CDATA[....]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="solicitante">
         <assignment actor-id="#{actor.id}"/>
@@ -12,9 +12,35 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="solicitante"/>
-        <transition to="Término" name="Término"/>
+        <transition to="(REDIST) Verificar dígito 7" name="(REDIST) Verificar dígito 7"/>
     </start-state>  
     <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso().substring(6,7).equals(&quot;7&quot;) ? '(REDIST) Nó Sete' : '(REDIST) Verificar dígito 8'}" name="(REDIST) Verificar dígito 7">
+        <transition to="(REDIST) Verificar dígito 8" name="(REDIST) Verificar dígito 8"/>
+        <transition to="(REDIST) Redistribuir 5 Juizado Fazenda" name="(REDIST) Redistribuir 5 Juizado Fazenda"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso().substring(6,7).equals(&quot;8&quot;) ? '(REDIST) Nó Oito' : '(REDIST) Verificar dígito 9'}" name="(REDIST) Verificar dígito 8">
+        <transition to="(REDIST) Verificar dígito 9" name="(REDIST) Verificar dígito 9"/>
+        <transition to="(REDIST) Redistribuir 5 Juizado Fazenda" name="(REDIST) Redistribuir 5 Juizado Fazenda"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso().substring(6,7).equals(&quot;9&quot;) ? '(REDIST) Nó Nove' : '(REDIST) Nó Dez'}" name="(REDIST) Verificar dígito 9">
+        <transition to="(REDIST) Redistribuir 5 Juizado Fazenda" name="(REDIST) Redistribuir 5 Juizado Fazenda"/>
+        <transition to="(REDIST) Verificar dígito 0" name="(REDIST) Verificar dígito 0"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso().substring(6,7).equals(&quot;0&quot;) ? '(REDIST) Nó Zero' : '(REDIST) Verificar dígito 1'}" name="(REDIST) Verificar dígito 0">
+        <transition to="(REDIST) Redistribuir 5 Juizado Fazenda" name="(REDIST) Redistribuir 5 Juizado Fazenda"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <node name="(REDIST) Redistribuir 5 Juizado Fazenda">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{processoTrfRedistribuicaoHome.getInstance().setInTipoDistribuicao('CE')}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setJurisdicaoRedistribuicao(jurisdicaoService.getJurisdicaoByOrgaoJulgador(orgaoJulgadorService.findById(64)))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.setOrgaoJulgadorRedistribuicao(orgaoJulgadorService.findById(64))}"/>
+            <action expression="#{processoTrfRedistribuicaoHome.gravarRedistribuicaoExtincaoUnidadeJudiciaria()}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:tjrn:redistExt', 'true')}"/>
+        </event>
+    </node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (REDIST) Fluxo para redistribuição por extinção do 3 Juizado Especial da Fazenda">
         <task name="Nó de Desvio - (REDIST) Fluxo para redistribuição por extinção do 3 Juizado Especial da Fazenda" swimlane="Nó de Desvio - (REDIST) Fluxo para redistribuição por extinção do 3 Juizado Especial da Fazenda"/>

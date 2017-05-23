@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(REDIST) Fluxo básico geral para redistribuição por extinção">
-    <description><![CDATA[.....]]></description>  
+    <description><![CDATA[........]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (REDIST) Fluxo básico geral para redistribuição por extinção">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -15,30 +15,42 @@
         <transition to="(REDIST) É Fazenda ?" name="(REDIST) É Fazenda ?"/>
     </start-state>  
     <!-- NODES -->
-    <end-state name="Término"/>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apgaVariavel('pje:tjrn:redistExt')}"/>
+        </event>
+    </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (REDIST) Fluxo básico geral para redistribuição por extinção">
         <task name="Nó de Desvio - (REDIST) Fluxo básico geral para redistribuição por extinção" swimlane="Nó de Desvio - (REDIST) Fluxo básico geral para redistribuição por extinção"/>
         <transition to="Término" name="Término"/>
         <transition to="(REDIST) Processos redistribuidos por extinção de órgão" name="(REDIST) Processos redistribuidos por extinção de órgão"/>
     </task-node>
-    <decision name="(REDIST) É Fazenda ?">
+    <decision expression="#{processoTrfHome.possuiCompetencia(10) ? '(REDIST) Redistribuição Juizados Fazenda' : '(REDIST) É Família ?'}" name="(REDIST) É Fazenda ?">
         <transition to="(REDIST) Redistribuição Juizados Fazenda" name="(REDIST) Redistribuição Juizados Fazenda"/>
+        <transition to="(REDIST) É Família ?" name="(REDIST) É Família ?"/>
+    </decision>
+    <decision expression="#{processoTrfHome.possuiCompetencia(15) ? '(REDIST) Reditribuição Varas Família' : 'Término'}" name="(REDIST) É Família ?">
         <transition to="(REDIST) Reditribuição Varas Família" name="(REDIST) Reditribuição Varas Família"/>
+        <transition to="Término" name="Término"/>
     </decision>
     <process-state name="(REDIST) Redistribuição Juizados Fazenda">
         <sub-process name="(REDIST) Fluxo para redistribuição por extinção de juizados especiais da Fazenda" binding="late"/>
-        <transition to="(REDIST) Processos redistribuidos por extinção de órgão" name="(REDIST) Processos redistribuidos por extinção de órgão"/>
+        <transition to="(REDIST) Foi redistribuído?" name="(REDIST) Foi redistribuído?"/>
     </process-state>
     <process-state name="(REDIST) Reditribuição Varas Família">
         <sub-process name="(REDIST) Fluxo para redistribuição por extinção de varas de Família" binding="late"/>
-        <transition to="(REDIST) Processos redistribuidos por extinção de órgão" name="(REDIST) Processos redistribuidos por extinção de órgão"/>
+        <transition to="(REDIST) Foi redistribuído?" name="(REDIST) Foi redistribuído?"/>
     </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:tjrn:redistExt') ? '(REDIST) Processos redistribuidos por extinção de órgão' : 'Término'}" name="(REDIST) Foi redistribuído?">
+        <transition to="(REDIST) Processos redistribuidos por extinção de órgão" name="(REDIST) Processos redistribuidos por extinção de órgão"/>
+        <transition to="Término" name="Término"/>
+    </decision>
     <task-node end-tasks="true" name="(REDIST) Processos redistribuidos por extinção de órgão">
         <task name="(REDIST) Processos redistribuidos por extinção de órgão" swimlane="Secretaria"/>
         <transition to="Nó de Desvio - (REDIST) Fluxo básico geral para redistribuição por extinção" name="Nó de Desvio - (REDIST) Fluxo básico geral para redistribuição por extinção">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Término"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
