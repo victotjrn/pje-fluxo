@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum.............
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum................
 Aguardar Perícia / Laudo Técnico / Outros]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
@@ -183,7 +183,10 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{' 38 39 102 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat(' '))}"/>
         </transition>
         <transition to="(VCiv) Redistribuição por extinção de órgão" name="17 - Redistribuir por extinção/criação de órgão">
-            <condition expression="#{parametroUtil.getParametro('pje:tjrn:OrgaosRedistribuicao').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat('_'))}"/>
+            <condition expression="#{parametroUtil.getParametro('pje:tjrn:OrgaosRedistribuicao').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat('_')) &amp;&amp; !processoTrfHome.possuiCompetencia(10)}"/>
+        </transition>
+        <transition to="(VCiv) Redistribuição por extinção de órgão" name="18 - Redistribuir por extinção/criação de órgão">
+            <condition expression="#{parametroUtil.getParametro('pje:tjrn:OrgaosRedistribuicao').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat('_')) &amp;&amp; processoTrfHome.possuiCompetencia(10)}"/>
         </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_laudo_tecnico', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_laudo_tecnico'))}"/>

@@ -17,7 +17,7 @@
     <!-- NODES -->
     <end-state name="Término">
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apgaVariavel('pje:tjrn:redistExt')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:tjrn:redistExt')}"/>
         </event>
     </end-state>
     <task-node end-tasks="true" name="Nó de Desvio - (REDIST) Fluxo básico geral para redistribuição por extinção">
