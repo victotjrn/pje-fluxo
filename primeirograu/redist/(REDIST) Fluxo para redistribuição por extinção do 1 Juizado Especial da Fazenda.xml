@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(REDIST) Fluxo para redistribuição por extinção do 1 Juizado Especial da Fazenda">
-    <description><![CDATA[......]]></description>  
+    <description><![CDATA[.......]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="solicitante">
         <assignment actor-id="#{actor.id}"/>
@@ -23,7 +23,11 @@
         <transition to="(REDIST) Verificar dígito 9" name="(REDIST) Verificar dígito 9"/>
         <transition to="(REDIST) Redistribuir 4 Juizado Fazenda" name="(REDIST) Redistribuir 4 Juizado Fazenda"/>
     </decision>
-    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso().substring(6,7).equals(&quot;9&quot;) ? '(REDIST) Redistribuir 4 Juizado Fazenda' : 'Término'}" name="(REDIST) Verificar dígito 9">
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso().substring(6,7).equals(&quot;9&quot;) ? '(REDIST) Redistribuir 4 Juizado Fazenda' : '(REDIST) Verificar dígito 0'}" name="(REDIST) Verificar dígito 9">
+        <transition to="(REDIST) Verificar dígito 0" name="(REDIST) Verificar dígito 0"/>
+        <transition to="(REDIST) Redistribuir 4 Juizado Fazenda" name="(REDIST) Redistribuir 4 Juizado Fazenda"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso().substring(6,7).equals(&quot;0&quot;) ? '(REDIST) Redistribuir 4 Juizado Fazenda' : 'Término'}" name="(REDIST) Verificar dígito 0">
         <transition to="Término" name="Término"/>
         <transition to="(REDIST) Redistribuir 4 Juizado Fazenda" name="(REDIST) Redistribuir 4 Juizado Fazenda"/>
     </decision>
