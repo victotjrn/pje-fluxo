@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Intimações eletrônicas - CEJUSC">
-    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido...
+    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido....
 
 Para complementar as variáveis:
 - Selecione: label "Selecione o destinatário que deseja intimar diretamente"
@@ -29,20 +29,29 @@ Para complementar as variáveis:
         </task>
         <description><![CDATA[Labels:
 - prazoIntimacao: label "Prazo (em dias - 0 para sem prazo)"]]></description>
-        <transition to="(CEJUSC) Intimar partes do polo ativo" name="Intimar advogados do polo ativo"/>
+        <transition to="(CEJUSC) Intimar partes do polo ativo" name="01 - Intimar advogados do polo ativo">
+            <condition expression="#{authenticator.getPapelAtual().getIdPapel() == 5886}"/>
+        </transition>
         <transition to="(CEJUSC) Intimar partes do polo passivo" name="02 - Intimar advogados do polo passivo">
+            <condition expression="#{authenticator.getPapelAtual().getIdPapel() == 5886}"/>
+        </transition>
+        <transition to="(CEJUSC) Intimar partes do polo outros participantes" name="03 - Intimar partes do polo outros participantes">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(CEJUSC) Intimar todos os polos" name="03 - Intimar advogados de todos os polos">
-            <condition expression="#{true}"/>
+            <condition expression="#{authenticator.getPapelAtual().getIdPapel() == 5886}"/>
+        </transition>
+        <transition to="(CEJUSC) Informar dados de intimação eletrônica direcionada" name="04 - Intimar um destinatário específico">
+            <condition expression="#{authenticator.getPapelAtual().getIdPapel() == 5886}"/>
+        </transition>
+        <transition to="Término" name="05 - Cancelar e sair da tarefa">
+            <condition expression="#{authenticator.getPapelAtual().getIdPapel() == 5886}"/>
         </transition>
         <transition to="Nó de Desvio - (VCiv) Intimações eletrônicas - CEJUSC" name="Nó de Desvio - (VCiv) Intimações eletrônicas - CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(CEJUSC) Intimar cejusc" name="Intimar mandado/correio/sistema/pessoalmente"/>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <event type="task-start">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Intimar via sistema/correios/outros,Cancelar e sair da tarefa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', '06 - Cancelar e sair da tarefa,05 - Intimar um destinatário específico')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacao', '')}"/>
         </event>
     </task-node>
@@ -58,8 +67,12 @@ Para complementar as variáveis:
 - Selecione: label "Selecione o destinatário que deseja intimar diretamente"
 - partesAtivas: label "#{processoParteManager.recuperaPartes(tramitacaoProcessualService.recuperaProcesso(), true, null, null)}"
 - prazoIntimacao: label "Prazo (em dias - 0 para sem prazo)"]]></description>
-        <transition to="(CEJUSC) Intimar destinatário específico" name="Intimar destinatário selecionado"/>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(CEJUSC) Intimar destinatário específico" name="Intimar destinatário selecionado">
+            <condition expression="#{authenticator.getPapelAtual().getIdPapel() == 5886}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa">
+            <condition expression="#{authenticator.getPapelAtual().getIdPapel() == 5886}"/>
+        </transition>
         <transition to="Nó de Desvio - (VCiv) Intimações eletrônicas - CEJUSC" name="Nó de Desvio - (VCiv) Intimações eletrônicas - CEJUSC">
             <condition expression="#{true}"/>
         </transition>
@@ -78,6 +91,12 @@ Para complementar as variáveis:
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloPassivo()), (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D', (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'), null, 6230, 65)}"/>
+        </event>
+    </node>
+    <node name="(CEJUSC) Intimar partes do polo outros participantes">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf,'T',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? 'S' : 'D',(empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'),6230,65)}"/>
         </event>
     </node>
     <node name="(CEJUSC) Intimar todos os polos">
@@ -106,17 +125,7 @@ Para complementar as variáveis:
         <transition to="(CEJUSC) Informar dados de intimação eletrônica" name="(CEJUSC) Informar dados de intimação eletrônica"/>
         <transition to="(CEJUSC) Informar dados de intimação eletrônica direcionada" name="(CEJUSC) Informar dados de intimação eletrônica direcionada"/>
         <transition to="Término" name="Término"/>
-    </task-node>
-    <process-state name="(CEJUSC) Intimar cejusc">
-        <sub-process name="(VCiv) Controle do CEJUSC" binding="late"/>
-        <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('cejusc:intimar_padrao',true)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('cejusc:intimar_padrao')}"/>
-        </event>
-    </process-state>  
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
