@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Fluxo básico geral">
-    <description><![CDATA[Código do fluxo: TUJ_FBG
+    <description><![CDATA[Código do fluxo: TUJ_FBG...
 
 Descrição: Fluxo básico geral de entrada dos processos.
 
@@ -35,72 +35,19 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('tuj:aut_rec_pre:transicaoSaida') ? tramitacaoProcessualService.recuperaVariavel('tuj:aut_rec_pre:transicaoSaida') : 'Secretaria - ANALISAR'}" name="(TUJ) Intimar ou cumprir determinações?">
         <transition to="(TUJ) Secretaria - ANALISAR" name="Secretaria - ANALISAR"/>
         <transition to="(TUJ) Intimar" name="Intimar"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:aut_rec_pre:transicaoSaida')}"/>
+        </event>
     </decision>
     <task-node end-tasks="true" name="(TUJ) Secretaria - ANALISAR">
         <task name="(TUJ) Secretaria - ANALISAR" swimlane="Secretaria">
             <controller>
-                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
-                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
-                <variable name="tuj_fbg_expedir_sistema" mapped-name="sim_nao:tuj_fbg_expedir_sistema" access="read,write"/>
-                <variable name="tuj_fbg_expedir_correios" mapped-name="sim_nao:tuj_fbg_expedir_correios" access="read,write"/>
-                <variable name="tuj_fbg_expedir_edital" mapped-name="sim_nao:tuj_fbg_expedir_edital" access="read,write"/>
-                <variable name="tuj_fbg_expedir_pessoalmente" mapped-name="sim_nao:tuj_fbg_expedir_pessoalmente" access="read,write"/>
-                <variable name="tuj_fbg_expedir_central_mandados" mapped-name="sim_nao:tuj_fbg_expedir_central_mandados" access="read,write"/>
-                <variable name="tuj_fbg_expedir_carta_precatoria" mapped-name="sim_nao:tuj_fbg_expedir_carta_precatoria" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: Processo_Fluxo_visualizarDecisao
-   Label: 
-   Escrita: Sim
-   Obrig. Não
-   Tipo: Frame
-
-2. Variável: aviso1
-   Label: Marque a(s) opção(ões) de cumprimento abaixo, em seguida, clique em "Próxima ação: 01 - Prosseguir na(s) tarefa(s) acima selecionada(s)". Ou se preferir, deixe as opções de cumprimento desmarcadas e escolha a "Próxima ação" desejada.
-   Escrita: Sim
-   Obrig. Não
-   Tipo: Aviso
-
-3. Variável: tuj_fbg_expedir_sistema
-   Label: Expedir via sistema
-   Escrita: Sim
-   Obrig. Não
-   Tipo: Checkbox
-
-4. Variável: tuj_fbg_expedir_correios
-   Label: Expedir via sistema
-   Escrita: Sim
-   Obrig. Não
-   Tipo: Checkbox
-
-5. Variável: tuj_fbg_expedir_edital
-   Label: Expedir via edital
-   Escrita: Sim
-   Obrig. Não
-   Tipo: Checkbox
-
-6. Variável: tuj_fbg_expedir_pessoalmente
-   Label: Expedir manualmente
-   Escrita: Sim
-   Obrig. Não
-   Tipo: Checkbox
-
-7. Variável: tuj_fbg_expedir_central_mandados
-   Label: Expedir mandado
-   Escrita: Sim
-   Obrig. Não
-   Tipo: Checkbox
-
-8. Variável: tuj_fbg_expedir_carta_precatoria
-   Label: Expedir carta precatória ou rogatória
-   Escrita: Sim
-   Obrig. Não
-   Tipo: Checkbox
-
-9. Variável: movimentacaoLote
+1. Variável: movimentacaoLote
    Label: 
    Escrita: Sim
    Obrig. Não
@@ -108,41 +55,41 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <transition to="Nó de Desvio - (TUJ) Fluxo básico geral" name="Nó de Desvio - (TUJ) Fluxo básico geral">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TUJ) Intimar" name="Intimar"/>
-        <transition to="(TUJ) Sortear" name="Sortear para um dos relatores"/>
+        <transition to="(TUJ) Intimar" name="Intimar">
+            <condition expression="#{not tramitacaoProcessualService.recuperaVariavel('pje:fluxo:tuj:devolverTR')}"/>
+        </transition>
+        <transition to="(TUJ) Sortear" name="Sortear para um dos relatores">
+            <condition expression="#{not tramitacaoProcessualService.recuperaVariavel('pje:fluxo:tuj:devolverTR')}"/>
+        </transition>
+        <transition to="Término" name="Devolver para a Turma Recursal">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:tuj:devolverTR')}"/>
+        </transition>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj_fbg_expedir_sistema')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj_fbg_expedir_correios')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj_fbg_expedir_edital')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj_fbg_expedir_pessoalmente')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj_fbg_expedir_central_mandados')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj_fbg_expedir_carta_precatoria')}"/>
-        </event>
         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:fbg:opcoesCumprimento', '')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:tuj_fbg_expedir_sistema') == true ? '{tuj_fbg_expedir_sistema}' : ''))}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:tuj_fbg_expedir_correios') == true ? '{tuj_fbg_expedir_correios}' : ''))}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:tuj_fbg_expedir_edital') == true ? '{tuj_fbg_expedir_edital}' : ''))}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:tuj_fbg_expedir_pessoalmente') == true ? '{tuj_fbg_expedir_pessoalmente}' : ''))}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:tuj_fbg_expedir_central_mandados') == true ? '{tuj_fbg_expedir_central_mandados}' : ''))}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('tuj:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:tuj_fbg_expedir_carta_precatoria') == true ? '{tuj_fbg_expedir_carta_precatoria}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <process-state name="(TUJ) Intimar">
         <sub-process name="(TUJ) Preparar ato de comunicação" binding="late"/>
-        <transition to="(TUJ) Controle de retorno de expedientes" name="(TUJ) Controle de prazos e retorno de expedientes"/>
-    </process-state>
-    <process-state name="(TUJ) Sortear">
-        <sub-process name="(TUJ) Sortear para um dos relatores" binding="late"/>
-        <transition to="Término" name="Término"/>
+        <transition to="(TUJ) Controle de retorno de expedientes" name="(TUJ) Controle de retorno de expedientes"/>
     </process-state>
     <process-state name="(TUJ) Controle de retorno de expedientes">
         <sub-process name="(TUJ) Controle de retorno de expedientes" binding="late"/>
         <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
-        <transition to="Término" name="Término"/>
+    </process-state>
+    <process-state name="(TUJ) Sortear">
+        <sub-process name="(TUJ) Sortear para um dos relatores" binding="late"/>
+        <transition to="(TUJ) Autos recebidos da admissibilidade" name="(TUJ) Autos recebidos da admissibilidade"/>
+    </process-state>
+    <process-state name="(TUJ) Autos recebidos da admissibilidade">
+        <sub-process name="(TUJ) Autos recebidos da admissibilidade" binding="late"/>
+        <transition to="(TUJ) Enviar concluso para julgamento" name="(TUJ) Enviar concluso para julgamento"/>
+    </process-state>
+    <process-state name="(TUJ) Enviar concluso para julgamento">
+        <sub-process name="(TUJ) Decisão colegiada como relator" binding="late"/>
+        <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
     </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Fluxo básico geral">
@@ -198,5 +145,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS -->
+    <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:tuj:devolverTR', true)}"/> 
 </process-definition>

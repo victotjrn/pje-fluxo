@@ -5,9 +5,8 @@
 
 Descrição: Preparar ato de comunicação como intimações e citações via correios, sistema e edital.
 
-Raia        Localização              Papel
-Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
-Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
+Raia        Localização     Papel
+Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (TUJ) Preparar ato de comunicação">
         <assignment actor-id="#{actor.id}"/>
@@ -37,11 +36,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (TUJ) Preparar ato de comunicação" name="Nó de Desvio - (TUJ) Preparar ato de comunicação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TUJ) Controlar retorno de expediente" name="(TUJ) Controle de prazo de intimação ou citação expedida"/>
+        <transition to="(TUJ) Controlar retorno de expediente" name="Finalizar">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(TUJ) Separação em preparar ato de comunicação')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '60,65')}"/>
-            <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,D,S,M,L')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Finalizar')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '60')}"/>
+            <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,D,S,M,L,T')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
@@ -52,12 +54,6 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <process-state name="(TUJ) Controlar retorno de expediente">
         <sub-process name="(TUJ) Controle de retorno de expedientes" binding="late"/>
         <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:contprazos:intimacao_generica', true)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:contprazos:intimacao_generica')}"/>
-        </event>
     </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Preparar ato de comunicação">

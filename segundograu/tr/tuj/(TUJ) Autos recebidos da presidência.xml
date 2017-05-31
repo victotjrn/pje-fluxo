@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Autos recebidos da presidência">
     <description><![CDATA[Código do fluxo: TUJ_AUT_REC_PRE
 
-Descrição: Fluxo destinado à análise de processos devolvidos do gabinete para a secretaria da TUJ..
+Descrição: Fluxo destinado à análise de processos devolvidos do gabinete para a secretaria da TUJ.
 
 Raia        Localização     Papel
 Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>  

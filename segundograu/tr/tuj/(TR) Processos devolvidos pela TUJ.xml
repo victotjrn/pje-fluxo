@@ -1,36 +1,40 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Sortear para um dos relatores">
-    <description><![CDATA[Código do fluxo: TUJ_AUT_REC_ADMIS
-
-Descrição: Fluxo destinado ao recebimento dos processos após o sorteio de relatores.
-
-Raia        Localização     Papel
-Secretaria  Secretaria TUJ  Chefe de secretaria]]></description>  
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Processos devolvidos pela TUJ">
+    <description><![CDATA[...]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (TUJ) Sortear para um dos relatores">
-        <assignment actor-id="#{actor.id}"/>
+    <swimlane name="Nó de Desvio - (TR) Processos devolvidos pela TUJ">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('8:1338')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
-        <task name="Tarefa inicial" swimlane="secretaria"/>
-        <transition to="(TUJ) Sortear para um dos relatores" name="(TUJ) Sortear para um dos relatores"/>
+        <task name="Tarefa inicial"/>
+        <transition to="(TR) Devolver para TR" name="(TR) Devolver para TR"/>
     </start-state>  
     <!-- NODES -->
-    <node name="(TUJ) Sortear para um dos relatores">
-        <transition to="Término" name="Término"/>
+    <node name="(TR) Devolver para TR">
+        <transition to="(TR) Processos devolvidos pela TUJ" name="(TR) Processos devolvidos pela TUJ"/>
         <event type="node-enter">
-            <action expression="#{processoTrfRedistribuicaoHome.carregarTipoDistribuicaoProcesso()}"/>
-            <action expression="#{processoTrfRedistribuicaoHome.gravarRedistribuicaoImpedimentoRelator()}"/>
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Turma Recursal').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(40).lancarMovimento()}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj'),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjColegiado'),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjCargo'),false)}"/>
+            <action expression="#{entityManager.createQuery(&quot;UPDATE ProcessoTrf p SET p.competencia.id = 2 WHERE p.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).executeUpdate()}"/>
         </event>
     </node>
+    <task-node end-tasks="true" name="(TR) Processos devolvidos pela TUJ">
+        <task name="(TR) Processos devolvidos pela TUJ" swimlane="Secretaria"/>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (TR) Processos devolvidos pela TUJ" name="Nó de Desvio - (TR) Processos devolvidos pela TUJ">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Sortear para um dos relatores">
-        <task name="Nó de Desvio - (TUJ) Sortear para um dos relatores" swimlane="Nó de Desvio - (TUJ) Sortear para um dos relatores"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (TR) Processos devolvidos pela TUJ">
+        <task name="Nó de Desvio - (TR) Processos devolvidos pela TUJ" swimlane="Nó de Desvio - (TR) Processos devolvidos pela TUJ"/>
         <transition to="Término" name="Término"/>
+        <transition to="(TR) Processos devolvidos pela TUJ" name="(TR) Processos devolvidos pela TUJ"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
@@ -45,10 +49,10 @@ Secretaria  Secretaria TUJ  Chefe de secretaria]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
+    <event type="before-signal">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="process-start">

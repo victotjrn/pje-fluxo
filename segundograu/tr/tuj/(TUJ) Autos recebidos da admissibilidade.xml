@@ -1,37 +1,55 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Controle de prazos de mandados">
-    <description><![CDATA[Código do fluxo: TUJ_CONTPRAZOS_MAND
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Autos recebidos da admissibilidade">
+    <description><![CDATA[Código do fluxo: TUJ_AUT_REC_ADMIS...
 
-Descrição: Fluxo destinado ao controle de prazos de intimações feitas via central de mandados.
+Descrição: Fluxo destinado ao recebimento dos processos após o sorteio de relatores.
 
-Raia        Localização     Papel
-Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>  
+Raia         Localização     Papel
+Assessoria   Assessoria TUJ  Assessor
+Assessoria   Gabinete TUJ    Magistrado
+Magistrado   Assessoria TUJ  Assessor
+Magistrado   Gabinete TUJ    Magistrado]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (TUJ) Controle de prazos de mandados">
+    <swimlane name="Nó de Desvio - (TUJ) Autos recebidos da admissibilidade">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
+    <swimlane name="Assessoria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7280:5197,7281:1469')}"/>
+    </swimlane>
+    <swimlane name="Magistrado">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7281:1469,7280:5197')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
-        <task name="Tarefa inicial"/>
-        <transition to="(TUJ) Aguardando devolução de mandado" name="(TUJ) Aguardando devolução de mandado"/>
+        <task name="Tarefa inicial" swimlane="Magistrado"/>
+        <transition to="(TUJ) Autos recebidos da admissibilidade" name="(TUJ) Autos recebidos da admissibilidade"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).preencherComElementoDeCodigo(36).lancarMovimento()}"/>
+        </event>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(TUJ) Aguardando devolução de mandado">
-        <task name="(TUJ) Aguardando devolução de mandado" swimlane="Secretaria"/>
-        <transition to="Término" name="Finalizar e sair da tarefa"/>
-        <transition to="Nó de Desvio - (TUJ) Controle de prazos de mandados" name="Nó de Desvio - (TUJ) Controle de prazos de mandados">
+    <task-node end-tasks="true" name="(TUJ) Autos recebidos da admissibilidade">
+        <task name="(TUJ) Autos recebidos da admissibilidade" swimlane="Assessoria"/>
+        <transition to="(TUJ) Lançar movimento de concluso" name="Enviar concluso para julgamento"/>
+        <transition to="Nó de Desvio - (TUJ) Autos recebidos da admissibilidade" name="Nó de Desvio - (TUJ) Autos recebidos da admissibilidade">
             <condition expression="#{true}"/>
         </transition>
+        <event type="node-enter">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TUJ) Lançar movimento de concluso')}"/>
+        </event>
     </task-node>
-    <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Controle de prazos de mandados">
-        <task name="Nó de Desvio - (TUJ) Controle de prazos de mandados" swimlane="Nó de Desvio - (TUJ) Controle de prazos de mandados"/>
+    <node name="(TUJ) Lançar movimento de concluso">
         <transition to="Término" name="Término"/>
-        <transition to="(TUJ) Aguardando devolução de mandado" name="(TUJ) Aguardando devolução de mandado"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento()}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Autos recebidos da admissibilidade">
+        <task name="Nó de Desvio - (TUJ) Autos recebidos da admissibilidade" swimlane="Nó de Desvio - (TUJ) Autos recebidos da admissibilidade"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(TUJ) Autos recebidos da admissibilidade" name="(TUJ) Autos recebidos da admissibilidade"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

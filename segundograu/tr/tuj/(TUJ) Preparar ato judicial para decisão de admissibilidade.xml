@@ -5,15 +5,11 @@
 
 Descrição: Fluxo destinado ao preparo de atos judiciais de decisões de admissibilidade.
 
-Raia        Localização              Papel
-Assessoria  Assessoria Segundo Grau  Assessoria
-            Assessoria Segundo Grau  Assessor Chefe
-            Assessoria Segundo Grau  Assessor para Votação Antecipada
-            Gabinete Segundo Grau    Magistrado
-Magistrado  Assessoria Segundo Grau  Assessoria
-            Assessoria Segundo Grau  Assessor Chefe
-            Assessoria Segundo Grau  Assessor para Votação Antecipada
-            Gabinete Segundo Grau    Magistrado]]></description>  
+Raia        Localização     Papel
+Assessoria  Gabinete TUJ    Magistrado
+Assessoria  Assessoria TUJ  Assessor
+Magistrado  Gabinete TUJ    Magistrado
+Magistrado  Assessoria TUJ  Assessor]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (TUJ) Preparar ato judicial para decisão de admissibilidade">
         <assignment actor-id="#{actor.id}"/>
@@ -33,14 +29,14 @@ Magistrado  Assessoria Segundo Grau  Assessoria
     <task-node end-tasks="true" name="(TUJ) Concluso para decisão de admissibilidade - MINUTAR">
         <task name="(TUJ) Concluso para decisão de admissibilidade - MINUTAR" swimlane="Assessoria">
             <controller>
-                <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write"/>
+                <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
 1. Variável: minuta_ato_judicial
-   Label: Minuta em elaboração
+   Label: Minuta em elaboração de ato judicial
    Escrita: Sim
    Obrig. Sim
    Tipo: Editor

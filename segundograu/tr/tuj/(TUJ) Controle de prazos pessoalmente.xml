@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Controle de prazos pessoalmente">
-    <description><![CDATA[.]]></description>  
+    <description><![CDATA[Código do fluxo: TUJ_CONTPRAZOS_PESS
+
+Descrição: Fluxo destinado ao controle de prazos de intimações feitas pessoalmente.
+
+Raia        Localização     Papel
+Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
@@ -12,9 +17,13 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
+        <transition to="(TUJ) Existe processo na tarefa de aguardar" name="(TUJ) Existe processo na tarefa de aguardar"/>
     </start-state>  
     <!-- NODES -->
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(TUJ) Intimação com prazo em curso - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? 'Término' : '(TUJ) Intimação com prazo em curso - AGUARDAR'}" name="(TUJ) Existe processo na tarefa de aguardar">
+        <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
+        <transition to="Término" name="Término"/>
+    </decision>
     <task-node end-tasks="true" name="(TUJ) Intimação com prazo em curso - AGUARDAR">
         <task name="(TUJ) Intimação com prazo em curso - AGUARDAR" swimlane="Secretaria">
             <controller>
@@ -31,22 +40,24 @@
         <transition to="Nó de Desvio - (TUJ) Controle de prazos pessoalmente" name="Nó de Desvio - (TUJ) Controle de prazos pessoalmente">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TUJ) Prazos de intimações continuam em aberto?" name="(TUJ) Prazos de intimações continuam em aberto?"/>
-        <transition to="Término" name="Término"/>
+        <transition to="(TUJ) Prazos de intimações continuam em aberto?" name="(TUJ) Prazos de intimações continuam em aberto?">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tuj:aguardaPeticao', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(TUJ) Prazos de intimações continuam em aberto?')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaCiencia', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tuj:aguardaCiencia', 'true')}"/>
         </event>
         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tuj:aguardaPeticao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaCiencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tuj:aguardaCiencia')}"/>
         </event>
     </task-node>
-    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaPrazosIntimacoesEmAberto')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(TUJ) Intimação com prazo em curso - AGUARDAR' : '(TUJ) Intimação com prazo decorrido'}" name="(TUJ) Prazos de intimações continuam em aberto?">
+    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaIntimacaoPrazoAberto')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).setParameter(&quot;meioComunicacao&quot;, 'S').getSingleResult() &gt; 0 ? '(TUJ) Intimação com prazo em curso - AGUARDAR' : '(TUJ) Intimação com prazo decorrido'}" name="(TUJ) Prazos de intimações continuam em aberto?">
         <transition to="(TUJ) Intimação com prazo decorrido" name="(TUJ) Intimação com prazo decorrido"/>
         <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
     </decision>
