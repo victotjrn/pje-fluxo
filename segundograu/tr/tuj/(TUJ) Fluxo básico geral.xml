@@ -55,15 +55,11 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <transition to="Nó de Desvio - (TUJ) Fluxo básico geral" name="Nó de Desvio - (TUJ) Fluxo básico geral">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TUJ) Intimar" name="Intimar">
-            <condition expression="#{not tramitacaoProcessualService.recuperaVariavel('pje:fluxo:tuj:devolverTR')}"/>
-        </transition>
+        <transition to="(TUJ) Intimar" name="Intimar"/>
         <transition to="(TUJ) Sortear" name="Sortear para um dos relatores">
             <condition expression="#{not tramitacaoProcessualService.recuperaVariavel('pje:fluxo:tuj:devolverTR')}"/>
         </transition>
-        <transition to="Término" name="Devolver para a Turma Recursal">
-            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:tuj:devolverTR')}"/>
-        </transition>
+        <transition to="Término" name="Devolver para a Turma Recursal"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>

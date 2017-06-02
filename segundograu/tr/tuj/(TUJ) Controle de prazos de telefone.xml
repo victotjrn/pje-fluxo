@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Controle de prazos de sistema">
-    <description><![CDATA[Código do fluxo: TUJ_CONTPRAZOS_SISTEMA
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Controle de prazos de telefone">
+    <description><![CDATA[Código do fluxo: TUJ_CONTPRAZOS_TELEFONE
 
-Descrição: Fluxo destinado ao controle de prazos de intimações feitas via sistema.
+Descrição: Fluxo destinado ao controle de prazos de intimações feitas via telefone.
 
 Raia        Localização     Papel
 Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (TUJ) Controle de prazos de sistema">
+    <swimlane name="Nó de Desvio - (TUJ) Controle de prazos de telefone">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,1342:1469')}"/>
     </swimlane>
     <swimlane name="Secretaria">
@@ -37,7 +37,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote]]></description>
-        <transition to="Nó de Desvio - (TUJ) Controle de prazos de sistema" name="Nó de Desvio - (TUJ) Controle de prazos de sistema">
+        <transition to="Nó de Desvio - (TUJ) Controle de prazos de telefone" name="Nó de Desvio - (TUJ) Controle de prazos de telefone">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TUJ) Prazos de intimações continuam em aberto?" name="(TUJ) Prazos de intimações continuam em aberto?">
@@ -64,13 +64,13 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     <task-node end-tasks="true" name="(TUJ) Intimação com prazo decorrido - ANALISAR">
         <task name="(TUJ) Intimação com prazo decorrido - ANALISAR" swimlane="Secretaria"/>
         <transition to="Término" name="Término"/>
-        <transition to="Nó de Desvio - (TUJ) Controle de prazos de sistema" name="Nó de Desvio - (TUJ) Controle de prazos de sistema">
+        <transition to="Nó de Desvio - (TUJ) Controle de prazos de telefone" name="Nó de Desvio - (TUJ) Controle de prazos de telefone">
             <condition expression="#{true}"/>
         </transition>
     </task-node>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Controle de prazos de sistema">
-        <task name="Nó de Desvio - (TUJ) Controle de prazos de sistema" swimlane="Nó de Desvio - (TUJ) Controle de prazos de sistema"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Controle de prazos de telefone">
+        <task name="Nó de Desvio - (TUJ) Controle de prazos de telefone" swimlane="Nó de Desvio - (TUJ) Controle de prazos de telefone"/>
         <transition to="Término" name="Término"/>
         <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
         <transition to="(TUJ) Intimação com prazo decorrido - ANALISAR" name="(TUJ) Intimação com prazo decorrido - ANALISAR"/>

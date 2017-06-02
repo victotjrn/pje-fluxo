@@ -47,6 +47,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <event type="task-create">
             <action expression="#{tipoDocumento.set('TipoDocumento',57)}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_certidao'))}"/>
@@ -92,7 +93,6 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TUJ) Lançar movimento de expedição de certidão')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('condicaoLancamentoMovimentosTemporario', '${true}')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>

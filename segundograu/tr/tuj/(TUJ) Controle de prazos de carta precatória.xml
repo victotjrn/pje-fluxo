@@ -17,11 +17,11 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(TUJ) Aguardando carta precatória ou rogatória" name="(TUJ) Aguardando carta precatória ou rogatória"/>
+        <transition to="(TUJ) Intimação pendente de carta - AGUARDAR" name="(TUJ) Intimação pendente de carta - AGUARDAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(TUJ) Aguardando carta precatória ou rogatória">
-        <task name="(TUJ) Aguardando carta precatória ou rogatória" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(TUJ) Intimação pendente de carta - AGUARDAR">
+        <task name="(TUJ) Intimação pendente de carta - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_expedientes_precatorias" mapped-name="frame:Processo_Fluxo_expedientes_precatorias" access="read,write"/>
             </controller>
@@ -33,14 +33,14 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
-        <transition to="(TUJ) Registrar devolução de carta precatória ou rogatória" name="Registrar devolução de carta precatória ou rogatória"/>
+        <transition to="(TUJ) Intimação pendente de devolução de carta - REGISTRAR" name="Registrar devolução de carta precatória ou rogatória"/>
         <transition to="Término" name="Ignorar e sair da tarefa"/>
         <transition to="Nó de Desvio - (TUJ) Controle de prazos de carta precatória" name="Nó de Desvio - (TUJ) Controle de prazos de carta precatória">
             <condition expression="#{true}"/>
         </transition>
     </task-node>
-    <task-node end-tasks="true" name="(TUJ) Registrar devolução de carta precatória ou rogatória">
-        <task name="(TUJ) Registrar devolução de carta precatória ou rogatória" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(TUJ) Intimação pendente de devolução de carta - REGISTRAR">
+        <task name="(TUJ) Intimação pendente de devolução de carta - REGISTRAR" swimlane="Secretaria">
             <controller>
                 <variable name="WEB-INF_xhtml_flx_exped_registroCiencia" mapped-name="frame:WEB-INF_xhtml_flx_exped_registroCiencia" access="read,write"/>
             </controller>
@@ -98,12 +98,12 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tuj:aguardaCiencia')}"/>
         </event>
     </task-node>
-    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaIntimacaoPrazoAberto')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).setParameter(&quot;meioComunicacao&quot;, 'L').getSingleResult() &gt; 0 ? '(TUJ) Intimação com prazo em curso - AGUARDAR' : '(TUJ) Intimação com prazo decorrido'}" name="(TUJ) Prazos de intimações continuam em aberto?">
-        <transition to="(TUJ) Intimação com prazo decorrido" name="(TUJ) Intimação com prazo decorrido"/>
+    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaIntimacaoPrazoAberto')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).setParameter(&quot;meioComunicacao&quot;, 'L').getSingleResult() &gt; 0 ? '(TUJ) Intimação com prazo em curso - AGUARDAR' : '(TUJ) Intimação com prazo decorrido - ANALISAR'}" name="(TUJ) Prazos de intimações continuam em aberto?">
+        <transition to="(TUJ) Intimação com prazo decorrido - ANALISAR" name="(TUJ) Intimação com prazo decorrido - ANALISAR"/>
         <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
     </decision>
-    <task-node end-tasks="true" name="(TUJ) Intimação com prazo decorrido">
-        <task name="(TUJ) Intimação com prazo decorrido" swimlane="Secretaria"/>
+    <task-node end-tasks="true" name="(TUJ) Intimação com prazo decorrido - ANALISAR">
+        <task name="(TUJ) Intimação com prazo decorrido - ANALISAR" swimlane="Secretaria"/>
         <transition to="Término" name="Término"/>
         <transition to="Nó de Desvio - (TUJ) Controle de prazos de carta precatória" name="Nó de Desvio - (TUJ) Controle de prazos de carta precatória">
             <condition expression="#{true}"/>
@@ -114,9 +114,9 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <task name="Nó de Desvio - (TUJ) Controle de prazos de carta precatória" swimlane="Nó de Desvio - (TUJ) Controle de prazos de carta precatória"/>
         <transition to="Término" name="Término"/>
         <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
-        <transition to="(TUJ) Intimação com prazo decorrido" name="(TUJ) Intimação com prazo decorrido"/>
-        <transition to="(TUJ) Aguardando carta precatória ou rogatória" name="(TUJ) Aguardando carta precatória ou rogatória"/>
-        <transition to="(TUJ) Registrar devolução de carta precatória ou rogatória" name="(TUJ) Registrar devolução de carta precatória ou rogatória"/>
+        <transition to="(TUJ) Intimação com prazo decorrido - ANALISAR" name="(TUJ) Intimação com prazo decorrido - ANALISAR"/>
+        <transition to="(TUJ) Intimação pendente de carta - AGUARDAR" name="(TUJ) Intimação pendente de carta - AGUARDAR"/>
+        <transition to="(TUJ) Intimação pendente de devolução de carta - REGISTRAR" name="(TUJ) Intimação pendente de devolução de carta - REGISTRAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

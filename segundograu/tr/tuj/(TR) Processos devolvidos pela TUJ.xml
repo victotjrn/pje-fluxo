@@ -19,7 +19,7 @@
         <transition to="(TR) Processos devolvidos pela TUJ" name="(TR) Processos devolvidos pela TUJ"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Turma Recursal').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(40).lancarMovimento()}"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj'),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjColegiado'),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjCargo'),false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj'),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjColegiado'),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjCargo'),true)}"/>
             <action expression="#{entityManager.createQuery(&quot;UPDATE ProcessoTrf p SET p.competencia.id = 2 WHERE p.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).executeUpdate()}"/>
         </event>
     </node>

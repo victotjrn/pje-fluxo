@@ -23,15 +23,21 @@ Magistrado   Gabinete TUJ    Magistrado]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Magistrado"/>
-        <transition to="(TUJ) Autos recebidos da admissibilidade" name="(TUJ) Autos recebidos da admissibilidade"/>
+        <transition to="(TUJ) Lançar movimento de concluso para decisão" name="(TUJ) Lançar movimento de concluso para decisão"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).preencherComElementoDeCodigo(36).lancarMovimento()}"/>
         </event>
     </start-state>  
     <!-- NODES -->
+    <node name="(TUJ) Lançar movimento de concluso para decisão">
+        <transition to="(TUJ) Autos recebidos da admissibilidade" name="(TUJ) Autos recebidos da admissibilidade"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
+        </event>
+    </node>
     <task-node end-tasks="true" name="(TUJ) Autos recebidos da admissibilidade">
         <task name="(TUJ) Autos recebidos da admissibilidade" swimlane="Assessoria"/>
-        <transition to="(TUJ) Lançar movimento de concluso" name="Enviar concluso para julgamento"/>
+        <transition to="(TUJ) Lançar movimento de concluso para julgamento" name="Enviar concluso para julgamento"/>
         <transition to="Nó de Desvio - (TUJ) Autos recebidos da admissibilidade" name="Nó de Desvio - (TUJ) Autos recebidos da admissibilidade">
             <condition expression="#{true}"/>
         </transition>
@@ -39,7 +45,7 @@ Magistrado   Gabinete TUJ    Magistrado]]></description>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TUJ) Lançar movimento de concluso')}"/>
         </event>
     </task-node>
-    <node name="(TUJ) Lançar movimento de concluso">
+    <node name="(TUJ) Lançar movimento de concluso para julgamento">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento()}"/>

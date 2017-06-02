@@ -17,10 +17,10 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(TUJ) Existe processo na tarefa de aguardar" name="(TUJ) Existe processo na tarefa de aguardar"/>
+        <transition to="(TUJ) Existe processo na tarefa de aguardar?" name="(TUJ) Existe processo na tarefa de aguardar?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(TUJ) Intimação com prazo em curso - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? 'Término' : '(TUJ) Intimação com prazo em curso - AGUARDAR'}" name="(TUJ) Existe processo na tarefa de aguardar">
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(TUJ) Intimação com prazo em curso - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? 'Término' : '(TUJ) Intimação com prazo em curso - AGUARDAR'}" name="(TUJ) Existe processo na tarefa de aguardar?">
         <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
         <transition to="Término" name="Término"/>
     </decision>
@@ -57,12 +57,12 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tuj:aguardaCiencia')}"/>
         </event>
     </task-node>
-    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaIntimacaoPrazoAberto')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).setParameter(&quot;meioComunicacao&quot;, 'D').getSingleResult() &gt; 0 ? '(TUJ) Intimação com prazo em curso - AGUARDAR' : '(TUJ) Intimação com prazo decorrido'}" name="(TUJ) Prazos de intimações continuam em aberto?">
-        <transition to="(TUJ) Intimação com prazo decorrido" name="(TUJ) Intimação com prazo decorrido"/>
+    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaIntimacaoPrazoAberto')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).setParameter(&quot;meioComunicacao&quot;, 'D').getSingleResult() &gt; 0 ? '(TUJ) Intimação com prazo em curso - AGUARDAR' : '(TUJ) Intimação com prazo decorrido - ANALISAR'}" name="(TUJ) Prazos de intimações continuam em aberto?">
+        <transition to="(TUJ) Intimação com prazo decorrido - ANALISAR" name="(TUJ) Intimação com prazo decorrido - ANALISAR"/>
         <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
     </decision>
-    <task-node end-tasks="true" name="(TUJ) Intimação com prazo decorrido">
-        <task name="(TUJ) Intimação com prazo decorrido" swimlane="Secretaria"/>
+    <task-node end-tasks="true" name="(TUJ) Intimação com prazo decorrido - ANALISAR">
+        <task name="(TUJ) Intimação com prazo decorrido - ANALISAR" swimlane="Secretaria"/>
         <transition to="Término" name="Término"/>
         <transition to="Nó de Desvio - (TUJ) Controle de prazos de edital" name="Nó de Desvio - (TUJ) Controle de prazos de edital">
             <condition expression="#{true}"/>
@@ -73,7 +73,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <task name="Nó de Desvio - (TUJ) Controle de prazos de edital" swimlane="Nó de Desvio - (TUJ) Controle de prazos de edital"/>
         <transition to="Término" name="Término"/>
         <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
-        <transition to="(TUJ) Intimação com prazo decorrido" name="(TUJ) Intimação com prazo decorrido"/>
+        <transition to="(TUJ) Intimação com prazo decorrido - ANALISAR" name="(TUJ) Intimação com prazo decorrido - ANALISAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

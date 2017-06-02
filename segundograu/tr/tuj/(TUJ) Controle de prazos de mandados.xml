@@ -17,11 +17,11 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(TUJ) Aguardando devolução de mandado" name="(TUJ) Aguardando devolução de mandado"/>
+        <transition to="(TUJ) Intimação pendente de devolução de mandado - AGUARDAR" name="(TUJ) Intimação pendente de devolução de mandado - AGUARDAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(TUJ) Aguardando devolução de mandado">
-        <task name="(TUJ) Aguardando devolução de mandado" swimlane="Secretaria"/>
+    <task-node end-tasks="true" name="(TUJ) Intimação pendente de devolução de mandado - AGUARDAR">
+        <task name="(TUJ) Intimação pendente de devolução de mandado - AGUARDAR" swimlane="Secretaria"/>
         <transition to="Término" name="Finalizar e sair da tarefa"/>
         <transition to="Nó de Desvio - (TUJ) Controle de prazos de mandados" name="Nó de Desvio - (TUJ) Controle de prazos de mandados">
             <condition expression="#{true}"/>
@@ -31,7 +31,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Controle de prazos de mandados">
         <task name="Nó de Desvio - (TUJ) Controle de prazos de mandados" swimlane="Nó de Desvio - (TUJ) Controle de prazos de mandados"/>
         <transition to="Término" name="Término"/>
-        <transition to="(TUJ) Aguardando devolução de mandado" name="(TUJ) Aguardando devolução de mandado"/>
+        <transition to="(TUJ) Intimação pendente de devolução de mandado - AGUARDAR" name="(TUJ) Intimação pendente de devolução de mandado - AGUARDAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

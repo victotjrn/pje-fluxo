@@ -20,15 +20,22 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <transition to="(TUJ) Tem expediente sistema?" name="(TUJ) Tem expediente sistema?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaExpedienteSistema')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(TUJ) Lançar fluxo TUJ_CONTPRAZOS_SISTEMA' : '(TUJ) Tem expediente Correios?'}" name="(TUJ) Tem expediente sistema?">
+    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaExpedienteSistema')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(TUJ) Lançar fluxo TUJ_CONTPRAZOS_SISTEMA' : '(TUJ) Tem expediente telefone?'}" name="(TUJ) Tem expediente sistema?">
         <transition to="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_SISTEMA" name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_SISTEMA"/>
-        <transition to="(TUJ) Tem expediente Correios?" name="(TUJ) Tem expediente Correios?"/>
+        <transition to="(TUJ) Tem expediente telefone?" name="(TUJ) Tem expediente telefone?"/>
     </decision>
     <node name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_SISTEMA">
-        <transition to="(TUJ) Tem expediente Correios?" name="(TUJ) Tem expediente Correios?"/>
+        <transition to="(TUJ) Tem expediente telefone?" name="(TUJ) Tem expediente telefone?"/>
         <event type="node-enter">
             <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'TUJ_CONTPRAZOS_SISTEMA', processInstance.contextInstance.variables)}"/>
         </event>
+    </node>
+    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaExpedienteTelefone')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(TUJ) Lançar fluxo TUJ_CONTPRAZOS_TELEFONE' : '(TUJ) Tem expediente Correios?'}" name="(TUJ) Tem expediente telefone?">
+        <transition to="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_TELEFONE" name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_TELEFONE"/>
+        <transition to="(TUJ) Tem expediente Correios?" name="(TUJ) Tem expediente Correios?"/>
+    </decision>
+    <node name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_TELEFONE">
+        <transition to="(TUJ) Tem expediente Correios?" name="(TUJ) Tem expediente Correios?"/>
     </node>
     <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaExpedienteCorreios')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(TUJ) Lançar fluxo TUJ_CONTPRAZOS_CORREIOS' : '(TUJ) Tem expediente edital?'}" name="(TUJ) Tem expediente Correios?">
         <transition to="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_CORREIOS" name="(TUJ) Lançar fluxo TUJ_CONTPRAZOS_CORREIOS"/>
