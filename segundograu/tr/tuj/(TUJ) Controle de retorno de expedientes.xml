@@ -9,7 +9,7 @@ Raia        Localização     Papel
 Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (TUJ) Controle de retorno de expedientes">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338,1342:1469')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>

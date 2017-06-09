@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Processos devolvidos pela TUJ">
-    <description><![CDATA[...]]></description>  
+    <description><![CDATA[Código do fluxo: TR_PROC_DEVOL_TUJ
+
+Descrição: Fluxo destinado ao recebimento dos processos da TUJ.
+
+Raia         Localização                   Papel
+Secretaria   Secretaria da Turma Recursal  Chefe de secretaria]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (TR) Processos devolvidos pela TUJ">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,1342:1469')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('8:1338')}"/>
@@ -20,7 +25,7 @@
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Turma Recursal').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(40).lancarMovimento()}"/>
             <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj'),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjColegiado'),tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOjCargo'),true)}"/>
-            <action expression="#{entityManager.createQuery(&quot;UPDATE ProcessoTrf p SET p.competencia.id = 2 WHERE p.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).executeUpdate()}"/>
+            <action expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:alteraCompetenciaTR')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).executeUpdate()}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="(TR) Processos devolvidos pela TUJ">

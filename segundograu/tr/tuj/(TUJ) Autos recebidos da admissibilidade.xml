@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Autos recebidos da admissibilidade">
-    <description><![CDATA[Código do fluxo: TUJ_AUT_REC_ADMIS...
+    <description><![CDATA[Código do fluxo: TUJ_AUT_REC_ADMIS
 
 Descrição: Fluxo destinado ao recebimento dos processos após o sorteio de relatores.
 
@@ -12,7 +12,7 @@ Magistrado   Assessoria TUJ  Assessor
 Magistrado   Gabinete TUJ    Magistrado]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (TUJ) Autos recebidos da admissibilidade">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,1342:1469')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Assessoria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7280:5197,7281:1469')}"/>

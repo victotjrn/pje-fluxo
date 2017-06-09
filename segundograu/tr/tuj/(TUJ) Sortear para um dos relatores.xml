@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Sortear para um dos relatores">
-    <description><![CDATA[Código do fluxo: TUJ_AUT_REC_ADMIS
+    <description><![CDATA[Código do fluxo: TUJ_SORT_RELAT
 
 Descrição: Fluxo destinado ao recebimento dos processos após o sorteio de relatores.
 
@@ -25,6 +25,7 @@ Secretaria  Secretaria TUJ  Chefe de secretaria]]></description>
         <event type="node-enter">
             <action expression="#{processoTrfRedistribuicaoHome.carregarTipoDistribuicaoProcesso()}"/>
             <action expression="#{processoTrfRedistribuicaoHome.gravarRedistribuicaoImpedimentoRelator()}"/>
+            <action expression="#{preencherMovimento.deCodigo(26).comComplementoDeCodigo(2).doTipoDominio().preencherComElementoDeCodigo(2).lancarMovimento()}"/>
         </event>
     </node>
     <end-state name="Término"/>

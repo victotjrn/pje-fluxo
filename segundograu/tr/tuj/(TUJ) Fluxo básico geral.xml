@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Fluxo básico geral">
-    <description><![CDATA[Código do fluxo: TUJ_FBG...
+    <description><![CDATA[Código do fluxo: TUJ_FBG
 
 Descrição: Fluxo básico geral de entrada dos processos.
 
@@ -56,10 +56,10 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TUJ) Intimar" name="Intimar"/>
-        <transition to="(TUJ) Sortear" name="Sortear para um dos relatores">
+        <transition to="Término" name="Devolver para a Turma Recursal"/>
+        <transition to="(TUJ) Existe assunto principal?" name="Sortear para um dos relatores">
             <condition expression="#{not tramitacaoProcessualService.recuperaVariavel('pje:fluxo:tuj:devolverTR')}"/>
         </transition>
-        <transition to="Término" name="Devolver para a Turma Recursal"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -75,6 +75,21 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <sub-process name="(TUJ) Controle de retorno de expedientes" binding="late"/>
         <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
     </process-state>
+    <decision expression="#{(entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaAssuntoPrincipal')).setParameter(&quot;processo&quot;, tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).getSingleResult() == 0 ? '(TUJ) Sorteio pendente de assunto principal' : '(TUJ) Sortear')}" name="(TUJ) Existe assunto principal?">
+        <transition to="(TUJ) Sortear" name="(TUJ) Sortear"/>
+        <transition to="(TUJ) Sorteio pendente de assunto principal" name="(TUJ) Sorteio pendente de assunto principal"/>
+    </decision>
+    <process-state name="(TUJ) Sorteio pendente de assunto principal">
+        <sub-process name="(TUJ) Sorteio pendente de assunto principal" binding="late"/>
+        <transition to="(TUJ) Sortear ou sair?" name="(TUJ) Sortear ou sair?"/>
+    </process-state>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('tuj:sor_pen_ass:transicaoSaida') ? tramitacaoProcessualService.recuperaVariavel('tuj:sor_pen_ass:transicaoSaida') : 'Sortear para um dos relatores'}" name="(TUJ) Sortear ou sair?">
+        <transition to="(TUJ) Existe assunto principal?" name="Sortear para um dos relatores"/>
+        <transition to="(TUJ) Secretaria - ANALISAR" name="Cancelar e sair da tarefa"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:sor_pen_ass:transicaoSaida')}"/>
+        </event>
+    </decision>
     <process-state name="(TUJ) Sortear">
         <sub-process name="(TUJ) Sortear para um dos relatores" binding="late"/>
         <transition to="(TUJ) Autos recebidos da admissibilidade" name="(TUJ) Autos recebidos da admissibilidade"/>

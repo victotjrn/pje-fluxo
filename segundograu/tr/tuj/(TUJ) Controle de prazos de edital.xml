@@ -9,7 +9,7 @@ Raia        Localização     Papel
 Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (TUJ) Controle de prazos de edital">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,1342:1469')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
@@ -20,7 +20,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <transition to="(TUJ) Existe processo na tarefa de aguardar?" name="(TUJ) Existe processo na tarefa de aguardar?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(TUJ) Intimação com prazo em curso - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? 'Término' : '(TUJ) Intimação com prazo em curso - AGUARDAR'}" name="(TUJ) Existe processo na tarefa de aguardar?">
+    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaExisteProcessoTarefaAguardar')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? 'Término' : '(TUJ) Intimação com prazo em curso - AGUARDAR'}" name="(TUJ) Existe processo na tarefa de aguardar?">
         <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
         <transition to="Término" name="Término"/>
     </decision>
@@ -45,16 +45,16 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         </transition>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tuj:aguardaPeticao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(TUJ) Prazos de intimações continuam em aberto?')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tuj:aguardaCiencia', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaCiencia', 'true')}"/>
         </event>
         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tuj:aguardaPeticao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tuj:aguardaCiencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaCiencia')}"/>
         </event>
     </task-node>
     <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaIntimacaoPrazoAberto')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).setParameter(&quot;meioComunicacao&quot;, 'D').getSingleResult() &gt; 0 ? '(TUJ) Intimação com prazo em curso - AGUARDAR' : '(TUJ) Intimação com prazo decorrido - ANALISAR'}" name="(TUJ) Prazos de intimações continuam em aberto?">
