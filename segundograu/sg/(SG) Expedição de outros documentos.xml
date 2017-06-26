@@ -45,15 +45,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Outros documentos - ASSINAR" name="Encaminhar para assinatura"/>
-        <transition to="(SG) Apagar minuta não assinada de outros documentos" name="Cancelar e sair da tarefa">
-            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino') == null or tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino') != 43}"/>
-        </transition>
+        <transition to="(SG) Apagar minuta não assinada de outros documentos" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (SG) Expedição de outros documentos" name="Nó de Desvio - (SG) Expedição de outros documentos">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tipoDocumento.set('TipoDocumento',57, 67, 174)}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',57, 67, 174, 34)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174,34')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e sair da tarefa')}"/>
         </event>
         <event type="task-end">
@@ -102,7 +100,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174,34')}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de expedição de outros documentos')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('condicaoLancamentoMovimentosTemporario', '${true}')}"/>
         </event>
@@ -121,7 +119,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <node name="(SG) Lançar movimento de expedição de outros documentos">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 67 ?  preencherMovimento.deCodigo(11383).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).lancarMovimento() :  documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 57 ?  preencherMovimento.deCodigo(60).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(107).lancarMovimento() :  preencherMovimento.deCodigo(60).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento()}"/>
+            <action expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 67 ?  preencherMovimento.deCodigo(11383).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).lancarMovimento() :  preencherMovimento.deCodigo(60).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).comProximoComplementoVazio().preencherComTexto(revisarMinutaAction.processoDocumento.processoDocumento).lancarMovimento()}"/>
         </event>
     </node>
     <end-state name="Término"/>
