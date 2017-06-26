@@ -41,15 +41,15 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Preparar ato de comunicação genérico" name="Nó de Desvio - (SG) Preparar ato de comunicação genérico">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Separação em preparar ato de comunicação')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '60,65')}"/>
-            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('L,M,E,C,D,S')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp', org.jboss.seam.bpm.taskInstance.getId())}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Separação em preparar ato de comunicação')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '60,65')}"/>
+            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('L,M,E,C,D,S')}"/>
         </event>
     </task-node>
     <fork name="(SG) Separação em preparar ato de comunicação">
@@ -67,11 +67,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <node name="(SG) Registrar movimento de expediçao de AR">
         <description><![CDATA[#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(74).lancarMovimento()}')}]]></description>
         <transition to="(SG) Intimação genérica via correios - IMPRIMIR" name="(SG) Intimação genérica via correios - IMPRIMIR"/>
-        <event type="node-enter">
-            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(74).lancarMovimento()}')}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('variavelErrosConectorEct')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(74).lancarMovimento()}')}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="(SG) Intimação genérica via correios - IMPRIMIR">
@@ -91,11 +91,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Preparar ato de comunicação genérico" name="Nó de Desvio - (SG) Preparar ato de comunicação genérico">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'S' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Registrar ciência após expedição' : '(SG) Junção em preparar ato de comunicação'}" name="(SG) É pessoalmente?">
@@ -103,7 +103,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Junção em preparar ato de comunicação" name="(SG) Junção em preparar ato de comunicação"/>
     </decision>
     <node name="(SG) Registrar ciência após expedição">
-        <transition to="(SG) Controle de prazo de intimação expedida" name="(SG) Controle de prazo de intimação expedida"/>
+        <transition to="(SG) Lançar movimento de expedição de outros documentos" name="(SG) Lançar movimento de expedição de outros documentos"/>
         <event type="node-enter">
             <action expression="#{comunicacaoProcessualAction.registrarCienciaExpedientePessoal()}"/>
         </event>
@@ -123,8 +123,8 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Controle de prazo de intimação expedida" name="(SG) Controle de prazo de Intimação expedida"/>
     </process-state>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'D' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Registrar ciência após expedição' : '(SG) Junção em preparar ato de comunicação'}" name="(SG) É edital?">
-        <transition to="(SG) Registrar ciência após expedição" name="(SG) Registrar ciência após expedição"/>
         <transition to="(SG) Junção em preparar ato de comunicação" name="(SG) Junção em preparar ato de comunicação"/>
+        <transition to="(SG) Registrar ciência após expedição" name="(SG) Registrar ciência após expedição"/>
     </decision>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'M' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe central de mandados?' : '(SG) Junção em preparar ato de comunicação'}" name="(SG) É mandado?">
         <transition to="(SG) Junção em preparar ato de comunicação" name="(SG) Junção em preparar ato de comunicação"/>
@@ -151,11 +151,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Encaminhar para central de mandados" name="Encaminhar para central de mandados"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <node name="(SG) Encaminhar para central de mandados">
@@ -164,13 +164,23 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('M', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(78).lancarMovimento()}')}"/>
         </event>
     </node>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'L' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Controle de prazos de carta precatória' : '(SG) Junção em preparar ato de comunicação'}" name="(SG) É carta?">
-        <transition to="(SG) Controle de prazos de carta precatória" name="(SG) Controle de prazos de carta precatória"/>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'L' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Lançar movimento de expedição de carta como outros documentos' : '(SG) Junção em preparar ato de comunicação'}" name="(SG) É carta?">
         <transition to="(SG) Junção em preparar ato de comunicação" name="(SG) Junção em preparar ato de comunicação"/>
+        <transition to="(SG) Lançar movimento de expedição de carta como outros documentos" name="(SG) Lançar movimento de expedição de carta como outros documentos"/>
     </decision>
+    <node name="(SG) Lançar movimento de expedição de carta como outros documentos">
+        <transition to="(SG) Controle de prazos de carta precatória" name="(SG) Controle de prazos de carta precatória"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('L', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento()}')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:registrociencia:meios', 'L')}"/>
+        </event>
+    </node>
     <process-state name="(SG) Controle de prazos de carta precatória">
         <sub-process name="(SG) Controle de prazos de carta precatória" binding="late"/>
         <transition to="(SG) Junção em preparar ato de comunicação" name="(SG) Junção em preparar ato de comunicação"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:registrociencia:meios')}"/>
+        </event>
     </process-state>
     <process-state name="(SG) Controle de prazo de mandados após expedição">
         <sub-process name="(SG) Controle de prazos de mandados" binding="late"/>
@@ -179,11 +189,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <process-state name="(SG) Controle de prazo de intimação expedida">
         <sub-process name="(SG) Controle de prazos" binding="late"/>
         <transition to="(SG) Junção em preparar ato de comunicação" name="(SG) Junção em preparar ato de comunicação"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:contprazos:intimacao_generica', true)}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:contprazos:intimacao_generica')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:contprazos:intimacao_generica', true)}"/>
         </event>
     </process-state>
     <join name="(SG) Junção em preparar ato de comunicação">
@@ -213,10 +223,37 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Mandado genérico aguardando escolha da central - SELECIONAR" name="(SG) Mandado genérico aguardando escolha da central - SELECIONAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -225,40 +262,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>

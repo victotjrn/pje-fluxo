@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de audiências a serem realizadas pelo NCM">
     <description><![CDATA[Código do fluxo: SG_AUD_REAL_NCM
 
-Descrição: Fluxo responsável por controlar as audiências que serão realizadas no NCM
+Descrição: Fluxo responsável por controlar as audiências que serão realizadas no NCM.
 
 Raia                              Localização              Papel
 Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria
@@ -138,7 +138,9 @@ Magistrado                        Gabinete Segundo Grau    Magistrado]]></descri
         <transition to="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM" name="Nó de Desvio - (SG) Controle de audiências a serem realizadas pelo NCM">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Apagar variáveis do fluxo" name="Prosseguir"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="Prosseguir">
+            <condition expression="#{true}"/>
+        </transition>
         <transition to="(SG) Audiência pendente de ata - MINUTAR" name="Retornar para minuta"/>
         <transition to="(SG) Apagar variáveis do fluxo" name="Documento já assinado">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
