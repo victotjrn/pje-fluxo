@@ -8,11 +8,11 @@ Descrição: Fluxo responsável pelo controle de processos enviados para conciliaçã
 Raia                              Localização              Papel
 Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Núcleo de Conciliação e Mediação">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338')}" actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Nó de Desvio - (SG) Controle do NCM">
         <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Núcleo de Conciliação e Mediação">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -48,7 +48,7 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
         </event>
     </node>
     <node name="(SG) Deslocar órgão julgador à origem">
-        <transition to="(SG) Enviar autos à secretaria" name="(SG) Enviar autos à secretaria"/>
+        <transition to="(SG) É devolução à secretaria?" name="(SG) É devolução à secretaria?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador)}"/>
@@ -58,7 +58,18 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaVariavel('processo'))}"/>
         </event>
     </node>
-    <process-state name="(SG) Enviar autos à secretaria">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ncm:devolucao:secretaria') == true ? '(SG) Devolver autos à secretaria' : '(SG) Enviar autos ao gabinete'}" name="(SG) É devolução à secretaria?">
+        <transition to="(SG) Enviar autos ao gabinete" name="(SG) Enviar autos ao gabinete"/>
+        <transition to="(SG) Devolver autos à secretaria" name="(SG) Devolver autos à secretaria"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ncm:devolucao:secretaria')}"/>
+        </event>
+    </decision>
+    <process-state name="(SG) Enviar autos ao gabinete">
+        <sub-process name="(SG) Autos recebidos da secretaria" binding="late"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </process-state>
+    <process-state name="(SG) Devolver autos à secretaria">
         <sub-process name="(SG) Autos recebidos do NCM" binding="late"/>
         <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
     </process-state>

@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Controle de audiências do NCM">
     <description><![CDATA[Código do fluxo: SG_AUD_NCM
 
-Descrição: Fluxo responsável por controlar as audiências no NCM
+Descrição: Fluxo responsável por controlar as audiências no NCM.
 
 Raia                              Localização              Papel
 Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]></description>  
@@ -26,17 +26,18 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Audiência - DESIGNAR" name="01 - Designar audiência"/>
-        <transition to="(SG) Audiência - AGUARDAR" name="05 - Aguardar audiência">
+        <transition to="(SG) Audiência - AGUARDAR" name="06 - Aguardar audiência">
             <condition expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null}"/>
         </transition>
-        <transition to="(SG) Audiência - CANCELAR" name="06 - Cancelar audiência">
+        <transition to="(SG) Audiência - CANCELAR" name="07 - Cancelar audiência">
             <condition expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null}"/>
         </transition>
-        <transition to="(SG) Realizar audiência" name="04 - Realizar audiência">
+        <transition to="(SG) Realizar audiência" name="05 - Realizar audiência">
             <condition expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null}"/>
         </transition>
-        <transition to="(SG) Apagar variáveis do fluxo" name="03 - Devolver à secretaria"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="03 - Encaminhar autos ao gabinete"/>
         <transition to="(SG) Intimar as partes" name="02 - Intimar as partes"/>
+        <transition to="(SG) Gravar variavel de devolução à secretaria" name="04 - Devolver à secretaria"/>
     </task-node>
     <task-node end-tasks="true" name="(SG) Audiência - DESIGNAR">
         <task name="(SG) Audiência - DESIGNAR" swimlane="Núcleo de Conciliação e Mediação">
@@ -107,6 +108,12 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
         <sub-process name="(SG) Preparar ato de comunicação genérico" binding="late"/>
         <transition to="(SG) Audiência - AGUARDAR" name="(SG) Audiência - AGUARDAR"/>
     </process-state>
+    <node name="(SG) Gravar variavel de devolução à secretaria">
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ncm:devolucao:secretaria', true)}"/>
+        </event>
+    </node>
     <node name="(SG) Apagar variáveis do fluxo">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
