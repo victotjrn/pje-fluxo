@@ -21,7 +21,18 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
     </start-state>  
     <!-- NODES -->
     <task-node end-tasks="true" name="(SG) Audiência - ANALISAR">
-        <task name="(SG) Audiência - ANALISAR" swimlane="Núcleo de Conciliação e Mediação"/>
+        <task name="(SG) Audiência - ANALISAR" swimlane="Núcleo de Conciliação e Mediação">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: #{tramitacaoProcessualService.recuperaVariavel('sg:ncm:aviso_audiencia_analisar') ? '' : tramitacaoProcessualService.recuperaVariavel('sg:ncm:aviso_audiencia_analisar')}
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Aviso]]></description>
         <transition to="Nó de Desvio - (SG) Controle de audiências do NCM" name="Nó de Desvio - (SG) Controle de audiências do NCM">
             <condition expression="#{true}"/>
         </transition>
@@ -35,9 +46,12 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
         <transition to="(SG) Realizar audiência" name="05 - Realizar audiência">
             <condition expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null}"/>
         </transition>
-        <transition to="(SG) Apagar variáveis do fluxo" name="03 - Encaminhar autos ao gabinete"/>
         <transition to="(SG) Intimar as partes" name="02 - Intimar as partes"/>
-        <transition to="(SG) Gravar variavel de devolução à secretaria" name="04 - Devolver à secretaria"/>
+        <transition to="(SG) Gravar variável fluxo único - Encaminhar autos ao gabinete" name="03 - Encaminhar autos ao gabinete"/>
+        <transition to="(SG) Gravar variável fluxo único - Devolver à secretaria" name="04 - Devolver à secretaria"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:ncm:aviso_audiencia_analisar')}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Audiência - DESIGNAR">
         <task name="(SG) Audiência - DESIGNAR" swimlane="Núcleo de Conciliação e Mediação">
@@ -108,6 +122,26 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
         <sub-process name="(SG) Preparar ato de comunicação genérico" binding="late"/>
         <transition to="(SG) Audiência - AGUARDAR" name="(SG) Audiência - AGUARDAR"/>
     </process-state>
+    <node name="(SG) Gravar variável fluxo único - Encaminhar autos ao gabinete">
+        <transition to="(SG) Pode ir para subfluxo único?" name="(SG) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:ncm:sub_fluxo_unico', '(SG) Apagar variáveis do fluxo')}"/>
+        </event>
+    </node>
+    <node name="(SG) Gravar variável fluxo único - Devolver à secretaria">
+        <transition to="(SG) Pode ir para subfluxo único?" name="(SG) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:ncm:sub_fluxo_unico', '(SG) Gravar variavel de devolução à secretaria')}"/>
+        </event>
+    </node>
+    <decision expression="#{entityManager.createNativeQuery(&quot;select count(*) from vs_situacao_processo_new s where s.nm_tarefa &lt;&gt; '(SG) Audiência - ANALISAR' AND s.id_processo_trf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Gravar mensagem não pode entrar no fluxo' : tramitacaoProcessualService.recuperaVariavel('sg:ncm:sub_fluxo_unico')}" name="(SG) Pode ir para subfluxo único?">
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+        <transition to="(SG) Gravar variavel de devolução à secretaria" name="(SG) Gravar variavel de devolução à secretaria"/>
+        <transition to="(SG) Gravar mensagem não pode entrar no fluxo" name="(SG) Gravar mensagem não pode entrar no fluxo"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:ncm:sub_fluxo_unico')}"/>
+        </event>
+    </decision>
     <node name="(SG) Gravar variavel de devolução à secretaria">
         <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
         <event type="node-enter">
@@ -118,6 +152,12 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:idOrgaoJulgador')}"/>
+        </event>
+    </node>
+    <node name="(SG) Gravar mensagem não pode entrar no fluxo">
+        <transition to="(SG) Audiência - ANALISAR" name="(SG) Audiência - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:ncm:aviso_audiencia_analisar', 'O processo não pôde ser movimentado pois há ações sendo efetuadas em outras tarefas. Para movimentá-lo, é necessário finalizar os procedimentos nas demais caixas e deixá-lo, apenas, em &quot;(SG) Audiência - ANALISAR&quot;.')}"/>
         </event>
     </node>
     <end-state name="Término"/>
