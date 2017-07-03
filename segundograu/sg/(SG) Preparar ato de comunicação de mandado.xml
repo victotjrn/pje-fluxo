@@ -45,13 +45,13 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Mandado pendente de assinatura pelo gabinete - ASSINAR" name="Encaminhar para assinatura do gabinete"/>
-        <transition to="(SG) Existe central de mandados?" name="(SG) Existe central de mandados?">
-            <condition expression="#{true}"/>
-        </transition>
         <transition to="(SG) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
         <transition to="(SG) Mandado pendente de assinatura pela secretaria - ASSINAR" name="Encaminhar para assinatura da secretaria"/>
+        <transition to="(SG) É SG?" name="(SG) É SG?">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Existe central de mandados?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) É SG?')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '60,65')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('M')}"/>
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp') ? tramitacaoProcessualService.gravaVariavel('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))) : ''}"/>
@@ -87,14 +87,14 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
-        <transition to="(SG) Existe central de mandados?" name="(SG) Existe central de mandados?">
-            <condition expression="#{true}"/>
-        </transition>
         <transition to="Nó de Desvio - (SG) Preparar ato de comunicação de mandado" name="Nó de Desvio - (SG) Preparar ato de comunicação de mandado">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Mandado - EXPEDIR" name="Retornar para expedição de mandado"/>
         <transition to="(SG) Mandado pendente de assinatura pelo gabinete - ASSINAR" name="Encaminhar para assinatura do gabinete"/>
+        <transition to="(SG) É SG?" name="(SG) É SG?">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:mapaProcuradorias'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:mapaProcuradorias'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
@@ -111,7 +111,7 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))}"/>
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Existe central de mandados?')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) É SG?')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65')}"/>
         </event>
         <event type="task-end">
@@ -132,10 +132,10 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
    Obrig.: Não
    Tipo: Frame]]></description>
         <transition to="(SG) Mandado - EXPEDIR" name="Retornar para expedição de mandado"/>
-        <transition to="(SG) Existe central de mandados?" name="(SG) Existe central de mandados?">
+        <transition to="Nó de Desvio - (SG) Preparar ato de comunicação de mandado" name="Nó de Desvio - (SG) Preparar ato de comunicação de mandado">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Nó de Desvio - (SG) Preparar ato de comunicação de mandado" name="Nó de Desvio - (SG) Preparar ato de comunicação de mandado">
+        <transition to="(SG) É SG?" name="(SG) É SG?">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
@@ -154,7 +154,7 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))}"/>
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Existe central de mandados?')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) É SG?')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65')}"/>
         </event>
         <event type="task-end">
@@ -163,35 +163,23 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp',org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
-    <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(SG) Mandado aguardando escolha da central - SELECIONAR' : '(SG) Encaminhar para central de mandados'}" name="(SG) Existe central de mandados?">
-        <transition to="(SG) Mandado aguardando escolha da central - SELECIONAR" name="(SG) Mandado aguardando escolha da central - SELECIONAR"/>
-        <transition to="(SG) Encaminhar para central de mandados" name="(SG) Encaminhar para central de mandados"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao == (0+parametroUtil.getParametro('pje:tjrn:sg:jurisdicao:id')) ? '(SG) Encaminhar para CCM - SG' : '(SG) Encaminhar para CCM-TR'}" name="(SG) É SG?">
+        <transition to="(SG) Encaminhar para CCM - SG" name="(SG) Encaminhar para CCM - SG"/>
+        <transition to="(SG) Encaminhar para CCM-TR" name="(SG) Encaminhar para CCM-TR"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Mandado aguardando escolha da central - SELECIONAR">
-        <task name="(SG) Mandado aguardando escolha da central - SELECIONAR" swimlane="Secretaria">
-            <controller>
-                <variable name="Processo_Fluxo_expedientes_centralmandados" mapped-name="frame:Processo_Fluxo_expedientes_centralmandados" access="read,write"/>
-            </controller>
-        </task>
-        <description><![CDATA[*Variáveis*
-
-1. Variável: Processo_Fluxo_expedientes_centralmandados
-   Label: Selecione a central de mandados
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Frame]]></description>
-        <transition to="(SG) Encaminhar para central de mandados" name="Encaminhar para central de mandados"/>
-        <transition to="Nó de Desvio - (SG) Preparar ato de comunicação de mandado" name="Nó de Desvio - (SG) Preparar ato de comunicação de mandado">
-            <condition expression="#{true}"/>
-        </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+    <node name="(SG) Encaminhar para CCM - SG">
+        <transition to="(SG) Lançar movimentação de expedição de mandado" name="(SG) Lançar movimentação de expedição de mandado"/>
+        <event type="node-enter">
+            <action expression="#{conectorMandados.setCentralMandado(centralMandadoManager.findById((0+parametroUtil.getParametro('pje:tjrn:sg:centralMandado:id')).intValue()))}"/>
         </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+    </node>
+    <node name="(SG) Encaminhar para CCM-TR">
+        <transition to="(SG) Lançar movimentação de expedição de mandado" name="(SG) Lançar movimentação de expedição de mandado"/>
+        <event type="node-enter">
+            <action expression="#{conectorMandados.setCentralMandado(centralMandadoManager.findById((0+parametroUtil.getParametro('pje:tjrn:tr:centralMandado:id')).intValue()))}"/>
         </event>
-    </task-node>
-    <node name="(SG) Encaminhar para central de mandados">
+    </node>
+    <node name="(SG) Lançar movimentação de expedição de mandado">
         <transition to="(SG) Controle de prazo de mandados após expedição" name="(SG) Controle de prazo de mandados após expedição"/>
         <event type="node-enter">
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('M', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(78).lancarMovimento()}')}"/>
@@ -214,7 +202,6 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
         <task name="Nó de Desvio - (SG) Preparar ato de comunicação de mandado" swimlane="Nó de Desvio - (SG) Preparar ato de comunicação de mandado"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Mandado - EXPEDIR" name="(SG) Mandado - EXPEDIR"/>
-        <transition to="(SG) Mandado aguardando escolha da central - SELECIONAR" name="(SG) Mandado aguardando escolha da central - SELECIONAR"/>
         <transition to="(SG) Mandado pendente de assinatura pelo gabinete - ASSINAR" name="(SG) Mandado pendente de assinatura pelo gabinete - ASSINAR"/>
         <transition to="(SG) Mandado pendente de assinatura pela secretaria - ASSINAR" name="(SG) Mandado pendente de assinatura pela secretaria - ASSINAR"/>
     </task-node>  
