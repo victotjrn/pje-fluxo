@@ -179,9 +179,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <condition expression="#{ parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) }"/>
         </transition>
         <transition to="(VCiv) Conclusão para sentença de homologação e(ou) extinção" name="16 - Enviar concluso para sentença de homologação e/ou extinção"/>
-        <transition to="(VCiv) Dar cumprimento a ato judicial de central de calculos" name="17 - Enviar para central de calculos">
-            <condition expression="#{' 38 39 102 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat(' '))}"/>
-        </transition>
+        <transition to="(VCiv) Dar cumprimento a ato judicial de central de calculos" name="17 - Enviar para central de calculos"/>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_laudo_tecnico', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_laudo_tecnico'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_audiencia', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_audiencia'))}"/>
