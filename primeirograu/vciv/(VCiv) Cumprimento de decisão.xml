@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Cumprimento de decisão">
-    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria...........]]></description>  
+    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria..............]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Cumprimento de decisão">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -603,13 +603,18 @@
         <event type="task-create">
             <action expression="#{preencherMovimento.deCodigo(979).lancarMovimento()}"/>
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', 'false')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_cojud', 'true')}"/>
+            <action expression="&lt;action expression=&quot;#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Processos devolvidos pela COJUD')}&quot;/&gt;"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'COJUD_FBG', processInstance.contextInstance.variables)}"/>
         </event>
         <event type="task-end">
             <action expression="#{preencherMovimento.deCodigo(980).comComplementoDeCodigo(7).preencherComTexto('juízo de orgem').lancarMovimento()}"/>
+            <action expression="&lt;action expression=&quot;#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}&quot;/&gt;"/>
+            <action expression="&lt;action expression=&quot;#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_cojud')}&quot;/&gt;"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Aguardando COJUD">
-        <task name="(VCiv) Aguardando COJUD" swimlane="Secretaria e Servidor de cálculo">
+        <task name="(VCiv) Aguardando COJUD" swimlane="Secretaria">
             <controller>
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
             </controller>
@@ -618,13 +623,19 @@
         <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Processos devolvidos pela COJUD" name="Devolver para a secretaria"/>
+        <transition to="(VCiv) Processos devolvidos pela COJUD" name="Devolver para a secretaria">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
             <action expression="#{preencherMovimento.deCodigo(979).lancarMovimento()}"/>
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', 'false')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_cojud', 'true')}"/>
+            <action expression="&lt;action expression=&quot;#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Devolver para a secretaria')}&quot;/&gt;"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'COJUD_FBG', processInstance.contextInstance.variables)}"/>
         </event>
         <event type="task-end">
             <action expression="#{preencherMovimento.deCodigo(980).comComplementoDeCodigo(7).preencherComTexto('juízo de orgem').lancarMovimento()}"/>
+            <action expression="&lt;action expression=&quot;#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}&quot;/&gt;"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Processos devolvidos pela central de cálculos">
