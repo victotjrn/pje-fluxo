@@ -153,6 +153,9 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Aguardando sessão de julgamento" name="Retornar para aguardar sessão de julgamento"/>
+        <transition to="(TR) Lançar movimentações de julgamento" name="Acordão já assinado! Encaminhar para lançamento da movimentação">
+            <condition expression="#{ not empty tramitacaoProcessualService.recuperaVariavelTarefa('pje:fluxo:colegiado:minutaAcordao') and processoDocumentoManager.findById(tramitacaoProcessualService.recuperaVariavelTarefa('pje:fluxo:colegiado:minutaAcordao')).getDataJuntada() != null }"/>
+        </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Lançar movimentações de julgamento')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir',true)}"/>
