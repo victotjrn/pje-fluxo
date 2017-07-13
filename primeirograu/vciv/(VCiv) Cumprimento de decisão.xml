@@ -619,7 +619,7 @@
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[aviso: "Para juntar o cálculo, clique no número do processo e o anexe através do menu INCLUIR PETIÇÕES E DOCUMENTOS."]]></description>
+        <description><![CDATA[aviso: "Aguardando juntada de cálculo pela contadoria judicial."]]></description>
         <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
