@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de Audiência">
-    <description><![CDATA[Fluxo responsável por controlar as audiências.......]]></description>  
+    <description><![CDATA[Fluxo responsável por controlar as audiências.........]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle de Audiência">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -15,9 +15,15 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(VCiv) Verifica se existe audiência designada" name="(VCiv) Verifica se existe audiência designada"/>
+        <transition to="(VCiv) Limpar variáveis de audiência" name="(VCiv) Limpar variáveis de audiência"/>
     </start-state>  
     <!-- NODES -->
+    <node name="(VCiv) Limpar variáveis de audiência">
+        <transition to="(VCiv) Verifica se existe audiência designada" name="(VCiv) Verifica se existe audiência designada"/>
+        <event type="node-enter">
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ = :nomeVariavelAudiencia order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).setParameter('nomeVariavelAudiencia', 'pje:fluxo:audienciaSelecionada').executeUpdate()}"/>
+        </event>
+    </node>
     <decision expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) == null ? '(VCiv) Designar audiência' : '(VCiv) Aguardar audiência'}" name="(VCiv) Verifica se existe audiência designada">
         <transition to="(VCiv) Aguardar audiência" name="(VCiv) Aguardar audiência"/>
         <transition to="(VCiv) Designar audiência" name="(VCiv) Designar audiência"/>
@@ -86,6 +92,7 @@
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:expedir_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cumpridec:citar_intimar')}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ = :nomeVariavelAudiencia order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).setParameter('nomeVariavelAudiencia', 'pje:fluxo:audienciaSelecionada').executeUpdate()}"/>
         </event>
     </task-node>
     <process-state name="(VCiv) Intimar da designação">
