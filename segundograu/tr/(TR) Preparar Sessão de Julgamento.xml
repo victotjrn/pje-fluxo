@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Preparar Sessão de Julgamento">
-    <description><![CDATA[Controle de processos antes e depois da sessão de julgamento.
-(TR) Confirmar relatório - voto - ementa - avisoVotoRequired - #{tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired')}
-(TR) Elaborar relatório - voto - ementa - avisoVotoRequired - #{tramitacaoProcessualService.recuperaVariavel('avisoVotoRequired')}]]></description>  
+    <description><![CDATA[Controle de processos antes e depois da sessão de julgamento.]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Assessoria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5197,6:1469,8:1338')}" actor-id="#{actor.id}"/>
-    </swimlane>
-    <swimlane name="Nó de Desvio - (TR) Preparar Sessão de Julgamento"/>
     <swimlane name="Secretaria Segundo Grau">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('8:1338,8:5483')}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (TR) Preparar Sessão de Julgamento"/>
+    <swimlane name="Assessoria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5197,6:1469,8:1338')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5197,6:1469,8:1338')}"/>
@@ -18,9 +16,15 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Assessoria"/>
-        <transition to="(TR) Elaborar relatório - voto - ementa" name="(TR) Elaborar relatório - voto - ementa"/>
+        <transition to="(TR) Lançar movimento julgamento" name="(TR) Lançar movimento julgamento"/>
     </start-state>  
     <!-- NODES -->
+    <node name="(TR) Lançar movimento julgamento">
+        <transition to="(TR) Elaborar relatório - voto - ementa" name="(TR) Elaborar relatório - voto - ementa"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento()}"/>
+        </event>
+    </node>
     <task-node end-tasks="true" name="(TR) Elaborar relatório - voto - ementa">
         <task name="(TR) Elaborar relatório - voto - ementa" swimlane="Assessoria">
             <controller>
@@ -119,10 +123,12 @@
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator', true)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Encaminhar manualmente para assinatura do inteiro teor')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
     <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('pje:fluxo:colegiado:orgaoVencedor:id') and tramitacaoProcessualService.recuperaVariavel('pje:fluxo:colegiado:orgaoVencedor:id') == tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador ? '(TR) Assinar inteiro teor' : '(TR) Deslocar para o gabinete vencedor'}" name="(TR) O relator é o vencedor?">
