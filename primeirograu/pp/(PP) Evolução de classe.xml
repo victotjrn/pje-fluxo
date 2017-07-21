@@ -1,93 +1,76 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(HTE) Autos recebidos do gabinete">
-    <description><![CDATA[Código do fluxo: HTE_AUT_REC_GAB
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(PP) Evolução de classe">
+    <description><![CDATA[Código do fluxo: PP_EVOL_CLAS
 
-Descrição: Fluxo destinado à análise de processos devolvidos do gabinete para a secretaria.
+Descrição: Fluxo responsável pela evolução das classes judiciais.
 
 Raia        Localização              Papel
 Secretaria  Secretaria               Chefe de Secretaria
             Gabinete                 Magistrado
             Assessoria               Assessor]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (HTE) Autos recebidos do gabinete">
+    <swimlane name="Nó de Desvio - (PP) Evolução de classe">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,7:5197')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,7:5197,6:1469')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(HTE) Autos recebidos do gabinete - ANALISAR" name="(HTE) Autos recebidos do gabinete - ANALISAR"/>
+        <transition to="(PP) Evolução de classe - EFETUAR" name="(PP) Evolução de classe - EFETUAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(HTE) Autos recebidos do gabinete - ANALISAR">
-        <task name="(HTE) Autos recebidos do gabinete - ANALISAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(PP) Evolução de classe - EFETUAR">
+        <task name="(PP) Evolução de classe - EFETUAR" swimlane="Secretaria">
             <controller>
-                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
-                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="Processo_Fluxo_abaEvolucaoClasse" mapped-name="frame:Processo_Fluxo_abaEvolucaoClasse" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: Processo_Fluxo_visualizarDecisao
+1. Variável: Processo_Fluxo_abaEvolucaoClasse
    Label:
    Escrita: Sim
    Obrig.: Não
-   Tipo: Frame
-
-2. Variável: movimentacaoLote
-   Label:
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Habilitar Movimentação em Lote]]></description>
-        <transition to="Nó de Desvio - (HTE) Autos recebidos do gabinete" name="Nó de Desvio - (HTE) Autos recebidos do gabinete">
+   Tipo: Frame]]></description>
+        <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(HTE) Intimar as partes" name="Intimar as partes">
-            <condition expression="#{!tramitacaoProcessualService.temSituacao('jus:arquivado')}"/>
-        </transition>
-        <transition to="(HTE) Apagar variáveis do fluxo" name="Cumprir ato judicial">
-            <condition expression="#{!tramitacaoProcessualService.temSituacao('jus:arquivado')}"/>
-        </transition>
-        <transition to="(HTE) Manter arquivamento" name="Manter processo arquivado">
-            <condition expression="#{tramitacaoProcessualService.temSituacao('jus:arquivado')}"/>
-        </transition>
-        <transition to="(HTE) Reativar" name="Reativar processo">
-            <condition expression="#{tramitacaoProcessualService.temSituacao('jus:arquivado')}"/>
+        <transition to="(PP) Cancelar evolução" name="Cancelar"/>
+        <transition to="Nó de Desvio - (PP) Evolução de classe" name="Nó de Desvio - (PP) Evolução de classe">
+            <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Término')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar')}"/>
         </event>
         <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pp:evolucao:efetuada', true)}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
     </task-node>
-    <process-state name="(HTE) Intimar as partes">
-        <sub-process name="(HTE) Preparar ato de comunicação" binding="late"/>
-        <transition to="(HTE) Apagar variáveis do fluxo" name="(HTE) Apagar variáveis do fluxo"/>
-    </process-state>
-    <node name="(HTE) Manter arquivamento">
-        <transition to="(HTE) Apagar variáveis do fluxo" name="(HTE) Apagar variáveis do fluxo"/>
+    <node name="(PP) Cancelar evolução">
+        <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('hte:arq:manter_arquivado', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pp:evolucao:cancelada', true)}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pp:evolucao:efetuada')}"/>
         </event>
     </node>
-    <node name="(HTE) Reativar">
-        <transition to="(HTE) Apagar variáveis do fluxo" name="(HTE) Apagar variáveis do fluxo"/>
+    <end-state name="Término">
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('hte:arq:manter_arquivado', false)}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('pp:evolucao:efetuada') == true ? preencherMovimento.deCodigo(10966).comComplementoDeCodigo(31).doTipoDinamico().preencherComObjeto(processoTrfHome.getClasseJudicialAnterior()).comComplementoDeCodigo(32).doTipoDinamico().preencherComObjeto(processoHistoricoClasseHome.instance.getClasseJudicialAtual()).lancarMovimento() : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pp:evolucao:efetuada')}"/>
         </event>
-    </node>
-    <node name="(HTE) Apagar variáveis do fluxo">
+    </end-state>
+    <task-node end-tasks="true" name="Nó de Desvio - (PP) Evolução de classe">
+        <task name="Nó de Desvio - (PP) Evolução de classe" swimlane="Nó de Desvio - (PP) Evolução de classe"/>
         <transition to="Término" name="Término"/>
-    </node>
-    <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (HTE) Autos recebidos do gabinete">
-        <task name="Nó de Desvio - (HTE) Autos recebidos do gabinete" swimlane="Nó de Desvio - (HTE) Autos recebidos do gabinete"/>
-        <transition to="Término" name="Término"/>
-        <transition to="(HTE) Autos recebidos do gabinete - ANALISAR" name="(HTE) Autos recebidos do gabinete - ANALISAR"/>
+        <transition to="(PP) Evolução de classe - EFETUAR" name="(PP) Evolução de classe - EFETUAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
