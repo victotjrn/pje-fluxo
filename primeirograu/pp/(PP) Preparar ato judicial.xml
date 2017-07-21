@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(PP) Preparar ato judicial">
+    <description><![CDATA[Código do fluxo: PP_PAJ
+
+Descrição: Fluxo destinado ao controle de atos judicias.]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (PP) Preparar ato judicial">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(PP) Concluso para decisão?" name="(PP) Concluso para decisão?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pp:paj:decisao') == true ? '(PP) Lançar movimento conclusos para decisão' : '(PP) Concluso para despacho?'}" name="(PP) Concluso para decisão?">
+        <transition to="(PP) Lançar movimento conclusos para decisão" name="(PP) Lançar movimento conclusos para decisão"/>
+        <transition to="(PP) Concluso para despacho?" name="(PP) Concluso para despacho?"/>
+    </decision>
+    <node name="(PP) Lançar movimento conclusos para decisão">
+        <transition to="(PP) Concluso para decisão sobre reativação?" name="(PP) Concluso para decisão sobre reativação?"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pp:paj:decisao_reativacao') == true ? '(PP) Preparação de decisão sobre reativação' : '(PP) Concluso para decisão genérica?'}" name="(PP) Concluso para decisão sobre reativação?">
+        <transition to="(PP) Concluso para decisão genérica?" name="(PP) Concluso para decisão genérica?"/>
+        <transition to="(PP) Preparação de decisão sobre reativação" name="(PP) Preparação de decisão sobre reativação"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pp:paj:decisao_generica') == true ? '(PP) Enviar para autos recebidos da secretaria' : '(PP) Apagar variáveis do fluxo'}" name="(PP) Concluso para decisão genérica?">
+        <transition to="(PP) Apagar variáveis do fluxo" name="(PP) Apagar variáveis do fluxo"/>
+        <transition to="(PP) Enviar para autos recebidos da secretaria" name="(PP) Enviar para autos recebidos da secretaria"/>
+    </decision>
+    <process-state name="(PP) Preparação de decisão sobre reativação">
+        <sub-process name="(PP) Preparar ato judicial de decisão de reativação" binding="late"/>
+        <transition to="(PP) Enviar para autos recebidos do gabinete" name="(PP) Enviar para autos recebidos do gabinete"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pp:paj:despacho') == true ? '(PP) Lançar movimento conclusos para despacho' : '(PP) Concluso para julgamento?'}" name="(PP) Concluso para despacho?">
+        <transition to="(PP) Lançar movimento conclusos para despacho" name="(PP) Lançar movimento conclusos para despacho"/>
+        <transition to="(PP) Concluso para julgamento?" name="(PP) Concluso para julgamento?"/>
+    </decision>
+    <node name="(PP) Lançar movimento conclusos para despacho">
+        <transition to="(PP) Concluso para despacho genérico?" name="(PP) Concluso para despacho genérico?"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(5).lancarMovimento()}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pp:paj:despacho_generico') == true ? '(PP) Enviar para autos recebidos da secretaria' : '(PP) Apagar variáveis do fluxo'}" name="(PP) Concluso para despacho genérico?">
+        <transition to="(PP) Apagar variáveis do fluxo" name="(PP) Apagar variáveis do fluxo"/>
+        <transition to="(PP) Enviar para autos recebidos da secretaria" name="(PP) Enviar para autos recebidos da secretaria"/>
+    </decision>
+    <process-state name="(PP) Enviar para autos recebidos da secretaria">
+        <sub-process name="(PP) Autos recebidos da secretaria" binding="late"/>
+        <transition to="(PP) Enviar para autos recebidos do gabinete" name="(PP) Enviar para autos recebidos do gabinete"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pp:paj:julgamento') == true ? '(PP) Lançar movimento conclusos para julgamento' : '(PP) Apagar variáveis do fluxo'}" name="(PP) Concluso para julgamento?">
+        <transition to="(PP) Lançar movimento conclusos para julgamento" name="(PP) Lançar movimento conclusos para julgamento"/>
+        <transition to="(PP) Apagar variáveis do fluxo" name="(PP) Apagar variáveis do fluxo"/>
+    </decision>
+    <node name="(PP) Lançar movimento conclusos para julgamento">
+        <transition to="(PP) Preparação de sentença" name="(PP) Preparação de sentença"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento()}"/>
+        </event>
+    </node>
+    <process-state name="(PP) Preparação de sentença">
+        <sub-process name="(PP) Preparar ato judicial de sentença" binding="late"/>
+        <transition to="(PP) Enviar para autos recebidos do gabinete" name="(PP) Enviar para autos recebidos do gabinete"/>
+    </process-state>
+    <process-state name="(PP) Enviar para autos recebidos do gabinete">
+        <sub-process name="(PP) Autos recebidos do gabinete" binding="late"/>
+        <transition to="(PP) Apagar variáveis do fluxo" name="(PP) Apagar variáveis do fluxo"/>
+    </process-state>
+    <node name="(PP) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (PP) Preparar ato judicial">
+        <task name="Nó de Desvio - (PP) Preparar ato judicial" swimlane="Nó de Desvio - (PP) Preparar ato judicial"/>
+        <transition to="Término" name="Término"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

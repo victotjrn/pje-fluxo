@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(HTE) Arquivamento">
-    <description><![CDATA[Código do fluxo: HTE_ARQ
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(PP) Arquivamento">
+    <description><![CDATA[Código do fluxo: PP_ARQ
 
 Descrição: Gestão de arquivamento de processos.
 
 Raia        Localização              Papel
 Secretaria  Secretaria               Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (PP) Arquivamento">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,7:5197,6:1469')}" actor-id="#{actor.id}"/>
-    </swimlane>
-    <swimlane name="Nó de Desvio - (HTE) Arquivamento">
-        <assignment actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(HTE) ~Arquivo - CONFIRMAR" name="(HTE) ~Arquivo - CONFIRMAR"/>
+        <transition to="(PP) ~Arquivo - CONFIRMAR" name="(PP) ~Arquivo - CONFIRMAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(HTE) ~Arquivo - CONFIRMAR">
-        <task name="(HTE) ~Arquivo - CONFIRMAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(PP) ~Arquivo - CONFIRMAR">
+        <task name="(PP) ~Arquivo - CONFIRMAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
             </controller>
@@ -29,16 +29,18 @@ Secretaria  Secretaria               Chefe de Secretaria]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: aviso1
-   Label: ATENÇÃO! Ao escolher a opção "Arquivar definitivamente", o processo só poderá ser reativado após conclusão pelo o magistrado.
+   Label: ATENÇÃO! Ao escolher a opção "Arquivar definitivamente", o processo só poderá ser reativado após conclusão pelo magistrado.
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso]]></description>
-        <transition to="Nó de Desvio - (HTE) Arquivamento" name="Nó de Desvio - (HTE) Arquivamento">
+        <transition to="Nó de Desvio - (PP) Arquivamento" name="Nó de Desvio - (PP) Arquivamento">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(HTE) Lançar movimento de arquivo provisóro" name="Arquivar provisoriamente"/>
-        <transition to="(HTE) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
-        <transition to="(HTE) Lançar movimento de arquivo definitivo" name="Arquivar definitivamente"/>
+        <transition to="(PP) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
+        <transition to="(PP) Lançar movimento de arquivo definitivo" name="Arquivar definitivamente"/>
+        <transition to="Nó de Desvio - (PP) Arquivamento" name="Nó de Desvio - (PP) Arquivamento">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -46,52 +48,16 @@ Secretaria  Secretaria               Chefe de Secretaria]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
-    <node name="(HTE) Lançar movimento de arquivo provisóro">
-        <transition to="(HTE) ~Arquivo provisório - AGUARDAR" name="(HTE) ~Arquivo provisório - AGUARDAR"/>
-        <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(245).lancarMovimento()}"/>
-        </event>
-    </node>
-    <task-node end-tasks="true" name="(HTE) ~Arquivo provisório - AGUARDAR">
-        <task name="(HTE) ~Arquivo provisório - AGUARDAR" swimlane="Secretaria">
-            <controller>
-                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
-            </controller>
-        </task>
-        <description><![CDATA[*Variáveis*
-
-1. Variável: aviso2
-   Label: O processo encontra-se arquivado provisoriamente, podendo ser desarquivado clicando na opção "Desarquivar".
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Aviso]]></description>
-        <transition to="Nó de Desvio - (HTE) Arquivamento" name="Nó de Desvio - (HTE) Arquivamento">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="(HTE) Lançar movimento de desarquivamento" name="Desarquivar"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-    </task-node>
-    <node name="(HTE) Lançar movimento de desarquivamento">
-        <transition to="(HTE) Apagar variáveis do fluxo" name="(HTE) Apagar variáveis do fluxo"/>
-        <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(893).lancarMovimento()}"/>
-        </event>
-    </node>
-    <node name="(HTE) Lançar movimento de arquivo definitivo">
-        <transition to="(HTE) ~Arquivo definitivo" name="(HTE) ~Arquivo definitivo"/>
+    <node name="(PP) Lançar movimento de arquivo definitivo">
+        <transition to="(PP) ~Arquivo definitivo" name="(PP) ~Arquivo definitivo"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(246).lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.removerSituacao('jus:andamento')}"/>
             <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:arquivado')}"/>
         </event>
     </node>
-    <task-node end-tasks="true" name="(HTE) ~Arquivo definitivo">
-        <task name="(HTE) ~Arquivo definitivo" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(PP) ~Arquivo definitivo">
+        <task name="(PP) ~Arquivo definitivo" swimlane="Secretaria">
             <controller>
                 <variable name="aviso3" mapped-name="textAlert:aviso3" access="read,write"/>
             </controller>
@@ -103,10 +69,13 @@ Secretaria  Secretaria               Chefe de Secretaria]]></description>
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso]]></description>
-        <transition to="Nó de Desvio - (HTE) Arquivamento" name="Nó de Desvio - (HTE) Arquivamento">
+        <transition to="Nó de Desvio - (PP) Arquivamento" name="Nó de Desvio - (PP) Arquivamento">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(HTE) Preparação de decisão sobre reativação" name="Enviar concluso sobre reativação"/>
+        <transition to="(PP) Preparação de decisão sobre reativação" name="Enviar concluso sobre reativação"/>
+        <transition to="Nó de Desvio - (PP) Arquivamento" name="Nó de Desvio - (PP) Arquivamento">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -114,43 +83,47 @@ Secretaria  Secretaria               Chefe de Secretaria]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
-    <process-state name="(HTE) Preparação de decisão sobre reativação">
-        <sub-process name="(HTE) Preparar ato judicial" binding="late"/>
-        <transition to="(HTE) Manter arquivado definitivamente?" name="(HTE) Manter arquivado definitivamente?"/>
+    <process-state name="(PP) Preparação de decisão sobre reativação">
+        <sub-process name="(PP) Preparar ato judicial" binding="late"/>
+        <transition to="(PP) Manter arquivado definitivamente?" name="(PP) Manter arquivado definitivamente?"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('hte:paj:decisao', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('hte:paj:decisao_reativacao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pp:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pp:paj:decisao_reativacao', true)}"/>
         </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('hte:paj:decisao')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('hte:paj:decisao_reativacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pp:paj:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pp:paj:decisao_reativacao')}"/>
         </event>
     </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('hte:arq:manter_arquivado') == true ? '(HTE) ~Arquivo definitivo' : '(HTE) Lançar movimento de reativação'}" name="(HTE) Manter arquivado definitivamente?">
-        <transition to="(HTE) ~Arquivo definitivo" name="(HTE) ~Arquivo definitivo"/>
-        <transition to="(HTE) Lançar movimento de reativação" name="(HTE) Lançar movimento de reativação"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pp:arq:manter_arquivado') == true ? '(PP) ~Arquivo definitivo' : '(PP) Lançar movimento de reativação'}" name="(PP) Manter arquivado definitivamente?">
+        <transition to="(PP) ~Arquivo definitivo" name="(PP) ~Arquivo definitivo"/>
+        <transition to="(PP) Lançar movimento de reativação" name="(PP) Lançar movimento de reativação"/>
     </decision>
-    <node name="(HTE) Lançar movimento de reativação">
-        <transition to="(HTE) Apagar variáveis do fluxo" name="(HTE) Apagar variáveis do fluxo"/>
+    <node name="(PP) Lançar movimento de reativação">
+        <transition to="(PP) Apagar variáveis do fluxo" name="(PP) Apagar variáveis do fluxo"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(849).lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.removerSituacao('jus:arquivado')}"/>
             <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:andamento')}"/>
         </event>
     </node>
-    <node name="(HTE) Apagar variáveis do fluxo">
+    <node name="(PP) Apagar variáveis do fluxo">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('hte:arq:manter_arquivado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pp:arq:manter_arquivado')}"/>
         </event>
     </node>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (HTE) Arquivamento">
-        <task name="Nó de Desvio - (HTE) Arquivamento" swimlane="Nó de Desvio - (HTE) Arquivamento"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (PP) Arquivamento">
+        <task name="Nó de Desvio - (PP) Arquivamento" swimlane="Nó de Desvio - (PP) Arquivamento"/>
         <transition to="Término" name="Término"/>
-        <transition to="(HTE) ~Arquivo - CONFIRMAR" name="(HTE) ~Arquivo - CONFIRMAR"/>
-        <transition to="(HTE) ~Arquivo provisório - AGUARDAR" name="(HTE) ~Arquivo provisório - AGUARDAR"/>
-        <transition to="(HTE) ~Arquivo definitivo" name="(HTE) ~Arquivo definitivo"/>
+        <transition to="(PP) ~Arquivo - CONFIRMAR" name="(PP) ~Arquivo - CONFIRMAR"/>
+        <transition to="(PP) ~Arquivo definitivo" name="(PP) ~Arquivo definitivo"/>
+        <transition to="Nó de Desvio - (PP) Arquivamento" name="Nó de Desvio - (PP) Arquivamento">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (PP) Arquivamento" name="Nó de Desvio - (PP) Arquivamento"/>
+        <transition to="Nó de Desvio - (PP) Arquivamento" name="Nó de Desvio - (PP) Arquivamento"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

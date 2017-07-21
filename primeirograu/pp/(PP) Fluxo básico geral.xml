@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(PP) Fluxo básico geral">
+    <description><![CDATA[Código do fluxo: PP_FBG
+
+Descrição: Fluxo básico geral de entrada dos procedimentos prévios.
+
+Raia        Localização              Papel
+Secretaria  Secretaria               Chefe de Secretaria
+            Gabinete                 Magistrado
+            Assessoria               Assessor]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (PP) Fluxo básico geral">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,7:5197')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(PP) Efetuou evolução?" name="(PP) Efetuou evolução?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial == 112 ? '(PP) Preparação de sentença genérica' : '(PP) Autos recebidos da autuação'}" name="(PP) Efetuou evolução?">
+        <transition to="(PP) Autos recebidos da autuação" name="(PP) Autos recebidos da autuação"/>
+        <transition to="(PP) Preparação de sentença genérica" name="(PP) Preparação de sentença genérica"/>
+    </decision>
+    <process-state name="(PP) Autos recebidos da autuação">
+        <sub-process name="(PP) Autos recebidos da autuação" binding="late"/>
+        <transition to="(PP) Controle de audiências" name="(PP) Controle de audiências"/>
+    </process-state>
+    <process-state name="(PP) Controle de audiências">
+        <sub-process name="(PP) Controle de audiências" binding="late"/>
+        <transition to="(PP) Evolução de classe" name="(PP) Evolução de classe"/>
+    </process-state>
+    <task-node end-tasks="true" name="(PP) Secretaria - ANALISAR">
+        <task name="(PP) Secretaria - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_visualizarDecisao
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (PP) Fluxo básico geral" name="Nó de Desvio - (PP) Fluxo básico geral">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Término">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(PP) Evolução de classe" name="02 - Evoluir classe processual"/>
+        <transition to="(PP) Preparação de sentença genérica" name="03 - Enviar concluso para sentença"/>
+        <transition to="(PP) Preparação para arquivamento" name="04 - Arquivar o processo"/>
+        <transition to="(PP) Controle de audiências" name="01 - Enviar para controle de audiências"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pp:evolucao:cancelada')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <process-state name="(PP) Preparação para arquivamento">
+        <sub-process name="(PP) Arquivamento" binding="late"/>
+        <transition to="(PP) Secretaria - ANALISAR" name="(PP) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(PP) Evolução de classe">
+        <sub-process name="(PP) Evolução de classe" binding="late"/>
+        <transition to="(PP) Cancelou evolução?" name="(PP) Cancelou evolução?"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pp:evolucao:cancelada') == true ? '(PP) Secretaria - ANALISAR' : 'Término'}" name="(PP) Cancelou evolução?">
+        <transition to="(PP) Secretaria - ANALISAR" name="(PP) Secretaria - ANALISAR"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <process-state name="(PP) Preparação de sentença genérica">
+        <sub-process name="(PP) Preparar ato judicial" binding="late"/>
+        <transition to="(PP) Processo arquivado?" name="(PP) Processo arquivado?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pp:paj:julgamento', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pp:paj:julgamento')}"/>
+        </event>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pp:prepara:arquivar') == true ? '(PP) Preparação para arquivamento' : '(PP) Secretaria - ANALISAR'}" name="(PP) Processo arquivado?">
+        <transition to="(PP) Preparação para arquivamento" name="(PP) Preparação para arquivamento"/>
+        <transition to="(PP) Secretaria - ANALISAR" name="(PP) Secretaria - ANALISAR"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pp:prepara:arquivar')}"/>
+        </event>
+    </decision>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (PP) Fluxo básico geral">
+        <task name="Nó de Desvio - (PP) Fluxo básico geral" swimlane="Nó de Desvio - (PP) Fluxo básico geral"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(PP) Secretaria - ANALISAR" name="(PP) Secretaria - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

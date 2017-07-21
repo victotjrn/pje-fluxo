@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(HTE) Preparar ato judicial de despacho genérico">
-    <description><![CDATA[Código do fluxo: HTE_PAJ_DESP_GEN.
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(PP) Preparar ato judicial de decisão genérica">
+    <description><![CDATA[Código do fluxo: PP_PAJ_DEC_GEN
 
-Descrição: Fluxo destinado ao preparo de atos judiciais de despachos genéricos.
+Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.
 
 Raia        Localização              Papel
 Assessoria  Assessoria               Assessor
@@ -19,17 +19,17 @@ Magistrado  Assessoria               Assessor
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7:5197,6:1469,5:1338')}"/>
     </swimlane>
-    <swimlane name="Nó de Desvio - (HTE) Preparar ato judicial de despacho genérico">
+    <swimlane name="Nó de Desvio - (PP) Preparar ato judicial de decisão genérica">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Assessoria"/>
-        <transition to="(HTE) Concluso para despacho - MINUTAR" name="(HTE) Concluso para despacho - MINUTAR"/>
+        <transition to="(PP) Concluso para decisão - MINUTAR" name="(PP) Concluso para decisão - MINUTAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(HTE) Concluso para despacho - MINUTAR">
-        <task name="(HTE) Concluso para despacho - MINUTAR" swimlane="Assessoria">
+    <task-node end-tasks="true" name="(PP) Concluso para decisão - MINUTAR">
+        <task name="(PP) Concluso para decisão - MINUTAR" swimlane="Assessoria">
             <controller>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
@@ -44,7 +44,7 @@ Magistrado  Assessoria               Assessor
    Tipo: Editor
 
 2. Variável: minutarLote
-   Label: 
+   Label: Minutar em lote
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Minutar em Lote
@@ -54,11 +54,11 @@ Magistrado  Assessoria               Assessor
 1. Tipo do evento: Sair Tarefa
    Agrupamento eventos: Magistrado
    Condição para lançamento temporário: #{true}]]></description>
-        <transition to="Nó de Desvio - (HTE) Preparar ato judicial de despacho genérico" name="Nó de Desvio - (HTE) Preparar ato judicial de despacho genérico">
+        <transition to="(PP) Concluso para decisão - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(PP) Gravar variável de cancelamento de conclusão" name="Alterar escolha do tipo de conclusão"/>
+        <transition to="Nó de Desvio - (PP) Preparar ato judicial de decisão genérica" name="Nó de Desvio - (PP) Preparar ato judicial de decisão genérica">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(HTE) Concluso para despacho - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="(HTE) Gravar variável de cancelamento de conclusão" name="Alterar escolha do tipo de conclusão"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar escolha do tipo de conclusão')}"/>
         </event>
@@ -70,11 +70,11 @@ Magistrado  Assessoria               Assessor
         </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
-            <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento', 64)}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(HTE) Concluso para despacho - ASSINAR">
-        <task name="(HTE) Concluso para despacho - ASSINAR" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(PP) Concluso para decisão - ASSINAR">
+        <task name="(PP) Concluso para decisão - ASSINAR" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -90,28 +90,28 @@ Magistrado  Assessoria               Assessor
    Tipo: Frame
 
 2. Variável: movimentacaoLote
-   Label: 
+   Label: Movimentar em lote
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Movimentação em Lote
 
 3. Variável: assinaturaLote
-   Label: 
+   Label: Assinar em lote
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Assinatura em Lote]]></description>
-        <transition to="Nó de Desvio - (HTE) Preparar ato judicial de despacho genérico" name="Nó de Desvio - (HTE) Preparar ato judicial de despacho genérico">
+        <transition to="(PP) Concluso para decisão - MINUTAR" name="Retornar para minuta"/>
+        <transition to="Nó de Desvio - (PP) Preparar ato judicial de decisão genérica" name="Nó de Desvio - (PP) Preparar ato judicial de decisão genérica">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(HTE) Concluso para despacho - MINUTAR" name="Retornar para minuta"/>
-        <transition to="(HTE) Apagar variáveis do fluxo" name="(HTE) Apagar variáveis do fluxo">
+        <transition to="(PP) Apagar variáveis do fluxo" name="(PP) Apagar variáveis do fluxo">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(HTE) Apagar variáveis do fluxo" name="Documento já assinado">
+        <transition to="(PP) Apagar variáveis do fluxo" name="Documento já assinado">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(HTE) Apagar variáveis do fluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(PP) Apagar variáveis do fluxo')}"/>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
@@ -120,24 +120,24 @@ Magistrado  Assessoria               Assessor
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
-    <node name="(HTE) Gravar variável de cancelamento de conclusão">
-        <transition to="(HTE) Apagar variáveis do fluxo" name="(HTE) Apagar variáveis do fluxo"/>
+    <node name="(PP) Gravar variável de cancelamento de conclusão">
+        <transition to="(PP) Apagar variáveis do fluxo" name="(PP) Apagar variáveis do fluxo"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('hte:paj:conclusao_cancelada', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pp:paj:conclusao_cancelada', true)}"/>
         </event>
     </node>
-    <node name="(HTE) Apagar variáveis do fluxo">
+    <node name="(PP) Apagar variáveis do fluxo">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
         </event>
     </node>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (HTE) Preparar ato judicial de despacho genérico">
-        <task name="Nó de Desvio - (HTE) Preparar ato judicial de despacho genérico" swimlane="Nó de Desvio - (HTE) Preparar ato judicial de despacho genérico"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (PP) Preparar ato judicial de decisão genérica">
+        <task name="Nó de Desvio - (PP) Preparar ato judicial de decisão genérica" swimlane="Nó de Desvio - (PP) Preparar ato judicial de decisão genérica"/>
+        <transition to="(PP) Concluso para decisão - MINUTAR" name="(PP) Concluso para decisão - MINUTAR"/>
+        <transition to="(PP) Concluso para decisão - ASSINAR" name="(PP) Concluso para decisão - ASSINAR"/>
         <transition to="Término" name="Término"/>
-        <transition to="(HTE) Concluso para despacho - MINUTAR" name="(HTE) Concluso para despacho - MINUTAR"/>
-        <transition to="(HTE) Concluso para despacho - ASSINAR" name="(HTE) Concluso para despacho - ASSINAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
