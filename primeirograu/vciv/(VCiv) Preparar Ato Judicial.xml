@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Preparar Ato Judicial">
-    <description><![CDATA[Fluxo para controle de elaboração de atos judiciais (decisões, despachos e sentenças)..]]></description>  
+    <description><![CDATA[Fluxo para controle de elaboração de atos judiciais (decisões, despachos e sentenças).....]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Assessor">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,7:5197,5:1338,8:5852,8:5853')}" actor-id="#{actor.id}"/>
@@ -69,6 +69,8 @@
         <transition to="(VCiv) Concluso para decisão de suspensão" name="(VCiv) Concluso para decisão de suspensão"/>
         <transition to="(VCiv) Assinar decisão de suspensão" name="(VCiv) Assinar decisão de suspensão"/>
         <transition to="(VCiv) Certificar Conclusão sem Efeito" name="(VCiv) Certificar Conclusão sem Efeito"/>
+        <transition to="(VCiv) Concluso para despacho inicial - Cumprimento de Sentença" name="(VCiv) Concluso para despacho inicial - Cumprimento de Sentença"/>
+        <transition to="(VCiv) Assinar despacho inicial - Cumprimento de Sentença" name="(VCiv) Assinar despacho inicial - Cumprimento de Sentença"/>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:decisao') ? '(VCiv) Lançar movimento concluso para decisão' : '(VCiv) Junção de atos judiciais'}" name="(VCiv) É decisão?">
         <transition to="(VCiv) Lançar movimento concluso para decisão" name="(VCiv) Lançar movimento concluso para decisão"/>
@@ -173,6 +175,62 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para despacho inicial" name="Retornar para minuta">
+            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <transition to="(VCiv) Junção de despacho" name="(VCiv) Junção de despacho">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Junção de despacho" name="Documento já assinado! Encaminhar para secretaria">
+            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <event type="node-enter">
+            <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção de despacho')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Concluso para despacho inicial - Cumprimento de Sentença">
+        <task name="(VCiv) Concluso para despacho inicial - Cumprimento de Sentença" swimlane="Magistrado">
+            <controller>
+                <variable name="minuta_despacho" mapped-name="textEditCombo:minuta_despacho" access="read,write"/>
+                <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Assinar despacho inicial - Cumprimento de Sentença" name="Encaminhar para assinatura"/>
+        <transition to="(VCiv) Gravar variável conclusão sem efeito despacho" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_despacho'))}"/>
+        </event>
+        <event type="task-start">
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+            <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_despacho', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Assinar despacho inicial - Cumprimento de Sentença">
+        <task name="(VCiv) Assinar despacho inicial - Cumprimento de Sentença" swimlane="Magistrado">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
+                <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Concluso para despacho inicial - Cumprimento de Sentença" name="Retornar para minuta">
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de despacho" name="(VCiv) Junção de despacho">
@@ -333,9 +391,13 @@
         <transition to="(VCiv) É decisão de desbloqueio?" name="(VCiv) É decisão de desbloqueio?"/>
         <transition to="(VCiv) É decisão de suspensão?" name="(VCiv) É decisão de suspensão?"/>
     </fork>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:despacho_inicial') ? '(VCiv) Concluso para despacho inicial' : '(VCiv) Junção de despacho'}" name="(VCiv) É despacho inicial?">
-        <transition to="(VCiv) Concluso para despacho inicial" name="(VCiv) Concluso para despacho inicial"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:despacho_inicial') ? '(VCiv) É cumprimento de sentença?' : '(VCiv) Junção de despacho'}" name="(VCiv) É despacho inicial?">
         <transition to="(VCiv) Junção de despacho" name="(VCiv) Junção de despacho"/>
+        <transition to="(VCiv) É cumprimento de sentença?" name="(VCiv) É cumprimento de sentença?"/>
+    </decision>
+    <decision expression="#{parametroUtil.getParametro('pje:tjrn:classesExecucao').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) ? '(VCiv) Concluso para despacho inicial - Cumprimento de Sentença' : '(VCiv) Concluso para despacho inicial' }" name="(VCiv) É cumprimento de sentença?">
+        <transition to="(VCiv) Concluso para despacho inicial - Cumprimento de Sentença" name="(VCiv) Concluso para despacho inicial - Cumprimento de Sentença"/>
+        <transition to="(VCiv) Concluso para despacho inicial" name="(VCiv) Concluso para despacho inicial"/>
     </decision>
     <fork name="(VCiv) Bifurcação de sentença">
         <transition to="(VCiv) É sentença genérica?" name="(VCiv) É sentença genérica?"/>
