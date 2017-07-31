@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Elaborar Documentos">
-    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros.............]]></description>  
+    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros..............]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:1338,8:5852,8:5853,6:5901')}"/>
@@ -494,38 +494,92 @@
     <process-state name="(VCiv) Deslocar gabinete precatória e rogatoria">
         <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
         <transition to="(VCiv) Assinar Carta Precatória e(ou) Rogatória" name="(VCiv) Assinar Carta Precatória e(ou) Rogatória"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+        </event>
     </process-state>
     <process-state name="(VCiv) Deslocar gabinete alvara">
         <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
         <transition to="(VCiv) Assinar Alvará" name="(VCiv) Assinar Alvará"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+        </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada alvara">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Expedir Alvará" name="(VCiv) Expedir Alvará"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+        </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada precatória e rogatória">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Expedir outros documentos" name="(VCiv) Expedir outros documentos"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+        </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada entrega precatória e rogatória">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Imprimir outros documentos" name="(VCiv) Imprimir outros documentos"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+        </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada entrega alvara">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Entregar Alvará" name="(VCiv) Entregar Alvará"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+        </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada oficio">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Expedir Ofício" name="(VCiv) Expedir Ofício"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+        </event>
     </process-state>
     <process-state name="(VCiv) Deslocar gabinete oficio">
         <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
         <transition to="(VCiv) Assinar Ofício" name="(VCiv) Assinar Ofício"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+        </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada imprimir oficio">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Imprimir Ofício" name="(VCiv) Imprimir Ofício"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+        </event>
     </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

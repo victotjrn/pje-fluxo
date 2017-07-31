@@ -51,6 +51,12 @@
     <process-state name="Deslocar secretaria unificada">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="Processos Redistribuídos de outras varas" name="Processos Redistribuídos de outras varas"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+        </event>
     </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
