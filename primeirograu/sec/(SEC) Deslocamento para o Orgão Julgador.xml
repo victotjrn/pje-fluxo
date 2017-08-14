@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SEC) Deslocamento para o Orgão Julgador">
-    <description><![CDATA[Fluxo destinado ao deslocamento dos processos para o orgão julgador]]></description>  
+    <description><![CDATA[Fluxo destinado ao deslocamento dos processos para o orgão julgador....]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SEC) Deslocamento para o Orgão Julgador">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -9,7 +9,7 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(SEC) Deslocar orgao orgiem" name="(SEC) Deslocar orgao orgiem"/>
+        <transition to="(SEC) Deve executar ?" name="(SEC) Deve executar ?"/>
     </start-state>  
     <!-- NODES -->
     <end-state name="Término"/>
@@ -20,11 +20,13 @@
     <node name="(SEC) Deslocar orgao orgiem">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
-            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiversoTJRN(processInstance.contextInstance.getVariable('processo'))}"/>
+            <action expression="#{entityManager.createNativeQuery('update tb_processo_instance set id_orgao_julgador = null, id_orgao_julgador_cargo = null where id_processo = :idProcesso and id_proc_inst = :idProcessInstance').setParameter('idProcesso', tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).setParameter('idProcessInstance', tramitacaoProcessualService.recuperaVariavel('idProcessInstanceTemp')).executeUpdate()}"/>
         </event>
-    </node>  
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('idProcessInstanceTemp') != null ? '(SEC) Deslocar orgao orgiem': 'Término'}" name="(SEC) Deve executar ?">
+        <transition to="Término" name="Término"/>
+        <transition to="(SEC) Deslocar orgao orgiem" name="(SEC) Deslocar orgao orgiem"/>
+    </decision>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
