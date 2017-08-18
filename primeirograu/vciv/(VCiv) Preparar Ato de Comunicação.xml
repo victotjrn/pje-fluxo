@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Preparar Ato de Comunicação">
-    <description><![CDATA[Fluxo destinado a permitir a realização de atos de comunicação, tais como citações, intimações, etc.....]]></description>  
+    <description><![CDATA[Fluxo destinado a permitir a realização de atos de comunicação, tais como citações, intimações, etc..........]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Preparar Ato de Comunicação">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:1469')}"/>
@@ -958,124 +958,100 @@
         </event>
     </node>
     <end-state name="Término"/>
-    <process-state name="(VCiv) Deslocar OJ origem citacao">
-        <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
+    <node name="(VCiv) Deslocar OJ origem citacao">
         <transition to="(VCiv) Assinar Citação e(ou) intimação pelo magistrado" name="(VCiv) Assinar Citação e(ou) intimação pelo magistrado"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
         </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
-        </event>
-    </process-state>
+    </node>
     <process-state name="(VCiv) Deslocar secretaria unificada citacao">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Preparar citação e(ou) intimação" name="(VCiv) Preparar citação e(ou) intimação"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
-        </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>
-    <process-state name="(VCiv) Deslocar OJ origem mandado">
-        <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
+    <node name="(VCiv) Deslocar OJ origem mandado">
         <transition to="(VCiv) Assinar mandado pelo magistrado" name="(VCiv) Assinar mandado pelo magistrado"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
         </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
-        </event>
-    </process-state>
+    </node>
     <process-state name="(VCiv) Deslocar secretaria unificada mandado">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Expedir Mandado" name="(VCiv) Expedir Mandado"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
-        </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>
-    <process-state name="(VCiv) Deslocar OJ origem carta precatoria">
-        <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
+    <node name="(VCiv) Deslocar OJ origem carta precatoria">
         <transition to="(VCiv) Assinar Carta Precatória" name="(VCiv) Assinar Carta Precatória"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
         </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
-        </event>
-    </process-state>
+    </node>
     <process-state name="(VCiv) Deslocar secretaria unificada carta precatoria">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Expedir Carta Precatória" name="(VCiv) Expedir Carta Precatória"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
-        </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>
-    <process-state name="(VCiv) Deslocar OJ origem carta rogatoria">
-        <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
+    <node name="(VCiv) Deslocar OJ origem carta rogatoria">
         <transition to="(VCiv) Assinar Carta Rogatória" name="(VCiv) Assinar Carta Rogatória"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
         </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
-        </event>
-    </process-state>
+    </node>
     <process-state name="(VCiv) Deslocar secretaria unificada carta rogatoria">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Expedir Carta Precatória" name="(VCiv) Expedir Carta Precatória"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
-        </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada assinatura carta rogatoria">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Encaminhar Carta Rogatória" name="(VCiv) Encaminhar Carta Rogatória"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
-        </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada assinatura carta precatoria">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Encaminhar Carta Precatória" name="(VCiv) Encaminhar Carta Precatória"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
-        </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada assinatura mandado">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Existe alguma Central de Mandados?" name="(VCiv) Existe alguma Central de Mandados?"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
-        </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada assinatura citação">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) É competência de Fazenda?" name="(VCiv) É competência de Fazenda?"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
-        </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>  
     <!-- PROCESS-EVENTS -->
@@ -1091,10 +1067,10 @@
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
+    <event type="before-signal">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="process-start">

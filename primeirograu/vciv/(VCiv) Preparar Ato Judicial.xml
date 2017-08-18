@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Preparar Ato Judicial">
-    <description><![CDATA[Fluxo para controle de elaboração de atos judiciais (decisões, despachos e sentenças)....]]></description>  
+    <description><![CDATA[Fluxo para controle de elaboração de atos judiciais (decisões, despachos e sentenças)............]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Assessor">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,7:5197,5:1338,8:5852,8:5853')}" actor-id="#{actor.id}"/>
@@ -69,7 +69,6 @@
         <transition to="(VCiv) Concluso para decisão de suspensão" name="(VCiv) Concluso para decisão de suspensão"/>
         <transition to="(VCiv) Assinar decisão de suspensão" name="(VCiv) Assinar decisão de suspensão"/>
         <transition to="(VCiv) Certificar Conclusão sem Efeito" name="(VCiv) Certificar Conclusão sem Efeito"/>
-        <transition to="(VCiv) É ato inicial ?" name="(VCiv) É ato inicial ?"/>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:decisao') ? '(VCiv) Lançar movimento concluso para decisão' : '(VCiv) Junção de atos judiciais'}" name="(VCiv) É decisão?">
         <transition to="(VCiv) Lançar movimento concluso para decisão" name="(VCiv) Lançar movimento concluso para decisão"/>
@@ -1021,7 +1020,7 @@
         </event>
     </node>
     <node name="(VCiv) Remover documento temporário decisão_despacho_sentença">
-        <transition to="(VCiv) Lancar deslocar secretaria unificada" name="(VCiv) Lancar deslocar secretaria unificada"/>
+        <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
         <event type="node-enter">
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_despacho')}"/>
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_decisao')}"/>
@@ -1030,7 +1029,7 @@
         </event>
     </node>
     <node name="(VCiv) Remover documento temporário sem efeito">
-        <transition to="(VCiv) Lancar deslocar secretaria unificada" name="(VCiv) Lancar deslocar secretaria unificada"/>
+        <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
         <event type="node-enter">
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_semefeito')}"/>
         </event>
@@ -1039,40 +1038,22 @@
         <transition to="(VCiv) Certificar Conclusão sem Efeito" name="(VCiv) Certificar Conclusão sem Efeito"/>
         <transition to="(VCiv) Remover documento temporário decisão_despacho_sentença" name="(VCiv) Remover documento temporário decisão_despacho_sentença"/>
     </decision>
-    <process-state name="(VCiv) Deslocar OJ origem">
-        <sub-process name="(SEC) Deslocamento para o Orgão Julgador" binding="late"/>
+    <node name="(VCiv) Deslocar OJ origem">
         <transition to="(VCiv) Bifurcação de atos judiciais" name="(VCiv) Bifurcação de atos judiciais"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
-        </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
         </event>
-    </process-state>
+    </node>
     <process-state name="(VCiv) Deslocar secretaria unificada">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
-        </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino\',\'pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
-    </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:decisao_urgencia_inicial') || tramitacaoProcessualService.recuperaVariavel('pje:fbc:despacho_inicial') ? '(VCiv) Bifurcação de atos judiciais' : '(VCiv) Deslocar OJ origem' }" name="(VCiv) É ato inicial ?">
-        <transition to="(VCiv) Bifurcação de atos judiciais" name="(VCiv) Bifurcação de atos judiciais"/>
-        <transition to="(VCiv) Deslocar OJ origem" name="(VCiv) Deslocar OJ origem"/>
-    </decision>
-    <node name="(VCiv) Lancar deslocar secretaria unificada">
-        <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idProcessInstanceTemp',  taskInstanceUtil.getProcessInstance().getId())}"/>
-            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'SEC_UNI', processInstance.contextInstance.variables)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('idProcessInstanceTemp')}"/>
-        </event>
-    </node>  
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
