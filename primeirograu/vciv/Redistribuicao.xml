@@ -3,11 +3,11 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="Redistribuíção">
     <description><![CDATA[....]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - Redistribuíção">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
-    </swimlane>
     <swimlane name="Secretária">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - Redistribuíção">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -25,6 +25,9 @@
         <transition to="Nó de Desvio - Redistribuíção" name="Nó de Desvio - Redistribuíção">
             <condition expression="#{true}"/>
         </transition>
+        <event type="node-enter">
+            <action expression="#{!(parametroUtil.getParametro('pje:tjrn:OJsCiveisMossoro').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat('_')) || parametroUtil.getParametro('pje:tjrn:OJsFamiliaMossoro').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat('_'))) ? entityManager.createNativeQuery('update tb_processo_instance set id_orgao_julgador = null, id_orgao_julgador_cargo = null where id_processo = :idProcesso').setParameter('idProcesso', tramitacaoProcessualService.recuperaVariavel('processo')).executeUpdate() : null}"/>
+        </event>
     </task-node>
     <task-node end-tasks="true" name="Processos Redistribuídos do Cejusc">
         <task name="Processos Redistribuídos do Cejusc" swimlane="Secretária"/>
