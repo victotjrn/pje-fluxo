@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Elaborar Documentos">
-    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros.............]]></description>  
+    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros............]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:1338,8:5852,8:5853,6:5901')}"/>
@@ -116,9 +116,11 @@
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Entregar Alvará')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
         <event type="task-end">
             <action expression="#{preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(73).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
         </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',91)}"/>
@@ -151,7 +153,7 @@
         </transition>
         <transition to="(VCiv) Remover documento temporário ofício" name="Ignorar expedição de ofício"/>
         <transition to="(VCiv) Assinar ofício pelo chefe de secretaria" name="Encaminhar para assinatura do chefe de secretaria"/>
-        <transition to="(VCiv) Assinar ofício pelo magistrado" name="Encaminhar para assinatura do chefe do magistrado"/>
+        <transition to="(VCiv) Assinar ofício pelo magistrado" name="Encaminhar para assinatura do magistrado"/>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
@@ -185,8 +187,12 @@
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir Ofício')}"/>
         </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+        </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',34)}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar ofício pelo chefe de secretaria">
@@ -208,7 +214,7 @@
         <transition to="(VCiv) Imprimir Ofício" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <transition to="(VCiv) Assinar ofício pelo magistrado" name="Encaminhar para assinatura do chefe do magistrado"/>
+        <transition to="(VCiv) Assinar ofício pelo magistrado" name="Encaminhar para assinatura do magistrado"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir Ofício')}"/>
         </event>
@@ -347,6 +353,7 @@
                 <variable name="MinutarEmLote" mapped-name="minutarLote:MinutarEmLote" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[.]]></description>
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
@@ -405,9 +412,15 @@
     <task-node end-tasks="true" name="(VCiv) Imprimir Certidão de Trânsito em Julgado">
         <task name="(VCiv) Imprimir Certidão de Trânsito em Julgado" swimlane="Secretaria">
             <controller>
-                <variable name="Processo_ConsultaProcesso_Detalhe_detalheProcessoVisualizacao" mapped-name="page:Processo_ConsultaProcesso_Detalhe_detalheProcessoVisualizacao" access="read,write"/>
+                <variable name="Processo_ConsultaProcesso_Detalhe_detalheProcessoVisualizacao" mapped-name="textAlert:Processo_ConsultaProcesso_Detalhe_detalheProcessoVisualizacao" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[* Variáveis *
+1. Processo_ConsultaProcesso_Detalhe_detalheProcessoVisualizacao
+   Label: Abrir detalhamento do processo para impressão da certidão
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
         <transition to="(VCiv) Junção em Elaborar Documentos" name="Finalizar tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
@@ -537,6 +550,10 @@
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir outros documentos')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
         </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',94,205)}"/>
@@ -568,6 +585,10 @@
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir outros documentos')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
         </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',172)}"/>
@@ -624,3 +645,4 @@
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
+
