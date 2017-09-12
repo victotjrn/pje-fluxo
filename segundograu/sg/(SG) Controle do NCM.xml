@@ -29,9 +29,9 @@ Núcleo de Conciliação e Mediação  Secretaria Segundo Grau  Chefe de Secretaria]]
     <node name="(SG) Deslocar órgão julgador ao NCM">
         <transition to="(SG) Autos recebidos da secretaria pelo NCM" name="(SG) Autos recebidos da secretaria pelo NCM"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 11)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 43)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 47)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 12)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 44)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 52)}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaVariavel('processo'))}"/>

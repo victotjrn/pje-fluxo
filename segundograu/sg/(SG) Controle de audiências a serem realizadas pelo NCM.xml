@@ -106,7 +106,7 @@ Magistrado                        Gabinete Segundo Grau    Magistrado]]></descri
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:audienciaSelecionada') == null ? tramitacaoProcessualService.gravaVariavel('pje:fluxo:audienciaSelecionada',processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)) : ''}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 43)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 44)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
