@@ -58,9 +58,16 @@ Magistrado  Assessoria               Assessor
             <condition expression="#{true}"/>
         </transition>
         <transition to="(PP) Concluso para sentença - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(PP) Fluxo básico de conhecimento" name="Retornar para o fluxo básico de conhecimento">
+            <condition expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador != 112}"/>
+        </transition>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Retornar para o fluxo básico de conhecimento')}"/>
+        </event>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
             <action expression="#{not empty processoHome.idProcessoDocumento ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
@@ -103,16 +110,25 @@ Magistrado  Assessoria               Assessor
         <transition to="(PP) Apagar variáveis do fluxo" name="Documento já assinado">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
+        <transition to="(PP) Fluxo básico de conhecimento" name="Retornar para o fluxo básico de conhecimento">
+            <condition expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador != 112}"/>
+        </transition>
         <event type="task-create">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(PP) Apagar variáveis do fluxo')}"/>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Retornar para o fluxo básico de conhecimento')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
     </task-node>
+    <process-state name="(PP) Fluxo básico de conhecimento">
+        <sub-process name="(VCiv) Fluxo básico de conhecimento" binding="late"/>
+        <transition to="(PP) Apagar variáveis do fluxo" name="(PP) Apagar variáveis do fluxo"/>
+    </process-state>
     <node name="(PP) Apagar variáveis do fluxo">
         <transition to="Término" name="Término"/>
         <event type="node-enter">

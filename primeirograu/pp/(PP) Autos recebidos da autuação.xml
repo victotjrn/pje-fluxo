@@ -28,7 +28,14 @@ Secretaria  Secretaria               Chefe de Secretaria
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Enviar para o controle de audiências"/>
+        <transition to="(PP) Fluxo básico de conhecimento" name="Retornar para o fluxo básico de conhecimento">
+            <condition expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador != 112}"/>
+        </transition>
     </task-node>
+    <process-state name="(PP) Fluxo básico de conhecimento">
+        <sub-process name="(VCiv) Fluxo básico de conhecimento" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (PP) Autos recebidos da autuação">
         <task name="Nó de Desvio - (PP) Autos recebidos da autuação" swimlane="Nó de Desvio - (PP) Autos recebidos da autuação"/>

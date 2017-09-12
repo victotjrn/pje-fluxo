@@ -57,6 +57,9 @@ Secretaria  Secretaria               Chefe de Secretaria
         <transition to="(PP) Preparação de sentença genérica" name="03 - Enviar concluso para sentença"/>
         <transition to="(PP) Preparação para arquivamento" name="04 - Arquivar o processo"/>
         <transition to="(PP) Controle de audiências" name="01 - Enviar para controle de audiências"/>
+        <transition to="(PP) Fluxo básico de conhecimento" name="05 - Retornar para o fluxo básico de conhecimento">
+            <condition expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador != 112}"/>
+        </transition>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pp:evolucao:cancelada')}"/>
         </event>
@@ -96,6 +99,10 @@ Secretaria  Secretaria               Chefe de Secretaria
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pp:prepara:arquivar')}"/>
         </event>
     </decision>
+    <process-state name="(PP) Fluxo básico de conhecimento">
+        <sub-process name="(VCiv) Fluxo básico de conhecimento" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (PP) Fluxo básico geral">
         <task name="Nó de Desvio - (PP) Fluxo básico geral" swimlane="Nó de Desvio - (PP) Fluxo básico geral"/>
