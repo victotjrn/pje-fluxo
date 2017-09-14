@@ -9,7 +9,7 @@ Descrição: Controle de remessa do processo para admissibilidade de recursos pela
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5687:5483')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">

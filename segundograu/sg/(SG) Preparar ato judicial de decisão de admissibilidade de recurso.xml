@@ -61,7 +61,6 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </transition>
         <transition to="(SG) Concluso para decisão de admissibilidade de recurso - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
         <transition to="(SG) Concluso para decisão de admissibilidade de recurso - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
-        <transition to="(SG) Enviar autos à secretaria" name="(SG) Enviar autos à secretaria"/>
         <transition to="(SG) Gravar variável de cancelamento de conclusão" name="Alterar escolha do tipo de conclusão"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar escolha do tipo de conclusão')}"/>

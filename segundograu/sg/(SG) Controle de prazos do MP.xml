@@ -64,11 +64,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Intimação ou citação ao MP com prazo continua aberto?')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaCiencia', 'true')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaCiencia')}"/>
         </event>
     </task-node>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa = 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.tipoPrazo != 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Intimação ou citação ao MP com prazo em curso - AGUARDAR' : '(SG) Intimação ou citação ao MP com prazo decorrido - ANALISAR'}" name="(SG) Intimação ou citação ao MP com prazo continua aberto?">
@@ -145,11 +147,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Intimação ou citação ao MP sem prazo continua aberto?')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaCiencia', 'true')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaCiencia')}"/>
         </event>
     </task-node>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.pessoaParte.idPessoa = 4266 AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND ppe.tipoPrazo = 'S' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Intimação ou citação ao MP sem prazo - AGUARDAR' : '(SG) Intimação ou citação ao MP sem prazo e fechado - ANALISAR'}" name="(SG) Intimação ou citação ao MP sem prazo continua aberto?">

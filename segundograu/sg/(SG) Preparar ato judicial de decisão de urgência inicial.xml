@@ -190,7 +190,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <transition to="(SG) Concluso para decisão de urgência inicial - MINUTAR" name="(SG) Concluso para decisão de urgência inicial - MINUTAR"/>
         <transition to="Término" name="Término"/>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sg:paj:conclusao_cancelada')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:conclusao_cancelada')}"/>
         </event>
     </decision>
     <end-state name="Término"/>
