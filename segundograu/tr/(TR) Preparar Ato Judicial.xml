@@ -668,8 +668,7 @@
     <node name="(TR) Limpar movimentos temporários">
         <transition to="(TR) Certificar Conclusão sem Efeito" name="(TR) Certificar Conclusão sem Efeito"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('MovimentosLancadosTemporariamente')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('AgrupamentosLancadosTemporariamente')}"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
         </event>
     </node>
     <end-state name="Término">
@@ -693,6 +692,7 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_semefeito')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:paj:idDocAssinado')}"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
         </event>
     </end-state>  
     <!-- PROCESS-EVENTS -->
