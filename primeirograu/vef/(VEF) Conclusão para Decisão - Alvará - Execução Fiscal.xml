@@ -59,7 +59,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
         </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
-            <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento', 63,64,62)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VEF) Concluso para decisão - Alvará - ASSINAR">
@@ -108,7 +108,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VEF) Encaminhar para despachados')}"/>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64,62')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
