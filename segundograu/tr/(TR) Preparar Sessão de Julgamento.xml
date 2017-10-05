@@ -39,9 +39,15 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('tarefaOrigem', '(TR) Elaborar relatório - voto - ementa')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('tarefaDestino', '(TR) Confirmar relatório - voto - ementa')}"/>
         </transition>
-        <transition to="(TR) Registrar cancelamento de decisão colegiada" name="Ignorar e sair da tarefa"/>
+        <transition to="(TR) Registrar cancelamento de decisão colegiada" name="Ignorar e sair da tarefa">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('tr:paj:RecIno_Inicial') != true}"/>
+        </transition>
+        <transition to="(TR) Encaminhar para concluso para despacho inicial" name="Encaminhar para concluso para despacho inicial">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('tr:paj:RecIno_Inicial') == true}"/>
+        </transition>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao',false)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Encaminhar para concluso para despacho inicial')}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('textAlert:avisoVotoRequired')}"/>
@@ -223,6 +229,14 @@
         <transition to="(TR) Confirmar relatório - voto - ementa" name="(TR) Confirmar relatório - voto - ementa"/>
         <transition to="(TR) Julgados em sessão" name="(TR) Despachados pós acórdão"/>
     </task-node>
+    <process-state name="(TR) Encaminhar para concluso para despacho inicial">
+        <sub-process name="(TR) Preparar Ato Judicial" binding="late"/>
+        <transition to="(TR) Documento assinado?" name="(TR) Documento assinado?"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tr:paj:RecIno_Assinado') == true ? 'Término' : '(TR) Elaborar relatório - voto - ementa'}" name="(TR) Documento assinado?">
+        <transition to="(TR) Elaborar relatório - voto - ementa" name="(TR) Elaborar relatório - voto - ementa"/>
+        <transition to="Término" name="Término"/>
+    </decision>
     <end-state name="Término"/>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TR) Fluxo Básico Geral">
-    <description><![CDATA[Fluxo básico geral de entrada dos processos das Câmaras Cíveis e Pleno Cível...]]></description>  
+    <description><![CDATA[Fluxo básico geral de entrada dos processos das Câmaras Cíveis e Pleno Cível.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (TR) Fluxo Básico Geral"/>
     <swimlane name="Secretaria Segundo Grau">
@@ -10,9 +10,19 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria Segundo Grau"/>
-        <transition to="(TR) Tem pedido de urgência?" name="(TR) Tem pedido de urgência?"/>
+        <transition to="(TR) É recurso inominado?" name="(TR) É recurso inominado?"/>
     </start-state>  
     <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial == 460 ? '(TR) Gravar variável de ato inicial dos Recursos inominados' : '(TR) Tem pedido de urgência?'}" name="(TR) É recurso inominado?">
+        <transition to="(TR) Tem pedido de urgência?" name="(TR) Tem pedido de urgência?"/>
+        <transition to="(TR) Gravar variável de ato inicial dos Recursos inominados" name="(TR) Gravar variável de ato inicial dos Recursos inominados"/>
+    </decision>
+    <node name="(TR) Gravar variável de ato inicial dos Recursos inominados">
+        <transition to="(TR) Preparação de relatório, voto e ementa" name="(TR) Preparação de relatório, voto e ementa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tr:paj:RecIno_Inicial', true)}"/>
+        </event>
+    </node>
     <decision expression="#{tramitacaoProcessualService.temUrgencia() ? '(TR) Conclusão para decisão de urgência inicial' : '(TR) Conclusão para despacho inicial'}" name="(TR) Tem pedido de urgência?">
         <transition to="(TR) Conclusão para decisão de urgência inicial" name="(TR) Conclusão para decisão de urgência inicial"/>
         <transition to="(TR) Conclusão para despacho inicial" name="(TR) Conclusão para despacho inicial"/>
@@ -192,7 +202,10 @@
     </process-state>
     <process-state name="(TR) Preparação de relatório, voto e ementa">
         <sub-process name="(TR) Preparar Sessão de Julgamento" binding="late"/>
-        <transition to="(TR) Análise da Secretaria" name="(TR) Análise da Secretaria"/>
+        <transition to="(TR) Encaminhar RecIno para Despachados?" name="(TR) Encaminhar RecIno para Despachados?"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tr:paj:RecIno_Inicial')}"/>
+        </event>
     </process-state>
     <process-state name="(TR) Conclusão para decisão de urgência">
         <sub-process name="(TR) Preparar Ato Judicial" binding="late"/>
@@ -318,6 +331,13 @@
         <transition to="(TR) Análise da Secretaria" name="Cumprir despacho"/>
         <transition to="(TR) Preparar comunicação da decisão inicial" name="Preparar comunicação"/>
     </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tr:paj:RecIno_Assinado') == true ? '(TR) Despachados' : '(TR) Análise da Secretaria'}" name="(TR) Encaminhar RecIno para Despachados?">
+        <transition to="(TR) Despachados" name="(TR) Despachados"/>
+        <transition to="(TR) Análise da Secretaria" name="(TR) Análise da Secretaria"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tr:paj:RecIno_Assinado')}"/>
+        </event>
+    </decision>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (TR) Fluxo Básico Geral">
         <task name="Nó de Desvio - (TR) Fluxo Básico Geral" swimlane="Nó de Desvio - (TR) Fluxo Básico Geral"/>
