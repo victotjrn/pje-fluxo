@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Arquivamento">
-    <description><![CDATA[Fluxo que controla o arquivamento..]]></description>  
+    <description><![CDATA[Fluxo que controla o arquivamento.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Arquivamento">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -27,15 +27,23 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Arquivo provisório - art. 40" name="(VCiv) Arquivo provisório - art. 40"/>
+        <transition to="(VCiv) Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens" name="(VCiv) Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens"/>
+        <transition to="(VCiv) Arquivado - Processos com custas pendentes" name="(VCiv) Arquivado - Processos com custas pendentes"/>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Arquivar">
-        <task name="(VCiv) Arquivar" swimlane="Secretaria"/>
+        <task name="(VCiv) Arquivar" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
         <transition to="Nó de Desvio - (VCiv) Arquivamento" name="Nó de Desvio - (VCiv) Arquivamento">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Lançar movimento de Arquivo Definitivo" name="Arquivar definitivamente"/>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="(VCiv) Definir data de Arquivo provisório" name="Arquivar provisoriamente"/>
+        <transition to="(VCiv) Lançar movimento de Execuções fiscais aguardando a localização do devedor ou de bens" name="Arquivar e aguardar localização do devedor ou de bens"/>
+        <transition to="(VCiv) Lançar movimento de arquivamento de processos com custas pendentes" name="Arquivar por falta de recolhimento das custas processuais"/>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Definir data de Arquivo provisório">
         <task name="(VCiv) Definir data de Arquivo provisório" swimlane="Secretaria">
@@ -60,14 +68,65 @@
         <transition to="(VCiv) Arquivo definitivo" name="(VCiv) Arquivo definitivo"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(246).lancarMovimento()}"/>
+            <action/>
         </event>
     </node>
     <task-node end-tasks="true" name="(VCiv) Arquivo definitivo">
-        <task name="(VCiv) Arquivo definitivo" swimlane="Secretaria"/>
+        <task name="(VCiv) Arquivo definitivo" swimlane="Secretaria">
+            <controller>
+                <variable name="Aviso1" mapped-name="textAlert:Aviso1" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
         <transition to="Nó de Desvio - (VCiv) Arquivamento" name="Nó de Desvio - (VCiv) Arquivamento">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Conclusão para decisão de reativação" name="Enviar concluso para decisão de reativação"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:TipoArquivo', '(VCiv) Arquivo definitivo')}"/>
+        </event>
+    </task-node>
+    <node name="(VCiv) Lançar movimento de Execuções fiscais aguardando a localização do devedor ou de bens">
+        <transition to="(VCiv) Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens" name="(VCiv) Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(50236).lancarMovimento()}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(VCiv) Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens">
+        <task name="(VCiv) Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+                <variable name="Aviso1" mapped-name="textAlert:Aviso1" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="(VCiv) Conclusão para decisão de reativação" name="Enviar concluso para decisão de reativação"/>
+        <transition to="Nó de Desvio - (VCiv) Arquivamento" name="Nó de Desvio - (VCiv) Arquivamento">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:TipoArquivo', '(VCiv) Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens')}"/>
+        </event>
+    </task-node>
+    <node name="(VCiv) Lançar movimento de arquivamento de processos com custas pendentes">
+        <transition to="(VCiv) Arquivado - Processos com custas pendentes" name="(VCiv) Arquivado - Processos com custas pendentes"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(50230).lancarMovimento()}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(VCiv) Arquivado - Processos com custas pendentes">
+        <task name="(VCiv) Arquivado - Processos com custas pendentes" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+                <variable name="Aviso1" mapped-name="textAlert:Aviso1" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="(VCiv) Conclusão para decisão de reativação" name="Enviar concluso para decisão de reativação"/>
+        <transition to="Nó de Desvio - (VCiv) Arquivamento" name="Nó de Desvio - (VCiv) Arquivamento">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:TipoArquivo', '(VCiv) Arquivado - Processos com custas pendentes')}"/>
+        </event>
     </task-node>
     <node name="(VCiv) Lançar movimento de Reativação">
         <transition to="Término" name="Término"/>
@@ -135,13 +194,24 @@
                 <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
             </controller>
         </task>
-        <transition to="(VCiv) Arquivo definitivo" name="Manter arquivado"/>
+        <transition to="(VCiv) Arquivo definitivo" name="Manter arquivado.">
+            <condition expression="#{true}"/>
+        </transition>
         <transition to="(VCiv) Lançar movimento de Reativação" name="Reativar o processo"/>
         <transition to="Nó de Desvio - (VCiv) Arquivamento" name="Nó de Desvio - (VCiv) Arquivamento">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Citar e(ou) intimar sobre reativação" name="Intimar da decisão"/>
+        <transition to="(VCiv) Retornar para qual arquivo?" name="Manter arquivado"/>
     </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:tjrn:TipoArquivo')}" name="(VCiv) Retornar para qual arquivo?">
+        <transition to="(VCiv) Arquivo definitivo" name="(VCiv) Arquivo definitivo"/>
+        <transition to="(VCiv) Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens" name="(VCiv) Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens"/>
+        <transition to="(VCiv) Arquivado - Processos com custas pendentes" name="(VCiv) Arquivado - Processos com custas pendentes"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:tjrn:TipoArquivo')}"/>
+        </event>
+    </decision>
     <process-state name="(VCiv) Citar e(ou) intimar sobre reativação">
         <sub-process name="(VCiv) Preparar Ato de Comunicação" binding="late"/>
         <transition to="(VCiv) Despachados sobre reativação" name="(VCiv) Despachados sobre reativação"/>
