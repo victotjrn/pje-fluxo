@@ -56,6 +56,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="(VCIv) Sentenciados sobre homologação e extinção" name="(VCIv) Sentenciados sobre homologação e extinção"/>
         <transition to="(VCiv) Sentenciados" name="(VCiv) Sentenciados"/>
         <transition to="(VCiv) Sentenciados sobre homologação e extinção" name="(VCiv) Sentenciados sobre homologação e extinção"/>
+        <transition to="(VCiv) Escolher providência inicial - Documentação insuficiente" name="(VCiv) Escolher providência inicial - Documentação insuficiente"/>
     </task-node>
     <decision expression="#{processoTrfHome.isEmPedidoUrgencia() ? '(VCiv) É Emb. Execução Fiscal - urgente?' : '(VCiv) É Emb. Execução Fiscal?'}" name="(VCiv) Tem pedido de urgência?">
         <transition to="(VCiv) É Emb. Execução Fiscal?" name="(VCiv) É Emb. Execução Fiscal?"/>
@@ -455,9 +456,9 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fbc:EhDeOutroFluxo', 'true')}"/>
         </event>
     </process-state>
-    <decision expression="#{((tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia == 3 &amp;&amp; competenciaClasseAssuntoHome.processoContemClasseAssunto('159;156')) || (tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia != 3)) ? '(VCiv) Controlar audiência?' : '(VCiv) Escolher providência inicial'}" name="(VCiv) É competência de juizado especial cível?">
-        <transition to="(VCiv) Escolher providência inicial" name="(VCiv) Escolher providência inicial"/>
+    <decision expression="#{((tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia == 3 &amp;&amp; competenciaClasseAssuntoHome.processoContemClasseAssunto('159;156')) || (tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia != 3)) ? '(VCiv) Controlar audiência?' : '(VCiv) Processo com documentação insuficiente?'}" name="(VCiv) É competência de juizado especial cível?">
         <transition to="(VCiv) Controlar audiência?" name="(VCiv) Controlar audiência?"/>
+        <transition to="(VCiv) Processo com documentação insuficiente?" name="(VCiv) Processo com documentação insuficiente?"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Escolher providência inicial">
         <task name="(VCiv) Escolher providência inicial" swimlane="Secretaria">
@@ -879,7 +880,23 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:vef:sentenca', 'true')}"/>
         </event>
-    </node>  
+    </node>
+    <decision expression="#{(entityManager.createNativeQuery(parametroUtil.getParametro('paj:query_parte_sem_doc')).setParameter(&quot;idProcesso&quot;, tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).getSingleResult() == 1 ? '(VCiv) Escolher providência inicial - Documentação insuficiente' : '(VCiv) Escolher providência inicial')}" name="(VCiv) Processo com documentação insuficiente?">
+        <transition to="(VCiv) Escolher providência inicial - Documentação insuficiente" name="(VCiv) Escolher providência inicial - Documentação insuficiente"/>
+        <transition to="(VCiv) Escolher providência inicial" name="(VCiv) Escolher providência inicial"/>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Escolher providência inicial - Documentação insuficiente">
+        <task name="(VCiv) Escolher providência inicial - Documentação insuficiente" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Fluxo básico de conhecimento" name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Análise da secretaria" name="Encaminhar para análise da secretaria"/>
+        <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
