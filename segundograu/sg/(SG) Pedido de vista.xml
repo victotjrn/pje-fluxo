@@ -8,10 +8,12 @@ Descrição: Fluxo destinado à análise de pedido de vista.
 Raia        Localização              Papel
 Magistrado  Assessoria Segundo Grau  Assessoria
             Assessoria Segundo Grau  Assessor Chefe
-            Gabinete Segundo Grau    Magistrado]]></description>  
+            Gabinete Segundo Grau    Magistrado
+            Assessoria               Assessor
+            Gabinete               Magistrado]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,5:5197,6:1469')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Nó de Desvio - (SG) Pedido de vista">
         <assignment actor-id="#{actor.id}"/>
@@ -32,6 +34,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <task name="(SG) Pedido de vista - ANALISAR" swimlane="Magistrado">
             <controller>
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
