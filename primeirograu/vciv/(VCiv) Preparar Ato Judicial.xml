@@ -1038,7 +1038,7 @@
         <transition to="(VCiv) Certificar Conclusão sem Efeito" name="(VCiv) Certificar Conclusão sem Efeito"/>
         <transition to="(VCiv) Remover documento temporário decisão_despacho_sentença" name="(VCiv) Remover documento temporário decisão_despacho_sentença"/>
     </decision>
-    <decision expression="#{(entityManager.createNativeQuery(parametroUtil.getParametro('paj:query_parte_sem_doc')).setParameter(&quot;idProcesso&quot;, tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).getSingleResult() == 1 ? '(VCiv) Conclusão - Documentação insuficiente' : '(VCiv) Bifurcação de atos judiciais')}" name="(VCiv) Processo com documentação insuficiente?">
+    <decision expression="#{(entityManager.createNativeQuery(parametroUtil.getParametro('paj:query_parte_sem_doc')).setParameter(&quot;idProcesso&quot;, tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).getSingleResult() == 1 &amp;&amp; tramitacaoProcessualService.recuperaVariavel('pje:paj:docinsuficanalisada')== null ? '(VCiv) Conclusão - Documentação insuficiente' : '(VCiv) Bifurcação de atos judiciais')}" name="(VCiv) Processo com documentação insuficiente?">
         <transition to="(VCiv) Bifurcação de atos judiciais" name="(VCiv) Bifurcação de atos judiciais"/>
         <transition to="(VCiv) Conclusão - Documentação insuficiente" name="(VCiv) Conclusão - Documentação insuficiente"/>
     </decision>

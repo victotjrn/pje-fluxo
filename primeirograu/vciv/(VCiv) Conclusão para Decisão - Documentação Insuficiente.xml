@@ -18,7 +18,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões sobre pro
     </start-state>  
     <!-- NODES -->
     <node name="(VCiv) Lançar movimento decisão ">
-        <transition to="(VCiv) Concluso para decisão - Documentação insuficiente - MINUTAR" name="(VCiv) Concluso para decisão - Documentação insuficiente - MINUTAR"/>
+        <transition to="(VCiv) É urgência ?" name="(VCiv) É urgência ?"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
         </event>
@@ -105,14 +105,14 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões sobre pro
         <transition to="Nó de Desvio - (VCiv) Conclusão para Decisão - Documentação Insuficiente" name="Nó de Desvio - (VCiv) Conclusão para Decisão - Documentação Insuficiente">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Término">
+        <transition to="(VCiv) Sinalizar análise de documentação insuficiente" name="(VCiv) Sinalizar análise de documentação insuficiente">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Documento já assinado! Prosseguir">
+        <transition to="(VCiv) Sinalizar análise de documentação insuficiente" name="Documento já assinado! Finalizar e prosseguir">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Término')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Sinalizar análise de documentação insuficiente')}"/>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
         </event>
@@ -128,6 +128,9 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões sobre pro
         <transition to="(VCiv) Concluso para decisão - Documentação insuficiente - ASSINAR" name="(VCiv) Concluso para decisão - Documentação insuficiente - ASSINAR"/>
         <transition to="Término" name="Término"/>
         <transition to="(VCiv) Certificar Conclusão sem Efeito - Documentação insuficiente" name="(VCiv) Certificar Conclusão sem Efeito - Documentação insuficiente"/>
+        <transition to="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - MINUTAR" name="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - MINUTAR"/>
+        <transition to="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - ASSINAR" name="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - ASSINAR"/>
+        <transition to="(VCiv) Certificar Conclusão sem Efeito - Urgência - Documentação insuficiente" name="(VCiv) Certificar Conclusão sem Efeito - Urgência - Documentação insuficiente"/>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Certificar Conclusão sem Efeito - Documentação insuficiente">
         <task name="(VCiv) Certificar Conclusão sem Efeito - Documentação insuficiente" swimlane="Assessor">
@@ -158,7 +161,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões sobre pro
         <transition to="(VCiv) Remover documento temporário decisão_despacho_sentença" name="(VCiv) Remover documento temporário decisão_despacho_sentença"/>
     </decision>
     <node name="(VCiv) Remover documento temporário decisão_despacho_sentença">
-        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Sinalizar análise de documentação insuficiente" name="(VCiv) Sinalizar análise de documentação insuficiente"/>
         <event type="node-enter">
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_despacho')}"/>
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_decisao')}"/>
@@ -166,7 +169,139 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões sobre pro
             <action expression="#{preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(100001).lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:certidaosemefeito', true)}"/>
         </event>
-    </node>  
+    </node>
+    <node name="(VCiv) Sinalizar análise de documentação insuficiente">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:docinsuficanalisada', true)}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - MINUTAR">
+        <task name="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - MINUTAR" swimlane="Assessor">
+            <controller>
+                <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
+                <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: minuta_ato_judicial
+   Label: Minuta em elaboração
+   Escrita: Sim
+   Obrig. Sim
+   Tipo: Editor
+
+2. Variável: minutarLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Minutar em Lote
+
+*Eventos de Tarefa*
+
+1. Tipo do evento: Sair Tarefa
+   Agrupamento eventos: Magistrado
+   Condição para lançamento temporário: #{true}]]></description>
+        <transition to="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="Nó de Desvio - (VCiv) Conclusão para Decisão - Documentação Insuficiente" name="Nó de Desvio - (VCiv) Conclusão para Decisão - Documentação Insuficiente">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Certificar Conclusão sem Efeito - Urgência - Documentação insuficiente" name="Emitir certidão de conclusão sem efeito"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Emitir certidão de conclusão sem efeito')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+        </event>
+        <event type="task-start">
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - ASSINAR">
+        <task name="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - ASSINAR" swimlane="Assessor">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Movimentação em Lote
+
+3. Variável: assinaturaLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Assinatura em Lote
+
+4. Variável: confirmarMovimentacao
+   Label: Confirma Movimentação
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Homologador de Movimentos Temporários]]></description>
+        <transition to="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - MINUTAR" name="Retornar para minuta"/>
+        <transition to="Nó de Desvio - (VCiv) Conclusão para Decisão - Documentação Insuficiente" name="Nó de Desvio - (VCiv) Conclusão para Decisão - Documentação Insuficiente">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Sinalizar análise de documentação insuficiente" name="(VCiv) Sinalizar análise de documentação insuficiente">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Sinalizar análise de documentação insuficiente" name="Documento já assinado! Finalizar e prosseguir">
+            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Sinalizar análise de documentação insuficiente')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Certificar Conclusão sem Efeito - Urgência - Documentação insuficiente">
+        <task name="(VCiv) Certificar Conclusão sem Efeito - Urgência - Documentação insuficiente" swimlane="Assessor">
+            <controller>
+                <variable name="minuta_semefeito" mapped-name="textEditSignature:minuta_semefeito" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="(VCiv) Tem documento assinado?" name="(VCiv) Tem documento assinado?">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (VCiv) Conclusão para Decisão - Documentação Insuficiente" name="Nó de Desvio - (VCiv) Conclusão para Decisão - Documentação Insuficiente">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - MINUTAR" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Tem documento assinado?')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:idDocAssinado', processoHome.isDocumentoAssinado(processoHome.idProcessoDocumento))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:paj:jaexisteconcluso',true)}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{processoTrfHome.isEmPedidoUrgencia() ? '(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - MINUTAR' : '(VCiv) Concluso para decisão - Documentação insuficiente - MINUTAR'}" name="(VCiv) É urgência ?">
+        <transition to="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - MINUTAR" name="(VCiv) Concluso para decisão - Urgência - Documentação insuficiente - MINUTAR"/>
+        <transition to="(VCiv) Concluso para decisão - Documentação insuficiente - MINUTAR" name="(VCiv) Concluso para decisão - Documentação insuficiente - MINUTAR"/>
+    </decision>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
