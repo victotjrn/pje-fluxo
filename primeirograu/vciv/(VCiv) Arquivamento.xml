@@ -204,7 +204,7 @@
         <transition to="(VCiv) Citar e(ou) intimar sobre reativação" name="Intimar da decisão"/>
         <transition to="(VCiv) Retornar para qual arquivo?" name="Manter arquivado"/>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:tjrn:TipoArquivo')}" name="(VCiv) Retornar para qual arquivo?">
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('sg:tjrn:TipoArquivo') ? tramitacaoProcessualService.recuperaVariavel('sg:tjrn:TipoArquivo') : '(VCiv) Arquivo definitivo'}" name="(VCiv) Retornar para qual arquivo?">
         <transition to="(VCiv) Arquivo definitivo" name="(VCiv) Arquivo definitivo"/>
         <transition to="(VCiv) Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens" name="(VCiv) Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens"/>
         <transition to="(VCiv) Arquivado - Processos com custas pendentes" name="(VCiv) Arquivado - Processos com custas pendentes"/>
