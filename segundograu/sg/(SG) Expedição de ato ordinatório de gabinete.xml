@@ -20,25 +20,13 @@ Assessoria  Gabinete Segundo Grau    Magistrado]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Assessoria"/>
-        <transition to="(SG) Existe minuta?" name="(SG) Existe minuta?"/>
+        <transition to="(SG) Ato ordinatório do gabinete - EXPEDIR" name="(SG) Ato ordinatório do gabinete - EXPEDIR"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') &amp;&amp; not processoHome.isDocumentoAssinado(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')) ? '(SG) Corrigir tipo documento' : '(SG) Ato ordinatório do gabinete - EXPEDIR' }" name="(SG) Existe minuta?">
-        <transition to="(SG) Corrigir tipo documento" name="(SG) Corrigir tipo documento"/>
-        <transition to="(SG) Ato ordinatório do gabinete - EXPEDIR" name="(SG) Ato ordinatório do gabinete - EXPEDIR"/>
-    </decision>
-    <node name="(SG) Corrigir tipo documento">
-        <transition to="(SG) Ato ordinatório do gabinete - EXPEDIR" name="(SG) Ato ordinatório do gabinete - EXPEDIR"/>
-        <event type="node-enter">
-            <action expression="#{processoDocumentoHome.setInstance(processoDocumentoManager.findById(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')))}"/>
-            <action expression="#{processoDocumentoHome.instance.setTipoProcessoDocumento(tipoProcessoDocumentoManager.findById((67).intValue()))}"/>
-            <action expression="#{processoDocumentoHome.update()}"/>
-        </event>
-    </node>
     <task-node end-tasks="true" name="(SG) Ato ordinatório do gabinete - EXPEDIR">
         <task name="(SG) Ato ordinatório do gabinete - EXPEDIR" swimlane="Assessoria">
             <controller>
-                <variable name="minuta_ato_judicial" mapped-name="textEditSignature:minuta_ato_judicial" access="read,write"/>
+                <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
                 <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
@@ -74,9 +62,6 @@ Assessoria  Gabinete Segundo Grau    Magistrado]]></description>
         </transition>
         <transition to="(SG) Remover ato ordinatório não assinado e sinalizar cancelamento" name="Cancelar elaboração de ato ordinatório"/>
         <transition to="(SG) Ato ordinatório do gabinete - ASSINAR" name="Encaminhar para assinatura"/>
-        <transition to="(SG) Documento assinado?" name="(SG) Lançar movimento de juntada de ato ordinatório">
-            <condition expression="#{true}"/>
-        </transition>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','67')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar elaboração de ato ordinatório')}"/>
@@ -121,35 +106,26 @@ Assessoria  Gabinete Segundo Grau    Magistrado]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Ato ordinatório do gabinete - EXPEDIR" name="Retornar para elaboração da minuta"/>
-        <transition to="(SG) Documento assinado?" name="(SG) Lançar movimento de juntada de ato ordinatório">
+        <transition to="(SG) Lançar movimento de juntada de ato ordinatório" name="(SG) Lançar movimento de juntada de ato ordinatório">
             <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Lançar movimento de juntada de ato ordinatório" name="Documento já assinado! Encaminhar para secretaria">
+            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Lançar movimento de juntada de ato ordinatório')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','67')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Encaminhar para secretaria')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
         </event>
     </task-node>
-    <decision expression="#{processoHome.isDocumentoAssinado(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')) ? '(SG) Corrigir nome documento' : '(SG) Ato ordinatório do gabinete - ASSINAR'}" name="(SG) Documento assinado?">
-        <transition to="(SG) Ato ordinatório do gabinete - ASSINAR" name="(SG) Ato ordinatório do gabinete - ASSINAR"/>
-        <transition to="(SG) Corrigir nome documento" name="(SG) Corrigir nome documento"/>
-    </decision>
-    <node name="(SG) Corrigir nome documento">
-        <transition to="(SG) Lançar movimento de juntada de ato ordinatório" name="(SG) Lançar movimento de juntada de ato ordinatório"/>
-        <event type="node-enter">
-            <action expression="#{processoDocumentoHome.setInstance(processoDocumentoManager.findById(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')))}"/>
-            <action expression="#{processoDocumentoHome.instance.setProcessoDocumento(processoDocumentoHome.instance.tipoProcessoDocumento.tipoProcessoDocumento)}"/>
-            <action expression="#{processoDocumentoHome.instance.setDataJuntada(dateUtil.stringToDate(dateUtil.getDataAtual('dd/MM/yyyy HH:mm'), 'dd/MM/yyyy HH:mm'))}"/>
-            <action expression="#{processoDocumentoHome.update()}"/>
-        </event>
-    </node>
     <node name="(SG) Lançar movimento de juntada de ato ordinatório">
         <transition to="(SG) Enviar autos à secretaria" name="(SG) Enviar autos à secretaria"/>
         <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(11383).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao'))).associarAoProcesso(tramitacaoProcessualService.recuperaProcesso()).lancarMovimento()}"/>
+            <action expression="#{preencherMovimento.deCodigo(11383).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).associarAoProcesso(tramitacaoProcessualService.recuperaProcesso()).lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:eaog:assinou_ato_ordinatorio', true)}"/>
         </event>
         <event type="node-leave">
@@ -232,5 +208,6 @@ Assessoria  Gabinete Segundo Grau    Magistrado]]></description>
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>
