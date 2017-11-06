@@ -238,11 +238,12 @@
         <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Processos devolvidos pela instância superior" name="(VCiv) Processos devolvidos pela instância superior">
-            <condition expression="#{true}"/>
+        <transition to="(VCiv) Processos devolvidos pela instância superior" name="Enviar para processos devolvidos pela instância superior">
+            <condition expression="#{ parametroUtil.getParametro('pje:tjrn:processosMovimentacaoManualAguardaRemessa').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().processo.numeroProcesso).concat('_')) }"/>
         </transition>
+        <transition to="(VCiv) Processos devolvidos pela instância superior" name="(VCiv) Processos devolvidos pela instância superior"/>
         <event type="node-enter">
-            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('instância superior').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(motivoRemessa.codigoGlossario).lancarMovimento()}"/>
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Turma Recursal').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(motivoRemessa.codigoGlossario).lancarMovimento()}"/>
         </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Processos devolvidos pela instância superior')}"/>
