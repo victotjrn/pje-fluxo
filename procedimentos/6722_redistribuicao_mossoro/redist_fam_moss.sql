@@ -143,3 +143,9 @@ END;
 $$
 LANGUAGE 'plpgsql';
 commit; 
+
+
+begin;
+select REDIST_FAM_MOSS(90);
+select REDIST_FAM_MOSS(92);
+commit;
