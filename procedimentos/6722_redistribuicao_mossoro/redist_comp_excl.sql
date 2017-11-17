@@ -22,7 +22,7 @@ BEGIN
     select ds_cargo into nomeOJCargoDestino from tb_orgao_julgador_cargo where id_orgao_julgador_cargo = $3;
 
     IF idOrgaoJulgadorOrigem is NULL THEN
-        RAISE EXCEPTION 'Processo de id % não existe ou não está distribuído!', $1;
+        --RAISE EXCEPTION 'Processo de id % não existe ou não está distribuído!', $1;
         RETURN NULL;
     END IF;
 
