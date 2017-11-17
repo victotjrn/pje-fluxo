@@ -631,12 +631,12 @@
             <action expression="#{preencherMovimento.deCodigo(979).lancarMovimento()}"/>
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', 'false')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_cojud', 'true')}"/>
-            <action expression="&lt;action expression=&quot;#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Devolver para a secretaria')}&quot;/&gt;"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Devolver para a secretaria')}"/>
             <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'COJUD_FBG', processInstance.contextInstance.variables)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{preencherMovimento.deCodigo(980).comComplementoDeCodigo(7).preencherComTexto('juízo de orgem').lancarMovimento()}"/>
-            <action expression="&lt;action expression=&quot;#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}&quot;/&gt;"/>
+            <action expression="#{preencherMovimento.deCodigo(980).comComplementoDeCodigo(7).preencherComTexto('juízo de origem').lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Processos devolvidos pela central de cálculos">
