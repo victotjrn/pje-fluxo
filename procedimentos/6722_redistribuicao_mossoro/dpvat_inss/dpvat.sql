@@ -33,7 +33,7 @@ BEGIN
         RAISE NOTICE 'Processo ID: % ', result.idProcesso;                
         RAISE NOTICE 'Número: % ', result.processo;               
                 
-        PERFORM REDIST_PROC_COMP_EXCL(result.idProcesso,idOj_6VCIVMOSS,idOjCargo_6VCIVMOSS,false);                 
+        PERFORM REDIST_PROC_COMP_EXCL_DP(result.idProcesso,idOj_6VCIVMOSS,idOjCargo_6VCIVMOSS,false);                 
         
         RAISE NOTICE '---------------------------------------------------------------------------';
     END LOOP;   
