@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Sorteio pendente de assunto principal">
+    <description><![CDATA[Código do fluxo: TUJ_SOR_PEN_ASS.......
+
+Descrição: Fluxo destinado ao recebimento dos processos que não foram sorteados por não ter assunto principal.
+
+Raia        Localização     Papel
+Secretaria  Secretaria TUJ  Chefe de secretaria]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (TUJ) Sorteio pendente de assunto principal">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(TUJ) Sorteio pendente de assunto principal - ANALISAR" name="(TUJ) Sorteio pendente de assunto principal - ANALISAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(TUJ) Sorteio pendente de assunto principal - ANALISAR">
+        <task name="(TUJ) Sorteio pendente de assunto principal - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="Processo_RetificacaoAutuacao_updateRetificacaoAutuacao" mapped-name="page:Processo_RetificacaoAutuacao_updateRetificacaoAutuacao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis**
+
+1. Variável: aviso
+   Label: Processo não pôde ser sorteado por não existir assunto principal. Clique em retificar autuação para informá-lo.
+  Escrita: Sim
+  Obrig.: Não
+  Tipo: Aviso
+
+2. Variável: Processo_RetificacaoAutuacao_updateRetificacaoAutuacao
+   Label: Retificar autuação do processo
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Página]]></description>
+        <transition to="(TUJ) Sortear para um dos relatores " name="Sortear para um dos relatores "/>
+        <transition to="(TUJ) Cancelar e sair da tarefa" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (TUJ) Sorteio pendente de assunto principal" name="Nó de Desvio - (TUJ) Sorteio pendente de assunto principal">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <node name="(TUJ) Sortear para um dos relatores ">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:sor_pen_ass:transicaoSaida', 'Sortear para um dos relatores')}"/>
+        </event>
+    </node>
+    <node name="(TUJ) Cancelar e sair da tarefa">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:sor_pen_ass:transicaoSaida', 'Cancelar e sair da tarefa')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Sorteio pendente de assunto principal">
+        <task name="Nó de Desvio - (TUJ) Sorteio pendente de assunto principal" swimlane="Nó de Desvio - (TUJ) Sorteio pendente de assunto principal"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(TUJ) Sorteio pendente de assunto principal - ANALISAR" name="(TUJ) Sorteio pendente de assunto principal - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Controle de prazos de correios">
+    <description><![CDATA[Código do fluxo: TUJ_CONTPRAZOS_CORREIOS
+
+Descrição: Fluxo destinado ao controle de prazos de intimações feitas via Correios.
+
+Raia        Localização     Papel
+Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (TUJ) Controle de prazos de correios">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(TUJ) Existe processo na tarefa de devolução de AR?" name="(TUJ) Existe processo na tarefa de devolução de AR?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaExisteProcessoTarefaAguardarAR')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? 'Término' : '(TUJ) Intimação pendente de AR - AGUARDAR'}" name="(TUJ) Existe processo na tarefa de devolução de AR?">
+        <transition to="(TUJ) Intimação pendente de AR - AGUARDAR " name="(TUJ) Intimação pendente de AR - AGUARDAR "/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <task-node end-tasks="true" name="(TUJ) Intimação pendente de AR - AGUARDAR ">
+        <task name="(TUJ) Intimação pendente de AR - AGUARDAR " swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_controleCorreios" mapped-name="frame:WEB-INF_xhtml_flx_exped_controleCorreios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: WEB-INF_xhtml_flx_exped_controleCorreios
+   Label: Inserir informação de AR
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="(TUJ) Intimação pendente de AR - REGISTRAR " name="Registrar devolução do AR"/>
+        <transition to="Término" name="Ignorar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (TUJ) Controle de prazos de correios" name="Nó de Desvio - (TUJ) Controle de prazos de correios">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:registroCiencia', false)}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(TUJ) Intimação pendente de AR - REGISTRAR ">
+        <task name="(TUJ) Intimação pendente de AR - REGISTRAR " swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_controleCorreios" mapped-name="frame:WEB-INF_xhtml_flx_exped_controleCorreios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: WEB-INF_xhtml_flx_exped_controleCorreios
+   Label: Verificar cumprimento de AR
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (TUJ) Controle de prazos de correios" name="Nó de Desvio - (TUJ) Controle de prazos de correios">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(TUJ) Intimação pendente de AR - AGUARDAR " name="Retornar para aguardar devolução do AR"/>
+        <transition to="(TUJ) Existe processo na tarefa de aguardar?" name="Finalizar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:edicaoNumeroAR',false)}"/>
+        </event>
+    </task-node>
+    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaExisteProcessoTarefaAguardar')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? 'Término' : '(TUJ) Intimação com prazo em curso - AGUARDAR'}" name="(TUJ) Existe processo na tarefa de aguardar?">
+        <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <task-node end-tasks="true" name="(TUJ) Intimação com prazo em curso - AGUARDAR">
+        <task name="(TUJ) Intimação com prazo em curso - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (TUJ) Controle de prazos de correios" name="Nó de Desvio - (TUJ) Controle de prazos de correios">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(TUJ) Prazos de intimações continuam em aberto?" name="(TUJ) Prazos de intimações continuam em aberto?">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(TUJ) Prazos de intimações continuam em aberto?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaCiencia', 'true')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaCiencia')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaIntimacaoPrazoAberto')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).setParameter(&quot;meioComunicacao&quot;, 'C').getSingleResult() &gt; 0 ? '(TUJ) Intimação com prazo em curso - AGUARDAR' : '(TUJ) Intimação com prazo decorrido - ANALISAR'}" name="(TUJ) Prazos de intimações continuam em aberto?">
+        <transition to="(TUJ) Intimação com prazo decorrido - ANALISAR" name="(TUJ) Intimação com prazo decorrido - ANALISAR"/>
+        <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(TUJ) Intimação com prazo decorrido - ANALISAR">
+        <task name="(TUJ) Intimação com prazo decorrido - ANALISAR" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (TUJ) Controle de prazos de correios" name="Nó de Desvio - (TUJ) Controle de prazos de correios">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Controle de prazos de correios">
+        <task name="Nó de Desvio - (TUJ) Controle de prazos de correios" swimlane="Nó de Desvio - (TUJ) Controle de prazos de correios"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
+        <transition to="(TUJ) Intimação com prazo decorrido - ANALISAR" name="(TUJ) Intimação com prazo decorrido - ANALISAR"/>
+        <transition to="(TUJ) Intimação pendente de AR - REGISTRAR " name="(TUJ) Intimação pendente de AR - REGISTRAR "/>
+        <transition to="(TUJ) Intimação pendente de AR - AGUARDAR " name="(TUJ) Intimação pendente de AR - AGUARDAR "/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

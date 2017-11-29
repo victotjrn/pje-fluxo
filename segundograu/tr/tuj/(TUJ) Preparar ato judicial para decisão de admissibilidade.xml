@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Preparar ato judicial para decisão de admissibilidade">
+    <description><![CDATA[Código do fluxo: TUJ_PAJ_DEC_ADM
+
+Descrição: Fluxo destinado ao preparo de atos judiciais de decisões de admissibilidade.
+
+Raia        Localização     Papel
+Assessoria  Gabinete TUJ    Magistrado
+Assessoria  Assessoria TUJ  Assessor
+Magistrado  Gabinete TUJ    Magistrado
+Magistrado  Assessoria TUJ  Assessor]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (TUJ) Preparar ato judicial para decisão de admissibilidade">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Assessoria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7281:1469,7280:5197')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Magistrado">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7281:1469,7280:5197')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Assessoria"/>
+        <transition to="(TUJ) Concluso para decisão de admissibilidade - MINUTAR" name="(TUJ) Concluso para decisão de admissibilidade - MINUTAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(TUJ) Concluso para decisão de admissibilidade - MINUTAR">
+        <task name="(TUJ) Concluso para decisão de admissibilidade - MINUTAR" swimlane="Assessoria">
+            <controller>
+                <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
+                <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: minuta_ato_judicial
+   Label: Minuta em elaboração de ato judicial
+   Escrita: Sim
+   Obrig. Sim
+   Tipo: Editor
+
+2. Variável: minutarLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Minutar em Lote
+
+*Eventos de tarefa*
+
+1. Tipo do evento: Sair da tarefa
+   Agrupamento eventos: Magistrado
+   Condição para lançamento temporário: #{true}]]></description>
+        <transition to="Nó de Desvio - (TUJ) Preparar ato judicial para decisão de admissibilidade" name="Nó de Desvio - (TUJ) Preparar ato judicial para decisão de admissibilidade">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(TUJ) Concluso para decisão de admissibilidade - ASSINAR" name="Encaminhar para assinatura"/>
+        <event type="task-end">
+            <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(TUJ) Concluso para decisão de admissibilidade - ASSINAR">
+        <task name="(TUJ) Concluso para decisão de admissibilidade - ASSINAR" swimlane="Magistrado">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Movimentação em Lote
+
+3. Variável: assinaturaLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="(TUJ) Concluso para decisão de admissibilidade - MINUTAR" name="Retornar para minuta"/>
+        <transition to="Nó de Desvio - (TUJ) Preparar ato judicial para decisão de admissibilidade" name="Nó de Desvio - (TUJ) Preparar ato judicial para decisão de admissibilidade">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(TUJ) Enviar autos à secretaria" name="Documento já assinado! Encaminhar para secretaria">
+            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <transition to="(TUJ) Enviar autos à secretaria" name="(TUJ) Enviar autos à secretaria">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(TUJ) Enviar autos à secretaria')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <process-state name="(TUJ) Enviar autos à secretaria">
+        <sub-process name="(TUJ) Autos recebidos da presidência" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Preparar ato judicial para decisão de admissibilidade">
+        <task name="Nó de Desvio - (TUJ) Preparar ato judicial para decisão de admissibilidade" swimlane="Nó de Desvio - (TUJ) Preparar ato judicial para decisão de admissibilidade"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(TUJ) Concluso para decisão de admissibilidade - MINUTAR" name="(TUJ) Concluso para decisão de admissibilidade - MINUTAR"/>
+        <transition to="(TUJ) Concluso para decisão de admissibilidade - ASSINAR" name="(TUJ) Concluso para decisão de admissibilidade - ASSINAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>
