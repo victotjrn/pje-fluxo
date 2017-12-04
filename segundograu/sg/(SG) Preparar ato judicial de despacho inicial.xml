@@ -63,8 +63,9 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <transition to="(SG) Concluso para despacho inicial - CONFIRMAR" name="Encaminhar para confirmação da minuta"/>
         <transition to="(SG) Conclusão para decisão de urgência inicial" name="Alterar para decisão de urgência inicial"/>
         <transition to="(SG) Expedir ato ordinatório" name="Prosseguir através de ato ordinatório"/>
+        <transition to="(SG) Encaminhar para preparação do voto, relatório e ementa" name="Encaminhar para preparação do voto, relatório e ementa"/>
         <event type="task-create">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Prosseguir através de ato ordinatório,Alterar para decisão de urgência inicial')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Prosseguir através de ato ordinatório,Alterar para decisão de urgência inicial,Encaminhar para preparação do voto, relatório e ementa')}"/>
         </event>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
@@ -184,6 +185,10 @@ Magistrado  Assessoria Segundo Grau  Assessoria
     <process-state name="(SG) Expedir ato ordinatório">
         <sub-process name="(SG) Expedição de ato ordinatório de gabinete" binding="late"/>
         <transition to="(SG) Ato ordinatório cancelado?" name="(SG) Ato ordinatório cancelado?"/>
+    </process-state>
+    <process-state name="(SG) Encaminhar para preparação do voto, relatório e ementa">
+        <sub-process name="(SG) Decisão colegiada como relator" binding="late"/>
+        <transition to="Término" name="Término"/>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:conclusao_cancelada') == true ? '(SG) Concluso para despacho inicial - MINUTAR' : 'Término'}" name="(SG) Ato ordinatório cancelado?">
         <transition to="(SG) Concluso para despacho inicial - MINUTAR" name="(SG) Concluso para despacho inicial - MINUTAR"/>
