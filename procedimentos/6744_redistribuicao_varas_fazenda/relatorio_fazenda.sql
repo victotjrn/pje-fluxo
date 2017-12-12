@@ -1,4 +1,3 @@
-
 select * from (
 SELECT
    p.id_processo AS idProcesso, 
