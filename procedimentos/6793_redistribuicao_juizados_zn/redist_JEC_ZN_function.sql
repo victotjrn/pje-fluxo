@@ -1,6 +1,6 @@
--- Função para redistribuição nas varas da fazenda
+-- Função para redistribuição nos juizados da zona norte
 begin;
-CREATE OR REPLACE FUNCTION REDIST_VAF(idOrgaoJulgadorRedist integer)  RETURNS integer AS $$
+CREATE OR REPLACE FUNCTION REDIST_JEC_ZN(idOrgaoJulgadorRedist integer)  RETURNS integer AS $$
 DECLARE
     /* OJ's que receberão distribuição dos processos.    
 
@@ -8,25 +8,27 @@ DECLARE
 	join tb_orgao_julgador_cargo oc using(id_orgao_julgador)
 	where ds_orgao_julgador ilike '%juiz%faz%natal' and oc.in_recebe_distribuicao = true
 
-		id_orgao_julgador  id_orgao_julgador_cargo  ds_orgao_julgador                                   
+		id_oj  	id_oj_cargo  ds_orgao_julgador                                   
 		------------------------------------------------------------------------------------------------
-		57                 129                      1ª Vara da Fazenda Pública da Comarca de Natal      
-		42                 82                       2ª Vara da Fazenda Pública da Comarca de Natal      
-		54                 119                      3ª Vara da Fazenda Pública da Comarca de Natal      
-		47                 101                      4ª Vara da Fazenda Pública da Comarca de Natal      
-		49                 107                      5ª Vara da Fazenda Pública da Comarca de Natal
-		130				   301						6ª Vara da Fazenda Pública da Comarca de Natal
+		131		302	    	14º Juizado Especial Cível Central da Comarca de Natal
+		132		303			15º Juizado Especial Cível Central da Comarca de Natal
+		133		304			16º Juizado Especial Cível Central da Comarca de Natal
+
+
     */
 
     -- ID's dos OJ envolvidos na redistriuição
-    idOj_1VAFAP CONSTANT integer := 57;
-    idOj_2VAFAP CONSTANT integer := 42;
-    idOj_3VAFAP CONSTANT integer := 54;
-    idOj_4VAFAP CONSTANT integer := 47;
-    idOj_5VAFAP CONSTANT integer := 49;    
+    idOj_1JECZN CONSTANT integer := 4;
+    idOj_2JECZN CONSTANT integer := 5;
+    idOj_3JECZN CONSTANT integer := 6;
+    
     -- OJ NOVO
-    idOj_6VAFAP CONSTANT integer := 130;
-    idOjCargo_6VAFAP CONSTANT integer := 301;       
+    idOj_14JECNAT CONSTANT integer := 131;
+    idOjCargo_14JECNAT CONSTANT integer := 302;       
+    idOj_15JECNAT CONSTANT integer := 132;
+    idOjCargo_15JECNAT CONSTANT integer := 303;       
+    idOj_16JECNAT CONSTANT integer := 133;
+    idOjCargo_16JECNAT CONSTANT integer := 304;       
 
     dsOrgaoJulgadorRedistribuicao varchar;        
     result RECORD;
@@ -48,83 +50,18 @@ BEGIN
 						p.nr_processo AS processo
 								  FROM tb_processo p
 								  JOIN tb_processo_trf pt ON pt.id_processo_trf = p.id_processo
-								  WHERE pt.id_orgao_julgador = $1 AND pt.cd_processo_status = 'D'
-										  AND p.id_processo NOT IN
-											(
-							      SELECT
-							      pro.id_processo_trf
-							      FROM tb_processo_trf pro
-							      INNER JOIN tb_processo_evento pe ON pe.id_processo = pro.id_processo_trf
-							      INNER JOIN tb_evento e ON e.id_evento = pe.id_evento
-							      LEFT JOIN tb_proc_trf_redistribuicao pr ON pr.id_processo_trf = pe.id_processo
-							      AND
-							      (
-							         pr.dt_redistribuicao >
-							         (
-							            SELECT
-							            coalesce(max(dt_redistribuicao), '1900-01-01'::TIMESTAMP)
-							            FROM tb_proc_trf_redistribuicao pr2
-							            WHERE pr2.id_processo_trf = pe.id_processo
-							            AND pr2.dt_redistribuicao < pe.dt_atualizacao
-							         )
-							         AND pr.dt_redistribuicao <=
-							         (
-							            SELECT
-							            coalesce(min(dt_redistribuicao), '2099-12-31'::TIMESTAMP)
-							            FROM tb_proc_trf_redistribuicao pr3
-							            WHERE pr3.id_processo_trf = pe.id_processo
-							            AND pr3.dt_redistribuicao > pe.dt_atualizacao
-							         )
-							      )
-							      WHERE pro.cd_processo_status = 'D'
-							      AND coalesce
-							      (
-							         pr.id_orgao_julgador_anterior, pro.id_orgao_julgador
-							      )
-							      in($1)
-							      AND e.id_evento IN (270,247)
-							      AND NOT EXISTS
-							      (
-							         SELECT
-							         pe1.id_processo_evento
-							         FROM tb_processo_evento pe1
-							         WHERE pe1.id_processo = pro.id_processo_trf
-							         AND pe1.id_evento = 267
-							         AND pe1.dt_atualizacao > pe.dt_atualizacao
-							      )
-							   )
+								  WHERE pt.id_orgao_julgador = $1 AND pt.cd_processo_status = 'D'										 
 							 LOOP                    
 
         RAISE NOTICE 'Processo ID: % ', result.idProcesso;                
-        RAISE NOTICE 'Número: % ', result.processo;       
-        digitoConsiderado:= cast(SUBSTRING(result.processo,7,1) as integer);
-        RAISE NOTICE 'Dígito a considerar: % ...', digitoConsiderado;		
+        RAISE NOTICE 'Número: % ', result.processo;                       
 		
-		IF $1 = idOj_1VAFAP THEN 
-	        CASE WHEN (digitoConsiderado = 1 or digitoConsiderado = 0) 
-	        	 THEN PERFORM REDIST_PROC_COMP_EXCL(result.idProcesso,idOj_6VAFAP,idOjCargo_6VAFAP,false);
-	             ELSE RAISE NOTICE 'Dígito não se encaixa na regra de distribuição ...';
-	        END CASE;
-	     ELSIF  $1 = idOj_2VAFAP THEN
-	        CASE WHEN (digitoConsiderado = 5 or digitoConsiderado = 6 or digitoConsiderado = 8) 
-	        	 THEN PERFORM REDIST_PROC_COMP_EXCL(result.idProcesso,idOj_6VAFAP,idOjCargo_6VAFAP,false);	             
-	             ELSE RAISE NOTICE 'Dígito não se encaixa na regra de distribuição ...';
-	        END CASE;
-	     ELSIF  $1 = idOj_3VAFAP THEN
-	        CASE WHEN (digitoConsiderado = 1 or digitoConsiderado = 0 or digitoConsiderado = 9) 
-	        	 THEN PERFORM REDIST_PROC_COMP_EXCL(result.idProcesso,idOj_6VAFAP,idOjCargo_6VAFAP,false);
-	             ELSE RAISE NOTICE 'Dígito não se encaixa na regra de distribuição ...';
-	        END CASE;
-	     ELSIF  $1 = idOj_4VAFAP THEN
-	        CASE WHEN (digitoConsiderado = 2 or digitoConsiderado = 4 or digitoConsiderado = 6) 
-	        	 THEN PERFORM REDIST_PROC_COMP_EXCL(result.idProcesso,idOj_6VAFAP,idOjCargo_6VAFAP,false);
-	             ELSE RAISE NOTICE 'Dígito não se encaixa na regra de distribuição ...';
-	        END CASE;
-	     ELSIF  $1 = idOj_5VAFAP THEN
-	        CASE WHEN (digitoConsiderado = 3 or digitoConsiderado = 7) 
-	        	 THEN PERFORM REDIST_PROC_COMP_EXCL(result.idProcesso,idOj_6VAFAP,idOjCargo_6VAFAP,false);
-	             ELSE RAISE NOTICE 'Dígito não se encaixa na regra de distribuição ...';
-	        END CASE;
+		IF $1 = idOj_1JECZN THEN 	        
+			PERFORM REDIST_PROC_COMP_EXCL(result.idProcesso,idOj_14JECNAT,idOjCargo_14JECNAT,false);	        	       
+	     ELSIF  $1 = idOj_2JECZN THEN	        
+			PERFORM REDIST_PROC_COMP_EXCL(result.idProcesso,idOj_15JECNAT,idOjCargo_15JECNAT,false);	             	        	       
+	     ELSIF  $1 = idOj_3JECZN THEN	        
+			PERFORM REDIST_PROC_COMP_EXCL(result.idProcesso,idOj_16JECNAT,idOjCargo_16JECNAT,false);	             	        	    
 	     END IF;
         RAISE NOTICE '---------------------------------------------------------------------------';
     END LOOP;   
@@ -136,9 +73,30 @@ LANGUAGE 'plpgsql';
 commit; 
 
 begin; 
-select REDIST_VAF(57);
-select REDIST_VAF(42);
-select REDIST_VAF(54);
-select REDIST_VAF(47);
-select REDIST_VAF(49);
+select REDIST_JEC_ZN(4);
+select REDIST_JEC_ZN(5);
+select REDIST_JEC_ZN(6);
+commit;
+
+begin;
+	update tb_sala set id_orgao_julgador = 131 where id_orgao_julgador= 4;
+	update tb_sala set id_orgao_julgador = 132 where id_orgao_julgador= 5;
+	update tb_sala set id_orgao_julgador = 133 where id_orgao_julgador= 6;
+commit;
+
+
+begin;
+	update tb_orgao_julgador set ds_orgao_julgador = ds_orgao_julgador || ' (Inativado pela resolução 35/2017)' where id_orgao_julgador in (4,5,6);
+commit;
+
+
+begin;
+	update tb_orgao_julgador_cargo set in_recebe_distribuicao = false where id_orgao_julgador_cargo in (6,8,10);
+	update tb_orgao_julgador_cargo set in_recebe_distribuicao = true where id_orgao_julgador_cargo in (131,132,133);	
+commit;		
+
+begin;
+	update tb_calendario_eventos SET id_orgao_julgador = 131 where id_orgao_julgador = 4;
+	update tb_calendario_eventos SET id_orgao_julgador = 132 where id_orgao_julgador = 5;
+	update tb_calendario_eventos SET id_orgao_julgador = 133 where id_orgao_julgador = 6;
 commit;
