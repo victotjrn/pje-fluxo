@@ -82,6 +82,9 @@ begin;
 	update tb_sala set id_orgao_julgador = 131 where id_orgao_julgador= 4;
 	update tb_sala set id_orgao_julgador = 132 where id_orgao_julgador= 5;
 	update tb_sala set id_orgao_julgador = 133 where id_orgao_julgador= 6;
+		update tb_tempo_audienca_org_julg set id_orgao_julgador = 131 where id_orgao_julgador = 4;
+		update tb_tempo_audienca_org_julg set id_orgao_julgador = 132 where id_orgao_julgador = 5;
+		update tb_tempo_audienca_org_julg set id_orgao_julgador = 133 where id_orgao_julgador = 6;
 commit;
 
 
