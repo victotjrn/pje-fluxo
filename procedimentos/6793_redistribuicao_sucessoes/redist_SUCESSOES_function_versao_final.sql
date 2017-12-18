@@ -59,8 +59,8 @@ LANGUAGE 'plpgsql';
 commit; 
 
 begin; 
-select REDIST_SUCESSOES(52);
-select REDIST_SUCESSOES(55);
+	select REDIST_SUCESSOES(52);
+	select REDIST_SUCESSOES(55);
 commit;
 
 begin;
@@ -78,7 +78,6 @@ commit;
 begin;
 	update tb_orgao_julgador_cargo set in_recebe_distribuicao = false where id_orgao_julgador_cargo in (116);	
 	update tb_orgao_julgador_cargo set in_recebe_distribuicao = false where id_orgao_julgador_cargo in (125);	
-
 	update tb_orgao_julgador_cargo set in_recebe_distribuicao = true where id_orgao_julgador_cargo in (307);	
 commit;		
 
