@@ -15,7 +15,7 @@
         <transition to="É migração?" name="É migração?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{ parametroUtil.getParametro('pje:tjrn:ip3:migracao:ativo').equals('true') and tramitacaoProcessualService.recuperaProcesso().importadoSistemaLegado ? 'Entrar no projudi migração' : 'É competência de Fazenda?' }" name="É migração?">
+    <decision expression="#{ not parametroUtil.getParametro('pje:tjrn:ip3:migracao:jurisdicoes:vara').contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao).concat(' ')) and parametroUtil.getParametro('pje:tjrn:ip3:migracao:ativo').equals('true') and tramitacaoProcessualService.recuperaProcesso().importadoSistemaLegado ? 'Entrar no projudi migração' : 'É competência de Fazenda?' }" name="É migração?">
         <transition to="Entrar no projudi migração" name="Entrar no projudi migração"/>
         <transition to="É competência de Fazenda?" name="É competência de Fazenda?"/>
     </decision>
