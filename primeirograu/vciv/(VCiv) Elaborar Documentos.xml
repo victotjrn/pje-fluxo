@@ -46,6 +46,7 @@
         <transition to="(VCiv) Assinar Edital" name="(VCiv) Assinar Edital"/>
         <transition to="(VCiv) Assinar ofício pelo chefe de secretaria" name="(VCiv) Assinar ofício pelo chefe de secretaria"/>
         <transition to="(VCiv) Assinar ofício pelo magistrado" name="(VCiv) Assinar ofício pelo magistrado"/>
+        <transition to="(VCiv) Informar valor recuperado" name="(VCiv) Informar valor recuperado"/>
     </task-node>
     <fork name="(VCiv) Separação em Elaborar Documentos">
         <transition to="(VCiv) É Alvará?" name="(VCiv) É Alvará?"/>
@@ -390,19 +391,14 @@
         <transition to="(VCiv) Imprimir Certidão de Trânsito em Julgado" name="(VCiv) Imprimir Certidão de Trânsito em Julgado">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Certificar Trânsito em Julgado" name="Retornar para certificar">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
-        </transition>
+        <transition to="(VCiv) Certificar Trânsito em Julgado" name="Retornar para certificar"/>
         <transition to="(VCiv) Imprimir Certidão de Trânsito em Julgado" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="(VCiv) Junção em Elaborar Documentos" name="Documento assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '70')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Documento assinado! Encaminhar para secretaria')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Imprimir Certidão de Trânsito em Julgado')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
@@ -421,10 +417,10 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso]]></description>
-        <transition to="(VCiv) Junção em Elaborar Documentos" name="Finalizar tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(VCiv) É classe VEF?" name="Finalizar tarefa"/>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:certificar_decurso') ? '(VCiv) Certificar decurso de prazo' : '(VCiv) Junção em Elaborar Documentos'}" name="(VCiv) É certificar decurso de prazo?">
         <transition to="(VCiv) Junção em Elaborar Documentos" name="(VCiv) Junção em Elaborar Documentos"/>
@@ -593,6 +589,27 @@
         <event type="task-start">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',172)}"/>
         </event>
+    </task-node>
+    <decision expression="#{parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) ? '(VCiv) Informar valor recuperado' : '(VCiv) Junção em Elaborar Documentos'}" name="(VCiv) É classe VEF?">
+        <transition to="(VCiv) Junção em Elaborar Documentos" name="(VCiv) Junção em Elaborar Documentos"/>
+        <transition to="(VCiv) Informar valor recuperado" name="(VCiv) Informar valor recuperado"/>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Informar valor recuperado">
+        <task name="(VCiv) Informar valor recuperado" swimlane="Secretaria">
+            <controller>
+                <variable name="vef_valor_recuperado" mapped-name="number:vef_valor_recuperado" access="read,write,required"/>
+                <variable name="aviso_valor_recuperado" mapped-name="textAlert:aviso_valor_recuperado" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Junção em Elaborar Documentos" name="Prosseguir"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('data_valor_recuperado', dateUtil.getDataAtual('dd/MM/yyyy'))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('valor_recuperado', tramitacaoProcessualService.recuperaVariavelTarefa('number:vef_valor_recuperado')) }"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('valor_recuperado')}"/>
+        </event>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
@@ -645,4 +662,3 @@
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
-
