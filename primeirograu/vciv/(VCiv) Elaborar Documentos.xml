@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Elaborar Documentos">
-    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros...............]]></description>  
+    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros................]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:1338,8:5852,8:5853,6:5901')}"/>
@@ -85,15 +85,15 @@
         </transition>
         <transition to="(VCiv) Assinar Alvará" name="Encaminhar para assinatura"/>
         <transition to="(VCiv) Remover documento temporário alvará" name="Ignorar expedição de alvará"/>
-        <event type="task-start">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','91')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar expedição de alvará')}"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_alvara'))}"/>
         </event>
-        <event type="node-leave">
-            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','91')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar expedição de alvará')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar Alvará">
@@ -115,16 +115,16 @@
         <transition to="(VCiv) Entregar Alvará" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <event type="task-start">
-            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',91)}"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Entregar Alvará')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
         <event type="task-end">
             <action expression="#{preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(73).lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
         </event>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Entregar Alvará')}"/>
-            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+        <event type="task-start">
+            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',91)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Entregar Alvará">
@@ -155,15 +155,15 @@
         <transition to="(VCiv) Remover documento temporário ofício" name="Ignorar expedição de ofício"/>
         <transition to="(VCiv) Assinar ofício pelo chefe de secretaria" name="Encaminhar para assinatura do chefe de secretaria"/>
         <transition to="(VCiv) Assinar ofício pelo magistrado" name="Encaminhar para assinatura do magistrado"/>
-        <event type="task-start">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','34')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar expedição de ofício')}"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_oficio'))}"/>
         </event>
-        <event type="node-leave">
-            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','34')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar expedição de ofício')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar Ofício">
@@ -185,15 +185,15 @@
         <transition to="(VCiv) Imprimir Ofício" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <event type="task-start">
-            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',34)}"/>
-            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
-        </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir Ofício')}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',34)}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar ofício pelo chefe de secretaria">
@@ -216,15 +216,15 @@
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Assinar ofício pelo magistrado" name="Encaminhar para assinatura do magistrado"/>
-        <event type="task-start">
-            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',34)}"/>
-            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
-        </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir Ofício')}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',34)}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar ofício pelo magistrado">
@@ -246,15 +246,15 @@
         <transition to="(VCiv) Imprimir Ofício" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <event type="task-start">
-            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',34)}"/>
-            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
-        </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir Ofício')}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',34)}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Imprimir Ofício">
@@ -287,15 +287,15 @@
         </transition>
         <transition to="(VCiv) Remover documento temporário outros documentos" name="Ignorar expedição de outros documentos"/>
         <transition to="(VCiv) Tem Carta Precatória ou Rogatória?" name="Encaminhar para assinatura"/>
-        <event type="task-start">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,159,160,161,162,163,164,165,166,94,205,172')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar expedição de outros documentos')}"/>
+        <event type="node-leave">
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_outros_documentos'))}"/>
         </event>
-        <event type="node-leave">
-            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,159,160,161,162,163,164,165,166,94,205,172')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar expedição de outros documentos')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar outros documentos">
@@ -317,16 +317,16 @@
         <transition to="(VCiv) Junção em Elaborar Documentos" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <event type="task-start">
-            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',57,67,159,160,161,162,163,164,165,166)}"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção em Elaborar Documentos')}"/>
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
         <event type="task-end">
             <action expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(), null, papelDAO.findByCodeName('admin'), null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 57 ? preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(107).lancarMovimento() : ( processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(), null, papelDAO.findByCodeName('admin'), null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 67 ? preencherMovimento.deCodigo(11383).lancarMovimento() : preencherMovimento.deCodigo(60).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento() )}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
         </event>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção em Elaborar Documentos')}"/>
-            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+        <event type="task-start">
+            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',57,67,159,160,161,162,163,164,165,166)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Imprimir outros documentos">
@@ -360,9 +360,9 @@
         </transition>
         <transition to="(VCiv) Assinar Certidão de Trânsito em Julgado" name="Encaminhar para assinatura"/>
         <transition to="(VCiv) Remover documento temporário trânsito julgado" name="Ignorar certificação de trânsito em julgado"/>
-        <event type="task-start">
-            <action expression="#{tipoDocumento.set('TipoDocumento',70)}"/>
-            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','70')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar certificação de trânsito em julgado')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_certidao_transito_julgado'))}"/>
@@ -372,9 +372,9 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','70')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar certificação de trânsito em julgado')}"/>
+        <event type="task-start">
+            <action expression="#{tipoDocumento.set('TipoDocumento',70)}"/>
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar Certidão de Trânsito em Julgado">
@@ -395,14 +395,14 @@
         <transition to="(VCiv) Imprimir Certidão de Trânsito em Julgado" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-        </event>
         <event type="task-create">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '70')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Imprimir Certidão de Trânsito em Julgado')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Imprimir Certidão de Trânsito em Julgado">
@@ -438,9 +438,9 @@
         </transition>
         <transition to="(VCiv) Assinar certidão de decurso de prazo" name="Encaminhar para assinatura"/>
         <transition to="(VCiv) Remover documento temporário decurso prazo" name="Ignorar certidão de decurso de prazo"/>
-        <event type="task-start">
-            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
-            <action expression="#{tipoDocumento.set('TipoDocumento',57)}"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar certidão de decurso de prazo')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_certidao_decurso_prazo'))}"/>
@@ -449,9 +449,9 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
         </event>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar certidão de decurso de prazo')}"/>
+        <event type="task-start">
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',57)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar certidão de decurso de prazo">
@@ -474,14 +474,14 @@
         <transition to="(VCiv) Imprimir certidão de decurso de prazo" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-        </event>
         <event type="task-create">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Imprimir certidão de decurso de prazo')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Imprimir certidão de decurso de prazo">
@@ -544,15 +544,15 @@
         <transition to="(VCiv) Imprimir outros documentos" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <event type="task-start">
-            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',94,205)}"/>
-        </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir outros documentos')}"/>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',94,205)}"/>
         </event>
     </task-node>
     <decision expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')).getTipoProcessoDocumento().idTipoProcessoDocumento == 94 ? '(VCiv) Assinar Carta Precatória e(ou) Rogatória' : ( documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')).getTipoProcessoDocumento().idTipoProcessoDocumento == 205 ? '(VCiv) Assinar Carta Precatória e(ou) Rogatória' : ( documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao')).getTipoProcessoDocumento().idTipoProcessoDocumento == 172 ? '(VCiv) Assinar Edital' : '(VCiv) Assinar outros documentos'))}" name="(VCiv) Tem Carta Precatória ou Rogatória?">
@@ -579,15 +579,15 @@
         <transition to="(VCiv) Imprimir outros documentos" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <event type="task-start">
-            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',172)}"/>
-        </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir outros documentos')}"/>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',172)}"/>
         </event>
     </task-node>
     <decision expression="#{parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) ? '(VCiv) Informar valor recuperado' : '(VCiv) Junção em Elaborar Documentos'}" name="(VCiv) É classe VEF?">
@@ -601,6 +601,13 @@
                 <variable name="aviso_valor_recuperado" mapped-name="textAlert:aviso_valor_recuperado" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[Variáveis:
+
+vef_valor_recuperado: "Informe o valor recuperado(Formato: 9.999,99):" - Texto
+
+
+aviso_valor_recuperado: "O valor recuperado deve ser informado para cumprimento da meta 5 do CNJ."
+- Aviso]]></description>
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
@@ -615,37 +622,10 @@
         <transition to="(VCiv) Informar valor recuperado" name="(VCiv) Informar valor recuperado"/>
     </decision>  
     <!-- PROCESS-EVENTS -->
-    <event type="superstate-enter">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-end">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-start">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -654,13 +634,40 @@
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="task-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="node-enter">
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
     <!-- ACTIONS --> 
