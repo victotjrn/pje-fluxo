@@ -66,6 +66,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Encerrar suspensão" name="Encerrar suspensão">
             <condition expression="#{tramitacaoProcessualService.temSituacao('jus:suspenso')}"/>
         </transition>
+        <transition to="(SG) Intimar MP (sem prazo)" name="Intimar MP eletronicamente (sem prazo)"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -97,6 +98,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Cumprir determinações"/>
+        <transition to="(SG) Intimar MP (sem prazo)" name="Intimar MP eletronicamente (sem prazo)"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -130,6 +132,18 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:consusp:manter_suspensao', false)}"/>
+        </event>
+    </node>
+    <node name="(SG) Intimar MP (sem prazo)">
+        <transition to="(SG) Encaminhar para controle de prazo do MP" name="(SG) Encaminhar para controle de prazo do MP"/>
+        <event type="node-leave">
+            <action expression="#{atoComunicacaoService.intimarDestinatarioEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, 4266, empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0 ? 'S' : 'D', empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacao'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para controle de prazo do MP">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'SG_CONTPRAZOS_MP', processInstance.contextInstance.variables)}"/>
         </event>
     </node>
     <end-state name="Término"/>
