@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Publicação no DJe">
-    <description><![CDATA[Código do fluxo: SG_PUBDJE
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Publicaï¿½ï¿½o no DJe">
+    <description><![CDATA[Cï¿½digo do fluxo: SG_PUBDJE
  
-Descrição: Fluxo destinado a publicação de expedientes no diário da justiça eletrônico.
+Descriï¿½ï¿½o: Fluxo destinado a publicaï¿½ï¿½o de expedientes no diï¿½rio da justiï¿½a eletrï¿½nico.
 
-Raia        Localização              Papel
+Raia        Localizaï¿½ï¿½o              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (SG) Publicação no DJe">
+    <swimlane name="Nï¿½ de Desvio - (SG) Publicaï¿½ï¿½o no DJe">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
-    <start-state name="Início">
+    <start-state name="Inï¿½cio">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(SG) É sistema?" name="(SG) É sistema?"/>
+        <transition to="(SG) Tem expediente para publicar?" name="(SG) ï¿½ sistema?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente = 'E' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Diário da Justiça Eletrônico - PUBLICAR' : 'Término'}" name="(SG) É sistema?">
-        <transition to="(SG) Diário da Justiça Eletrônico - PUBLICAR" name="(SG) Diário da Justiça Eletrônico - PUBLICAR"/>
-        <transition to="Término" name="Término"/>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento != 34 AND pe.meioExpedicaoExpediente in ('E', 'D') AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Diï¿½rio da Justiï¿½a Eletrï¿½nico - PUBLICAR' : 'Tï¿½rmino'}" name="(SG) Tem expediente para publicar?">
+        <transition to="(SG) Diï¿½rio da Justiï¿½a Eletrï¿½nico - PUBLICAR" name="(SG) Diï¿½rio da Justiï¿½a Eletrï¿½nico - PUBLICAR"/>
+        <transition to="Tï¿½rmino" name="Tï¿½rmino"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Diário da Justiça Eletrônico - PUBLICAR">
-        <task name="(SG) Diário da Justiça Eletrônico - PUBLICAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Diï¿½rio da Justiï¿½a Eletrï¿½nico - PUBLICAR">
+        <task name="(SG) Diï¿½rio da Justiï¿½a Eletrï¿½nico - PUBLICAR" swimlane="Secretaria">
             <controller>
                 <variable name="WEB-INF_xhtml_flx_paginaExterna" mapped-name="frame:WEB-INF_xhtml_flx_paginaExterna" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[*Variáveis*
+        <description><![CDATA[*Variï¿½veis*
 
-1. Variável: WEB-INF_xhtml_flx_paginaExterna
+1. Variï¿½vel: WEB-INF_xhtml_flx_paginaExterna
    Label: Expedientes
    Escrita: Sim
-   Obrig.: Não
+   Obrig.: Nï¿½o
    Tipo: Frame
 
-2. Variável: movimentacaoLote
+2. Variï¿½vel: movimentacaoLote
    Label: 
    Escrita: Sim
-   Obrig.: Não
-   Tipo: Habilitar Movimentação em Lote]]></description>
-        <transition to="Término" name="Finalizar"/>
-        <transition to="Nó de Desvio - (SG) Publicação no DJe" name="Nó de Desvio - (SG) Publicação no DJe">
+   Obrig.: Nï¿½o
+   Tipo: Habilitar Movimentaï¿½ï¿½o em Lote]]></description>
+        <transition to="Tï¿½rmino" name="Finalizar"/>
+        <transition to="Nï¿½ de Desvio - (SG) Publicaï¿½ï¿½o no DJe" name="Nï¿½ de Desvio - (SG) Publicaï¿½ï¿½o no DJe">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-assign">
@@ -55,11 +55,11 @@ Secretaria  Secretaria Segundo Grau  Chefe de Secretaria  Secretaria Segundo Gra
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:flx:paginaExterna')}"/>
         </event>
     </task-node>
-    <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (SG) Publicação no DJe">
-        <task name="Nó de Desvio - (SG) Publicação no DJe" swimlane="Nó de Desvio - (SG) Publicação no DJe"/>
-        <transition to="Término" name="Término"/>
-        <transition to="(SG) Diário da Justiça Eletrônico - PUBLICAR" name="(SG) Diário da Justiça Eletrônico - PUBLICAR"/>
+    <end-state name="Tï¿½rmino"/>
+    <task-node end-tasks="true" name="Nï¿½ de Desvio - (SG) Publicaï¿½ï¿½o no DJe">
+        <task name="Nï¿½ de Desvio - (SG) Publicaï¿½ï¿½o no DJe" swimlane="Nï¿½ de Desvio - (SG) Publicaï¿½ï¿½o no DJe"/>
+        <transition to="Tï¿½rmino" name="Tï¿½rmino"/>
+        <transition to="(SG) Diï¿½rio da Justiï¿½a Eletrï¿½nico - PUBLICAR" name="(SG) Diï¿½rio da Justiï¿½a Eletrï¿½nico - PUBLICAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
