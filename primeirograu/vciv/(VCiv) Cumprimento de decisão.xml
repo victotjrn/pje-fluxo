@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Cumprimento de decisão">
-    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria..............]]></description>  
+    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Cumprimento de decisão">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Conciliação">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,7:5197,7:5886,6:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria e Servidor de cálculo">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:5891')}"/>
@@ -86,7 +86,18 @@
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Redistribuir">
-        <task name="(VCiv) Redistribuir" swimlane="Secretaria"/>
+        <task name="(VCiv) Redistribuir" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variaveis*
+
+1. Variável: movimentacaoLote
+   Label: Movimentar em lote
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
