@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Registrar SERASAJUD">
+    <description><![CDATA[.............]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (VCiv) Registrar SERASAJUD">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    </swimlane>
+    <swimlane name="solicitante">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(VCiv) É classe VEF ?" name="(VCiv) É classe VEF ?"/>
+    </start-state>  
+    <!-- NODES -->
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Registrar SERASAJUD">
+        <task name="Nó de Desvio - (VCiv) Registrar SERASAJUD" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) SERASAJUD - Confirmar inscrição" name="(VCiv) SERASAJUD - Confirmar inscrição"/>
+        <transition to="(VCiv) SERASAJUD - Inscrever" name="(VCiv) SERASAJUD - Inscrever"/>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) SERASAJUD - Confirmar inscrição">
+        <task name="(VCiv) SERASAJUD - Confirmar inscrição" swimlane="Secretaria"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (VCiv) Registrar SERASAJUD" name="Nó de Desvio - (VCiv) Registrar SERASAJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) SERASAJUD - Inscrever" name="Prosseguir para aguardar inscrição no SERASAJUD"/>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) SERASAJUD - Inscrever">
+        <task name="(VCiv) SERASAJUD - Inscrever" swimlane="Secretaria">
+            <controller>
+                <variable name="Aviso" mapped-name="textAlert:Aviso" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (VCiv) Registrar SERASAJUD" name="Nó de Desvio - (VCiv) Registrar SERASAJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Concluir"/>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:tjrn:registrar_serasajud') ? '(VCiv) SERASAJUD - Inscrever' : '(VCiv) SERASAJUD - Confirmar inscrição'}" name="(VCiv) É Secretaria?">
+        <transition to="(VCiv) SERASAJUD - Confirmar inscrição" name="(VCiv) SERASAJUD - Confirmar inscrição"/>
+        <transition to="(VCiv) SERASAJUD - Inscrever" name="(VCiv) SERASAJUD - Inscrever"/>
+    </decision>
+    <decision expression="#{parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) ? '(VCiv) É Secretaria?' : 'Término'}" name="(VCiv) É classe VEF ?">
+        <transition to="(VCiv) É Secretaria?" name="(VCiv) É Secretaria?"/>
+        <transition to="Término" name="Término"/>
+    </decision>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

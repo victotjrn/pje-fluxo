@@ -73,7 +73,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Aguardando devolução do AR" name="Retornar para aguardar devolução do AR"/>
-        <transition to="(VCiv) Há prazo em aberto?" name="Finalizar e sair da tarefa"/>
+        <transition to="(VCiv) Existe citação?" name="Finalizar e sair da tarefa"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:edicaoNumeroAR',false)}"/>
         </event>
@@ -262,7 +262,15 @@
     <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(VCiv) Aguardando devolução do AR' : '(VCiv) Controlar retorno de expediente'}" name="(VCiv) Há expediente AR em aberto?">
         <transition to="(VCiv) Aguardando devolução do AR" name="(VCiv) Aguardando devolução do AR"/>
         <transition to="(VCiv) Controlar retorno de expediente" name="(VCiv) Controlar retorno de expediente"/>
-    </decision>  
+    </decision>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT (*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = 65 AND ppe.fechado = false AND ppe.dtCienciaParte IS NOT NULL&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(VCiv) Registrar SERASAJUD' : 'Finalizar e sair da tarefa'}" name="(VCiv) Existe citação?">
+        <transition to="(VCiv) Há prazo em aberto?" name="Finalizar e sair da tarefa"/>
+        <transition to="(VCiv) Registrar SERASAJUD" name="(VCiv) Registrar SERASAJUD"/>
+    </decision>
+    <process-state name="(VCiv) Registrar SERASAJUD">
+        <sub-process name="(VCiv) Registrar SERASAJUD" binding="late"/>
+        <transition to="(VCiv) Há prazo em aberto?" name="Finalizar e sair da tarefa"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
