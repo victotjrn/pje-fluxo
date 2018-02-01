@@ -8,10 +8,7 @@
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
-    </swimlane>  
-    <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901')}" actor-id="#{actor.id}"/>
-    </swimlane>  
+    </swimlane>    
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901')}" actor-id="#{actor.id}"/>
     </swimlane> 
