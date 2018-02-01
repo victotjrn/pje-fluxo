@@ -18,7 +18,6 @@
         <transition to="(VCiv) Separação em Preparar Ato de Comunicação" name="(VCiv) Separação em Preparar Ato de Comunicação"/>
     </start-state>  
     <!-- NODES -->
-    <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Preparar Ato de Comunicação">
         <task name="Nó de Desvio - (VCiv) Preparar Ato de Comunicação" swimlane="Nó de Desvio - (VCiv) Preparar Ato de Comunicação"/>
         <transition to="Término" name="Término">
