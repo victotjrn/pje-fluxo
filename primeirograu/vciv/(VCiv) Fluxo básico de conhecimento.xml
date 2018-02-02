@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum...........
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum...............
 Aguardar Perícia / Laudo Técnico / Outros]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
@@ -131,6 +131,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
                 <variable name="vciv_fbc_expedir_oficio" mapped-name="sim_nao:vciv_fbc_expedir_oficio" access="read,write"/>
                 <variable name="vciv_fbc_expedir_outros_documentos" mapped-name="sim_nao:vciv_fbc_expedir_outros_documentos" access="read,write"/>
                 <variable name="vciv_fbc_expedir_precatorio_rpv" mapped-name="sim_nao:vciv_fbc_expedir_precatorio_rpv" access="read,write"/>
+                <variable name="vciv_fbc_registrar_serasajud" mapped-name="sim_nao:vciv_fbc_registrar_serasajud" access="read,write"/>
                 <variable name="vciv_fbc_infojud_infoseg_consultar" mapped-name="sim_nao:vciv_fbc_infojud_infoseg_consultar" access="read,write"/>
                 <variable name="vciv_fbc_intimar_mp" mapped-name="sim_nao:vciv_fbc_intimar_mp" access="read,write"/>
                 <variable name="vciv_fbc_publicar_dje" mapped-name="sim_nao:vciv_fbc_publicar_dje" access="read,write"/>
@@ -209,6 +210,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_precatorio_rpv', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_precatorio_rpv'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:encaminar_cejusc',tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_encaminhar_cejusc'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:encerrar_prazo',tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_encerrar_prazo'))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:registrar_serasajud', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_registrar_serasajud'))}"/>
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_aguardar_laudo_tecnico')}"/>
@@ -247,6 +249,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:aguardar_central_calculos')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_encerrar_prazo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:encerrar_prazo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_registrar_serasajud')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Despachados urgentes">

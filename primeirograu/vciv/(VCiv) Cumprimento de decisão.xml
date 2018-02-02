@@ -55,6 +55,7 @@
         <transition to="(VCiv) Encerrar prazo?" name="(VCiv) Encerrar prazo?"/>
         <transition to="(VCiv) Alterar tipo de documento ?" name="(VCiv) Alterar tipo de documento ?"/>
         <transition to="(VCiv) Expedir Alvarás?" name="(VCiv) Expedir Alvarás?"/>
+        <transition to="(VCiv) Serasajud?" name="(VCiv) Serasajud?"/>
     </fork>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:suspender') ? '(VCiv) Suspensão de processo' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Suspender?">
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
@@ -873,7 +874,21 @@
     <process-state name="(VCiv) Expedição de Alvarás">
         <sub-process name="(VCiv) Encaminhar para preparação de alvarás" binding="late"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
-    </process-state>  
+    </process-state>
+    <process-state name="(VCiv) Registrar SERASAJUD">
+        <sub-process name="(VCiv) Registrar SERASAJUD" binding="late"/>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:tjrn:registrar_serasajud','true')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:tjrn:registrar_serasajud')}"/>
+        </event>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:registrar_serasajud') ? '(VCiv) Registrar SERASAJUD' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Serasajud?">
+        <transition to="(VCiv) Registrar SERASAJUD" name="(VCiv) Registrar SERASAJUD"/>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
+    </decision>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
