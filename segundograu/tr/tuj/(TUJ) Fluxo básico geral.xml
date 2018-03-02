@@ -60,6 +60,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <transition to="(TUJ) Existe assunto principal?" name="Sortear para um dos relatores">
             <condition expression="#{not tramitacaoProcessualService.recuperaVariavel('pje:fluxo:tuj:devolverTR')}"/>
         </transition>
+        <transition to="(TUJ) Redistribuição" name="Redistribuir processo"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -96,18 +97,26 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     </process-state>
     <process-state name="(TUJ) Autos recebidos da admissibilidade">
         <sub-process name="(TUJ) Autos recebidos da admissibilidade" binding="late"/>
-        <transition to="(TUJ) Enviar concluso para julgamento" name="(TUJ) Enviar concluso para julgamento"/>
+        <transition to="(TUJ) Enviar concluso ou sair?" name="(TUJ) Enviar concluso ou sair?"/>
     </process-state>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('tuj:aut_rec_adm:transicaoSaida') ? tramitacaoProcessualService.recuperaVariavel('tuj:aut_rec_adm:transicaoSaida') : 'Secretaria - ANALISAR'}" name="(TUJ) Enviar concluso ou sair?">
+        <transition to="(TUJ) Enviar concluso para julgamento" name="Enviar concluso para julgamento"/>
+        <transition to="(TUJ) Secretaria - ANALISAR" name="Secretaria - ANALISAR"/>
+    </decision>
     <process-state name="(TUJ) Enviar concluso para julgamento">
         <sub-process name="(TUJ) Decisão colegiada como relator" binding="late"/>
         <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
     </process-state>
-    <end-state name="Término"/>
+    <process-state name="(TUJ) Redistribuição">
+        <sub-process name="(TUJ) Redistribuição" binding="late"/>
+        <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
+    </process-state>
     <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Fluxo básico geral">
         <task name="Nó de Desvio - (TUJ) Fluxo básico geral" swimlane="Nó de Desvio - (TUJ) Fluxo básico geral"/>
         <transition to="Término" name="Término"/>
         <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
-    </task-node>  
+    </task-node>
+    <end-state name="Término"/>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

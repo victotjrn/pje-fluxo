@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Autos recebidos da admissibilidade">
-    <description><![CDATA[Código do fluxo: TUJ_AUT_REC_ADMIS
+    <description><![CDATA[Código do fluxo: TUJ_AUT_REC_ADMIS.
 
 Descrição: Fluxo destinado ao recebimento dos processos após o sorteio de relatores.
 
@@ -41,6 +41,7 @@ Magistrado   Gabinete TUJ    Magistrado]]></description>
         <transition to="Nó de Desvio - (TUJ) Autos recebidos da admissibilidade" name="Nó de Desvio - (TUJ) Autos recebidos da admissibilidade">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(TUJ) Cancelar" name="Cancelar e sair da tarefa"/>
         <event type="node-enter">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(TUJ) Lançar movimento de concluso')}"/>
         </event>
@@ -49,6 +50,13 @@ Magistrado   Gabinete TUJ    Magistrado]]></description>
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:aut_rec_adm:transicaoSaida', 'Enviar concluso para julgamento')}"/>
+        </event>
+    </node>
+    <node name="(TUJ) Cancelar">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:aut_rec_adm:transicaoSaida', 'Secretaria - ANALISAR')}"/>
         </event>
     </node>
     <end-state name="Término"/>
