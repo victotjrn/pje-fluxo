@@ -93,7 +93,7 @@ BEGIN
 							         pr.id_orgao_julgador_anterior, pro.id_orgao_julgador
 							      )
 							      in($1)
-							      AND e.id_evento IN (270,247)
+							      AND e.id_evento IN (270,247, 355, 340, 337)
 							      AND NOT EXISTS
 							      (
 							         SELECT
