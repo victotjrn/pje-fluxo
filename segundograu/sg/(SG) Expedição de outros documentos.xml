@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Expedição de outros documentos">
     <description><![CDATA[Código do fluxo: SG_EXP_OUTROSDOC
 
-Descrição: Fluxo destinado a expedição de outros documentos (certidão, ato ordinatório da secretaria, etc).
+Descrição: Fluxo destinado a expedição de outros documentos (certidão, ato ordinatório da secretaria, etc)..
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
@@ -12,8 +12,11 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <swimlane name="Nó de Desvio - (SG) Expedição de outros documentos">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
+    <swimlane name="Magistrado">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('599:1469,600:5899,600:5898,600:5197')}"/>
+    </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483,602:5906')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -44,14 +47,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Expedição de outros documentos" name="Nó de Desvio - (SG) Expedição de outros documentos">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Outros documentos - ASSINAR" name="Encaminhar para assinatura"/>
+        <transition to="(SG) Outros documentos - ASSINAR" name="Encaminhar para assinatura/revisão do(a) secretário(a)"/>
         <transition to="(SG) Apagar minuta não assinada de outros documentos" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (SG) Expedição de outros documentos" name="Nó de Desvio - (SG) Expedição de outros documentos">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tipoDocumento.set('TipoDocumento',57, 67, 174, 34)}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174,34')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',57, 67, 174, 34, 210)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174,34,210')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e sair da tarefa')}"/>
         </event>
         <event type="task-end">
@@ -99,8 +102,9 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="Nó de Desvio - (SG) Expedição de outros documentos" name="Nó de Desvio - (SG) Expedição de outros documentos">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(SG) Outros documentos pendentes de assinatura pelo gabinete - ASSINAR" name="Encaminhar para assinatura do gabinete"/>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174,34')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174,34,210')}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de expedição de outros documentos')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('condicaoLancamentoMovimentosTemporario', '${true}')}"/>
         </event>
@@ -108,6 +112,53 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(SG) Outros documentos pendentes de assinatura pelo gabinete - ASSINAR">
+        <task name="(SG) Outros documentos pendentes de assinatura pelo gabinete - ASSINAR" swimlane="Magistrado">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+3. Variável: assinaturaLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="(SG) Lançar movimento de expedição de outros documentos" name="(SG) Lançar movimento de expedição de outros documentos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (SG) Expedição de outros documentos" name="Nó de Desvio - (SG) Expedição de outros documentos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Outros documentos - ASSINAR" name="Retornar para elaboração do documento pela secretaria"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174,34,210')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) Lançar movimento de expedição de outros documentos')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('condicaoLancamentoMovimentosTemporario', '${true}')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Retornar para elaboração do documento pela secretaria')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
     </task-node>
     <node name="(SG) Apagar minuta não assinada de outros documentos">
@@ -128,6 +179,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Outros documentos - EXPEDIR" name="(SG) Outros documentos - EXPEDIR"/>
         <transition to="(SG) Outros documentos - ASSINAR" name="(SG) Outros documentos - ASSINAR"/>
         <transition to="Término" name="Término"/>
+        <transition to="(SG) Outros documentos pendentes de assinatura pelo gabinete - ASSINAR" name="(SG) Outros documentos pendentes de assinatura pelo gabinete - ASSINAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
