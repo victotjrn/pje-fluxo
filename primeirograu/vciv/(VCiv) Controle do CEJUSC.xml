@@ -26,6 +26,7 @@
         <task name="(CEJUSC) Designar audiência" swimlane="CEJUSC">
             <controller>
                 <variable name="Processo_Fluxo_abaDesignarAudiencia" mapped-name="frame:Processo_Fluxo_abaDesignarAudiencia" access="read,write"/>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[Labels: 
@@ -60,6 +61,7 @@ expressão p/ quando ativar parnamirim:
         <task name="(CEJUSC) Análise do CEJUSC" swimlane="CEJUSC">
             <controller>
                 <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
