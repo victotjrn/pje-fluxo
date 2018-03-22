@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Redistribuição">
-    <description><![CDATA[Controle de redistribuição de processos...]]></description>  
+    <description><![CDATA[Controle de redistribuição de processos.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (TUJ) Redistribuição"/>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('10265:1338')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">

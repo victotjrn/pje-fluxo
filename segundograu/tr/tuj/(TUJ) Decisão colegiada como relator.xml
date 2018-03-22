@@ -15,10 +15,10 @@ Magistrado  Gabinete TUJ    Magistrado]]></description>
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Assessoria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7280:5197,7281:1469')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('10261:5197,10260:1469')}"/>
     </swimlane>
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7280:5197,7281:1469')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('10261:5197,10260:1469')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -39,7 +39,7 @@ Magistrado  Gabinete TUJ    Magistrado]]></description>
    Label: #{tramitacaoProcessualService.recuperaVariavel('sg:deccolrel:decisaoColegiadaVazia') == true ? '*** ATENÇÃO! *** Voto, relatório e ementa são obrigatórios para prosseguir. Movimentação cancelada!' : ''}
    Escrita: Sim
    Obrig.: Não
-   Tipo: Frame
+   Tipo: Aviso
 
 2. Variável: WEB-INF_xhtml_flx_votacaoColegiado
    Label: 

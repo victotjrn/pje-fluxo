@@ -9,7 +9,7 @@ Raia        Localização     Papel
 Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('10265:1338')}"/>
     </swimlane>
     <swimlane name="Nó de Desvio - (TUJ) Controle de prazos pessoalmente">
         <assignment actor-id="#{actor.id}"/>
@@ -63,7 +63,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     </decision>
     <task-node end-tasks="true" name="(TUJ) Intimação com prazo decorrido - ANALISAR">
         <task name="(TUJ) Intimação com prazo decorrido - ANALISAR" swimlane="Secretaria"/>
-        <transition to="Término" name="Término"/>
+        <transition to="Término" name="Finalizar tarefa"/>
         <transition to="Nó de Desvio - (TUJ) Controle de prazos pessoalmente" name="Nó de Desvio - (TUJ) Controle de prazos pessoalmente">
             <condition expression="#{true}"/>
         </transition>

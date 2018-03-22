@@ -12,7 +12,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('10265:1338')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -70,10 +70,6 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     </task-node>
     <process-state name="(TUJ) Intimar">
         <sub-process name="(TUJ) Preparar ato de comunicação" binding="late"/>
-        <transition to="(TUJ) Controle de retorno de expedientes" name="(TUJ) Controle de retorno de expedientes"/>
-    </process-state>
-    <process-state name="(TUJ) Controle de retorno de expedientes">
-        <sub-process name="(TUJ) Controle de retorno de expedientes" binding="late"/>
         <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
     </process-state>
     <decision expression="#{(entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaAssuntoPrincipal')).setParameter(&quot;processo&quot;, tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).getSingleResult() == 0 ? '(TUJ) Sorteio pendente de assunto principal' : '(TUJ) Sortear')}" name="(TUJ) Existe assunto principal?">
@@ -109,7 +105,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     </process-state>
     <process-state name="(TUJ) Redistribuição">
         <sub-process name="(TUJ) Redistribuição" binding="late"/>
-        <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
+        <transition to="(TUJ) Enviar concluso para julgamento" name="(TUJ) Enviar concluso para julgamento"/>
     </process-state>
     <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Fluxo básico geral">
         <task name="Nó de Desvio - (TUJ) Fluxo básico geral" swimlane="Nó de Desvio - (TUJ) Fluxo básico geral"/>

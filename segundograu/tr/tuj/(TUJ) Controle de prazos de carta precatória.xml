@@ -12,7 +12,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('10265:1338')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -84,7 +84,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TUJ) Prazos de intimações continuam em aberto?" name="(TUJ) Prazos de intimações continuam em aberto?"/>
-        <transition to="Término" name="Término"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(TUJ) Prazos de intimações continuam em aberto?')}"/>
@@ -104,7 +104,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     </decision>
     <task-node end-tasks="true" name="(TUJ) Intimação com prazo decorrido - ANALISAR">
         <task name="(TUJ) Intimação com prazo decorrido - ANALISAR" swimlane="Secretaria"/>
-        <transition to="Término" name="Término"/>
+        <transition to="Término" name="Finalizar tarefa"/>
         <transition to="Nó de Desvio - (TUJ) Controle de prazos de carta precatória" name="Nó de Desvio - (TUJ) Controle de prazos de carta precatória">
             <condition expression="#{true}"/>
         </transition>
