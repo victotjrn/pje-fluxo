@@ -6,9 +6,11 @@ Melhor executado via psql.
 
 begin;
 
+SET session_replication_role = replica;
+
 create temporary table armageddon_proc ( id integer ) on commit drop;
 insert into armageddon_proc
-select id_processo_trf from tb_processo_trf where dt_autuacao between '2014-05-05 00:00:00.000' and '2014-05-05 07:59:59.999'
+select id_processo_trf from tb_processo_trf where dt_autuacao < '2018-05-01 00:00:00.000' --dt_autuacao between '2014-05-05 00:00:00.000' and '2014-05-05 07:59:59.999'
 order by id_processo_trf;
 
 delete from client.tb_sessao_comp_processo where id_processo_trf in ( select id from armageddon_proc );
@@ -32,6 +34,7 @@ delete from client.tb_processo_expediente where id_processo_trf in ( select id f
 delete from client.tb_processo_alerta where id_processo_trf in ( select id from armageddon_proc );
 delete from client.tb_proc_parte_expediente where id_processo_trf in ( select id from armageddon_proc );
 delete from client.tb_processo_push where id_processo_trf in ( select id from armageddon_proc );
+delete from client.tb_pagamento_pericia where id_processo_pericia in ( select id_processo_pericia from client.tb_processo_pericia where id_processo_trf in ( select id from armageddon_proc ) );
 delete from client.tb_processo_pericia where id_processo_trf in ( select id from armageddon_proc );
 delete from client.tb_proc_parte_represntante where id_processo_parte in ( select id_processo_parte from tb_processo_parte where id_processo_trf in ( select id from armageddon_proc ) );
 delete from client.tb_processo_parte_endereco where id_processo_parte in ( select id_processo_parte from tb_processo_parte where id_processo_trf in ( select id from armageddon_proc ) );
@@ -101,6 +104,8 @@ delete from tb_processo_instance where id_processo in ( select id from armageddo
 
 delete from core.tb_proc_localizacao_ibpm where id_processo in ( select id from armageddon_proc );
 delete from core.tb_processo where id_processo in ( select id from armageddon_proc );
+
+SET session_replication_role = DEFAULT;
 
 --commit
 rollback;
