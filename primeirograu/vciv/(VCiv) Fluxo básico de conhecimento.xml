@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum...............
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum..................
 Aguardar Perícia / Laudo Técnico / Outros]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
@@ -804,7 +804,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
         <transition to="(VCiv) Sentenciados sobre homologação e extinção" name="(VCiv) Sentenciados sobre homologação e extinção"/>
     </decision>
-    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador == 77 ? '(VCiv) Controlar audiência' : '(VCiv) Conclusão para despacho inicial'}" name="(VCiv) Controlar audiência?">
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador == 129 ? '(VCiv) Controlar audiência' : '(VCiv) Conclusão para despacho inicial'}" name="(VCiv) Controlar audiência?">
         <transition to="(VCiv) Conclusão para despacho inicial" name="(VCiv) Conclusão para despacho inicial"/>
         <transition to="(VCiv) Controlar audiência" name="(VCiv) Controlar audiência"/>
     </decision>
