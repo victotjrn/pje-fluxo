@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar ato de comunicação de ofício">
     <description><![CDATA[Código do fluxo: SG_PAC_OFI
 
-Descrição: Preparar ato de comunicação do tipo ofício.
+Descrição: Preparar ato de comunicação do tipo ofício..
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
@@ -20,7 +20,7 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('599:1469,600:5197,600:5898,600:5899')}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483,602:5906')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -44,14 +44,13 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
         <transition to="Nó de Desvio - (SG) Preparar ato de comunicação de ofício" name="Nó de Desvio - (SG) Preparar ato de comunicação de ofício">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Registrar movimento de expedição de ofício" name="(SG) Registrar movimento de expedição de ofício">
+        <transition to="(SG) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Secretário(a) [OFÍCIO] - ASSINAR" name="Encaminhar para assinatura do(a) secretário(a)"/>
+        <transition to="(SG) Separação em meio de expedição de ofício" name="(SG) Separação em meio de expedição de ofício">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Ofício pendente de assinatura pela secretaria - ASSINAR" name="Encaminhar para assinatura da secretaria"/>
-        <transition to="(SG) Ofício pendente de assinatura pelo gabinete - ASSINAR" name="Encaminhar para assinatura do gabinete"/>
-        <transition to="(SG) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Registrar movimento de expedição de ofício')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Separação em meio de expedição de ofício')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '34')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('C,M')}"/>
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp') ? tramitacaoProcessualService.gravaVariavel('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))) : ''}"/>
@@ -68,6 +67,45 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp', org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
+    <task-node end-tasks="true" name="(SG) Secretário(a) [OFÍCIO] - ASSINAR">
+        <task name="(SG) Secretário(a) [OFÍCIO] - ASSINAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_prepararExpediente
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (SG) Preparar ato de comunicação de ofício" name="Nó de Desvio - (SG) Preparar ato de comunicação de ofício">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Ofício - EXPEDIR" name="Retornar para preparação do ofício"/>
+        <transition to="(SG) Ofício pendente de assinatura pelo gabinete - ASSINAR" name="Encaminhar para assinatura do gabinete"/>
+        <transition to="(SG) Separação em meio de expedição de ofício" name="(SG) Separação em meio de expedição de ofício">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Separação em meio de expedição de ofício')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '34')}"/>
+            <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('C,M')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:mapaProcuradorias'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:mapaProcuradorias'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:mapaUmExpedientePorEndereco'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:mapaUmExpedientePorEndereco'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:mapaProcuradoriaSelecionada'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:mapaProcuradoriaSelecionada'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:mapaExpedientes'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:mapaAgrupamentos'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:mapaInstrumento'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp',org.jboss.seam.bpm.taskInstance.getId())}"/>
+        </event>
+    </task-node>
     <task-node end-tasks="true" name="(SG) Ofício pendente de assinatura pela secretaria - ASSINAR">
         <task name="(SG) Ofício pendente de assinatura pela secretaria - ASSINAR" swimlane="Secretaria">
             <controller>
@@ -81,16 +119,14 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
-        <transition to="(SG) Registrar movimento de expedição de ofício" name="(SG) Registrar movimento de expedição de ofício">
-            <condition expression="#{true}"/>
-        </transition>
         <transition to="Nó de Desvio - (SG) Preparar ato de comunicação de ofício" name="Nó de Desvio - (SG) Preparar ato de comunicação de ofício">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Ofício - EXPEDIR" name="Retornar para preparação da minuta do ofício"/>
         <transition to="(SG) Ofício pendente de assinatura pelo gabinete - ASSINAR" name="Encaminhar para assinatura do gabinete"/>
+        <transition to="(SG) Ofício - EXPEDIR" name="Retornar para preparação da minuta do ofício"/>
+        <transition to="(SG) Separação em meio de expedição de ofício" name="(SG) Separação em meio de expedição de ofício"/>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Registrar movimento de expedição de ofício')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Separação em meio de expedição de ofício')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '34')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('C,M')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
@@ -120,15 +156,15 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
-        <transition to="(SG) Registrar movimento de expedição de ofício" name="(SG) Registrar movimento de expedição de ofício">
-            <condition expression="#{true}"/>
-        </transition>
         <transition to="Nó de Desvio - (SG) Preparar ato de comunicação de ofício" name="Nó de Desvio - (SG) Preparar ato de comunicação de ofício">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Ofício - EXPEDIR" name="Retornar para preparação da minuta do ofício"/>
+        <transition to="(SG) Ofício - EXPEDIR" name="Retornar para preparação do ofício"/>
+        <transition to="(SG) Separação em meio de expedição de ofício" name="(SG) Separação em meio de expedição de ofício">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Registrar movimento de expedição de ofício')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Separação em meio de expedição de ofício')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '34')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('C,M')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
@@ -145,20 +181,72 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp',org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
-    <node name="(SG) Registrar movimento de expedição de ofício">
+    <fork name="(SG) Separação em meio de expedição de ofício">
         <transition to="(SG) É mandado?" name="(SG) É mandado?"/>
+        <transition to="(SG) É correios?" name="(SG) É correios?"/>
+    </fork>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = 34 AND pe.meioExpedicaoExpediente = 'M' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) É SG?' : '(SG) Junção em meio de expedição de ofício'}" name="(SG) É mandado?">
+        <transition to="(SG) Junção em meio de expedição de ofício" name="(SG) Junção em meio de expedição de ofício"/>
+        <transition to="(SG) É SG?" name="(SG) É SG?"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao == (0+parametroUtil.getParametro('pje:tjrn:sg:jurisdicao:id')) ? '(SG) Encaminhar para CCM - SG' : '(SG) Encaminhar para CCM - TR'}" name="(SG) É SG?">
+        <transition to="(SG) Encaminhar para CCM - TR" name="(SG) Encaminhar para CCM - TR"/>
+        <transition to="(SG) Encaminhar para CCM - SG" name="(SG) Encaminhar para CCM - SG"/>
+    </decision>
+    <node name="(SG) Encaminhar para CCM - TR">
+        <transition to="(SG) Registrar movimento de expedição de ofício" name="(SG) Registrar movimento de expedição de ofício"/>
         <event type="node-enter">
-            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('E', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(79).lancarMovimento()}')}"/>
+            <action expression="#{conectorMandados.setCentralMandado(centralMandadoManager.findById((0+parametroUtil.getParametro('pje:tjrn:tr:centralMandado:id')).intValue()))}"/>
         </event>
     </node>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = 34 AND pe.meioExpedicaoExpediente = 'M' AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe mais de uma central de mandados?' : '(SG) Controle de prazo de ofício após expedição'}" name="(SG) É mandado?">
-        <transition to="(SG) Existe mais de uma central de mandados?" name="(SG) Existe mais de uma central de mandados?"/>
+    <node name="(SG) Encaminhar para CCM - SG">
+        <transition to="(SG) Registrar movimento de expedição de ofício" name="(SG) Registrar movimento de expedição de ofício"/>
+        <event type="node-enter">
+            <action expression="#{conectorMandados.setCentralMandado(centralMandadoManager.findById((0+parametroUtil.getParametro('pje:tjrn:sg:centralMandado:id')).intValue()))}"/>
+        </event>
+    </node>
+    <node name="(SG) Registrar movimento de expedição de ofício">
         <transition to="(SG) Controle de prazo de ofício após expedição" name="(SG) Controle de prazo de ofício após expedição"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('M', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(79).lancarMovimento()}')}"/>
+        </event>
+    </node>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = 34 AND pe.meioExpedicaoExpediente = 'C' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Registrar movimento de expedição de ofício via correios' : '(SG) Junção em meio de expedição de ofício'}" name="(SG) É correios?">
+        <transition to="(SG) Junção em meio de expedição de ofício" name="(SG) Junção em meio de expedição de ofício"/>
+        <transition to="(SG) Registrar movimento de expedição de ofício via correios" name="(SG) Registrar movimento de expedição de ofício via correios"/>
     </decision>
-    <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(SG) Ofício pendente de escolha da central de mandados - SELECIONAR' : '(SG) Encaminhar para central de mandados'}" name="(SG) Existe mais de uma central de mandados?">
-        <transition to="(SG) Ofício pendente de escolha da central de mandados - SELECIONAR" name="(SG) Ofício pendente de escolha da central de mandados - SELECIONAR"/>
-        <transition to="(SG) Encaminhar para central de mandados" name="(SG) Encaminhar para central de mandados"/>
-    </decision>
+    <node name="(SG) Registrar movimento de expedição de ofício via correios">
+        <transition to="(SG) Ofício assinado - ENCAMINHAR" name="(SG) Ofício assinado - ENCAMINHAR"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(79).lancarMovimento()}')}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(SG) Ofício assinado - ENCAMINHAR">
+        <task name="(SG) Ofício assinado - ENCAMINHAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="Processo_Fluxo_expedientes_correios" mapped-name="frame:Processo_Fluxo_expedientes_correios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. aviso1
+   Label: Consta no processo ofício assinado. Para encaminhá-lo via Hermes, basta gerar o PDF do documento desejado. Se o envio já foi efetuado, movimente o processo para registrar o comprovante de recebimento.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso.
+
+
+2. Processo_Fluxo_expedientes_correios
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame.]]></description>
+        <transition to="Nó de Desvio - (SG) Preparar ato de comunicação de ofício" name="Nó de Desvio - (SG) Preparar ato de comunicação de ofício">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Controle de prazo de ofício após expedição" name="Registrar comprovante de recebimento"/>
+    </task-node>
     <task-node end-tasks="true" name="(SG) Ofício pendente de escolha da central de mandados - SELECIONAR">
         <task name="(SG) Ofício pendente de escolha da central de mandados - SELECIONAR" swimlane="Secretaria">
             <controller>
@@ -190,9 +278,12 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('M', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(78).lancarMovimento()}')}"/>
         </event>
     </node>
+    <join name="(SG) Junção em meio de expedição de ofício">
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+    </join>
     <process-state name="(SG) Controle de prazo de ofício após expedição">
         <sub-process name="(SG) Controle de prazos de ofícios" binding="late"/>
-        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
+        <transition to="(SG) Junção em meio de expedição de ofício" name="(SG) Junção em meio de expedição de ofício"/>
     </process-state>
     <node name="(SG) Apagar variáveis do fluxo">
         <transition to="Término" name="Término"/>
@@ -217,6 +308,8 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
         <transition to="(SG) Ofício pendente de escolha da central de mandados - SELECIONAR" name="(SG) Ofício pendente de escolha da central de mandados - SELECIONAR"/>
         <transition to="(SG) Ofício pendente de assinatura pela secretaria - ASSINAR" name="(SG) Ofício pendente de assinatura pela secretaria - ASSINAR"/>
         <transition to="(SG) Ofício pendente de assinatura pelo gabinete - ASSINAR" name="(SG) Ofício pendente de assinatura pelo gabinete - ASSINAR"/>
+        <transition to="(SG) Ofício assinado - ENCAMINHAR" name="(SG) Ofício assinado - ENCAMINHAR"/>
+        <transition to="(SG) Secretário(a) [OFÍCIO] - ASSINAR" name="(SG) Secretário(a) [OFÍCIO] - ASSINAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
@@ -231,10 +324,10 @@ Magistrado  Gabinete Segundo Grau    Magistrado]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
+    <event type="before-signal">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="process-start">
