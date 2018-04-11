@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC.......................]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC............................]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -85,6 +85,7 @@ expressão p/ quando ativar parnamirim:
         <transition to="(CEJUSC) Audiências realizadas com acordo parcial" name="Devolver - Acordo parcial"/>
         <transition to="(CEJUSC) Designar PERÍCIA DPVAT" name="Designar/Cancelar PERÍCiA"/>
         <transition to="(CEJUSC) Intimar da PERÍCIA" name="Intimar mandado/correio/sistema/pessoalmente - PERÍCIA"/>
+        <transition to="(CEJUSC) Controle de PERÍCIA do CEJUSC" name="Realizar PERÍCIA"/>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavel('cancelou:aud:cejusc')}"/>
         </event>
@@ -736,7 +737,11 @@ aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiên
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
         </event>
-    </task-node>  
+    </task-node>
+    <process-state name="(CEJUSC) Controle de PERÍCIA do CEJUSC">
+        <sub-process name="(VCiv) Controle de audiências do CEJUSC - PERÍCIA" binding="late"/>
+        <transition to="(CEJUSC) Cancelou realizar audiência ?" name="(CEJUSC) Cancelou realizar audiência ?"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

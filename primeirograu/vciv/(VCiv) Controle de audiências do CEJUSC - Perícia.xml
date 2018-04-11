@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de audiências do CEJUSC">
-    <description><![CDATA[Fluxo responsável por controlar as audiências no CEJUSC.......]]></description>  
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de audiências do CEJUSC - PERÍCIA">
+    <description><![CDATA[Fluxo responsável por controlar as audiências no CEJUSC DPVAT Perícia........
+        Código: VCiv_CEJUSC_AUD_PERI]]></description>  
     <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    </swimlane>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469')}"/>
     </swimlane>
@@ -19,32 +23,29 @@
     </start-state>  
     <!-- NODES -->
     <node name="(CEJUSC) Limpar movimentos temporários">
-        <transition to="(CEJUSC) Verifica se existe audiência designada" name="(CEJUSC) Verifica se existe audiência designada"/>
+        <transition to="(CEJUSC) Verifica se existe PERÍCIA designada" name="(CEJUSC) Verifica se existe PERÍCIA designada"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('MovimentosLancadosTemporariamente')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('AgrupamentosLancadosTemporariamente')}"/>
         </event>
     </node>
-    <decision expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null
-&amp;&amp;
-processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()).getTipoAudiencia().getIdTipoAudiencia() != 26
- ? '(CEJUSC) Realizar audiência' : 'Término'}" name="(CEJUSC) Verifica se existe audiência designada">
-        <transition to="(CEJUSC) Realizar audiência" name="(CEJUSC) Realizar audiência"/>
-        <transition to="Término" name="Término"/>
+    <decision expression="#{processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()) != null &amp;&amp; processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()).getTipoAudiencia().getIdTipoAudiencia() == 26 ? '(CEJUSC) Realizar PERÍCIA' : '(CEJUSC) Aviso PERÍCIA'}" name="(CEJUSC) Verifica se existe PERÍCIA designada">
+        <transition to="(CEJUSC) Realizar PERÍCIA" name="(CEJUSC) Realizar PERÍCIA"/>
+        <transition to="(CEJUSC) Aviso PERÍCIA" name="(CEJUSC) Aviso PERÍCIA"/>
     </decision>
-    <task-node end-tasks="true" name="(CEJUSC) Minutar ata de audiência">
-        <task name="(CEJUSC) Minutar ata de audiência" swimlane="CEJUSC">
+    <task-node end-tasks="true" name="(CEJUSC) Minutar ata de PERÍCIA">
+        <task name="(CEJUSC) Minutar ata de PERÍCIA" swimlane="CEJUSC">
             <controller>
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
                 <variable name="minuta_audiencia" mapped-name="textEditCombo:minuta_audiencia" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[aviso: Próxima audiência: #{processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)}
+        <description><![CDATA[aviso: Próxima PERÍCIA: #{processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)}
 
-minuta_audiencia: Minutar ata de audiência]]></description>
-        <transition to="(CEJUSC) Informar dados da audiência" name="Informar dados da audiência"/>
+minuta_audiencia: Minutar ata de PERÍCIA]]></description>
+        <transition to="(CEJUSC) Informar dados da PERÍCIA" name="Informar dados da PERÍCIA"/>
         <transition to="(CEJUSC) Apagar minuta em elaboração" name="Cancelar e sair da tarefa"/>
-        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
+        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA">
             <condition expression="#{true}"/>
         </transition>
         <event type="node-enter">
@@ -70,11 +71,11 @@ minuta_audiencia: Minutar ata de audiência]]></description>
             <action expression="#{documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_audiencia')}"/>
         </event>
     </node>
-    <task-node end-tasks="true" name="(CEJUSC) Realizar audiência">
-        <task name="(CEJUSC) Realizar audiência" swimlane="CEJUSC"/>
-        <transition to="(CEJUSC) Minutar ata de audiência" name="Minutar ata de audiência"/>
+    <task-node end-tasks="true" name="(CEJUSC) Realizar PERÍCIA">
+        <task name="(CEJUSC) Realizar PERÍCIA" swimlane="CEJUSC"/>
+        <transition to="(CEJUSC) Minutar ata de PERÍCIA" name="Minutar ata de PERÍCIA"/>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
+        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA">
             <condition expression="#{true}"/>
         </transition>
         <event type="node-enter">
@@ -87,21 +88,21 @@ minuta_audiencia: Minutar ata de audiência]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(CEJUSC) Informar dados da audiência">
-        <task name="(CEJUSC) Informar dados da audiência" swimlane="CEJUSC">
+    <task-node end-tasks="true" name="(CEJUSC) Informar dados da PERÍCIA">
+        <task name="(CEJUSC) Informar dados da PERÍCIA" swimlane="CEJUSC">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
                 <variable name="ProcessoAudiencia_informarDadosAudiencia" mapped-name="frame:ProcessoAudiencia_informarDadosAudiencia" access="read,write"/>
                 <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[aviso1: Audiência: #{processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)}
+        <description><![CDATA[aviso1: Perícia: #{processoJudicialManager.getProximaAudienciaDesignada(processoTrfHome.instance)}
 
-ProcessoAudiencia_informarDadosAudiencia: Informar dados da audiência
+ProcessoAudiencia_informarDadosAudiencia: Informar dados da PERÍCIA
 
-aviso2: ATENÇÃO: É necessário SEMPRE clicar no botão "GRAVAR" após preencher os dados da audiência.]]></description>
-        <transition to="(CEJUSC) Preencheu dados audiência - conciliador?" name="Encaminhar para assinatura do conciliador"/>
-        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
+aviso2: ATENÇÃO: É necessário SEMPRE clicar no botão "GRAVAR" após preencher os dados da PERÍCIA.]]></description>
+        <transition to="(CEJUSC) Preencheu dados PERÍCIA - conciliador?" name="Encaminhar para assinatura do conciliador"/>
+        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA">
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
@@ -113,24 +114,24 @@ aviso2: ATENÇÃO: É necessário SEMPRE clicar no botão "GRAVAR" após preencher os 
             <action expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 105) :       (authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;MOSSOR&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 99) : null)}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(CEJUSC) Assinar ata de audiência pelo conciliador">
-        <task name="(CEJUSC) Assinar ata de audiência pelo conciliador" swimlane="CEJUSC">
+    <task-node end-tasks="true" name="(CEJUSC) Assinar ata de PERÍCIA pelo conciliador">
+        <task name="(CEJUSC) Assinar ata de PERÍCIA pelo conciliador" swimlane="CEJUSC">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[Processo_Fluxo_revisarMinuta: Assinar ata de audiência pelo conciliador]]></description>
-        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
-            <condition expression="#{true}"/>
-        </transition>
+        <description><![CDATA[Processo_Fluxo_revisarMinuta: Assinar ata de PERÍCIA pelo conciliador]]></description>
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Documento já assinado">
             <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <transition to="(CEJUSC) Minutar ata de audiência" name="Retornar para minuta"/>
+        <transition to="(CEJUSC) Minutar ata de PERÍCIA" name="Retornar para minuta"/>
+        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="node-leave">
             <action expression="#{processoAudienciaHome.instance.setStatusAudiencia(tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada'))}"/>
             <action expression="#{processoAudienciaHome.update()}"/>
@@ -149,17 +150,32 @@ aviso2: ATENÇÃO: É necessário SEMPRE clicar no botão "GRAVAR" após preencher os 
             <action expression="#{tramitacaoProcessualService.apagaVariavel('textEditCombo:minuta_audiencia')}"/>
         </event>
     </end-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(CEJUSC) Assinar ata de audiência pelo conciliador' : '(CEJUSC) Informar dados da audiência'}" name="(CEJUSC) Preencheu dados audiência - conciliador?">
-        <transition to="(CEJUSC) Informar dados da audiência" name="(CEJUSC) Informar dados da audiência"/>
-        <transition to="(CEJUSC) Assinar ata de audiência pelo conciliador" name="(CEJUSC) Assinar ata de audiência pelo conciliador"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(CEJUSC) Assinar ata de PERÍCIA pelo conciliador' : '(CEJUSC) Informar dados da PERÍCIA'}" name="(CEJUSC) Preencheu dados PERÍCIA - conciliador?">
+        <transition to="(CEJUSC) Informar dados da PERÍCIA" name="(CEJUSC) Informar dados da PERÍCIA"/>
+        <transition to="(CEJUSC) Assinar ata de PERÍCIA pelo conciliador" name="(CEJUSC) Assinar ata de PERÍCIA pelo conciliador"/>
     </decision>
-    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC">
-        <task name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC"/>
-        <transition to="(CEJUSC) Informar dados da audiência" name="(CEJUSC) Informar dados da audiência"/>
-        <transition to="(CEJUSC) Assinar ata de audiência pelo conciliador" name="(CEJUSC) Assinar ata de audiência pelo conciliador"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA">
+        <task name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA" swimlane="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA"/>
+        <transition to="(CEJUSC) Minutar ata de PERÍCIA" name="(CEJUSC) Minutar ata de PERÍCIA"/>
+        <transition to="(CEJUSC) Realizar PERÍCIA" name="(CEJUSC) Realizar PERÍCIA"/>
+        <transition to="(CEJUSC) Informar dados da PERÍCIA" name="(CEJUSC) Informar dados da PERÍCIA"/>
+        <transition to="(CEJUSC) Assinar ata de PERÍCIA pelo conciliador" name="(CEJUSC) Assinar ata de PERÍCIA pelo conciliador"/>
         <transition to="Término" name="Término"/>
-        <transition to="(CEJUSC) Minutar ata de audiência" name="(CEJUSC) Minutar ata de audiência"/>
-        <transition to="(CEJUSC) Realizar audiência" name="(CEJUSC) Realizar audiência"/>
+        <transition to="(CEJUSC) Aviso PERÍCIA" name="(CEJUSC) Aviso PERÍCIA"/>
+    </task-node>
+    <task-node end-tasks="true" name="(CEJUSC) Aviso PERÍCIA">
+        <task name="(CEJUSC) Aviso PERÍCIA" swimlane="CEJUSC">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[Variáveis:
+
+aviso: "Não há perícia designada para o processo!"]]></description>
+        <transition to="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA" name="Nó de Desvio - (VCiv) Controle de audiências do CEJUSC - PERÍCIA">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
