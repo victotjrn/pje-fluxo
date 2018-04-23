@@ -63,7 +63,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     </decision>
     <task-node end-tasks="true" name="(TUJ) Intimação com prazo decorrido - ANALISAR">
         <task name="(TUJ) Intimação com prazo decorrido - ANALISAR" swimlane="Secretaria"/>
-        <transition to="Término" name="Finalizar tarefa"/>
+        <transition to="Término" name="Término"/>
         <transition to="Nó de Desvio - (TUJ) Controle de prazos de edital" name="Nó de Desvio - (TUJ) Controle de prazos de edital">
             <condition expression="#{true}"/>
         </transition>
