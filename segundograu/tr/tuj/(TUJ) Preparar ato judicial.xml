@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Preparar ato judicial">
+    <description><![CDATA[Código do fluxo: TUJ_PAJ
+
+Descrição: Fluxo destinado ao controle de atos judicias..]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (TUJ) Preparar ato judicial">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(TUJ) Concluso para decisão?" name="(TUJ) Concluso para decisão?"/>
+        <transition to="Nó de Desvio - (TUJ) Preparar ato judicial" name="Nó de Desvio - (TUJ) Preparar ato judicial"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tuj:paj:decisao') == true ? '(TUJ) Lançar movimento conclusos para decisão' : '(TUJ) Concluso para despacho?'}" name="(TUJ) Concluso para decisão?">
+        <transition to="(TUJ) Lançar movimento conclusos para decisão" name="(TUJ) Lançar movimento conclusos para decisão"/>
+        <transition to="(TUJ) Concluso para despacho?" name="(TUJ) Concluso para despacho?"/>
+    </decision>
+    <node name="(TUJ) Lançar movimento conclusos para decisão">
+        <transition to="(TUJ) Concluso para decisão sobre encerramento de suspensão?" name="(TUJ) Concluso para decisão sobre encerramento de suspensão?"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tuj:paj:despacho') == true ? '(TUJ) Lançar movimento conclusos para despacho' : '(TUJ) Concluso para julgamento?'}" name="(TUJ) Concluso para despacho?">
+        <transition to="(TUJ) Lançar movimento conclusos para despacho" name="(TUJ) Lançar movimento conclusos para despacho"/>
+        <transition to="(TUJ) Concluso para julgamento?" name="(TUJ) Concluso para julgamento?"/>
+    </decision>
+    <node name="(TUJ) Lançar movimento conclusos para despacho">
+        <transition to="(TUJ) Enviar para autos recebidos da secretaria" name="(TUJ) Enviar para autos recebidos da secretaria"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(5).lancarMovimento()}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tuj:paj:decisao_encerramento_suspensao') == true ? '(TUJ) Preparação de decisão de encerramento de suspensão' : '(TUJ) Enviar para autos recebidos da secretaria'}" name="(TUJ) Concluso para decisão sobre encerramento de suspensão?">
+        <transition to="(TUJ) Preparação de decisão de encerramento de suspensão" name="(TUJ) Preparação de decisão de encerramento de suspensão"/>
+        <transition to="(TUJ) Enviar para autos recebidos da secretaria" name="(TUJ) Enviar para autos recebidos da secretaria"/>
+    </decision>
+    <process-state name="(TUJ) Preparação de decisão de encerramento de suspensão">
+        <sub-process name="(TUJ) Preparar ato judicial de decisão sobre encerramento de suspensão" binding="late"/>
+        <transition to="(TUJ) Apagar variáveis do fluxo" name="(TUJ) Apagar variáveis do fluxo"/>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tuj:paj:julgamento') == true ? '(TUJ) Lançar movimento conclusos para julgamento' : '(TUJ) Apagar variáveis do fluxo'}" name="(TUJ) Concluso para julgamento?">
+        <transition to="(TUJ) Lançar movimento conclusos para julgamento" name="(TUJ) Lançar movimento conclusos para julgamento"/>
+        <transition to="(TUJ) Apagar variáveis do fluxo" name="(TUJ) Apagar variáveis do fluxo"/>
+    </decision>
+    <node name="(TUJ) Lançar movimento conclusos para julgamento">
+        <transition to="(TUJ) Enviar para autos recebidos da secretaria" name="(TUJ) Enviar para autos recebidos da secretaria"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(36).lancarMovimento()}"/>
+        </event>
+    </node>
+    <process-state name="(TUJ) Enviar para autos recebidos da secretaria">
+        <sub-process name="(TUJ) Autos recebidos da secretaria" binding="late"/>
+        <transition to="(TUJ) Apagar variáveis do fluxo" name="(TUJ) Apagar variáveis do fluxo"/>
+    </process-state>
+    <node name="(TUJ) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:eaog:assinou_ato_ordinatorio')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minuta_ato_judicial')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Preparar ato judicial">
+        <task name="Nó de Desvio - (TUJ) Preparar ato judicial" swimlane="Nó de Desvio - (TUJ) Preparar ato judicial"/>
+        <transition to="Término" name="Término"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

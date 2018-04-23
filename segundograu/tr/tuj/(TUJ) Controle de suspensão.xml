@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(TUJ) Controle de suspensão">
+    <description><![CDATA[Código do fluxo: TUJ_CONSUSP
+
+Descrição: Controle de suspensão processual.
+
+Raia        Localização     Papel
+Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (TUJ) Controle de suspensão">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('10265:1338')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(TUJ) Suspensão de processo - CONFIRMAR" name="(TUJ) Suspensão de processo - CONFIRMAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(TUJ) Suspensão de processo - CONFIRMAR">
+        <task name="(TUJ) Suspensão de processo - CONFIRMAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: ATENÇÃO! Após escolha da opção de suspensão abaixo, só será possível encerrar a suspensão do processo após enviá-lo concluso ao magistrado.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (TUJ) Controle de suspensão" name="Nó de Desvio - (TUJ) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(TUJ) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
+        <transition to="(TUJ) Alterar situação do processo para suspenso" name="Suspender processo"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(TUJ) Alterar situação do processo para suspenso">
+        <transition to="(TUJ) Suspensão de processo - AGUARDAR" name="(TUJ) Suspensão de processo - AGUARDAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:andamento')}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(TUJ) Suspensão de processo - AGUARDAR">
+        <task name="(TUJ) Suspensão de processo - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+2. Variável: aviso1
+   Label: O processo encontra-se suspenso, podendo ser reativado após conclusão ao magistrado.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Nó de Desvio - (TUJ) Controle de suspensão" name="Nó de Desvio - (TUJ) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(TUJ) Preparação de decisão sobre encerramento de suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <process-state name="(TUJ) Preparação de decisão sobre encerramento de suspensão">
+        <sub-process name="(TUJ) Preparar ato judicial" binding="late"/>
+        <transition to="(TUJ) Mantém processo suspenso?" name="(TUJ) Mantém processo suspenso?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:decisao_encerramento_suspensao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:paj:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:paj:decisao_encerramento_suspensao')}"/>
+        </event>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('tuj:consusp:manter_suspensao') == true ? '(TUJ) Suspensão de processo - CONFIRMAR' : '(TUJ) Lançar movimento de encerramento de suspensão'}" name="(TUJ) Mantém processo suspenso?">
+        <transition to="(TUJ) Lançar movimento de encerramento de suspensão" name="(TUJ) Lançar movimento de encerramento de suspensão"/>
+    </decision>
+    <node name="(TUJ) Lançar movimento de encerramento de suspensão">
+        <transition to="(TUJ) Apagar variáveis do fluxo" name="(TUJ) Apagar variáveis do fluxo"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(9001).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:suspenso')}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:andamento')}"/>
+        </event>
+    </node>
+    <node name="(TUJ) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:consusp:manter_suspensao')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Controle de suspensão">
+        <task name="Nó de Desvio - (TUJ) Controle de suspensão" swimlane="Nó de Desvio - (TUJ) Controle de suspensão"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(TUJ) Suspensão de processo - CONFIRMAR" name="(TUJ) Suspensão de processo - CONFIRMAR"/>
+        <transition to="(TUJ) Suspensão de processo - AGUARDAR" name="(TUJ) Suspensão de processo - AGUARDAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

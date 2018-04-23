@@ -377,7 +377,7 @@ Magistrado  Gabinete TUJ    Magistrado]]></description>
     <node name="(TUJ) Gravar variável de cancelamento de conclusão">
         <transition to="(TUJ) Apagar variáveis do fluxo" name="(TUJ) Apagar variáveis do fluxo"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:conclusao_cancelada', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:conclusao_cancelada', true)}"/>
         </event>
     </node>
     <node name="(TUJ) Apagar variáveis do fluxo">
