@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Decisão colegiada como relator">
-    <description><![CDATA[Código do fluxo: SG_DECCOLREL
+    <description><![CDATA[Código do fluxo: SG_DECCOLREL..
 
 Descrição: Fluxo destinado a preparação de decisões colegiadas como relator do processo.
 
@@ -167,6 +167,10 @@ Magistrado  Assessoria Segundo Grau  Assessor
         <transition to="(SG) Pode liberar ao revisor?" name="Encaminhar ao revisor">
             <condition expression="#{parametroUtil.getParametro('pje:tjrn:classesCriminais').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_'))}"/>
         </transition>
+        <transition to="(SG) Sinalizar manualmente o julgamento" name="Encaminhar manualmente para preparação do acórdão">
+            <condition expression="#{sessaoPautaProcessoTrfManager.isProcessoJulgadoUltimaSessao(processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')))}"/>
+        </transition>
+        <transition to="(SG) Pode solicitar inclusão em mesa?" name="Solicitar inclusão em mesa"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao', false)}"/>
         </event>
@@ -218,6 +222,7 @@ Magistrado  Assessoria Segundo Grau  Assessor
         <transition to="(SG) Pode solicitar inclusão em pauta?" name="Solicitar inclusão em pauta">
             <condition expression="#{not processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')).selecionadoPauta}"/>
         </transition>
+        <transition to="(SG) Pode solicitar inclusão em mesa?" name="Solicitar inclusão em mesa"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator', true)}"/>
@@ -442,7 +447,7 @@ Magistrado  Assessoria Segundo Grau  Assessor
         </event>
     </node>
     <process-state name="(SG) Enviar autos à secretaria">
-        <sub-process name="(SG) Autos recebidos do gabinete" binding="late"/>
+        <sub-process name="(SG) Preparar ato de comunicação do acórdão" binding="late"/>
         <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
     </process-state>
     <node name="(SG) Registrar cancelamento de decisão colegiada">
@@ -469,6 +474,16 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:colegiadoDestino')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:relator:transicao:cancelamento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sg:deccolrel:RelatorioNaoAssinado')}"/>
+        </event>
+    </node>
+    <decision expression="#{votacaoColegiadoAction.isRelatorioAssinado() ? '(SG) Registrar aptidão para inclusão em mesa' : '(SG) Voto, relatório e ementa - VALIDAR'}" name="(SG) Pode solicitar inclusão em mesa?">
+        <transition to="(SG) Registrar aptidão para inclusão em mesa" name="(SG) Registrar aptidão para inclusão em mesa"/>
+        <transition to="(SG) Voto, relatório e ementa - VALIDAR" name="(SG) Voto, relatório e ementa - VALIDAR"/>
+    </decision>
+    <node name="(SG) Registrar aptidão para inclusão em mesa">
+        <transition to="(SG) Sessão de julgamento - AGUARDAR" name="(SG) Sessão de julgamento - AGUARDAR"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialManager.aptidaoParaJulgamento(processoTrfHome.instance.idProcessoTrf, true)}"/>
         </event>
     </node>
     <end-state name="Término"/>

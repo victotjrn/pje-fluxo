@@ -105,7 +105,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaCiencia')}"/>
         </event>
     </task-node>
-    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaIntimacaoPrazoAberto')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).setParameter(&quot;meioComunicacao&quot;, 'C').getSingleResult() &gt; 0 ? '(TUJ) Intimação com prazo em curso - AGUARDAR' : '(TUJ) Intimação com prazo decorrido - ANALISAR'}" name="(TUJ) Prazos de intimações continuam em aberto?">
+    <decision expression="#{entityManager.createQuery(parametroUtil.getParametro('pje:tjrn:tuj:consultaIntimacaoPrazoAberto')).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).setParameter(&quot;meioComunicacao&quot;, ExpedicaoExpedienteEnum.C).getSingleResult() &gt; 0 ? '(TUJ) Intimação com prazo em curso - AGUARDAR' : '(TUJ) Intimação com prazo decorrido - ANALISAR'}" name="(TUJ) Prazos de intimações continuam em aberto?">
         <transition to="(TUJ) Intimação com prazo decorrido - ANALISAR" name="(TUJ) Intimação com prazo decorrido - ANALISAR"/>
         <transition to="(TUJ) Intimação com prazo em curso - AGUARDAR" name="(TUJ) Intimação com prazo em curso - AGUARDAR"/>
     </decision>
