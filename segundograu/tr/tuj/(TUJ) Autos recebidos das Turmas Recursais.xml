@@ -12,7 +12,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('10265:1338')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">

@@ -12,7 +12,7 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('7283:1338')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('10265:1338')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -42,12 +42,18 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     <task-node end-tasks="true" name="(TUJ) Secretaria - ANALISAR">
         <task name="(TUJ) Secretaria - ANALISAR" swimlane="Secretaria">
             <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: movimentacaoLote
+1. Variável: aviso1
+   Label: #{tramitacaoProcessualService.recuperaVariavel('tuj:fbg:aviso_secretaria_analisar') ? '' : tramitacaoProcessualService.recuperaVariavel('tuj:fbg:aviso_secretaria_analisar')}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+2. Variável: movimentacaoLote
    Label: 
    Escrita: Sim
    Obrig. Não
@@ -55,12 +61,16 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <transition to="Nó de Desvio - (TUJ) Fluxo básico geral" name="Nó de Desvio - (TUJ) Fluxo básico geral">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(TUJ) Intimar" name="Intimar"/>
         <transition to="Término" name="Devolver para a Turma Recursal"/>
-        <transition to="(TUJ) Existe assunto principal?" name="Sortear para um dos relatores">
+        <transition to="(TUJ) Gravar variavel fluxo unico - Suspender o processo" name="Suspender o processo"/>
+        <transition to="(TUJ) Gravar variavel fluxo unico - Redistribuir" name="Redistribuir processo"/>
+        <transition to="(TUJ) Gravar variavel fluxo unico - Intimar" name="Intimar"/>
+        <transition to="(TUJ) Gravar variavel fluxo unico - Sortear" name="Sortear para um dos relatores">
             <condition expression="#{not tramitacaoProcessualService.recuperaVariavel('pje:fluxo:tuj:devolverTR')}"/>
         </transition>
-        <transition to="(TUJ) Redistribuição" name="Redistribuir processo"/>
+        <transition to="(TUJ) Gravar variavel fluxo unico - Enviar concluso para decisão" name="Enviar concluso para decisão"/>
+        <transition to="(TUJ) Gravar variavel fluxo unico - Enviar concluso para despacho" name="Enviar concluso para despacho"/>
+        <transition to="(TUJ) Gravar variavel fluxo unico - Enviar para preparação do voto, relatório e ementa" name="Enviar concluso para julgamento"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -68,6 +78,64 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
+    <node name="(TUJ) Gravar variavel fluxo unico - Suspender o processo">
+        <transition to="(TUJ) Pode ir para subfluxo único?" name="(TUJ) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:sub_fluxo_unico', '(TUJ) Controle de suspensão')}"/>
+        </event>
+    </node>
+    <node name="(TUJ) Gravar variavel fluxo unico - Redistribuir">
+        <transition to="(TUJ) Pode ir para subfluxo único?" name="(TUJ) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:sub_fluxo_unico', '(TUJ) Redistribuição')}"/>
+        </event>
+    </node>
+    <node name="(TUJ) Gravar variavel fluxo unico - Intimar">
+        <transition to="(TUJ) Pode ir para subfluxo único?" name="(TUJ) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:sub_fluxo_unico', '(TUJ) Intimar')}"/>
+        </event>
+    </node>
+    <node name="(TUJ) Gravar variavel fluxo unico - Sortear">
+        <transition to="(TUJ) Pode ir para subfluxo único?" name="(TUJ) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:sub_fluxo_unico', '(TUJ) Existe assunto principal?')}"/>
+        </event>
+    </node>
+    <node name="(TUJ) Gravar variavel fluxo unico - Enviar concluso para decisão">
+        <transition to="(TUJ) Pode ir para subfluxo único?" name="(TUJ) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:sub_fluxo_unico', '(TUJ) Preparação de decisão genérica')}"/>
+        </event>
+    </node>
+    <node name="(TUJ) Gravar variavel fluxo unico - Enviar concluso para despacho">
+        <transition to="(TUJ) Pode ir para subfluxo único?" name="(TUJ) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:sub_fluxo_unico', '(TUJ) Preparação de despacho genérico')}"/>
+        </event>
+    </node>
+    <node name="(TUJ) Gravar variavel fluxo unico - Enviar para preparação do voto, relatório e ementa">
+        <transition to="(TUJ) Pode ir para subfluxo único?" name="(TUJ) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:sub_fluxo_unico', '(TUJ) Preparação de voto, relatório e ementa')}"/>
+        </event>
+    </node>
+    <decision expression="#{entityManager.createNativeQuery(&quot;select count(*) from vs_situacao_processo_new s where s.nm_tarefa not in ('(TUJ) Secretaria - ANALISAR') AND s.id_processo_trf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(TUJ) Gravar mensagem nao pode entrar no fluxo' : tramitacaoProcessualService.recuperaVariavel('tuj:paj:sub_fluxo_unico')}" name="(TUJ) Pode ir para subfluxo único?">
+        <transition to="(TUJ) Controle de suspensão" name="(TUJ) Controle de suspensão"/>
+        <transition to="(TUJ) Redistribuição" name="(TUJ) Redistribuição"/>
+        <transition to="(TUJ) Intimar" name="(TUJ) Intimar"/>
+        <transition to="(TUJ) Existe assunto principal?" name="(TUJ) Existe assunto principal?"/>
+        <transition to="(TUJ) Preparação de decisão genérica" name="(TUJ) Preparação de decisão genérica"/>
+        <transition to="(TUJ) Preparação de despacho genérico" name="(TUJ) Preparação de despacho genérico"/>
+        <transition to="(TUJ) Preparação de voto, relatório e ementa" name="(TUJ) Preparação de voto, relatório e ementa"/>
+        <transition to="(TUJ) Gravar mensagem nao pode entrar no fluxo" name="(TUJ) Gravar mensagem nao pode entrar no fluxo"/>
+    </decision>
+    <node name="(TUJ) Gravar mensagem nao pode entrar no fluxo">
+        <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:fbg:aviso_secretaria_analisar', 'O processo não pôde ser movimentado pois há ações sendo efetuadas em outras tarefas. Para movimentá-lo, é necessário finalizar os procedimentos nas demais caixas e deixá-lo, apenas, em &quot;(TUJ) Secretaria - ANALISAR&quot;.')}"/>
+        </event>
+    </node>
     <process-state name="(TUJ) Intimar">
         <sub-process name="(TUJ) Preparar ato de comunicação" binding="late"/>
         <transition to="(TUJ) Controle de retorno de expedientes" name="(TUJ) Controle de retorno de expedientes"/>
@@ -109,7 +177,41 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     </process-state>
     <process-state name="(TUJ) Redistribuição">
         <sub-process name="(TUJ) Redistribuição" binding="late"/>
+        <transition to="(TUJ) Enviar concluso para julgamento" name="(TUJ) Enviar concluso para julgamento"/>
+    </process-state>
+    <process-state name="(TUJ) Controle de suspensão">
+        <sub-process name="(TUJ) Controle de suspensão" binding="late"/>
         <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(TUJ) Preparação de decisão genérica">
+        <sub-process name="(TUJ) Preparar ato judicial" binding="late"/>
+        <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:decisao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:paj:decisao')}"/>
+        </event>
+    </process-state>
+    <process-state name="(TUJ) Preparação de despacho genérico">
+        <sub-process name="(TUJ) Preparar ato judicial" binding="late"/>
+        <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:despacho', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:paj:despacho')}"/>
+        </event>
+    </process-state>
+    <process-state name="(TUJ) Preparação de voto, relatório e ementa">
+        <sub-process name="(TUJ) Preparar ato judicial" binding="late"/>
+        <transition to="(TUJ) Secretaria - ANALISAR" name="(TUJ) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:paj:julgamento', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('tuj:paj:julgamento')}"/>
+        </event>
     </process-state>
     <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Fluxo básico geral">
         <task name="Nó de Desvio - (TUJ) Fluxo básico geral" swimlane="Nó de Desvio - (TUJ) Fluxo básico geral"/>
