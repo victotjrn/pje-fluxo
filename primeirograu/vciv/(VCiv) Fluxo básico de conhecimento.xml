@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Fluxo básico de conhecimento">
-    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum..................
+    <description><![CDATA[Fluxo básico de conhecimento para varas cíveis da justiça comum....................
 Aguardar Perícia / Laudo Técnico / Outros]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Fluxo básico de conhecimento">
@@ -461,7 +461,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fbc:EhDeOutroFluxo', 'true')}"/>
         </event>
     </process-state>
-    <decision expression="#{((tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia == 3 &amp;&amp; competenciaClasseAssuntoHome.processoContemClasseAssunto('159;156')) || (tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia != 3)) ? '(VCiv) Controlar audiência?' : '(VCiv) Processo com documentação insuficiente?'}" name="(VCiv) É competência de juizado especial cível?">
+    <decision expression="#{util.eval(parametroUtil.getParametro('pje:tjrn:vciv:DefinicaoJuizadoCivel')) ? '(VCiv) Processo com documentação insuficiente?' : '(VCiv) Controlar audiência?'}" name="(VCiv) É competência de juizado especial cível?">
         <transition to="(VCiv) Controlar audiência?" name="(VCiv) Controlar audiência?"/>
         <transition to="(VCiv) Processo com documentação insuficiente?" name="(VCiv) Processo com documentação insuficiente?"/>
     </decision>
