@@ -462,6 +462,27 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </event>
     </process-state>
     <decision expression="#{util.eval(parametroUtil.getParametro('pje:tjrn:vciv:DefinicaoJuizadoCivel')) ?  '(VCiv) Controlar audiência?' : '(VCiv) Processo com documentação insuficiente?'}" name="(VCiv) É competência de juizado especial cível?">
+        <description><![CDATA[parametro: pje:tjrn:vciv:DefinicaoJuizadoCivel : (
+        tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia == 3 
+                && 
+        competenciaClasseAssuntoHome.processoContemClasseAssunto('159;156')
+) 
+
+||
+
+(
+        tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia == 25 
+                        && 
+        competenciaClasseAssuntoHome.processoContemClasseAssunto('159;156')
+) 
+
+|| 
+
+(
+        tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia != 3
+                &&
+        tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia != 25
+)]]></description>
         <transition to="(VCiv) Controlar audiência?" name="(VCiv) Controlar audiência?"/>
         <transition to="(VCiv) Processo com documentação insuficiente?" name="(VCiv) Processo com documentação insuficiente?"/>
     </decision>
