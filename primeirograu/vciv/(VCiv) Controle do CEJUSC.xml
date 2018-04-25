@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC.............................]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC..............................]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -632,11 +632,13 @@ expressão p/ quando ativar parnamirim:
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
                 <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
                 <variable name="aviso3" mapped-name="textAlert:aviso3" access="read,write"/>
+                <variable name="aviso4" mapped-name="textAlert:aviso4" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[aviso:Selecione para qual CEJUSC deseja encaminhar o processo:
 aviso2:A opção "CEJUSC" encaminhará o processo para a marcação de audiência de conciliação cível ou família, bem como mediação cível ou família.
-aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiência de conciliação específica do DPVAT.]]></description>
+aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiência de conciliação específica do DPVAT.
+aviso4:A opção "CEJUSC - DPVAT - PERÍCIA" encaminhará o processo para a realização de perícias referentes ao DPVAT.]]></description>
         <transition to="(CEJUSC) Designar audiência" name="CEJUSC"/>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
