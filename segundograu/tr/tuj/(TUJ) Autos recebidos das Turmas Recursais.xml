@@ -37,7 +37,8 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
         <transition to="Nó de Desvio - (TUJ) Autos recebidos das Turmas Recursais" name="Nó de Desvio - (TUJ) Autos recebidos das Turmas Recursais">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Emitir certidão de recebimento"/>
+        <transition to="(TUJ) Cancelar" name="Devolver para a Turma Recursal"/>
+        <transition to="(TUJ) Emitir certidão de recebimento" name="Emitir certidão de recebimento"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -45,6 +46,18 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
+    <node name="(TUJ) Emitir certidão de recebimento">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:aut_rec_tr:transicaoSaida', '(TUJ) Encaminhar para elaborar certidão')}"/>
+        </event>
+    </node>
+    <node name="(TUJ) Cancelar">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tuj:aut_rec_tr:transicaoSaida', 'Término')}"/>
+        </event>
+    </node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (TUJ) Autos recebidos das Turmas Recursais">
         <task name="Nó de Desvio - (TUJ) Autos recebidos das Turmas Recursais" swimlane="Nó de Desvio - (TUJ) Autos recebidos das Turmas Recursais"/>

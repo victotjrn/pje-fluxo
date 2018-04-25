@@ -22,8 +22,12 @@ Secretaria  Secretaria TUJ  Chefe de Secretaria]]></description>
     <!-- NODES -->
     <process-state name="(TUJ) Autos recebidos das Turmas Recursais">
         <sub-process name="(TUJ) Autos recebidos das Turmas Recursais" binding="late"/>
-        <transition to="(TUJ) Encaminhar para elaborar certidão" name="(TUJ) Encaminhar para elaborar certidão"/>
+        <transition to="(TUJ) Elaborar certidão ou sair?" name="(TUJ) Elaborar certidão ou sair?"/>
     </process-state>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('tuj:aut_rec_tr:transicaoSaida') ? tramitacaoProcessualService.recuperaVariavel('tuj:aut_rec_tr:transicaoSaida') : '(TUJ) Encaminhar para elaborar certidão'}" name="(TUJ) Elaborar certidão ou sair?">
+        <transition to="(TUJ) Encaminhar para elaborar certidão" name="(TUJ) Encaminhar para elaborar certidão"/>
+        <transition to="Término" name="Término"/>
+    </decision>
     <process-state name="(TUJ) Encaminhar para elaborar certidão">
         <sub-process name="(TUJ) Elaboração de certidão" binding="late"/>
         <transition to="(TUJ) Remessa para admissibilidade" name="(TUJ) Remessa para admissibilidade"/>
