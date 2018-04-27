@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Expedição de ato ordinatório de gabinete">
     <description><![CDATA[Código do fluxo: SG_EAOG
 
-Descrição: Expedição de ato ordinatório, para retirada de concluso dispensando assinatura pelo magistrado..
+Descrição: Expedição de ato ordinatório, para retirada de concluso dispensando assinatura pelo magistrado.
 
 Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessor
@@ -62,6 +62,12 @@ Assessoria  Gabinete Segundo Grau    Magistrado]]></description>
         </transition>
         <transition to="(SG) Remover ato ordinatório não assinado e sinalizar cancelamento" name="Cancelar elaboração de ato ordinatório"/>
         <transition to="(SG) Ato ordinatório do gabinete - ASSINAR" name="Encaminhar para assinatura"/>
+        <event type="node-enter">
+            <action expression="#{ not empty tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') ? processoDocumentoHome.setInstance(processoDocumentoManager.findById(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao'))) : '' }"/>
+            <action expression="#{ not empty tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') ? processoDocumentoHome.instance.setTipoProcessoDocumento(tipoProcessoDocumentoManager.findByCodigoDocumento('4050023')) : '' }"/>
+            <action expression="#{ not empty tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') ? processoDocumentoHome.update() : '' }"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
+        </event>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','67')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar elaboração de ato ordinatório')}"/>
