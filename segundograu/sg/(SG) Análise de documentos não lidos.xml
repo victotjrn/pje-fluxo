@@ -7,13 +7,14 @@ Descrição: Fluxo destinado à análise de juntada de documentos..
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
-Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
+Secretaria  Secretaria Segundo Grau  Servidor Geral
+Secretaria  Secretaria TUJ           Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Análise de documentos não lidos">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483,8:1338')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483,8:1338,602:5906,10265:1338')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
