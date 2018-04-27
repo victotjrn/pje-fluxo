@@ -3,24 +3,29 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Análise de documentos não lidos">
     <description><![CDATA[Código do fluxo: SG_ADOCNLIDO
 
-Descrição: Fluxo destinado à análise de juntada de documentos.
+Descrição: Fluxo destinado à análise de juntada de documentos..
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
-Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>  
+Secretaria  Secretaria Segundo Grau  Servidor Geral
+Secretaria  Secretaria TUJ           Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Análise de documentos não lidos">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483,8:1338,602:5906,10265:1338')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(SG) Foi juntado pelo Ministério Público?" name="(SG) Foi juntado pelo Ministério Público?"/>
+        <transition to="(SG) Processo distribuído?" name="(SG) Processo distribuído?"/>
     </start-state>  
     <!-- NODES -->
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaProcesso().processo.numeroProcesso ? '(SG) Foi juntado pelo Ministério Público?' : 'Término'}" name="(SG) Processo distribuído?">
+        <transition to="(SG) Foi juntado pelo Ministério Público?" name="(SG) Foi juntado pelo Ministério Público?"/>
+        <transition to="Término" name="Término"/>
+    </decision>
     <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Ministério Público') &gt; -1 ? '(SG) Documentos não lidos [Ministério Público] - ANALISAR' : '(SG) Foi juntado pela Defensoria?'}" name="(SG) Foi juntado pelo Ministério Público?">
         <transition to="(SG) Foi juntado pela Defensoria?" name="(SG) Foi juntado pela Defensoria?"/>
         <transition to="(SG) Documentos não lidos [Ministério Público] - ANALISAR" name="(SG) Documentos não lidos [Ministério Público] - ANALISAR"/>
