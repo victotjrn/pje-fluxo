@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC..............................]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC...............................]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -645,6 +645,12 @@ aviso4:A opção "CEJUSC - DPVAT - PERÍCIA" encaminhará o processo para a realizaç
         </transition>
         <transition to="(CEJUSC) É NATAL ?" name="CEJUSC - DPVAT"/>
         <transition to="(CEJUSC) É NATAL DPVAT PERÍCIA ?" name="CEJUSC - DPVAT - PERÍCIA"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
     </task-node>
     <decision expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) || authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;MOSSOR&quot;) || authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;PARNAMIRIM&quot;) ? '(CEJUSC) Selecionar CEJUSC' : '(CEJUSC) Designar audiência'}" name="(CEJUSC) É Natal Mossoró Ou Parnamirim ?">
         <transition to="(CEJUSC) Selecionar CEJUSC" name="(CEJUSC) Selecionar CEJUSC"/>
