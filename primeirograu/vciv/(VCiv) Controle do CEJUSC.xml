@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC...............................]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC.................................]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -644,7 +644,9 @@ aviso4:A opção "CEJUSC - DPVAT - PERÍCIA" encaminhará o processo para a realizaç
             <condition expression="#{true}"/>
         </transition>
         <transition to="(CEJUSC) É NATAL ?" name="CEJUSC - DPVAT"/>
-        <transition to="(CEJUSC) É NATAL DPVAT PERÍCIA ?" name="CEJUSC - DPVAT - PERÍCIA"/>
+        <transition to="(CEJUSC) É NATAL DPVAT PERÍCIA ?" name="CEJUSC - DPVAT - PERÍCIA">
+            <condition expression="authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;)"/>
+        </transition>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
