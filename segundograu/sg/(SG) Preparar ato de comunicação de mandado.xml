@@ -11,13 +11,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral
 Magistrado  Assessoria Segundo Grau  Assessor
 Magistrado  Assessoria Segundo Grau  Assessor Chefe
 Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada
-Magistrado  Gabinete Segundo Grau    Magistrado]]></description>  
+Magistrado  Gabinete Segundo Grau    Magistrado
+Assessoria Segundo Grau  Assessor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Preparar ato de comunicação de mandado">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,600:5907')}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483,602:5906')}" actor-id="#{actor.id}"/>

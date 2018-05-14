@@ -10,16 +10,18 @@ Assessoria  Assessoria Segundo Grau  Assessoria
             Assessoria Segundo Grau  Assessor Chefe
             Assessoria Segundo Grau  Assessor para Votação Antecipada
             Gabinete Segundo Grau    Magistrado
+            Assessoria Segundo Grau  Assessor Geral
 Magistrado  Assessoria Segundo Grau  Assessoria
             Assessoria Segundo Grau  Assessor Chefe
             Assessoria Segundo Grau  Assessor para Votação Antecipada
-            Gabinete Segundo Grau    Magistrado]]></description>  
+            Gabinete Segundo Grau    Magistrado
+            Assessoria Segundo Grau  Assessor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Assessoria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,600:5907')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,600:5907')}"/>
     </swimlane>
     <swimlane name="Nó de Desvio - (SG) Preparar ato judicial de decisão de urgência">
         <assignment actor-id="#{actor.id}"/>

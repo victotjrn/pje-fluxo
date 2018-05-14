@@ -10,10 +10,11 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             Assessoria Segundo Grau  Assessor Chefe
             Gabinete Segundo Grau    Magistrado
             Assessoria               Assessor
-            Gabinete               Magistrado]]></description>  
+            Gabinete               Magistrado
+            Assessoria Segundo Grau  Assessor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,5:5197,6:1469')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,5:5197,6:1469,600:5907')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Nó de Desvio - (SG) Pedido de vista">
         <assignment actor-id="#{actor.id}"/>

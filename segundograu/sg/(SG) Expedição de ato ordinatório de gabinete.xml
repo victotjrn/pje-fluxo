@@ -9,13 +9,14 @@ Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessor
 Assessoria  Assessoria Segundo Grau  Assessor Chefe
 Assessoria  Assessoria Segundo Grau  Assessor para Votação Antecipada
-Assessoria  Gabinete Segundo Grau    Magistrado]]></description>  
+Assessoria  Gabinete Segundo Grau    Magistrado
+Assessoria Segundo Grau  Assessor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Expedição de ato ordinatório de gabinete">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Assessoria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,600:5898,600:5899,599:1469')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,600:5898,600:5899,599:1469,600:5907')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">

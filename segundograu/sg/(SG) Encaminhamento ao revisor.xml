@@ -9,20 +9,23 @@ Raia        Localização              Papel
 Assessoria  Assessoria Segundo Grau  Assessor
 Assessoria  Assessoria Segundo Grau  Assessor Chefe
 Assessoria  Assessoria Segundo Grau  Assessor para Votação Antecipada
+Assessoria  Assessoria Segundo Grau  Assessor Geral
 Assessoria  Gabinete Segundo Grau    Magistrado
+Assessoria  Assessoria Segundo Grau  Assessor Geral
 Magistrado  Assessoria Segundo Grau  Assessor
 Magistrado  Assessoria Segundo Grau  Assessor Chefe
 Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada
-Magistrado  Gabinete Segundo Grau    Magistrado]]></description>  
+Magistrado  Gabinete Segundo Grau    Magistrado
+Magistrado  Assessoria Segundo Grau  Assessor Geral]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (SG) Encaminhamento ao revisor">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Gabinete">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,600:5898,599:1469,600:5899')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,600:5898,599:1469,600:5899,600:5907')}"/>
     </swimlane>
     <swimlane name="Assessoria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,600:5898,599:1469,600:5899')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,600:5898,599:1469,600:5899,600:5907')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
