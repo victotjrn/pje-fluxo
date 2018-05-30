@@ -85,6 +85,7 @@ Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Voto [não relator] - VALIDAR" name="Encaminhar para validação"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
         </event>
