@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Decisão colegiada como relator">
-    <description><![CDATA[Código do fluxo: SG_DECCOLREL.
+    <description><![CDATA[Código do fluxo: SG_DECCOLREL
 
 Descrição: Fluxo destinado a preparação de decisões colegiadas como relator do processo.
 
@@ -17,14 +17,17 @@ Magistrado  Assessoria Segundo Grau  Assessor
             Gabinete Segundo Grau    Magistrado
             Assessoria Segundo Grau  Assessor Geral]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Assessoria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,600:5907')}" actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,600:5907')}"/>
     </swimlane>
+    <swimlane name="Redação judiciária">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:5031')}"/>
+    </swimlane>
     <swimlane name="Nó de Desvio - (SG) Decisão colegiada como relator">
         <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Assessoria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,600:5907')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -69,14 +72,14 @@ Magistrado  Assessoria Segundo Grau  Assessor
         <transition to="(SG) Voto, relatório ou ementa vazio?" name="Encaminhar para validação do magistrado">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:deccolrel:enviarMagistrado', true)}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar escolha do tipo de conclusão')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:deccolrel:decisaoColegiadaVazia')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar escolha do tipo de conclusão')}"/>
         </event>
     </task-node>
     <decision expression="#{(entityManager.createQuery(&quot;SELECT COUNT(DISTINCT pd.tipoProcessoDocumento.idTipoProcessoDocumento) FROM ProcessoDocumento pd WHERE NOT EXISTS (SELECT DISTINCT pd.tipoProcessoDocumento.idTipoProcessoDocumento FROM ProcessoDocumentoBinPessoaAssinatura pdba WHERE pdba.processoDocumentoBin.idProcessoDocumentoBin = pd.processoDocumentoBin.idProcessoDocumentoBin) AND pd.processo = :processo AND pd.ativo=true AND pd.tipoProcessoDocumento.idTipoProcessoDocumento IN (77,73,72)&quot;).setParameter(&quot;processo&quot;, tramitacaoProcessualService.recuperaProcesso()).getSingleResult() == 3 ? (tramitacaoProcessualService.recuperaVariavel('sg:deccolrel:enviarMagistrado') == true ? '(SG) Voto, relatório e ementa - VALIDAR' : '(SG) Voto, relatório e ementa - CONFIRMAR') : '(SG) Voto, relatório e ementa - MINUTAR')}" name="(SG) Voto, relatório ou ementa vazio?">
@@ -118,11 +121,11 @@ Magistrado  Assessoria Segundo Grau  Assessor
         </transition>
         <transition to="(SG) Voto, relatório e ementa - VALIDAR" name="Encaminhar para validação do magistrado"/>
         <transition to="(SG) Voto, relatório e ementa - MINUTAR" name="Retornar à assessoria para minutar"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao', false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Voto, relatório e ementa - VALIDAR">
@@ -173,12 +176,12 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <condition expression="#{sessaoPautaProcessoTrfManager.isProcessoJulgadoUltimaSessao(processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')))}"/>
         </transition>
         <transition to="(SG) Registrar aptidão para inclusão em mesa" name="Solicitar inclusão em mesa"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:deccolrel:RelatorioNaoAssinado')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao', false)}"/>
         </event>
     </task-node>
     <decision expression="#{votacaoColegiadoAction.isRelatorioAssinado() ? '(SG) Registrar aptidão para julgamento' : '(SG) Voto, relatório e ementa - VALIDAR'}" name="(SG) Pode solicitar inclusão em pauta?">
@@ -225,17 +228,17 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <condition expression="#{not processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')).selecionadoPauta}"/>
         </transition>
         <transition to="(SG) Registrar aptidão para inclusão em mesa" name="Solicitar inclusão em mesa"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Houve julgamento?')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Retornar para confirmação do relatório, voto e ementa, Encaminhar manualmente para preparação do acórdão')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Houve julgamento?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Retornar para confirmação do relatório, voto e ementa, Encaminhar manualmente para preparação do acórdão')}"/>
         </event>
     </task-node>
     <process-state name="(SG) Envio ao revisor">
@@ -302,17 +305,17 @@ Magistrado  Assessoria Segundo Grau  Assessor
         <transition to="(SG) Houve disponibilização aos demais gabinetes?" name="Liberar para votação antecipada">
             <condition expression="#{empty tramitacaoProcessualService.recuperaVariavel('pje:flx:colegiado:disponibilizado')}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Houve julgamento?')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Encaminhar manualmente para preparação do acórdão')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao:relator', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Houve julgamento?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Encaminhar manualmente para preparação do acórdão')}"/>
         </event>
     </task-node>
     <node name="(SG) Renovar pedido de inclusão em pauta">
@@ -337,36 +340,130 @@ Magistrado  Assessoria Segundo Grau  Assessor
     </decision>
     <node name="(SG) Disponibilizar para demais gabinetes">
         <transition to="(SG) Votação antecipada - AGUARDAR" name="(SG) Votação antecipada - AGUARDAR"/>
-        <event type="node-enter">
-            <action expression="#{sessaoJulgamentoServiceCNJ.criarFluxoDemaisJulgadores(tramitacaoProcessualService.recuperaProcesso(),'SG_DECCOLNREL')}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:flx:colegiado:disponibilizado', true)}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{sessaoJulgamentoServiceCNJ.criarFluxoDemaisJulgadores(tramitacaoProcessualService.recuperaProcesso(),'SG_DECCOLNREL')}"/>
         </event>
     </node>
     <decision expression="#{'julgado' == processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao') ? '(SG) Gabinete do relator foi o vencedor?' : '(SG) Sessão de julgamento - AGUARDAR'}" name="(SG) Houve julgamento?">
         <transition to="(SG) Gabinete do relator foi o vencedor?" name="(SG) Gabinete do relator foi o vencedor?"/>
         <transition to="(SG) Sessão de julgamento - AGUARDAR" name="(SG) Sessão de julgamento - AGUARDAR"/>
     </decision>
-    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('pje:fluxo:colegiado:orgaoVencedor:id') and tramitacaoProcessualService.recuperaVariavel('pje:fluxo:colegiado:orgaoVencedor:id') == tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador ? '(SG) Acórdão [Inteiro Teor] - ASSINAR' : '(SG) Deslocar órgão ao relator pro acórdão'}" name="(SG) Gabinete do relator foi o vencedor?">
-        <transition to="(SG) Acórdão [Inteiro Teor] - ASSINAR" name="(SG) Acórdão [Inteiro Teor] - ASSINAR"/>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('pje:fluxo:colegiado:orgaoVencedor:id') and tramitacaoProcessualService.recuperaVariavel('pje:fluxo:colegiado:orgaoVencedor:id') == tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador ? '(SG) Acórdão [Inteiro Teor] - CONFERIR' : '(SG) Deslocar órgão ao relator pro acórdão'}" name="(SG) Gabinete do relator foi o vencedor?">
         <transition to="(SG) Deslocar órgão ao relator pro acórdão" name="(SG) Deslocar órgão ao relator pro acórdão"/>
+        <transition to="(SG) Acórdão [Inteiro Teor] - CONFERIR" name="(SG) Acórdão [Inteiro Teor] - CONFERIR"/>
     </decision>
+    <task-node end-tasks="true" name="(SG) Acórdão [Inteiro Teor] - CONFERIR">
+        <task name="(SG) Acórdão [Inteiro Teor] - CONFERIR" swimlane="Redação judiciária">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_elaborarAcordao" mapped-name="frame:WEB-INF_xhtml_flx_elaborarAcordao" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: WEB-INF_xhtml_flx_elaborarAcordao
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em lote
+
+*Eventos de tarefa*
+
+1. Sair Tarefa
+   Agrupamento eventos: Julgamento
+   Condições de lançamento temporário: #{true}]]></description>
+        <transition to="(SG) Acórdão [Inteiro Teor] - REVISAR" name="Encaminhar para revisão do acórdão pela assessoria"/>
+        <transition to="(SG) Acórdão [Inteiro Teor] - ASSINAR" name="Encaminhar para assinatura do acórdão"/>
+        <transition to="Nó de Desvio - (SG) Decisão colegiada como relator" name="Nó de Desvio - (SG) Decisão colegiada como relator">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-start">
+            <action/>
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:voto:permiteIncluir')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir')}"/>
+        </event>
+        <event type="task-create">
+            <action/>
+            <action/>
+            <action/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:acordaorevisado', true)}"/>
+        </event>
+    </task-node>
     <node name="(SG) Deslocar órgão ao relator pro acórdão">
-        <transition to="(SG) Acórdão [Inteiro Teor] - ASSINAR" name="(SG) Acórdão [Inteiro Teor] - ASSINAR"/>
+        <transition to="(SG) Acórdão [Inteiro Teor] - REVISAR" name="(SG) Acórdão [Inteiro Teor] - REVISAR"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(processInstance.contextInstance.getVariable('processo'))}"/>
+        </event>
         <event type="node-enter">
             <action expression="#{processInstance.contextInstance.setVariable('pje:fluxo:deslocamento:orgaoDestino', processInstance.contextInstance.getVariable('pje:fluxo:colegiado:orgaoVencedor:id'))}"/>
             <action expression="#{processInstance.contextInstance.setVariable('pje:fluxo:deslocamento:orgaoCargoDestino', processInstance.contextInstance.getVariable('pje:fluxo:colegiado:cargoVencedor:id'))}"/>
         </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(processInstance.contextInstance.getVariable('processo'))}"/>
-        </event>
     </node>
+    <task-node end-tasks="true" name="(SG) Acórdão [Inteiro Teor] - REVISAR">
+        <task name="(SG) Acórdão [Inteiro Teor] - REVISAR" swimlane="Assessoria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_elaborarAcordao" mapped-name="frame:WEB-INF_xhtml_flx_elaborarAcordao" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: WEB-INF_xhtml_flx_elaborarAcordao
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em lote
+
+*Eventos de tarefa*
+
+1. Sair Tarefa
+   Agrupamento eventos: Julgamento
+   Condições de lançamento temporário: #{true}]]></description>
+        <transition to="(SG) Acórdão [Inteiro Teor] - ASSINAR" name="Encaminhar para assinatura do acórdão"/>
+        <transition to="Nó de Desvio - (SG) Decisão colegiada como relator" name="Nó de Desvio - (SG) Decisão colegiada como relator">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Acórdão [Inteiro Teor] - CONFERIR" name="Retornar para revisão pela redação judiciária"/>
+        <event type="task-start">
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:voto:permiteIncluir')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:voto:permiteIncluir', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:acordaorevisado', true)}"/>
+        </event>
+    </task-node>
     <task-node end-tasks="true" name="(SG) Acórdão [Inteiro Teor] - ASSINAR">
         <task name="(SG) Acórdão [Inteiro Teor] - ASSINAR" swimlane="Magistrado">
             <controller>
                 <variable name="WEB-INF_xhtml_flx_elaborarAcordao" mapped-name="frame:WEB-INF_xhtml_flx_elaborarAcordao" access="read,write"/>
                 <variable name="assinaturaInteiroTeorLote" mapped-name="assinarInteiroTeorLote:assinaturaInteiroTeorLote" access="read,write"/>
+                <variable name="HomologarMovimentos" mapped-name="homologadorEventoTree:HomologarMovimentos" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -386,14 +483,16 @@ Magistrado  Assessoria Segundo Grau  Assessor
         <transition to="Nó de Desvio - (SG) Decisão colegiada como relator" name="Nó de Desvio - (SG) Decisão colegiada como relator">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Realocar órgão ao relator de origem" name="(SG) Realocar órgão ao relator de origem">
+        <transition to="(SG) Acórdão revisado?" name="(SG) Acórdão revisado?">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Realocar órgão ao relator de origem')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:voto:permiteIncluir', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir', true)}"/>
+        <transition to="(SG) Acórdão [Inteiro Teor] - REVISAR" name="Retornar para revisão do acórdão pela assessoria"/>
+        <transition to="(SG) Acórdão [Inteiro Teor] - CONFERIR" name="Retornar pela revisão pela redação judiciária"/>
+        <transition to="(SG) Realocar órgão ao relator de origem" name="Acórdão assinado!">
+            <condition expression="#{ parametroUtil.getParametro('pje:tjrn:AcordaoAssinado').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).concat('_')) }"/>
+        </transition>
+        <event type="task-start">
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir')}"/>
@@ -401,7 +500,27 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Acórdão revisado?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:voto:permiteIncluir', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir', true)}"/>
+            <action name="upd" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+        </event>
     </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:acordaorevisado') == true ? '(SG) Lançar movimentação do acórdão' : '(SG) Realocar órgão ao relator de origem'}" name="(SG) Acórdão revisado?">
+        <transition to="(SG) Realocar órgão ao relator de origem" name="(SG) Realocar órgão ao relator de origem"/>
+        <transition to="(SG) Lançar movimentação do acórdão" name="(SG) Lançar movimentação do acórdão"/>
+    </decision>
+    <node name="(SG) Lançar movimentação do acórdão">
+        <transition to="(SG) Acrescentar situação julgado no processo" name="(SG) Acrescentar situação julgado no processo"/>
+        <event type="node-enter">
+            <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+            <action expression="#{eventsHomologarMovimentosTree.setEventoBeanList(tramitacaoProcessualService.recuperaVariavel('MovimentosLancadosTemporariamente'))}"/>
+            <action expression="#{ eventsHomologarMovimentosTree.registraEventosSemFluxo(tramitacaoProcessualService.recuperaProcesso().processo, processoDocumentoManager.findById(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao'))) }"/>
+        </event>
+    </node>
     <node name="(SG) Realocar órgão ao relator de origem">
         <transition to="(SG) Acórdão aguardando movimento de julgamento - LANÇAR" name="(SG) Acórdão aguardando movimento de julgamento - LANÇAR"/>
         <event type="node-enter">
@@ -432,14 +551,14 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Acrescentar situação julgado no processo" name="Lançar movimentação"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        <event type="task-start">
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
-        <event type="task-start">
-            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <node name="(SG) Acrescentar situação julgado no processo">
@@ -476,6 +595,7 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:colegiadoDestino')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:relator:transicao:cancelamento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sg:deccolrel:RelatorioNaoAssinado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:acordaorevisado')}"/>
         </event>
     </node>
     <node name="(SG) Registrar aptidão para inclusão em mesa">
@@ -495,12 +615,41 @@ Magistrado  Assessoria Segundo Grau  Assessor
         <transition to="(SG) Acórdão [Inteiro Teor] - ASSINAR" name="(SG) Acórdão [Inteiro Teor] - ASSINAR"/>
         <transition to="(SG) Acórdão aguardando movimento de julgamento - LANÇAR" name="(SG) Acórdão aguardando movimento de julgamento - LANÇAR"/>
         <transition to="(SG) Votação antecipada - AGUARDAR" name="(SG) Votação antecipada - AGUARDAR"/>
+        <transition to="(SG) Acórdão [Inteiro Teor] - REVISAR" name="(SG) Acórdão [Inteiro Teor] - REVISAR"/>
+        <transition to="(SG) Acórdão [Inteiro Teor] - CONFERIR" name="(SG) Acórdão [Inteiro Teor] - CONFERIR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -509,40 +658,13 @@ Magistrado  Assessoria Segundo Grau  Assessor
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
     <!-- ACTIONS --> 
