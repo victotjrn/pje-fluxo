@@ -28,7 +28,7 @@
         <transition to="Fluxo de conhecimento de VCiv" name="Fluxo de conhecimento de VCiv"/>
     </decision>
     <end-state name="Término"/>
-    <decision expression="#{processoTrfHome.possuiCompetencia(3) ? 'É classe de execução do JEC?' : 'É competência de CEJUSC?'}" name="É competência de JEC?">
+    <decision expression="#{processoTrfHome.possuiCompetencia(parametroUtil.getParametro('pje:fluxo:idCompetenciaJEC')) ? 'É classe de execução do JEC?' : 'É competência de CEJUSC?'}" name="É competência de JEC?">
         <transition to="É classe de execução do JEC?" name="É classe de execução do JEC?"/>
         <transition to="É competência de CEJUSC?" name="É competência de CEJUSC?"/>
     </decision>
