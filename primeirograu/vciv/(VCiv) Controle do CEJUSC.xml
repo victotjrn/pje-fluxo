@@ -81,6 +81,8 @@ expressão p/ quando ativar parnamirim:
         </transition>
         <transition to="(CEJUSC) Audiências realizadas sem acordo" name="Devolver - Sem acordo"/>
         <transition to="(CEJUSC) Audiências realizadas com acordo" name="Devolver - Com acordo"/>
+        <transition to="(CEJUSC) Audiências realizadas sem laudo" name="Devolver - Sem laudo"/>
+        <transition to="(CEJUSC) Audiências realizadas com laudo" name="Devolver - Com laudo"/>
         <transition to="(CEJUSC) Audiências realizadas com ausência parcial das partes" name="Devolver - Ausência parcial das partes"/>
         <transition to="(CEJUSC) Audiências realizadas com acordo parcial" name="Devolver - Acordo parcial"/>
         <event type="task-start">
@@ -93,6 +95,13 @@ expressão p/ quando ativar parnamirim:
                 <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: movimentarLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
@@ -110,6 +119,61 @@ expressão p/ quando ativar parnamirim:
                 <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
             </controller>
         </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: movimentarLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(CEJUSC) Audiências realizadas sem laudo">
+        <task name="(CEJUSC) Audiências realizadas sem laudo" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: movimentarLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(CEJUSC) Audiências realizadas com laudo">
+        <task name="(CEJUSC) Audiências realizadas com laudo" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: movimentarLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Controle do CEJUSC" name="Nó de Desvio - (VCiv) Controle do CEJUSC">
             <condition expression="#{true}"/>
@@ -317,6 +381,8 @@ expressão p/ quando ativar parnamirim:
         <transition to="(CEJUSC) Audiências realizadas com ausência parcial das partes" name="(CEJUSC) Audiências realizadas com ausência parcial das partes"/>
         <transition to="(CEJUSC) Audiências realizadas com acordo parcial" name="(CEJUSC) Audiências realizadas com acordo parcial"/>
         <transition to="(CEJUSC) Selecionar Central de Mandados" name="(CEJUSC) Selecionar Central de Mandados"/>
+        <transition to="(CEJUSC) Audiências realizadas sem laudo" name="(CEJUSC) Audiências realizadas sem laudo"/>
+        <transition to="(CEJUSC) Audiências realizadas com laudo" name="(CEJUSC) Audiências realizadas com laudo"/>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Informar conteúdo DJe">
         <task name="(CEJUSC) Informar conteúdo DJe" swimlane="CEJUSC">
@@ -440,6 +506,8 @@ expressão p/ quando ativar parnamirim:
         <task name="(CEJUSC) Escolher tipo de devolução" swimlane="CEJUSC"/>
         <transition to="(CEJUSC) Audiências realizadas sem acordo" name="Devolver - Sem acordo"/>
         <transition to="(CEJUSC) Audiências realizadas com acordo" name="Devolver - Com acordo"/>
+        <transition to="(CEJUSC) Audiências realizadas sem laudo" name="Devolver - Sem laudo"/>
+        <transition to="(CEJUSC) Audiências realizadas com laudo" name="Devolver - Com laudo"/>
         <transition to="(CEJUSC) Audiências não realizadas" name="Devolver - Não realizado"/>
         <transition to="(CEJUSC) Audiências realizadas com ausência parcial das partes" name="Devolver - Ausência parcial das partes"/>
         <transition to="(CEJUSC) Audiências realizadas com acordo parcial" name="Devolver - Acordo parcial"/>
