@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+f<?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Controle de prazos e retorno de expedientes">
     <description><![CDATA[Controla prazos e retorno de expedientes..
@@ -263,7 +263,7 @@
         <transition to="(VCiv) Aguardando devolução do AR" name="(VCiv) Aguardando devolução do AR"/>
         <transition to="(VCiv) Controlar retorno de expediente" name="(VCiv) Controlar retorno de expediente"/>
     </decision>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT (*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = 65 AND ppe.fechado = false AND ppe.dtCienciaParte IS NOT NULL&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(VCiv) Registrar SERASAJUD' : 'Finalizar e sair da tarefa'}" name="(VCiv) Existe citação?">
+    <decision expression="#{util.eval(parametroUtil.getParametro('pje:tjrn:VerificaSerasaJUD')) ? '(VCiv) Registrar SERASAJUD' : 'Finalizar e sair da tarefa'}" name="(VCiv) Existe citação?">
         <transition to="(VCiv) Há prazo em aberto?" name="Finalizar e sair da tarefa"/>
         <transition to="(VCiv) Registrar SERASAJUD" name="(VCiv) Registrar SERASAJUD"/>
     </decision>
