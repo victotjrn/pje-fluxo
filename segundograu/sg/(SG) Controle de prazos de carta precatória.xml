@@ -21,116 +21,76 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Existe expediente do tipo carta pendente de ciência?" name="(SG) Existe expediente do tipo carta pendente de ciência?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.meioExpedicaoExpediente = 'L' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR' : '(SG) Separação em carta com ou sem prazo'}" name="(SG) Existe expediente do tipo carta pendente de ciência?">
-        <transition to="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR"/>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento in (94,203,204) AND pe.meioExpedicaoExpediente = 'C' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa de registrar AR?' : '(SG) Separação em carta com ou sem prazo'}" name="(SG) Existe expediente do tipo carta pendente de ciência?">
+        <transition to="(SG) Separação em carta com ou sem prazo" name="(SG) Separação em carta com ou sem prazo"/>
+        <transition to="(SG) Existe registro do processo na tarefa de registrar AR?" name="(SG) Existe registro do processo na tarefa de registrar AR?"/>
+    </decision>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(SG) Carta precatória, rogatória ou de ordem pendente de devolução do AR - REGISTRAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Separação em carta com ou sem prazo' : '(SG) Carta precatória, rogatória ou de ordem pendente de devolução do AR - REGISTRAR'}" name="(SG) Existe registro do processo na tarefa de registrar AR?">
+        <transition to="(SG) Carta precatória, rogatória ou de ordem pendente de devolução do AR - REGISTRAR" name="(SG) Carta precatória, rogatória ou de ordem pendente de devolução do AR - REGISTRAR"/>
         <transition to="(SG) Separação em carta com ou sem prazo" name="(SG) Separação em carta com ou sem prazo"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR">
-        <task name="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR" swimlane="Secretaria">
-            <controller>
-                <variable name="Processo_Fluxo_expedientes_precatorias" mapped-name="frame:Processo_Fluxo_expedientes_precatorias" access="read,write"/>
-                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
-            </controller>
-        </task>
-        <description><![CDATA[*Variáveis*
-
-1. Variável: Processo_Fluxo_expedientes_precatorias
-   Label: 
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Frame
-
-2. Variável: movimentacaoLote
-   Label:
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Habilitar Movimentação em Lote]]></description>
-        <transition to="Nó de Desvio - (SG) Controle de prazos de carta precatória" name="Nó de Desvio - (SG) Controle de prazos de carta precatória">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" name="Aguardar devolução da carta"/>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-    </task-node>
-    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória e rogatória - AGUARDAR">
-        <task name="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Carta precatória, rogatória ou de ordem pendente de devolução do AR - REGISTRAR">
+        <task name="(SG) Carta precatória, rogatória ou de ordem pendente de devolução do AR - REGISTRAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
-                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_exped_controleCorreios" mapped-name="frame:WEB-INF_xhtml_flx_exped_controleCorreios" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
 1. Variável: aviso1
-   Label: O processo encontra-se aguardando a devolução da carta. Ao ser devolvida, clique em "Registrar devolução da carta" para informar a data da devolução para que o sistema possa iniciar o prazo de cumprimento (quando aplicável).
+   Label: Nos casos de encaminhamento pelo Hermes: Informe no campo abaixo o código de envio do Hermes e clique em "Gravar".
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso
 
-2. Variável: movimentacaoLote
-   Label:
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Habilitar Movimentação em Lote]]></description>
-        <transition to="Nó de Desvio - (SG) Controle de prazos de carta precatória" name="Nó de Desvio - (SG) Controle de prazos de carta precatória">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR" name="Registrar devolução da carta"/>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="Retornar para encaminhar carta"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
-    </task-node>
-    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR">
-        <task name="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR" swimlane="Secretaria">
-            <controller>
-                <variable name="WEB-INF_xhtml_flx_exped_registroCiencia" mapped-name="frame:WEB-INF_xhtml_flx_exped_registroCiencia" access="read,write"/>
-                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
-            </controller>
-        </task>
-        <description><![CDATA[*Variáveis*
-
-1. Variável: WEB-INF_xhtml_flx_exped_registroCiencia
+2. Variável: WEB-INF_xhtml_flx_exped_controleCorreios
    Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame
 
-2. Variável: movimentacaoLote
-   Label:
+3. Variável: aviso2
+   Label: - Após obter a confirmação de leitura/retorno do AR, selecione a opção "Registrar Resultado" e anexe o recibo. Caso o resultado seja "Recebido", a contagem do respectivo prazo será iniciada.
    Escrita: Sim
    Obrig.: Não
-   Tipo: Habilitar Movimentação em Lote]]></description>
+   Tipo: Frame]]></description>
         <transition to="Nó de Desvio - (SG) Controle de prazos de carta precatória" name="Nó de Desvio - (SG) Controle de prazos de carta precatória">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(SG) Há registros pendentes de confirmação de recebimento?" name="Todos os registros concluídos! Verificar existência de prazo"/>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
-        <transition to="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" name="Retornar para aguardar devolução da carta"/>
-        <transition to="(SG) Separação em carta com ou sem prazo" name="Verificar existência da prazo em aberto"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:correios:registroCiencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:registroCiencia', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-assign">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('comunicacaoProcessualAction:idsExpedientes', entityManager.createNativeQuery(&quot;select string_agg(cast(pe.id_processo_expediente as text), ',') from tb_processo_expediente pe where pe.in_meio_expedicao_expediente = 'C' and pe.id_processo_trf = &quot;.concat(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf)).getSingleResult().toString())}"/>
+        </event>
     </task-node>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento in (94,203,204) AND pe.meioExpedicaoExpediente = 'C' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Carta precatória, rogatória ou de ordem pendente de devolução do AR - REGISTRAR' : '(SG) Separação em carta com ou sem prazo'}" name="(SG) Há registros pendentes de confirmação de recebimento?">
+        <transition to="(SG) Separação em carta com ou sem prazo" name="(SG) Separação em carta com ou sem prazo"/>
+        <transition to="(SG) Carta precatória, rogatória ou de ordem pendente de devolução do AR - REGISTRAR" name="(SG) Carta precatória, rogatória ou de ordem pendente de devolução do AR - REGISTRAR"/>
+    </decision>
     <fork name="(SG) Separação em carta com ou sem prazo">
         <transition to="(SG) Existe prazo de expediente do tipo carta em aberto?" name="(SG) Existe prazo de expediente do tipo carta em aberto?"/>
         <transition to="(SG) Existe expediente do tipo carta sem prazo em aberto?" name="(SG) Existe expediente do tipo carta sem prazo em aberto?"/>
     </fork>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.meioExpedicaoExpediente = 'L' AND ppe.dtCienciaParte IS NOT NULL AND ppe.fechado = false AND ppe.tipoPrazo &lt;&gt; 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa com prazo?' : '(SG) Junção em carta com ou sem prazo'}" name="(SG) Existe prazo de expediente do tipo carta em aberto?">
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento in (94,203,204) AND pe.meioExpedicaoExpediente = 'C' AND ppe.dtCienciaParte IS NOT NULL AND ppe.fechado = false AND ppe.tipoPrazo &lt;&gt; 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa com prazo?' : '(SG) Junção em carta com ou sem prazo'}" name="(SG) Existe prazo de expediente do tipo carta em aberto?">
         <transition to="(SG) Junção em carta com ou sem prazo" name="(SG) Junção em carta com ou sem prazo"/>
         <transition to="(SG) Existe registro do processo na tarefa com prazo?" name="(SG) Existe registro do processo na tarefa com prazo?"/>
     </decision>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Junção em carta com ou sem prazo' : '(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR'}" name="(SG) Existe registro do processo na tarefa com prazo?">
-        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(SG) Carta precatória, rogatória ou de ordem com prazo em curso - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Junção em carta com ou sem prazo' : '(SG) Carta precatória, rogatória ou de ordem com prazo em curso - AGUARDAR'}" name="(SG) Existe registro do processo na tarefa com prazo?">
+        <transition to="(SG) Carta precatória, rogatória ou de ordem com prazo em curso - AGUARDAR" name="(SG) Carta precatória, rogatória ou de ordem com prazo em curso - AGUARDAR"/>
         <transition to="(SG) Junção em carta com ou sem prazo" name="(SG) Junção em carta com ou sem prazo"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR">
-        <task name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Carta precatória, rogatória ou de ordem com prazo em curso - AGUARDAR">
+        <task name="(SG) Carta precatória, rogatória ou de ordem com prazo em curso - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -139,7 +99,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: aviso1
-   Label: O processo encontra-se aguardando o prazo de cumprimento da carta. Ao decorrer, o processo será movimentado automaticamente para tarefa "(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR".
+   Label: O processo encontra-se aguardando o prazo de cumprimento da carta. Ao decorrer, o processo será movimentado automaticamente para tarefa "(SG) Carta precatória, rogatória ou de ordem com prazo decorrido - ANALISAR".
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso
@@ -156,23 +116,23 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Junção em carta com ou sem prazo" name="Cancelar e sair da tarefa"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Os prazos dos expedientes do tipo carta continuam abertos?')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Os prazos dos expedientes do tipo carta continuam abertos?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
     </task-node>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.meioExpedicaoExpediente = 'L' AND ppe.fechado = false AND ppe.tipoPrazo &lt;&gt; 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR' : '(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR'}" name="(SG) Os prazos dos expedientes do tipo carta continuam abertos?">
-        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR"/>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento in (94,203,204) AND pe.meioExpedicaoExpediente = 'C' AND ppe.fechado = false AND ppe.tipoPrazo &lt;&gt; 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Carta precatória, rogatória ou de ordem com prazo em curso - AGUARDAR' : '(SG) Carta precatória, rogatória ou de ordem com prazo decorrido - ANALISAR'}" name="(SG) Os prazos dos expedientes do tipo carta continuam abertos?">
+        <transition to="(SG) Carta precatória, rogatória ou de ordem com prazo em curso - AGUARDAR" name="(SG) Carta precatória, rogatória ou de ordem com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Carta precatória, rogatória ou de ordem com prazo decorrido - ANALISAR" name="(SG) Carta precatória, rogatória ou de ordem com prazo decorrido - ANALISAR"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR">
-        <task name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(SG) Carta precatória, rogatória ou de ordem com prazo decorrido - ANALISAR">
+        <task name="(SG) Carta precatória, rogatória ou de ordem com prazo decorrido - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -195,19 +155,23 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Junção em carta com ou sem prazo" name="Finalizar e sair da tarefa"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
     </task-node>
-    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.meioExpedicaoExpediente = 'L' AND ppe.dtCienciaParte IS NOT NULL AND ppe.fechado = false AND ppe.tipoPrazo = 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR' : '(SG) Junção em carta com ou sem prazo'}" name="(SG) Existe expediente do tipo carta sem prazo em aberto?">
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento in (94,203,204) AND pe.meioExpedicaoExpediente = 'C' AND ppe.dtCienciaParte IS NOT NULL AND ppe.fechado = false AND ppe.tipoPrazo = 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Existe registro do processo na tarefa sem prazo?' : '(SG) Junção em carta com ou sem prazo'}" name="(SG) Existe expediente do tipo carta sem prazo em aberto?">
         <transition to="(SG) Junção em carta com ou sem prazo" name="(SG) Junção em carta com ou sem prazo"/>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR" name="(SG) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR"/>
+        <transition to="(SG) Existe registro do processo na tarefa sem prazo?" name="(SG) Existe registro do processo na tarefa sem prazo?"/>
     </decision>
-    <task-node end-tasks="true" name="(SG) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR">
-        <task name="(SG) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR" swimlane="Secretaria">
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(SG) Carta precatória, rogatória ou de ordem sem prazo pendente de resposta - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Junção em carta com ou sem prazo' : '(SG) Carta precatória, rogatória ou de ordem sem prazo pendente de resposta - AGUARDAR'}" name="(SG) Existe registro do processo na tarefa sem prazo?">
+        <transition to="(SG) Carta precatória, rogatória ou de ordem sem prazo pendente de resposta - AGUARDAR" name="(SG) Carta precatória, rogatória ou de ordem sem prazo pendente de resposta - AGUARDAR"/>
+        <transition to="(SG) Junção em carta com ou sem prazo" name="(SG) Junção em carta com ou sem prazo"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Carta precatória, rogatória ou de ordem sem prazo pendente de resposta - AGUARDAR">
+        <task name="(SG) Carta precatória, rogatória ou de ordem sem prazo pendente de resposta - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -230,11 +194,47 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Junção em carta com ou sem prazo" name="(SG) Junção em carta com ou sem prazo"/>
+        <transition to="(SG) Existe carta sem prazo ainda em aberto?" name="(SG) Existe carta sem prazo ainda em aberto?"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
+    </task-node>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento in (94,203,204) AND pe.meioExpedicaoExpediente = 'C' AND ppe.fechado = false AND ppe.tipoPrazo = 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Carta precatória, rogatória ou de ordem sem prazo pendente de resposta - AGUARDAR' : '(SG) Carta precatória, rogatória e de ordem sem prazo e fechado - ANALISAR'}" name="(SG) Existe carta sem prazo ainda em aberto?">
+        <transition to="(SG) Carta precatória, rogatória ou de ordem sem prazo pendente de resposta - AGUARDAR" name="(SG) Carta precatória, rogatória ou de ordem sem prazo pendente de resposta - AGUARDAR"/>
+        <transition to="(SG) Carta precatória, rogatória e de ordem sem prazo e fechado - ANALISAR" name="(SG) Carta precatória, rogatória e de ordem sem prazo e fechado - ANALISAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Carta precatória, rogatória e de ordem sem prazo e fechado - ANALISAR">
+        <task name="(SG) Carta precatória, rogatória e de ordem sem prazo e fechado - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O prazo de cumprimento da carta foi decorrido. Favor seguir no fluxo normalmente.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentarLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(SG) Junção em carta com ou sem prazo" name="(SG) Junção em carta com ou sem prazo"/>
+        <transition to="Nó de Desvio - (SG) Controle de prazos de carta precatória" name="Nó de Desvio - (SG) Controle de prazos de carta precatória">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <join name="(SG) Junção em carta com ou sem prazo">
@@ -244,18 +244,44 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Controle de prazos de carta precatória">
         <task name="Nó de Desvio - (SG) Controle de prazos de carta precatória" swimlane="Nó de Desvio - (SG) Controle de prazos de carta precatória"/>
         <transition to="Término" name="Término"/>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="(SG) Carta de ordem, precatória ou rogatória - ENCAMINHAR"/>
-        <transition to="(SG) Carta de ordem, precatória e rogatória - AGUARDAR" name="(SG) Carta de ordem, precatória e rogatória - AGUARDAR"/>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR" name="(SG) Carta de ordem, precatória ou rogatória - REGISTRAR"/>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" name="(SG) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR"/>
-        <transition to="(SG) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR" name="(SG) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR"/>
+        <transition to="(SG) Carta precatória, rogatória ou de ordem com prazo em curso - AGUARDAR" name="(SG) Carta precatória, rogatória ou de ordem com prazo em curso - AGUARDAR"/>
+        <transition to="(SG) Carta precatória, rogatória ou de ordem com prazo decorrido - ANALISAR" name="(SG) Carta precatória, rogatória ou de ordem com prazo decorrido - ANALISAR"/>
+        <transition to="(SG) Carta precatória, rogatória ou de ordem sem prazo pendente de resposta - AGUARDAR" name="(SG) Carta precatória, rogatória ou de ordem sem prazo pendente de resposta - AGUARDAR"/>
+        <transition to="(SG) Carta precatória, rogatória ou de ordem pendente de devolução do AR - REGISTRAR" name="(SG) Carta precatória, rogatória ou de ordem pendente de devolução do AR - REGISTRAR"/>
+        <transition to="(SG) Carta precatória, rogatória e de ordem sem prazo e fechado - ANALISAR" name="(SG) Carta precatória, rogatória e de ordem sem prazo e fechado - ANALISAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -264,40 +290,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event> 
+    </event>  
+    <!-- ACTIONS --> 
 </process-definition>
