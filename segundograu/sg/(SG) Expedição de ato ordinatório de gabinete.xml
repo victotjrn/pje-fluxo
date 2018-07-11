@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Expedição de ato ordinatório de gabinete">
-    <description><![CDATA[Código do fluxo: SG_EAOG
+    <description><![CDATA[Código do fluxo: SG_EAOG.
 
 Descrição: Expedição de ato ordinatório, para retirada de concluso dispensando assinatura pelo magistrado.
 
@@ -12,11 +12,11 @@ Assessoria  Assessoria Segundo Grau  Assessor para Votação Antecipada
 Assessoria  Gabinete Segundo Grau    Magistrado
 Assessoria Segundo Grau  Assessor Geral]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (SG) Expedição de ato ordinatório de gabinete">
-        <assignment actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Assessoria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,600:5898,600:5899,599:1469,600:5907')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Expedição de ato ordinatório de gabinete">
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -30,7 +30,6 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
-                <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -63,23 +62,24 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
         </transition>
         <transition to="(SG) Remover ato ordinatório não assinado e sinalizar cancelamento" name="Cancelar elaboração de ato ordinatório"/>
         <transition to="(SG) Ato ordinatório do gabinete - ASSINAR" name="Encaminhar para assinatura"/>
-        <event type="node-enter">
-            <action expression="#{ not empty tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') ? processoDocumentoHome.setInstance(processoDocumentoManager.findById(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao'))) : '' }"/>
-            <action expression="#{ not empty tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') ? processoDocumentoHome.instance.setTipoProcessoDocumento(tipoProcessoDocumentoManager.findByCodigoDocumento('4050023')) : '' }"/>
-            <action expression="#{ not empty tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') ? processoDocumentoHome.update() : '' }"/>
-            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
-        </event>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','67')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar elaboração de ato ordinatório')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Lançar movimento de juntada de ato ordinatório')}"/>
-        </event>
+        <transition to="(SG) Lançar movimento de juntada de ato ordinatório" name="Documento já assinado!">
+            <condition expression="#{ parametroUtil.getParametro('pje:tjrn:AtoOrdAssinado').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).concat('_')) }"/>
+        </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{not empty processoHome.idProcessoDocumento ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','67')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar elaboração de ato ordinatório,Documento já assinado!')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{ not empty tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') ? processoDocumentoHome.setInstance(processoDocumentoManager.findById(tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao'))) : '' }"/>
+            <action expression="#{ not empty tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') ? processoDocumentoHome.instance.setTipoProcessoDocumento(tipoProcessoDocumentoManager.findByCodigoDocumento('4050023', true)) : '' }"/>
+            <action expression="#{ not empty tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') ? processoDocumentoHome.update() : '' }"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Ato ordinatório do gabinete - ASSINAR">
@@ -117,26 +117,26 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Lançar movimento de juntada de ato ordinatório" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+        </event>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Lançar movimento de juntada de ato ordinatório')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','67')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Encaminhar para secretaria')}"/>
         </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-        </event>
     </task-node>
     <node name="(SG) Lançar movimento de juntada de ato ordinatório">
         <transition to="(SG) Enviar autos à secretaria" name="(SG) Enviar autos à secretaria"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:conclusao_cancelada', false)}"/>
+        </event>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(11383).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).associarAoProcesso(tramitacaoProcessualService.recuperaProcesso()).lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:eaog:assinou_ato_ordinatorio', true)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:conclusao_cancelada', false)}"/>
         </event>
     </node>
     <process-state name="(SG) Enviar autos à secretaria">
@@ -168,10 +168,37 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
         <transition to="(SG) Ato ordinatório do gabinete - ASSINAR" name="(SG) Ato ordinatório do gabinete - ASSINAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -180,40 +207,13 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
     <!-- ACTIONS --> 
