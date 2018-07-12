@@ -13,8 +13,11 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             Gabinete               Magistrado
             Assessoria Segundo Grau  Assessor Geral]]></description>  
     <!-- SWIMLANES -->
+    <swimlane name="Redação judiciária">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:5031,600:5899,600:5898,600:5197,599:1469')}"/>
+    </swimlane>
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,5:5197,6:1469,600:5907')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,5:5197,6:1469,600:5907,602:5031')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Nó de Desvio - (SG) Pedido de vista">
         <assignment actor-id="#{actor.id}"/>
@@ -36,6 +39,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             <controller>
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_votacaoVogal" mapped-name="frame:WEB-INF_xhtml_flx_votacaoVogal" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -49,24 +53,313 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Finalizar e sair da tarefa"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
+        <transition to="(SG) Encaminhamento para gabinete substituto - ENCAMINHAR" name="Encaminhar para gabinete substituto"/>
+        <transition to="Término" name="Término">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Encaminhar para gabinete substituto')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Término')}"/>
         </event>
     </task-node>
+    <task-node end-tasks="true" name="(SG) Encaminhamento para gabinete substituto - ENCAMINHAR">
+        <task name="(SG) Encaminhamento para gabinete substituto - ENCAMINHAR" swimlane="Redação judiciária"/>
+        <transition to="(SG) Encaminhar para CCv1Gab1" name="Encaminhar para Gab. Des. Cláudio Santos na Câmara Cível"/>
+        <transition to="(SG) Encaminhar para CCv1Gab2" name="Encaminhar para Gab. Des. Dilermando Mota na Câmara Cível"/>
+        <transition to="(SG) Encaminhar para CCv1Gab3" name="Encaminhar para Gab. Des. Cornélio Alves na Câmara Cível"/>
+        <transition to="(SG) Encaminhar para CCv2Gab1" name="Encaminhar para Gab. Desª. Judite Nunes na Câmara Cível"/>
+        <transition to="(SG) Encaminhar para CCv2Gab2" name="Encaminhar para Gab. Des. Virgílio Macêdo Junior na Câmara Cível"/>
+        <transition to="(SG) Encaminhar para CCv2Gab3" name="Encaminhar para Gab. Des. Ibanez Monteiro na Câmara Cível"/>
+        <transition to="(SG) Encaminhar para CCv3Gab1" name="Encaminhar para Gab. Des. Amaury Moura Sobrinho na Câmara Cível"/>
+        <transition to="(SG) Encaminhar para CCv3Gab2" name="Encaminhar para Gab. Des. João Rebouças na Câmara Cível"/>
+        <transition to="(SG) Encaminhar para CCv3Gab3" name="Encaminhar para Gab. Des. Vivaldo Pinheiro na Câmara Cível"/>
+        <transition to="(SG) Encaminhar para CCv3Gab4" name="Encaminhar para Gab. Des. Amílcar Maia na Câmara Cível"/>
+        <transition to="(SG) Encaminhar para PlenoGab01" name="Encaminhar para Gab. Des. Amaury Moura Sobrinho no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab02" name="Encaminhar para Gab. Desª. Judite Nunes no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab03" name="Encaminhar para Gab. Des. Cláudio Santos no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab04" name="Encaminhar para Gab. Des. João Rebouças no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab05" name="Encaminhar para Gab. Des. Vivaldo Pinheiro no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab06" name="Encaminhar para Gab. Des. Saraiva Sobrinho no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab07" name="Encaminhar para Gab. Des. Amílcar Maia no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab08" name="Encaminhar para Gab. Des. Dilermando Mota no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab09" name="Encaminhar para Gab. Des. Virgílio Macêdo Junior no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab10" name="Encaminhar para Gab. Desª. Zeneide Bezerra no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab11" name="Encaminhar para Gab. Des. Ibanez Monteiro no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab12" name="Encaminhar para Gab. Des. Glauber Rêgo no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab13" name="Encaminhar para Gab. Des. Gilson Barbosa no Pleno"/>
+        <transition to="(SG) Encaminhar para PlenoGab14" name="Encaminhar para Gab. Des. Cornélio Alves no Pleno"/>
+        <transition to="Nó de Desvio - (SG) Pedido de vista" name="Nó de Desvio - (SG) Pedido de vista">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Pedido de vista - ANALISAR" name="Retornar para elaboração de voto vista"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:idOjcOrigem', tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:idOjOrigem', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:idOjCargoOrigem', tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorCargo.idOrgaoJulgadorCargo)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorOrigem', tramitacaoProcessualService.recuperaProcesso().getOrgaoJulgador().getOrgaoJulgador()) }"/>
+        </event>
+    </task-node>
+    <node name="(SG) Encaminhar para CCv1Gab1">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 15)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 15)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 5)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCv1Gab2">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 14)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 12)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 5)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCv1Gab3">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 41)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 29)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 5)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCv2Gab1">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 20)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 11)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 6)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCv2Gab2">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 23)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 17)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 6)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCv2Gab3">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 18)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 13)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 6)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCv3Gab1">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 42)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 33)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 7)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCv3Gab2">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 19)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 39)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 7)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCv3Gab3">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 24)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 42)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 7)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCv3Gab4">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 12)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 14)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 7)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab01">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 11)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 16)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab02">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 40)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 43)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab03">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 30)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 31)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab04">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 35)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 40)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab05">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 39)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 44)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab06">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 22)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 41)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab07">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 27)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 35)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab08">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 29)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 36)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab09">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 38)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 28)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab10">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 21)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 45)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab11">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 33)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 38)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab12">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 17)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 37)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab13">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 16)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 32)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para PlenoGab14">
+        <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 28)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 30)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:colegiadoDestino', 8)}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Pedido de vista">
         <task name="Nó de Desvio - (SG) Pedido de vista" swimlane="Nó de Desvio - (SG) Pedido de vista"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
+        <transition to="(SG) Encaminhamento para gabinete substituto - ENCAMINHAR" name="(SG) Encaminhamento para gabinete substituto - ENCAMINHAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -75,42 +368,14 @@ Magistrado  Assessoria Segundo Grau  Assessoria
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
-    <!-- ACTIONS -->
-    <action name="upd" expression="#{sessaoHome.setInstance(null)}"/> 
+    <!-- ACTIONS --> 
 </process-definition>
