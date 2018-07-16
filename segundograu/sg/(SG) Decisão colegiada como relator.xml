@@ -176,6 +176,9 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <condition expression="#{sessaoPautaProcessoTrfManager.isProcessoJulgadoUltimaSessao(processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')))}"/>
         </transition>
         <transition to="(SG) Registrar aptidão para inclusão em mesa" name="Solicitar inclusão em mesa"/>
+        <transition to="(SG) Registrar aptidão para julgamento" name="Solicitar inclusão em pauta sem assinatura de relatório">
+            <condition expression="#{parametroUtil.getParametro('pje:tjrn:SolicitarPautaSemAssRel').contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).concat(' '))}"/>
+        </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:deccolrel:RelatorioNaoAssinado')}"/>
@@ -396,9 +399,9 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir')}"/>
         </event>
         <event type="task-create">
-            <action/>
-            <action/>
-            <action/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir', true)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:voto:permiteIncluir', true)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:acordaorevisado', true)}"/>
         </event>
     </task-node>
