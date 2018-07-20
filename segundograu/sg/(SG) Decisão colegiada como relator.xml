@@ -72,6 +72,15 @@ Magistrado  Assessoria Segundo Grau  Assessor
         <transition to="(SG) Voto, relatório ou ementa vazio?" name="Encaminhar para validação do magistrado">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:deccolrel:enviarMagistrado', true)}"/>
         </transition>
+        <transition to="(SG) Sessão de julgamento - AGUARDAR" name="Aguardar sessão de julgamento">
+            <condition expression="#{(tramitacaoProcessualService.recuperaProcesso().selecionadoJulgamento or tramitacaoProcessualService.recuperaProcesso().selecionadoPauta)}"/>
+        </transition>
+        <transition to="(SG) Pode solicitar inclusão em pauta?" name="Solicitar inclusão em pauta">
+            <condition expression="#{votacaoColegiadoAction.isRelatorioAssinado()}"/>
+        </transition>
+        <transition to="(SG) Registrar aptidão para inclusão em mesa" name="Solicitar inclusão em mesa">
+            <condition expression="#{votacaoColegiadoAction.isRelatorioAssinado()}"/>
+        </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:deccolrel:decisaoColegiadaVazia')}"/>
@@ -605,6 +614,7 @@ Magistrado  Assessoria Segundo Grau  Assessor
         <transition to="(SG) Sessão de julgamento - AGUARDAR" name="(SG) Sessão de julgamento - AGUARDAR"/>
         <event type="node-enter">
             <action expression="#{processoJudicialManager.aptidaoParaJulgamento(processoTrfHome.instance.idProcessoTrf, true)}"/>
+            <action name="upd" expression="#{preencherMovimento.deCodigo(20000029).lancarMovimento()}"/>
         </event>
     </node>
     <end-state name="Término"/>
