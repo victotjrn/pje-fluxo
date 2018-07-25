@@ -18,7 +18,7 @@
         <transition to="(CEJUSC) É CEJUSC ?" name="É intimar CEJUSC ?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{(' 3 10 19 8 14 16 7 9 11 17 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia).concat(' '))) || !(authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;MOSSOR&quot;) || authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) || authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;PARNAMIRIM&quot;)) ? '(CEJUSC) Aviso CEJUSC' : '(CEJUSC) Lançar movimento entrada'}" name="(CEJUSC) É CEJUSC ?">
+    <decision expression="#{util.eval(parametroUtil.getParametro('pje:tjrn:verificaCEJUSC')) ? '(CEJUSC) Aviso CEJUSC' : '(CEJUSC) Lançar movimento entrada'}" name="(CEJUSC) É CEJUSC ?">
         <transition to="(CEJUSC) Aviso CEJUSC" name="(CEJUSC) Aviso CEJUSC"/>
         <transition to="(CEJUSC) Lançar movimento entrada " name="(CEJUSC) Lançar movimento entrada"/>
     </decision>
