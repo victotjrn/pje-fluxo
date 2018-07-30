@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Preparar Ato de Comunicação">
-    <description><![CDATA[Fluxo destinado a permitir a realização de atos de comunicação, tais como citações, intimações, etc.........]]></description>  
+    <description><![CDATA[Fluxo destinado a permitir a realização de atos de comunicação, tais como citações, intimações, etc..............]]></description>  
     <!-- SWIMLANES -->
+    <swimlane name="Magistrado">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901')}" actor-id="#{actor.id}"/>
+    </swimlane>
     <swimlane name="Nó de Desvio - (VCiv) Preparar Ato de Comunicação">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:1469')}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
-    </swimlane>    
-    <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901')}" actor-id="#{actor.id}"/>
-    </swimlane> 
+    </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
@@ -93,8 +93,11 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:AntCitInt', '(VCiv) Preparar citação e(ou) intimação')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:ProxCitInt', '(VCiv) Assinar Citação e(ou) intimação pelo magistrado')}"/>
         </transition>
-        <event type="node-enter">
-            <action name="upd" expression="#{modeloDocumento.set('Processo_Fluxo_prepararExpediente',80)}"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCitInt', org.jboss.seam.bpm.taskInstance.getId())}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:CitIntValidaParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
         </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) É competência de Fazenda?')}"/>
@@ -116,11 +119,8 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCitInt')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCitInt')))}"/>
         </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCitInt', org.jboss.seam.bpm.taskInstance.getId())}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:CitIntValidaParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
+        <event type="node-enter">
+            <action name="upd" expression="#{modeloDocumento.set('Processo_Fluxo_prepararExpediente',80)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar Citação e(ou) intimação pelo chefe de secretaria">
@@ -140,6 +140,12 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:AntCitInt', '(VCiv) Assinar Citação e(ou) intimação pelo chefe de secretaria')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:ProxCitInt', '(VCiv) Assinar Citação e(ou) intimação pelo magistrado')}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCitInt', org.jboss.seam.bpm.taskInstance.getId())}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:CitIntValidaParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) É competência de Fazenda?')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,S,D')}"/>
@@ -159,12 +165,6 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCitInt')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCitInt')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCitInt')))}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCitInt', org.jboss.seam.bpm.taskInstance.getId())}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:CitIntValidaParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar Citação e(ou) intimação pelo magistrado">
@@ -180,6 +180,11 @@
         <transition to="Nó de Desvio - (VCiv) Preparar Ato de Comunicação" name="Nó de Desvio - (VCiv) Preparar Ato de Comunicação">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCitInt', org.jboss.seam.bpm.taskInstance.getId())}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) É competência de Fazenda?')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,S,D')}"/>
@@ -200,11 +205,6 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCitInt')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCitInt')))}"/>
         </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCitInt', org.jboss.seam.bpm.taskInstance.getId())}"/>
-        </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:tjrn:CitIntValidaParaAss') == true ? tramitacaoProcessualService.recuperaVariavel('sg:tjrn:ProxCitInt') : tramitacaoProcessualService.recuperaVariavel('sg:tjrn:AntCitInt') }" name="(VCiv) Encaminhar para assinatura de citação e(ou) intimação?">
         <transition to="(VCiv) Assinar Citação e(ou) intimação pelo chefe de secretaria" name="(VCiv) Assinar Citação e(ou) intimação pelo chefe de secretaria"/>
@@ -216,7 +216,7 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:tjrn:ProxCitInt')}"/>
         </event>
     </decision>
-    <decision expression="#{processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10) ? '(VCiv) Separação em citação e(ou) intimação' : '(VCiv) Informar conteúdo DJe'}" name="(VCiv) É competência de Fazenda?">
+    <decision expression="#{util.eval(parametroUtil.getParametro('pje:tjrn:vciv:DefinicaoPublicaDJe')) ?  '(VCiv) Separação em citação e(ou) intimação' : '(VCiv) Informar conteúdo DJe'}" name="(VCiv) É competência de Fazenda?">
         <transition to="(VCiv) Informar conteúdo DJe" name="(VCiv) Informar conteúdo DJe"/>
         <transition to="(VCiv) Separação em citação e(ou) intimação" name="(VCiv) Separação em citação e(ou) intimação"/>
     </decision>
@@ -237,14 +237,14 @@
         </transition>
         <transition to="(VCiv) Preencheu conteúdo DJe?" name="Prosseguir"/>
         <transition to="(VCiv) Ignorar conteúdo DJe" name="Cancelar e sair da tarefa"/>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv_conteudo_dje')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('magistrado_dje_temp', tramitacaoProcessualService.recuperaVariavelTarefa('combo_objetos:vciv_magistrado_dje').getIdUsuario())}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('combo_objetos:vciv_magistrado_dje')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('conteudo_dje_temp', tramitacaoProcessualService.strToBase64(tramitacaoProcessualService.recuperaVariavelTarefa('text:vciv_conteudo_dje')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('text:vciv_conteudo_dje')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv_conteudo_dje')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Ignorar conteúdo DJe">
@@ -302,12 +302,12 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="Ignorar preparação de expedientes para o DJE"/>
-        <event type="task-create">
-            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Preparar relação para o DJE')}"/>
-        </event>
         <event type="task-start">
             <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('P')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,69,65')}"/>
+        </event>
+        <event type="task-create">
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Preparar relação para o DJE')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Preparar relação para o DJE">
@@ -355,6 +355,12 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:AntMand', '(VCiv) Expedir Mandado')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:ProxMand', '(VCiv) Assinar mandado pelo magistrado')}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempMand', org.jboss.seam.bpm.taskInstance.getId())}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:MandValidoParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Existe alguma Central de Mandados?')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('M')}"/>
@@ -374,12 +380,6 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempMand', org.jboss.seam.bpm.taskInstance.getId())}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:MandValidoParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar mandado pelo chefe de secretaria">
@@ -399,6 +399,12 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:AntMand', '(VCiv) Assinar mandado pelo chefe de secretaria')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:ProxMand', '(VCiv) Assinar mandado pelo magistrado')}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempMand',org.jboss.seam.bpm.taskInstance.getId())}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:MandValidoParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Existe alguma Central de Mandados?')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('M')}"/>
@@ -418,12 +424,6 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempMand',org.jboss.seam.bpm.taskInstance.getId())}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:MandValidoParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar mandado pelo magistrado">
@@ -439,6 +439,11 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Expedir Mandado" name="Retonar para expedição de mandado"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempMand',org.jboss.seam.bpm.taskInstance.getId())}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Existe alguma Central de Mandados?')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('M')}"/>
@@ -458,11 +463,6 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempMand',org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:tjrn:MandValidoParaAss') == true ? tramitacaoProcessualService.recuperaVariavel('sg:tjrn:ProxMand') : tramitacaoProcessualService.recuperaVariavel('sg:tjrn:AntMand') }" name="(VCiv) Encaminhar para assinatura de mandado?">
@@ -503,11 +503,11 @@
     <process-state name="(VCiv) Controlar prazos via mandado">
         <sub-process name="(VCiv) Controle de prazos e retorno de expedientes" binding="late"/>
         <transition to="(VCiv) Apagar variáveis do fluxo" name="(VCiv) Apagar variáveis do fluxo"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:mandado','true')}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cpre:mandado')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:mandado','true')}"/>
         </event>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:expedir_carta_precatoria') ? '(VCiv) Expedir Carta Precatória' : '(VCiv) Junção em Preparar Ato de Comunicação'}" name="(VCiv) É carta precatória?">
@@ -532,6 +532,12 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:AntCartaPrec', '(VCiv) Expedir Carta Precatória')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:ProxCartaPrec', '(VCiv) Assinar Carta Precatória')}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCartaPrec', org.jboss.seam.bpm.taskInstance.getId())}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:CartaPrecValidaParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Lançar movimento de Expedição de Carta Precatória')}"/>
             <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('L')}"/>
@@ -552,12 +558,6 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCartaPrec')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCartaPrec')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('idTaskInstanceTempCartaPrec')}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCartaPrec', org.jboss.seam.bpm.taskInstance.getId())}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:CartaPrecValidaParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar Carta Precatória">
@@ -573,6 +573,11 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Expedir Carta Precatória" name="Retornar para expedição de carta precatória"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCartaPrec', org.jboss.seam.bpm.taskInstance.getId())}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Lançar movimento de Expedição de Carta Precatória')}"/>
             <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('L')}"/>
@@ -593,11 +598,6 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCartaPrec')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCartaPrec')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('idTaskInstanceTempCartaPrec')}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCartaPrec', org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:tjrn:CartaPrecValidaParaAss') == true ? tramitacaoProcessualService.recuperaVariavel('sg:tjrn:ProxCartaPrec') : tramitacaoProcessualService.recuperaVariavel('sg:tjrn:AntCartaPrec') }" name="(VCiv) Encaminhar para assinatura de carta precatória?">
@@ -638,11 +638,11 @@
     <process-state name="(VCiv) Controlar prazos via correios">
         <sub-process name="(VCiv) Controle de prazos e retorno de expedientes" binding="late"/>
         <transition to="(VCiv) Junção em citação e(ou) intimação" name="(VCiv) Junção em citação e(ou) intimação"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:correios','true')}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cpre:correios')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:correios','true')}"/>
         </event>
     </process-state>
     <fork name="(VCiv) Separação em citação e(ou) intimação">
@@ -667,11 +667,11 @@
     <process-state name="(VCiv) Controlar prazos via MP">
         <sub-process name="(VCiv) Controle de prazos e retorno de expedientes" binding="late"/>
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="(VCiv) Junção em Preparar Ato de Comunicação"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:MP','true')}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cpre:MP')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:MP','true')}"/>
         </event>
     </process-state>
     <join name="(VCiv) Junção em citação e(ou) intimação">
@@ -703,11 +703,11 @@
     <process-state name="(VCiv) Controlar prazos via carta">
         <sub-process name="(VCiv) Controle de prazos e retorno de expedientes" binding="late"/>
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="(VCiv) Junção em Preparar Ato de Comunicação"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:carta','true')}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cpre:carta')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:carta','true')}"/>
         </event>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:citar_intimar_audiencia') ? '(VCiv) Preparar citação e(ou) intimação da audiência - Fluxo antigo' : '(VCiv) Junção em Preparar Ato de Comunicação'}" name="(VCiv) É citação e(ou) intimação da audiência?">
@@ -727,12 +727,12 @@
         <transition to="(VCiv) É competência de Fazenda?" name="(VCiv) É competência de Fazenda?">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) É competência de Fazenda?')}"/>
-        </event>
         <event type="task-start">
             <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,S')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,69,65')}"/>
+        </event>
+        <event type="task-create">
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) É competência de Fazenda?')}"/>
         </event>
     </task-node>
     <process-state name="(VCiv) Controlar prazos">
@@ -756,13 +756,13 @@
         <transition to="(VCiv) Lançar movimento de Expedição de Outros documentos" name="(VCiv) Lançar movimento de Expedição de Outros documentos">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:pac:intimar_mp', 'true')}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Lançar movimento de Expedição de Outros documentos')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,69,65,71')}"/>
             <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,S')}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:pac:intimar_mp', 'true')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:pac:intimar_mp') ? '(VCiv) Aguardando manifestação do Ministério Público' : '(VCiv) Controlar prazos'}" name="(VCiv) Ainda em intimação ao Ministério Público?">
@@ -775,11 +775,11 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="Finalizar tarefa"/>
-        <event type="task-end">
-            <action expression="#{preencherMovimento.deCodigo(132).lancarMovimento()}"/>
-        </event>
         <event type="task-start">
             <action expression="#{preencherMovimento.deCodigo(493).comComplementoDeCodigo(13).doTipoLivre().preencherComTexto('Ministério Público').lancarMovimento()}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{preencherMovimento.deCodigo(132).lancarMovimento()}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Encaminhar Carta Rogatória">
@@ -817,6 +817,12 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:AntCartaRog', '(VCiv) Expedir Carta Rogatória')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:ProxCartaRog', '(VCiv) Assinar Carta Rogatória')}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCartaRog',org.jboss.seam.bpm.taskInstance.getId())}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:CartaRogValidaParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Lançar movimento de Expedição de Carta Rogatória')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('L')}"/>
@@ -836,12 +842,6 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCartaRog')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCartaRog')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCartaRog')))}"/>
-        </event>
-         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCartaRog',org.jboss.seam.bpm.taskInstance.getId())}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:tjrn:CartaRogValidaParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Assinar Carta Rogatória">
@@ -857,6 +857,11 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Expedir Carta Rogatória" name="Retornar para expedição de carta rogatória"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCartaRog',org.jboss.seam.bpm.taskInstance.getId())}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Lançar movimento de Expedição de Carta Rogatória')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('L')}"/>
@@ -876,11 +881,6 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCartaRog')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCartaRog')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempCartaRog')))}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempCartaRog',org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:tjrn:CartaRogValidaParaAss') == true ? tramitacaoProcessualService.recuperaVariavel('sg:tjrn:ProxCartaRog') : tramitacaoProcessualService.recuperaVariavel('sg:tjrn:AntCartaRog') }" name="(VCiv) Encaminhar para assinatura de carta rogatória?">
@@ -899,11 +899,11 @@
     <process-state name="(VCiv) Controlar prazos via sistema">
         <sub-process name="(VCiv) Controle de prazos e retorno de expedientes" binding="late"/>
         <transition to="(VCiv) Junção em citação e(ou) intimação" name="(VCiv) Junção em citação e(ou) intimação"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:sistema','true')}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:cpre:sistema')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:cpre:sistema','true')}"/>
         </event>
     </process-state>
     <node name="(VCiv) Lançar movimento de Expedição Outros documentos">
@@ -929,11 +929,11 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção em Preparar Ato de Comunicação" name="Ignorar intimação"/>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) É Mandado Reativação?')}"/>
-        </event>
         <event type="task-start">
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,69')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) É Mandado Reativação?')}"/>
         </event>
     </task-node>
     <decision expression="#{comunicacaoProcessualAction.getExpedientesMandados().size() &gt; 0 ? '(VCiv) Existe alguma Central de Mandados?' : '(VCiv) Separação em citação e(ou) intimação'}" name="(VCiv) É Mandado Reativação?">
@@ -955,10 +955,37 @@
     </node>
     <end-state name="Término"/>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -967,40 +994,13 @@
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
     <!-- ACTIONS --> 
