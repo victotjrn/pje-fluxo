@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="Fluxo de redirecionamento">
-    <description><![CDATA[Fluxo de redirecionamento com base na competência para controle de conflito de competência..]]></description>  
+    <description><![CDATA[Fluxo de redirecionamento com base na competência para controle de conflito de competência...]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - Fluxo de redirecionamento">
-        <assignment actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
     <swimlane name="solicitante">
         <assignment actor-id="#{actor.id}"/>
@@ -15,9 +15,9 @@
         <transition to="É migração?" name="É migração?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{ not parametroUtil.getParametro('pje:tjrn:ip3:migracao:jurisdicoes:vara').contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao).concat(' ')) and parametroUtil.getParametro('pje:tjrn:ip3:migracao:ativo').equals('true') and tramitacaoProcessualService.recuperaProcesso().importadoSistemaLegado ? 'Entrar no projudi migração' : 'É competência de Fazenda?' }" name="É migração?">
+    <decision expression="#{ not parametroUtil.getParametro('pje:tjrn:ip3:migracao:jurisdicoes:vara').contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao).concat(' ')) and parametroUtil.getParametro('pje:tjrn:ip3:migracao:ativo').equals('true') and tramitacaoProcessualService.recuperaProcesso().importadoSistemaLegado ? 'Entrar no projudi migração' : '(VCiv) Deslocar secretaria unificada' }" name="É migração?">
         <transition to="Entrar no projudi migração" name="Entrar no projudi migração"/>
-        <transition to="É competência de Fazenda?" name="É competência de Fazenda?"/>
+        <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
     </decision>
     <process-state name="Entrar no projudi migração">
         <sub-process name="(PROJUDI) Projudi migração" binding="late"/>
@@ -28,7 +28,7 @@
         <transition to="Fluxo de conhecimento de VCiv" name="Fluxo de conhecimento de VCiv"/>
     </decision>
     <end-state name="Término"/>
-    <decision expression="#{processoTrfHome.possuiCompetencia(parametroUtil.getParametro('pje:fluxo:idCompetenciaJEC')) ? 'É classe de execução do JEC?' : 'É competência de CEJUSC?'}" name="É competência de JEC?">
+    <decision expression="#{processoTrfHome.possuiCompetencia(3) ? 'É classe de execução do JEC?' : 'É competência de CEJUSC?'}" name="É competência de JEC?">
         <transition to="É classe de execução do JEC?" name="É classe de execução do JEC?"/>
         <transition to="É competência de CEJUSC?" name="É competência de CEJUSC?"/>
     </decision>
@@ -117,6 +117,14 @@
         <transition to="(Projudi) Arquivado provisoriamente" name="(Projudi) Arquivado provisoriamente"/>
         <transition to="(Projudi) Enviado à Central de Avaliação" name="(Projudi) Enviado à Central de Avaliação"/>
     </task-node>
+    <process-state name="(VCiv) Deslocar secretaria unificada">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="É competência de Fazenda?" name="É competência de Fazenda?"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+        </event>
+    </process-state>
     <task-node end-tasks="true" name="(Projudi) Processo migrado do projudi">
         <task name="(Projudi) Processo migrado do projudi" swimlane="solicitante"/>
         <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
@@ -430,10 +438,10 @@
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
+    <event type="before-signal">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="process-start">

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Elaboração de alvará">
-    <description><![CDATA[Elaboração de alvarás.]]></description>  
+    <description><![CDATA[Elaboração de alvarás.......]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,7:5197,5:1338')}"/>
@@ -12,7 +12,7 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(VCiv) Expedir alvará(s)" name="(VCiv) Expedir alvará(s)"/>
+        <transition to="(VCiv) Deslocar secretaria unificada inicio" name="(VCiv) Deslocar secretaria unificada inicio"/>
     </start-state>  
     <!-- NODES -->
     <task-node end-tasks="true" name="(VCiv) Expedir alvará(s)">
@@ -23,11 +23,11 @@
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read"/>
             </controller>
         </task>
-        <transition to="(VCiv) Assinar alvará(s)" name="Enviar para assinatura"/>
         <transition to="(VCiv) Apagar minuta não assinada de alvará" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (VCiv) Elaboração de alvará" name="Nó de Desvio - (VCiv) Elaboração de alvará">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(VCiv) Deslocar OJ origem " name="Enviar para assinatura"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '91')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
@@ -56,7 +56,7 @@
         <transition to="Nó de Desvio - (VCiv) Elaboração de alvará" name="Nó de Desvio - (VCiv) Elaboração de alvará">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Expedir alvará(s)" name="Retornar para expedição de alvarás"/>
+        <transition to="(VCiv) Deslocar secretaria unificada" name="Retornar para expedição de alvarás"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '91')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Lançar movimento de expedição de alvará')}"/>
@@ -74,9 +74,9 @@
             <action expression="#{preencherMovimento.deCodigo(60).associarAoDocumento(documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(73).lancarMovimento()}"/>
         </event>
     </node>
-    <decision expression="#{entityManager.createNativeQuery(&quot;select count(*) from vs_situacao_processo_new s where s.nm_tarefa = '(VCiv) Alvará(s) assinado(s)' AND s.id_processo_trf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? 'Término' : '(VCiv) Alvará(s) assinado(s)'}" name="(VCiv) Existe registro do processo na tarefa alvará(s) assinado(s)?">
-        <transition to="(VCiv) Alvará(s) assinado(s)" name="(VCiv) Alvará(s) assinado(s)"/>
-        <transition to="Término" name="Término"/>
+    <decision expression="#{entityManager.createNativeQuery(&quot;select count(*) from vs_situacao_processo_new s where s.nm_tarefa = '(VCiv) Alvará(s) assinado(s)' AND s.id_processo_trf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(VCiv) Deslocar secretaria unificada termino' : '(VCiv) Deslocar secretaria unificada assinado'}" name="(VCiv) Existe registro do processo na tarefa alvará(s) assinado(s)?">
+        <transition to="(VCiv) Deslocar secretaria unificada assinado" name="(VCiv) Deslocar secretaria unificada assinado"/>
+        <transition to="(VCiv) Deslocar secretaria unificada termino" name="(VCiv) Deslocar secretaria unificada termino"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Alvará(s) assinado(s)">
         <task name="(VCiv) Alvará(s) assinado(s)" swimlane="Magistrado">
@@ -106,7 +106,7 @@ Tipo: Aviso]]></description>
         </event>
     </task-node>
     <node name="(VCiv) Apagar minuta não assinada de alvará">
-        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Deslocar secretaria unificada termino" name="(VCiv) Deslocar secretaria unificada termino"/>
         <event type="node-enter">
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_alvara')}"/>
         </event>
@@ -122,7 +122,47 @@ Tipo: Aviso]]></description>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
         </event>
-    </end-state>  
+    </end-state>
+    <node name="(VCiv) Deslocar OJ origem ">
+        <transition to="(VCiv) Assinar alvará(s)" name="(VCiv) Assinar alvará(s)"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+        </event>
+    </node>
+    <process-state name="(VCiv) Deslocar secretaria unificada">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="(VCiv) Expedir alvará(s)" name="(VCiv) Expedir alvará(s)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+        </event>
+    </process-state>
+    <process-state name="(VCiv) Deslocar secretaria unificada assinado">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="(VCiv) Alvará(s) assinado(s)" name="(VCiv) Alvará(s) assinado(s)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+        </event>
+    </process-state>
+    <process-state name="(VCiv) Deslocar secretaria unificada termino">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+        </event>
+    </process-state>
+    <process-state name="(VCiv) Deslocar secretaria unificada inicio">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="(VCiv) Expedir alvará(s)" name="(VCiv) Expedir alvará(s)"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+        </event>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -174,3 +214,4 @@ Tipo: Aviso]]></description>
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
+

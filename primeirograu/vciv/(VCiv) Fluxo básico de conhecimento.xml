@@ -424,7 +424,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:encaminhar_instancia_superior')}"/>
         </event>
     </process-state>
-    <decision expression="#{competenciaClasseAssuntoHome.processoContemClasseAssunto('1118') || competenciaClasseAssuntoHome.processoContemClasseAssunto('172') ? '(VCiv) Análise inicial da secretaria' : '(VCiv) É competência de juizado especial cível?'}" name="(VCiv) É Emb. Execução Fiscal?">
+    <decision expression="#{competenciaClasseAssuntoHome.processoContemClasseAssunto('1118') ? '(VCiv) Análise inicial da secretaria' : '(VCiv) É competência de juizado especial cível?'}" name="(VCiv) É Emb. Execução Fiscal?">
         <transition to="(VCiv) Análise inicial da secretaria" name="(VCiv) Análise inicial da secretaria"/>
         <transition to="(VCiv) É competência de juizado especial cível?" name="(VCiv) É competência de juizado especial cível?"/>
     </decision>
@@ -439,7 +439,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Conclusão para despacho inicial" name="Enviar concluso para despacho inicial"/>
     </task-node>
-    <decision expression="#{competenciaClasseAssuntoHome.processoContemClasseAssunto('1118') || competenciaClasseAssuntoHome.processoContemClasseAssunto('172') ? '(VCiv) Análise inicial da secretaria - urgente' : '(VCiv) Conclusão para decisão de urgência inicial'}" name="(VCiv) É Emb. Execução Fiscal - urgente?">
+    <decision expression="#{competenciaClasseAssuntoHome.processoContemClasseAssunto('1118') ? '(VCiv) Análise inicial da secretaria - urgente' : '(VCiv) Conclusão para decisão de urgência inicial'}" name="(VCiv) É Emb. Execução Fiscal - urgente?">
         <transition to="(VCiv) Conclusão para decisão de urgência inicial" name="(VCiv) Conclusão para decisão de urgência inicial"/>
         <transition to="(VCiv) Análise inicial da secretaria - urgente" name="(VCiv) Análise inicial da secretaria - urgente"/>
     </decision>

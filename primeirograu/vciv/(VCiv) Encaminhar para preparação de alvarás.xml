@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Encaminhar para preparação de alvarás"> 
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Encaminhar para preparação de alvarás">
+    <description><![CDATA[....]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
@@ -8,7 +9,7 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(VCiv) Informar quantidade de alvarás" name="(VCiv) Informar quantidade de alvarás"/>
+        <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
     </start-state>  
     <!-- NODES -->
     <task-node end-tasks="true" name="(VCiv) Informar quantidade de alvarás">
@@ -58,8 +59,6 @@
             </controller>
         </task>
         <description><![CDATA[Variáveis:
-
-
 1 - Aviso
 Label: O processo foi encaminhado para duas tarefas distintas. Para expedir alvará, o usuário deverá acessar (VCiv) Expedir Alvará(s).]]></description>
         <transition to="(VCiv) Informar quantidade de alvarás" name="Expedir novo(s) alvará(s)"/>
@@ -85,7 +84,15 @@ Label: O processo foi encaminhado para duas tarefas distintas. Para expedir alva
         <transition to="Término" name="Término"/>
         <transition to="(VCiv) Informar quantidade de alvarás" name="(VCiv) Informar quantidade de alvarás"/>
         <transition to="(VCiv) Aguardando expedição de alvará(s)" name="(VCiv) Aguardando expedição de alvará(s)"/>
-    </task-node>  
+    </task-node>
+    <process-state name="(VCiv) Deslocar secretaria unificada">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="(VCiv) Informar quantidade de alvarás" name="(VCiv) Informar quantidade de alvarás"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
+            <action expression="#{entityManager.createNativeQuery('delete from jbpm_variableinstance where id_ in( select vi.id_ from jbpm_variableinstance vi join jbpm_processinstance pi on (pi.id_= vi.processinstance_) join tb_processo_instance tpi on (tpi.id_proc_inst = pi.id_) join tb_processo tp on (tpi.id_processo = tp.id_processo) where tp.nr_processo = :numeroProcesso and name_ in (\'pje:fluxo:deslocamento:orgaoCargoDestino,pje:fluxo:deslocamento:orgaoDestino\') order by id_ desc)').setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+        </event>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -136,3 +143,4 @@ Label: O processo foi encaminhado para duas tarefas distintas. Para expedir alva
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>
+
