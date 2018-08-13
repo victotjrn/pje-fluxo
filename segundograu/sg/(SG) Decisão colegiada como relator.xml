@@ -495,13 +495,13 @@ Magistrado  Assessoria Segundo Grau  Assessor
         <transition to="Nó de Desvio - (SG) Decisão colegiada como relator" name="Nó de Desvio - (SG) Decisão colegiada como relator">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(SG) Acórdão revisado?" name="(SG) Acórdão revisado?">
-            <condition expression="#{true}"/>
-        </transition>
         <transition to="(SG) Acórdão [Inteiro Teor] - REVISAR" name="Retornar para revisão do acórdão pela assessoria"/>
         <transition to="(SG) Acórdão [Inteiro Teor] - CONFERIR" name="Retornar pela revisão pela redação judiciária"/>
         <transition to="(SG) Realocar órgão ao relator de origem" name="Acórdão assinado!">
             <condition expression="#{ parametroUtil.getParametro('pje:tjrn:AcordaoAssinado').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).concat('_')) }"/>
+        </transition>
+        <transition to="(SG) Realocar órgão ao relator de origem" name="(SG) Realocar órgão ao relator de origem">
+            <condition expression="#{true}"/>
         </transition>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
@@ -513,16 +513,16 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
         <event type="task-create">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Acórdão revisado?')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Realocar órgão ao relator de origem')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:ementa:permiteIncluir', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:voto:permiteIncluir', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:elaborarAcordao:relatorio:permiteIncluir', true)}"/>
             <action name="upd" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:acordaorevisado') == true ? '(SG) Lançar movimentação do acórdão' : '(SG) Realocar órgão ao relator de origem'}" name="(SG) Acórdão revisado?">
-        <transition to="(SG) Realocar órgão ao relator de origem" name="(SG) Realocar órgão ao relator de origem"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:acordaorevisado') == true ? '(SG) Lançar movimentação do acórdão' : '(SG) Acórdão aguardando movimento de julgamento - LANÇAR'}" name="(SG) Acórdão revisado?">
         <transition to="(SG) Lançar movimentação do acórdão" name="(SG) Lançar movimentação do acórdão"/>
+        <transition to="(SG) Acórdão aguardando movimento de julgamento - LANÇAR" name="(SG) Acórdão aguardando movimento de julgamento - LANÇAR"/>
     </decision>
     <node name="(SG) Lançar movimentação do acórdão">
         <transition to="(SG) Acrescentar situação julgado no processo" name="(SG) Acrescentar situação julgado no processo"/>
@@ -534,7 +534,10 @@ Magistrado  Assessoria Segundo Grau  Assessor
         </event>
     </node>
     <node name="(SG) Realocar órgão ao relator de origem">
-        <transition to="(SG) Acórdão aguardando movimento de julgamento - LANÇAR" name="(SG) Acórdão aguardando movimento de julgamento - LANÇAR"/>
+        <transition to="(SG) Acórdão revisado?" name="(SG) Acórdão revisado?"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(processInstance.contextInstance.getVariable('processo'))}"/>
+        </event>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorCargo.idOrgaoJulgadorCargo)}"/>
