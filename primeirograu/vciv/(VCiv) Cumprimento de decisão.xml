@@ -618,7 +618,7 @@
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', 'false')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_cojud', 'true')}"/>
             <action expression="&lt;action expression=&quot;#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Processos devolvidos pela COJUD')}&quot;/&gt;"/>
-            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'COJUD_FBG', processInstance.contextInstance.variables)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'COJUD_FBG', 111, 270, null, true,processInstance.contextInstance.variables)}"/>
         </event>
         <event type="task-end">
             <action expression="#{preencherMovimento.deCodigo(980).comComplementoDeCodigo(7).preencherComTexto('juízo de orgem').lancarMovimento()}"/>
@@ -644,7 +644,7 @@
             <action expression="#{taskInstanceUtil.setVariable('mostrarBotaoGravarNoFluxo', 'false')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_cojud', 'true')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Devolver para a secretaria')}"/>
-            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'COJUD_FBG', processInstance.contextInstance.variables)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'COJUD_FBG', 111, 270, null, true,processInstance.contextInstance.variables)}"/>
         </event>
         <event type="task-end">
             <action expression="#{preencherMovimento.deCodigo(980).comComplementoDeCodigo(7).preencherComTexto('juízo de origem').lancarMovimento()}"/>
