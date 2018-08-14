@@ -123,7 +123,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -179,7 +179,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção de despacho" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -238,7 +238,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção de despacho" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -297,7 +297,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção de sentença" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -415,7 +415,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -474,7 +474,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção de sentença" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -551,7 +551,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -610,7 +610,7 @@
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -670,7 +670,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -728,7 +728,7 @@
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de despacho" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -784,7 +784,7 @@
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action name="upd" expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -843,7 +843,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -902,7 +902,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
@@ -960,7 +960,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="node-enter">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>

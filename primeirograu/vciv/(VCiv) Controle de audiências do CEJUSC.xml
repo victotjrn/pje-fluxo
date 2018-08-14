@@ -125,7 +125,7 @@ aviso2: ATENÇÃO: É necessário SEMPRE clicar no botão "GRAVAR" após preencher os 
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Documento já assinado">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(CEJUSC) Minutar ata de audiência" name="Retornar para minuta"/>
         <event type="node-leave">

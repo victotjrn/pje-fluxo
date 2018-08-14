@@ -101,7 +101,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas..]
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VEF) Encaminhar para despachados" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="Nó de Desvio - (VEF) Conclusão para Decisão - Edital - Execução Fiscal" name="Nó de Desvio - (VEF) Conclusão para Decisão - Edital - Execução Fiscal">
             <condition expression="#{true}"/>

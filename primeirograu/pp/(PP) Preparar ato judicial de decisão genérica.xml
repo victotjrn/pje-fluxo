@@ -109,7 +109,7 @@ Magistrado  Assessoria               Assessor
             <condition expression="#{true}"/>
         </transition>
         <transition to="(PP) Apagar variáveis do fluxo" name="Documento já assinado">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>

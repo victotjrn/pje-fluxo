@@ -113,7 +113,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada entrega alvara" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Entregar Alvará')}"/>
@@ -183,7 +183,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada imprimir oficio" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir Ofício')}"/>
@@ -213,7 +213,7 @@
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Imprimir Ofício" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Assinar ofício pelo magistrado" name="Encaminhar para assinatura do magistrado"/>
         <event type="task-create">
@@ -244,7 +244,7 @@
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Imprimir Ofício" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir Ofício')}"/>
@@ -315,7 +315,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção em Elaborar Documentos" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção em Elaborar Documentos')}"/>
@@ -393,7 +393,7 @@
         </transition>
         <transition to="(VCiv) Certificar Trânsito em Julgado" name="Retornar para certificar"/>
         <transition to="(VCiv) Imprimir Certidão de Trânsito em Julgado" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
@@ -472,7 +472,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Imprimir certidão de decurso de prazo" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
@@ -539,7 +539,7 @@
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada entrega precatória e rogatória" name="Documento já assinado! Encaminhar para secretaria 2">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada entrega precatória e rogatória" name="(VCiv) Imprimir outros documentos">
             <condition expression="#{true}"/>
@@ -577,7 +577,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Imprimir outros documentos" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir outros documentos')}"/>
