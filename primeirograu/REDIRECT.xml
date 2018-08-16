@@ -12,9 +12,17 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="solicitante"/>
-        <transition to="É migração?" name="É migração?"/>
+        <transition to="É migração SAJ?" name="É migração SAJ?"/>
     </start-state>  
     <!-- NODES -->
+    <decision expression="#{ not empty contexts.sessionContext.get('migracao') and contexts.sessionContext.get('migracao').contains('SAJ') ? 'Entrar no saj migração' : 'É migração?' }" name="É migração SAJ?">
+        <transition to="Entrar no saj migração" name="Entrar no saj migração"/>
+        <transition to="É migração?" name="É migração?"/>
+    </decision>
+    <process-state name="Entrar no saj migração">
+        <sub-process name="(SAJ) Saj migracao" binding="late"/>
+        <transition to="Encaminhar para analise da secretaria" name="Encaminhar para analise da secretaria"/>
+    </process-state>
     <decision expression="#{ not parametroUtil.getParametro('pje:tjrn:ip3:migracao:jurisdicoes:vara').contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao).concat(' ')) and parametroUtil.getParametro('pje:tjrn:ip3:migracao:ativo').equals('true') and tramitacaoProcessualService.recuperaProcesso().importadoSistemaLegado ? 'Entrar no projudi migração' : '(VCiv) Deslocar secretaria unificada' }" name="É migração?">
         <transition to="Entrar no projudi migração" name="Entrar no projudi migração"/>
         <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
