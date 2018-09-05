@@ -18,7 +18,7 @@
         <transition to="(CEJUSC) É CEJUSC ?" name="É intimar CEJUSC ?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{(' 3 10 19 8 14 16 7 9 11 17 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().competencia.idCompetencia).concat(' '))) || !(authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;MOSSOR&quot;) || authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) || authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;PARNAMIRIM&quot;)) ? '(CEJUSC) Aviso CEJUSC' : '(CEJUSC) Lançar movimento entrada'}" name="(CEJUSC) É CEJUSC ?">
+    <decision expression="#{util.eval(parametroUtil.getParametro('pje:tjrn:verificaCEJUSC')) ? '(CEJUSC) Aviso CEJUSC' : '(CEJUSC) Lançar movimento entrada'} ? '(CEJUSC) Aviso CEJUSC' : '(CEJUSC) Lançar movimento entrada'}" name="(CEJUSC) É CEJUSC ?">
         <transition to="(CEJUSC) Aviso CEJUSC" name="(CEJUSC) Aviso CEJUSC"/>
         <transition to="(CEJUSC) Lançar movimento entrada " name="(CEJUSC) Lançar movimento entrada"/>
     </decision>
@@ -54,7 +54,8 @@ expressão p/ quando ativar parnamirim:
         <transition to="(CEJUSC) Elaborar documento" name="Expedir Ato Ordinatório"/>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idTipoAudiencia', '23,24,25,21')}"/>
-            <action name="upd" expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 105) :       (authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;MOSSOR&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 99) :  authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;PARNAMIRIM&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 110) : null)}"/>
+            <action name="upd" expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 105) :       (authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;MOSSOR&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 99) :  authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;PARNAMIRIM&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 110) : authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;CAIC&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 268) : null)}"/>
+            
         </event>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Análise do CEJUSC">
