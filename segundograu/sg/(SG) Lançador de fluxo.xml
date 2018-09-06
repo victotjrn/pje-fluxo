@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Lançador de fluxo">
-    <description><![CDATA[Código do fluxo: SG_LANC_FLUXO
+    <description><![CDATA[Código do fluxo: SG_LANC_FLUXO.
 
 Descrição: Fluxo lançador de fluxo paralelo.]]></description>  
     <!-- SWIMLANES -->
@@ -168,14 +168,24 @@ Descrição: Fluxo lançador de fluxo paralelo.]]></description>
             <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'SG_RET_DOC', processInstance.contextInstance.variables)}"/>
         </event>
     </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:fbg:opcoesCumprimento').contains('{sg_fbg_controlar_retorno_expediente}') == true ? '(SG) Controlar retorno de expediente' : 'Término'}" name="(SG) É controlar retorno de expediente?">
-        <transition to="Término" name="Término"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:fbg:opcoesCumprimento').contains('{sg_fbg_controlar_retorno_expediente}') == true ? '(SG) Controlar retorno de expediente' : '(SG) É intimação ou citação ao Estado?'}" name="(SG) É controlar retorno de expediente?">
         <transition to="(SG) Controlar retorno de expediente" name="(SG) Controlar retorno de expediente"/>
+        <transition to="(SG) É intimação ou citação ao Estado?" name="(SG) É intimação ou citação ao Estado?"/>
     </decision>
     <node name="(SG) Controlar retorno de expediente">
-        <transition to="Término" name="Término"/>
+        <transition to="(SG) É intimação ou citação ao Estado?" name="(SG) É intimação ou citação ao Estado?"/>
         <event type="node-enter">
             <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'SG_CONTRETEXP', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:fbg:opcoesCumprimento').contains('{sg_fbg_intimar_citar_estado}') == true ? '(SG) Expedição de intimação ou citação ao Estado' : 'Término'}" name="(SG) É intimação ou citação ao Estado?">
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Expedição de intimação ou citação ao Estado" name="(SG) Expedição de intimação ou citação ao Estado"/>
+    </decision>
+    <node name="(SG) Expedição de intimação ou citação ao Estado">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'SG_PAC_RN', processInstance.contextInstance.variables)}"/>
         </event>
     </node>
     <end-state name="Término"/>
