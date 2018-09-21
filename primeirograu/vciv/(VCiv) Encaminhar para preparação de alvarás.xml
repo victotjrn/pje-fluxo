@@ -46,7 +46,7 @@
     <node name="(VCiv) Encaminhar para elaboração de alvarás">
         <transition to="(VCiv) Enviar para elaboração de alvará?" name="(VCiv) Enviar para elaboração de alvará?"/>
         <event type="node-enter">
-            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'VCiv_ELAB_ALV', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador, tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorCargo.idOrgaoJulgadorCargo, null, true,processInstance.contextInstance.variables)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'VCiv_ELAB_ALV', null, null, null, true,processInstance.contextInstance.variables)}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:quantAlv', tramitacaoProcessualService.recuperaVariavel('pje:fluxo:quantAlv')+1)}"/>
