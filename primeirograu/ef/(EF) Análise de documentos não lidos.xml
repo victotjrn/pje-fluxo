@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Análise de documentos não lidos">
+    <description><![CDATA[Código do fluxo: EF_ADOCNLIDO
+
+Descrição: Fluxo destinado à análise de juntada de documentos.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Análise de documentos não lidos">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(EF) Processo distribuído?" name="(EF) Processo distribuído?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaProcesso().processo.numeroProcesso ? '(EF) Foi juntado pelo Ministério Público?' : 'Término'}" name="(EF) Processo distribuído?">
+        <transition to="(EF) Foi juntado pelo Ministério Público?" name="(EF) Foi juntado pelo Ministério Público?"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Ministério Público') &gt; -1 ? '(EF) Documentos não lidos [Ministério Público] - ANALISAR' : '(EF) Foi juntado pela Defensoria?'}" name="(EF) Foi juntado pelo Ministério Público?">
+        <transition to="(EF) Foi juntado pela Defensoria?" name="(EF) Foi juntado pela Defensoria?"/>
+        <transition to="(EF) Documentos não lidos [Ministério Público] - ANALISAR" name="(EF) Documentos não lidos [Ministério Público] - ANALISAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Documentos não lidos [Ministério Público] - ANALISAR">
+        <task name="(EF) Documentos não lidos [Ministério Público] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+2. Variável: WEB-INF_xhtml_flx_visualizarPeticao
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Término" name="Marcar documento como lido e finalizar a tarefa"/>
+        <transition to="Nó de Desvio - (EF) Análise de documentos não lidos" name="Nó de Desvio - (EF) Análise de documentos não lidos">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Defensoria Pública') &gt; -1 ? '(EF) Documentos não lidos [Defensoria] - ANALISAR' : '(EF) Foi juntado pela Procuradoria?'}" name="(EF) Foi juntado pela Defensoria?">
+        <transition to="(EF) Documentos não lidos [Defensoria] - ANALISAR" name="(EF) Documentos não lidos [Defensoria] - ANALISAR"/>
+        <transition to="(EF) Foi juntado pela Procuradoria?" name="(EF) Foi juntado pela Procuradoria?"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Documentos não lidos [Defensoria] - ANALISAR">
+        <task name="(EF) Documentos não lidos [Defensoria] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+2. Variável: WEB-INF_xhtml_flx_visualizarPeticao
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Término" name="Marcar documento como lido e finalizar a tarefa"/>
+        <transition to="Nó de Desvio - (EF) Análise de documentos não lidos" name="Nó de Desvio - (EF) Análise de documentos não lidos">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{processoDocumentoManager.getDocumento(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:incidental:peticoes')).nomeUsuarioAlteracao.indexOf('- Procuradoria') &gt; -1 ? '(EF) Documentos não lidos [Procuradoria] - ANALISAR' : '(EF) Documentos não lidos - ANALISAR'}" name="(EF) Foi juntado pela Procuradoria?">
+        <transition to="(EF) Documentos não lidos [Procuradoria] - ANALISAR" name="(EF) Documentos não lidos [Procuradoria] - ANALISAR"/>
+        <transition to="(EF) Documentos não lidos - ANALISAR" name="(EF) Documentos não lidos - ANALISAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Documentos não lidos [Procuradoria] - ANALISAR">
+        <task name="(EF) Documentos não lidos [Procuradoria] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+2. Variável: WEB-INF_xhtml_flx_visualizarPeticao
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Análise de documentos não lidos" name="Nó de Desvio - (EF) Análise de documentos não lidos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Marcar documento como lido e finalizar a tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Documentos não lidos - ANALISAR">
+        <task name="(EF) Documentos não lidos - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_visualizarPeticao" mapped-name="frame:WEB-INF_xhtml_flx_visualizarPeticao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+2. Variável: WEB-INF_xhtml_flx_visualizarPeticao
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Análise de documentos não lidos" name="Nó de Desvio - (EF) Análise de documentos não lidos">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Marcar documento como lido e finalizar a tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{processoDocumentoTrfHome.inserirDocumentoLido(visualizarPeticaoAction.documentoPrincipal)}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Análise de documentos não lidos">
+        <task name="Nó de Desvio - (EF) Análise de documentos não lidos" swimlane="Nó de Desvio - (EF) Análise de documentos não lidos"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Documentos não lidos - ANALISAR" name="(EF) Documentos não lidos - ANALISAR"/>
+        <transition to="(EF) Documentos não lidos [Ministério Público] - ANALISAR" name="(EF) Documentos não lidos [Ministério Público] - ANALISAR"/>
+        <transition to="(EF) Documentos não lidos [Defensoria] - ANALISAR" name="(EF) Documentos não lidos [Defensoria] - ANALISAR"/>
+        <transition to="(EF) Documentos não lidos [Procuradoria] - ANALISAR" name="(EF) Documentos não lidos [Procuradoria] - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

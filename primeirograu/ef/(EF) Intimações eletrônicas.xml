@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Intimações eletrônicas">
+    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido. EF_INTELET]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Intimações eletrônicas">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(EF) Intimação eletrônica - INFORMAR">
+        <task name="(EF) Intimação eletrônica - INFORMAR" swimlane="Secretaria">
+            <controller>
+                <variable name="prazoIntimacaoAtivo" mapped-name="number:prazoIntimacaoAtivo" access="read,write,required"/>
+                <variable name="prazoIntimacaoPassivo" mapped-name="number:prazoIntimacaoPassivo" access="read,write,required"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: prazoIntimacaoAtivo
+   Label: Prazo em dias para o(s) advogado(s) do polo ativo (0 - para sem prazo; 99 - para não intimar)
+   Escrita: Sim
+   Obrig.: Sim
+   Tipo: Numérico
+
+2. Variável: prazoIntimacaoPassivo
+   Label: Prazo em dias para o(s) advogado(s) do polo passivo (0 - para sem prazo; 99 - para não intimar)
+   Escrita: Sim
+   Obrig.: Sim
+   Tipo: Numérico]]></description>
+        <transition to="Nó de Desvio - (EF) Intimações eletrônicas" name="Nó de Desvio - (EF) Intimações eletrônicas">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Separação em intimação eletrônica" name="Prosseguir"/>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacaoAtivo', '99')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacaoPassivo', '99')}"/>
+        </event>
+    </task-node>
+    <fork name="(EF) Separação em intimação eletrônica">
+        <transition to="(EF) Tem polo ativo ?" name="(EF) Tem polo ativo ?"/>
+        <transition to="(EF) Tem polo passivo ?" name="(EF) Tem polo passivo ?"/>
+    </fork>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != 99 ? '(EF) Verificar inaptos polo ativo' : '(EF) Junção em intimação eletrônica'}" name="(EF) Tem polo ativo ?">
+        <transition to="(EF) Verificar inaptos polo ativo" name="(EF) Verificar inaptos polo ativo"/>
+        <transition to="(EF) Junção em intimação eletrônica" name="(EF) Junção em intimação eletrônica"/>
+    </decision>
+    <node name="(EF) Verificar inaptos polo ativo">
+        <transition to="(EF) Junção em intimação eletrônica" name="(EF) Junção em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('enviarAtivo', 'true')}"/>
+            <action expression="#{atoComunicacaoService.naoAptosImtimar(tramitacaoProcessualService.recuperaProcesso(),tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloAtivo()) ,'inaptosAtivo')}"/>
+        </event>
+    </node>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != 99 ? '(EF) Verificar inaptos polo passivo' : '(EF) Junção em intimação eletrônica'}" name="(EF) Tem polo passivo ?">
+        <transition to="(EF) Verificar inaptos polo passivo" name="(EF) Verificar inaptos polo passivo"/>
+        <transition to="(EF) Junção em intimação eletrônica" name="(EF) Junção em intimação eletrônica"/>
+    </decision>
+    <node name="(EF) Verificar inaptos polo passivo">
+        <transition to="(EF) Junção em intimação eletrônica" name="(EF) Junção em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('enviarPassivo', 'true')}"/>
+            <action expression="#{atoComunicacaoService.naoAptosImtimar(tramitacaoProcessualService.recuperaProcesso(),tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloPassivo()) ,'inaptosPassivo')}"/>
+        </event>
+    </node>
+    <join name="(EF) Junção em intimação eletrônica">
+        <transition to="(EF) Existem inaptos ?" name="(EF) Existem inaptos ?"/>
+    </join>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') or not empty tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') ? '(EF) Intimação eletrônica - CONFIRMAR' : '(EF) Deve realizar intimação ?'}" name="(EF) Existem inaptos ?">
+        <transition to="(EF) Intimação eletrônica - CONFIRMAR" name="(EF) Intimação eletrônica - CONFIRMAR"/>
+        <transition to="(EF) Deve realizar intimação ?" name="(EF) Deve realizar intimação ?"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Intimação eletrônica - CONFIRMAR">
+        <task name="(EF) Intimação eletrônica - CONFIRMAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="poloAtivo" mapped-name="textAlert:poloAtivo" access="read,write"/>
+                <variable name="advogadosPoloAtivo" mapped-name="textAlert:advogadosPoloAtivo" access="read,write"/>
+                <variable name="poloPassivo" mapped-name="textAlert:poloPassivo" access="read,write"/>
+                <variable name="advogadosPoloPassivo" mapped-name="textAlert:advogadosPoloPassivo" access="read,write"/>
+                <variable name="avisoConfirmar" mapped-name="textAlert:avisoConfirmar" access="read,write"/>
+                <variable name="avisoRetornar" mapped-name="textAlert:avisoRetornar" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso
+   Label: *Foram encontrados os seguintes problemas nesta comunicação:*
+
+2. Variável: poloAtivo
+   Label: #{tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') != null ? 'Polo ativo:' : ''}
+
+3. Variável: advogadosPoloAtivo
+   Label: #{tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') != null ? tramitacaoProcessualService.recuperaVariavel('inaptosAtivo') : ''}
+
+4. Variável: poloPassivo
+   Label: #{tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') != null ? 'Polo passivo:' : ''}
+
+5. Variável: advogadosPoloPassivo
+   Label: #{tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') != null ? tramitacaoProcessualService.recuperaVariavel('inaptosPassivo') : ''}
+
+
+6. Variável: avisoConfimar
+   Label: Ao CONFIRMAR, o advogado cadastrado no processo, mas que não tenha a situação regular no sistema PJe, não será intimado deste último ato produzido.
+
+7. Variável: avisoRetornar
+   Label: Ao RETORNAR, esta intimação eletrônica será cancelada.]]></description>
+        <transition to="Nó de Desvio - (EF) Intimações eletrônicas" name="Nó de Desvio - (EF) Intimações eletrônicas">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Deve realizar intimação ?" name="Confirmar"/>
+        <transition to="(EF) Sinalizar cancelamento" name="Retornar"/>
+    </task-node>
+    <decision expression="#{not (not empty tramitacaoProcessualService.recuperaVariavel('enviarAtivo') &amp;&amp; tramitacaoProcessualService.recuperaVariavel('enviarAtivo')) &amp;&amp;  not (not empty tramitacaoProcessualService.recuperaVariavel('enviarPassivo') &amp;&amp; tramitacaoProcessualService.recuperaVariavel('enviarPassivo')) ? '(EF) Sinalizar cancelamento' : '(EF) Separação execução intimação'}" name="(EF) Deve realizar intimação ?">
+        <transition to="(EF) Separação execução intimação" name="(EF) Separação execução intimação"/>
+        <transition to="(EF) Sinalizar cancelamento" name="(EF) Sinalizar cancelamento"/>
+    </decision>
+    <node name="(EF) Sinalizar cancelamento">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:intelet:cancelou','true')}"/>
+        </event>
+    </node>
+    <fork name="(EF) Separação execução intimação">
+        <transition to="(EF) Enviar ativo ?" name="(EF) Enviar ativo ?"/>
+        <transition to="(EF) Enviar passivo ?" name="(EF) Enviar passivo ?"/>
+    </fork>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('enviarPassivo') &amp;&amp; tramitacaoProcessualService.recuperaVariavel('enviarPassivo') ? '(EF) Executar intimação passivos' : '(EF) Junção execução intimação'}" name="(EF) Enviar passivo ?">
+        <transition to="(EF) Executar intimação passivos" name="(EF) Executar intimação passivos"/>
+        <transition to="(EF) Junção execução intimação" name="(EF) Junção execução intimação"/>
+    </decision>
+    <node name="(EF) Executar intimação passivos">
+        <transition to="(EF) Junção execução intimação" name="(EF) Junção execução intimação"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloPassivo()), (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 0) ? 'S' : 'D', (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+        </event>
+    </node>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('enviarAtivo') &amp;&amp; tramitacaoProcessualService.recuperaVariavel('enviarAtivo') ? '(EF) Executar intimação ativos' : '(EF) Junção execução intimação'}" name="(EF) Enviar ativo ?">
+        <transition to="(EF) Executar intimação ativos" name="(EF) Executar intimação ativos"/>
+        <transition to="(EF) Junção execução intimação" name="(EF) Junção execução intimação"/>
+    </decision>
+    <node name="(EF) Executar intimação ativos">
+        <transition to="(EF) Junção execução intimação" name="(EF) Junção execução intimação"/>
+        <event type="node-enter">
+            <action expression="${atoComunicacaoService.intimarEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.listProcessoParteToListpessoa(tramitacaoProcessualService.recuperaProcesso().getListaAdvogadosPoloAtivo()), (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 0) ? 'S' : 'D', (empty tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') or tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 0) ? null : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo'), tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+        </event>
+    </node>
+    <join name="(EF) Junção execução intimação">
+        <transition to="(EF) É fazenda ?" name="(EF) É fazenda ?"/>
+    </join>
+    <decision expression="#{processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10) ? '(EF) Controle de Prazo' : '(EF) Informar DJe'}" name="(EF) É fazenda ?">
+        <transition to="(EF) Controle de Prazo" name="(EF) Controle de Prazo"/>
+        <transition to="(EF) Informar DJe" name="(EF) Informar DJe"/>
+    </decision>
+    <process-state name="(EF) Informar DJe">
+        <sub-process name="(EF) Publicações no DJe" binding="late"/>
+        <transition to="(EF) Controle de Prazo" name="(EF) Controle de Prazo"/>
+    </process-state>
+    <process-state name="(EF) Controle de Prazo">
+        <sub-process name="(EF) Controle de prazo - intimação" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntimacaoAtivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntimacaoPassivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('inaptosAtivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('inaptosPassivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('enviarAtivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('enviarPassivo')}"/>
+        </event>
+    </end-state>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Intimações eletrônicas">
+        <task name="Nó de Desvio - (EF) Intimações eletrônicas" swimlane="Nó de Desvio - (EF) Intimações eletrônicas"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <transition to="(EF) Intimação eletrônica - CONFIRMAR" name="(EF) Intimação eletrônica - CONFIRMAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>

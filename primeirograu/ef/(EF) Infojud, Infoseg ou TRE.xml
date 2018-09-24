@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Infojud, Infoseg ou TRE">
+    <description><![CDATA[Código do fluxo: EF_INFOJ_INFOG_TRE
+
+Descrição: Fluxo para aguardar Infojud, Infoseg ou TRE.
+
+Raia        Localização   Papel
+Secretaria  Secretaria    Chefe de Secretaria
+Secretaria  Gabinete      Magistrado]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Infojud, Infoseg ou TRE">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(EF) Infojud, Infoseg ou TRE - Consultar" name="(EF) Infojud, Infoseg ou TRE - Consultar"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(EF) Infojud, Infoseg ou TRE - Consultar">
+        <task name="(EF) Infojud, Infoseg ou TRE - Consultar" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso
+   Label: Para juntar a resposta do Infojud, Infoseg ou TRE clique no número do processo e Anexar documentos.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="(EF) Infojud, Infoseg ou TRE - Aguardando resposta" name="Aguardar resposta"/>
+        <transition to="Nó de Desvio - (EF) Infojud, Infoseg ou TRE" name="Nó de Desvio - (EF) Infojud, Infoseg ou TRE">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Finalizar"/>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Infojud, Infoseg ou TRE - Aguardando resposta">
+        <task name="(EF) Infojud, Infoseg ou TRE - Aguardando resposta" swimlane="Secretaria">
+            <controller/>
+        </task>
+        <transition to="Término" name="Finalizar tarefa"/>
+        <transition to="Nó de Desvio - (EF) Infojud, Infoseg ou TRE" name="Nó de Desvio - (EF) Infojud, Infoseg ou TRE">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Infojud, Infoseg ou TRE">
+        <task name="Nó de Desvio - (EF) Infojud, Infoseg ou TRE" swimlane="Nó de Desvio - (EF) Infojud, Infoseg ou TRE"/>
+        <transition to="(EF) Infojud, Infoseg ou TRE - Consultar" name="(EF) Infojud, Infoseg ou TRE - Consultar"/>
+        <transition to="(EF) Infojud, Infoseg ou TRE - Aguardando resposta" name="(EF) Infojud, Infoseg ou TRE - Aguardando resposta"/>
+        <transition to="Término" name="Término"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

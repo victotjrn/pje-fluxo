@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Fluxo básico geral">
+    <description><![CDATA[Fluxo básico de conhecimento para varas de execução fiscal.
+
+Raia        Localização    Papel
+Secretaria  Secretaria     Chefe de Secretaria
+Secretaria  Gabinete       Magistrado
+Secretaria  Corregedoria   Servidor Corregedoria 
+Secretaria  Corregedoria   Magistrado Corregedor]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,8:5852,8:5853')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(EF) É Embargos à Execução Fiscal?" name="(EF) É Embargos à Execução Fiscal?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial == '1118' ? '(EF) Tem pedido de urgência?' : '(EF) Preparar ato judicial de decisão inicial'}" name="(EF) É Embargos à Execução Fiscal?">
+        <transition to="(EF) Preparar ato judicial de decisão inicial" name="(EF) Preparar ato judicial de decisão inicial"/>
+        <transition to="(EF) Tem pedido de urgência?" name="(EF) Tem pedido de urgência?"/>
+    </decision>
+    <decision expression="#{processoTrfHome.isEmPedidoUrgencia() ? '(EF) Expedição de certidão de oposição de embargos - urgente' : '(EF) Expedição de certidão de oposição de embargos'}" name="(EF) Tem pedido de urgência?">
+        <transition to="(EF) Expedição de certidão de oposição de embargos" name="(EF) Expedição de certidão de oposição de embargos"/>
+        <transition to="(EF) Expedição de certidão de oposição de embargos - urgente" name="(EF) Expedição de certidão de oposição de embargos - urgente"/>
+    </decision>
+    <process-state name="(EF) Expedição de certidão de oposição de embargos">
+        <sub-process name="(EF) Expedição de certidão de oposição de embargos" binding="late"/>
+        <transition to="(EF) Preparar ato judicial de decisão inicial de embargos" name="(EF) Preparar ato judicial de decisão inicial de embargos"/>
+    </process-state>
+    <process-state name="(EF) Expedição de certidão de oposição de embargos - urgente">
+        <sub-process name="(EF) Expedição de certidão de oposição de embargos - urgente" binding="late"/>
+        <transition to="(EF) Preparar ato judicial de decisão inicial de embargos - urgente" name="(EF) Preparar ato judicial de decisão inicial - urgente"/>
+    </process-state>
+    <process-state name="(EF) Preparar ato judicial de decisão inicial">
+        <sub-process name="(EF) Preparar ato judicial de decisão inicial" binding="late"/>
+        <transition to="(EF) Autos recebidos do gabinete - decisão inicial" name="(EF) Autos recebidos do gabinete - decisão inicial"/>
+    </process-state>
+    <process-state name="(EF) Preparar ato judicial de decisão inicial de embargos - urgente">
+        <sub-process name="(EF) Preparar ato judicial de decisão inicial de embargos - urgente" binding="late"/>
+        <transition to="(EF) Preparar ato de comunicação - intimação" name="(EF) Preparar ato de comunicação - intimação"/>
+    </process-state>
+    <process-state name="(EF) Preparar ato de comunicação - intimação">
+        <sub-process name="(EF) Expedição de intimação" binding="late"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(EF) Autos recebidos do gabinete - decisão inicial">
+        <sub-process name="(EF) Autos recebidos do gabinete - decisão inicial" binding="late"/>
+        <transition to="(EF) Cumprir determinações ou citar?" name="(EF) Cumprir determinações ou citar?"/>
+    </process-state>
+    <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('ef:aut_rec_gab:transicaoSaida') ? tramitacaoProcessualService.recuperaVariavel('ef:aut_rec_gab:transicaoSaida') : 'Secretaria - ANALISAR'}" name="(EF) Cumprir determinações ou citar?">
+        <transition to="(EF) Secretaria - ANALISAR" name="Secretaria - ANALISAR"/>
+        <transition to="(EF) Preparar ato de comunicação - citação" name="Citar"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:aut_rec_gab:transicaoSaida')}"/>
+        </event>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Secretaria - ANALISAR">
+        <task name="(EF) Secretaria - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+                <variable name="ef_fbg_aguardar_laudo_tecnico" mapped-name="sim_nao:ef_fbg_aguardar_laudo_tecnico" access="read,write"/>
+                <variable name="ef_fbg_alterar_tipo_documento" mapped-name="sim_nao:ef_fbg_alterar_tipo_documento" access="read,write"/>
+                <variable name="ef_fbg_bacenjud_minutar" mapped-name="sim_nao:ef_fbg_bacenjud_minutar" access="read,write"/>
+                <variable name="ef_fbg_serasajud_solicitar" mapped-name="sim_nao:ef_fbg_serasajud_solicitar" access="read,write"/>
+                <variable name="ef_fbg_certificar_decurso" mapped-name="sim_nao:ef_fbg_certificar_decurso" access="read,write"/>
+                <variable name="ef_fbg_certificar_transito" mapped-name="sim_nao:ef_fbg_certificar_transito" access="read,write"/>
+                <variable name="ef_fbg_citar" mapped-name="sim_nao:ef_fbg_citar" access="read,write"/>
+                <variable name="ef_fbg_intimar" mapped-name="sim_nao:ef_fbg_intimar" access="read,write"/>
+                <variable name="ef_fbg_controlar_audiencia" mapped-name="sim_nao:ef_fbg_controlar_audiencia" access="read,write"/>
+                <variable name="ef_fbg_controlar_retorno_expediente" mapped-name="sim_nao:ef_fbg_controlar_retorno_expediente" access="read,write"/>
+                <variable name="ef_fbg_encaminhar_cejusc" mapped-name="sim_nao:ef_fbg_encaminhar_cejusc" access="read,write"/>
+                <variable name="ef_fbg_encerrar_prazo" mapped-name="sim_nao:ef_fbg_encerrar_prazo" access="read,write"/>
+                <variable name="ef_fbg_expedir_alvaras" mapped-name="sim_nao:ef_fbg_expedir_alvaras" access="read,write"/>
+                <variable name="ef_fbg_expedir_carta" mapped-name="sim_nao:ef_fbg_expedir_carta" access="read,write"/>
+                <variable name="ef_fbg_expedir_mandado" mapped-name="sim_nao:ef_fbg_expedir_mandado" access="read,write"/>
+                <variable name="ef_fbg_expedir_oficio" mapped-name="sim_nao:ef_fbg_expedir_oficio" access="read,write"/>
+                <variable name="ef_fbg_expedir_outros_documentos" mapped-name="sim_nao:ef_fbg_expedir_outros_documentos" access="read,write"/>
+                <variable name="ef_fbg_expedir_precatorio_rpv" mapped-name="sim_nao:ef_fbg_expedir_precatorio_rpv" access="read,write"/>
+                <variable name="ef_fbg_infojud_infoseg_consultar" mapped-name="sim_nao:ef_fbg_infojud_infoseg_consultar" access="read,write"/>
+                <variable name="ef_fbg_publicar_dje" mapped-name="sim_nao:ef_fbg_publicar_dje" access="read,write"/>
+                <variable name="ef_fbg_renajud_consultar" mapped-name="sim_nao:ef_fbg_renajud_consultar" access="read,write"/>
+                <variable name="ef_fbg_intimar_eletronicamente" mapped-name="sim_nao:ef_fbg_intimar_eletronicamente" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: #{tramitacaoProcessualService.recuperaVariavel('ef:fbg:aviso_secretaria_analisar') ? '' : tramitacaoProcessualService.recuperaVariavel('ef:fbg:aviso_secretaria_analisar')}
+   Escrita: Sim
+   Obrig.: Não
+
+2. Variável: Processo_Fluxo_visualizarDecisao
+   Label: Última conclusão judicial
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+3. Variável: MovimentarEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+4. Variável: aviso2
+   Label: Marque a(s) opção(ões) de cumprimento abaixo, em seguida, clique em "Próxima ação: 01 - Prosseguir na(s) tarefa(s) acima selecionada(s)". Ou se preferir, deixe as opções de cumprimento desmarcadas e escolha a "Próxima ação" desejada.
+   Escrita: Sim
+   Obrig.: Não
+
+5. Variável: ef_fbg_aguardar_laudo_tecnico
+   Label: Aguardar Perícia / Laudo Técnico / Outros
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Checkbox
+
+6. Variável: ef_fbg_alterar_tipo_documento
+   Label: Alterar tipo de documento
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Checkbox
+
+7. Variável: ef_fbg_bacenjud_minutar
+   Label: Bacen Jud - Minutar bloqueio ou desbloqueio
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Checkbox
+
+8. Variável: ef_fbg_serasajud_solicitar
+   Label: SerasaJUD - Solicitar
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Checkbox
+
+9. Variável: ef_fbg_certificar_decurso
+   Label: Certificar decurso
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Checkbox
+
+10. Variável: ef_fbg_certificar_transito
+   Label: Certificar trânsito em julgado
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Checkbox
+
+11. Variável: ef_fbg_citar
+    Label: Citar via Sistema/Correios/Edital
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+12. Variável: ef_fbg_intimar
+    Label: Intimar via Sistema/Correios/Edital
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+13. Variável: ef_fbg_controlar_audiencia
+    Label: Controlar audiência
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+14. Variável: ef_fbg_controlar_retorno_expediente
+    Label: Controlar retorno de expedientes
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+15. Variável: ef_fbg_encaminhar_cejusc
+    Label: Encaminhar para o CEJUSC
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+16. Variável: ef_fbg_encerrar_prazo
+    Label: Encerrar prazo
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+17. Variável: ef_fbg_expedir_alvaras
+    Label: Expedir alvará(s)
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+18. Variável: ef_fbg_expedir_carta
+    Label: Expedir carta de ordem, precatória ou rogatória
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+19. Variável: ef_fbg_expedir_mandado
+    Label: Expedir mandado
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+20. Variável: ef_fbg_expedir_oficio
+    Label: Expedir ofício
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+21. Variável: ef_fbg_expedir_outros_documentos
+    Label: Expedir outros documentos
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+22. Variável: ef_fbg_expedir_precatorio_rpv
+    Label: Expedir Precatório e(ou) RPV
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+23. Variável: ef_fbg_infojud_infoseg_consultar
+    Label: Infojud / Infoseg / TRE - Consultar
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+24. Variável: ef_fbg_publicar_dje
+    Label: Publicar no DJE
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+25. Variável: ef_fbg_renajud_consultar
+    Label: Renajud - Consultar
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox
+
+26. Variável: ef_fbg_intimar_eletronicamente
+    Label: Intimar advogados (automaticamente)
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Checkbox]]></description>
+        <transition to="Nó de Desvio - (EF) Fluxo básico geral" name="Nó de Desvio - (EF) Fluxo básico geral">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Lançar fluxos" name="01 - Prosseguir na(s) tarefa(s) acima selecionada(s) "/>
+        <transition to="(EF) Gravar variavel fluxo unico - Redistribuir processo" name="02 - Redistribuir processo"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Arquivar processo" name="03 - Arquivar processo"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Cancelar distribuição" name="04 - Cancelar distribuição"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Suspender processo" name="05 - Suspender processo"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Encaminhar para instância superior" name="06 - Encaminhar para instância superior"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Enviar concluso para decisão" name="07 - Enviar concluso para decisão"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Enviar concluso para decisão de urgência" name="08 - Enviar concluso para decisão de urgência"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Enviar concluso para despacho" name="09 - Enviar concluso para despacho"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Enviar concluso para sentença" name="10 - Enviar concluso para sentença"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Enviar à Contadoria Judicial - COJUD" name="11 - Enviar à Contadoria Judicial - COJUD"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Enviar à Penhora eletrônica - Ajud" name="12 - Enviar à Penhora eletrônica - Ajud"/>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_aguardar_laudo_tecnico')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_alterar_tipo_documento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_bacenjud_minutar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_serasajud_solicitar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_certificar_decurso')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_certificar_transito')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_citar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_intimar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_controlar_audiencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_controlar_retorno_expediente')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_encaminhar_cejusc')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_encerrar_prazo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_alvaras')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_carta')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_mandado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_oficio')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_outros_documentos')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_precatorio_rpv')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_infojud_infoseg_consultar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_publicar_dje')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_renajud_consultar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_intimar_eletronicamente')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:fbg:aviso_secretaria_analisar')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', '')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_aguardar_laudo_tecnico') == true ? '{ef_fbg_aguardar_laudo_tecnico}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_alterar_tipo_documento') == true ? '{ef_fbg_alterar_tipo_documento}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_bacenjud_minutar') == true ? '{ef_fbg_bacenjud_minutar}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_serasajud_solicitar') == true ? '{ef_fbg_serasajud_solicitar}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_certificar_decurso') == true ? '{ef_fbg_certificar_decurso}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_certificar_transito') == true ? '{ef_fbg_certificar_transito}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_citar') == true ? '{ef_fbg_citar}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_intimar') == true ? '{ef_fbg_intimar}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_controlar_audiencia') == true ? '{ef_fbg_controlar_audiencia}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_controlar_retorno_expediente') == true ? '{ef_fbg_controlar_retorno_expediente}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_encaminhar_cejusc') == true ? '{ef_fbg_encaminhar_cejusc}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_encerrar_prazo') == true ? '{ef_fbg_encerrar_prazo}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_expedir_alvaras') == true ? '{ef_fbg_expedir_alvaras}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_expedir_carta') == true ? '{ef_fbg_expedir_carta}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_expedir_mandado') == true ? '{ef_fbg_expedir_mandado}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_expedir_oficio') == true ? '{ef_fbg_expedir_oficio}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_expedir_outros_documentos') == true ? '{ef_fbg_expedir_outros_documentos}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_expedir_precatorio_rpv') == true ? '{ef_fbg_expedir_precatorio_rpv}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_infojud_infoseg_consultar') == true ? '{ef_fbg_infojud_infoseg_consultar}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_publicar_dje') == true ? '{ef_fbg_publicar_dje}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_renajud_consultar') == true ? '{ef_fbg_renajud_consultar}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_intimar_eletronicamente') == true ? '{ef_fbg_intimar_eletronicamente}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_aguardar_laudo_tecnico')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_alterar_tipo_documento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_bacenjud_minutar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_serasajud_solicitar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_certificar_decurso')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_certificar_transito')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_citar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_intimar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_controlar_audiencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_controlar_retorno_expediente')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_encaminhar_cejusc')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_encerrar_prazo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_expedir_alvaras')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_expedir_carta')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_expedir_mandado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_expedir_oficio')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_expedir_outros_documentos')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_expedir_precatorio_rpv')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_infojud_infoseg_consultar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_publicar_dje')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_renajud_consultar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_intimar_eletronicamente')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <process-state name="(EF) Autos recebidos da secretaria">
+        <sub-process name="(EF) Autos recebidos da secretaria - Execução Fiscal" binding="late"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:ef:despacho')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:ef:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:ef:decisao_urgencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:ef:sentenca')}"/>
+        </event>
+    </process-state>
+    <process-state name="(EF) Preparar ato de comunicação - citação">
+        <sub-process name="(EF) Expedição de citação" binding="late"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(EF) Preparar ato judicial de decisão inicial de embargos">
+        <sub-process name="(EF) Preparar ato judicial de decisão inicial de embargos" binding="late"/>
+        <transition to="(EF) Autos recebidos do gabinete - decisão inicial" name="(EF) Autos recebidos do gabinete - decisão inicial"/>
+    </process-state>
+    <process-state name="(EF) Lançar fluxos">
+        <sub-process name="(EF) Lançador de fluxo" binding="late"/>
+        <transition to="(EF) Secretaria aguardando cumprimento - AGUARDAR" name="(EF) Secretaria aguardando cumprimento - AGUARDAR"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:aviso_secretaria_analisar', 'Processo enviado com sucesso para as tarefas selecionadas.')}"/>
+        </event>
+    </process-state>
+    <task-node end-tasks="true" name="(EF) Secretaria aguardando cumprimento - AGUARDAR">
+        <task name="(EF) Secretaria aguardando cumprimento - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo encontra-se pendente de cumprimento em tarefas paralelas. Para dar continuidade, será necessário cumprir todas as tarefas pendentes e, só assim, retornar para a tarefa "(EF) Secretaria - ANALISAR".
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="(EF) Secretaria - ANALISAR" name="Retornar para as opções de cumprimento"/>
+        <transition to="Nó de Desvio - (EF) Fluxo básico geral" name="Nó de Desvio - (EF) Fluxo básico geral">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(EF) Gravar variavel fluxo unico - Redistribuir processo">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Redistribuição de processo')}"/>
+        </event>
+    </node>
+    <node name="(EF) Gravar variavel fluxo unico - Arquivar processo">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Arquivamento de processo')}"/>
+        </event>
+    </node>
+    <node name="(EF) Gravar variavel fluxo unico - Cancelar distribuição">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Cancelamento de distribuição')}"/>
+        </event>
+    </node>
+    <node name="(EF) Gravar variavel fluxo unico - Suspender processo">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Suspensão de processo')}"/>
+        </event>
+    </node>
+    <node name="(EF) Gravar variavel fluxo unico - Encaminhar para instância superior">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Encaminhamento para instância superior')}"/>
+        </event>
+    </node>
+    <node name="(EF) Gravar variavel fluxo unico - Enviar concluso para decisão">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:ef:decisao', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Autos recebidos da secretaria')}"/>
+        </event>
+    </node>
+    <node name="(EF) Gravar variavel fluxo unico - Enviar concluso para decisão de urgência">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:ef:decisao', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:ef:decisao_urgencia', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Autos recebidos da secretaria')}"/>
+        </event>
+    </node>
+    <node name="(EF) Gravar variavel fluxo unico - Enviar concluso para despacho">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:ef:despacho', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Autos recebidos da secretaria')}"/>
+        </event>
+    </node>
+    <node name="(EF) Gravar variavel fluxo unico - Enviar concluso para sentença">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:ef:sentenca', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Autos recebidos da secretaria')}"/>
+        </event>
+    </node>
+    <node name="(EF) Gravar variavel fluxo unico - Enviar à Contadoria Judicial - COJUD">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Dar cumprimento a ato judicial de central de calculos')}"/>
+        </event>
+    </node>
+    <node name="(EF) Gravar variavel fluxo unico - Enviar à Penhora eletrônica - Ajud">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Penhora eletrônica - Ajud')}"/>
+        </event>
+    </node>
+    <decision expression="#{entityManager.createNativeQuery(&quot;select count(*) from vs_situacao_processo_new s where s.nm_tarefa &lt;&gt; '(EF) Secretaria - ANALISAR' AND s.id_processo_trf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(EF) Gravar mensagem nao pode entrar no fluxo' : tramitacaoProcessualService.recuperaVariavel('ef:paj:sub_fluxo_unico')}" name="(EF) Pode ir para subfluxo único?">
+        <transition to="(EF) Arquivamento de processo" name="(EF) Arquivamento de processo"/>
+        <transition to="(EF) Cancelamento de distribuição" name="(EF) Cancelamento de distribuição"/>
+        <transition to="(EF) Encaminhamento para instância superior" name="(EF) Encaminhamento para instância superior"/>
+        <transition to="(EF) Dar cumprimento a ato judicial de central de calculos" name="(EF) Dar cumprimento a ato judicial de central de calculos"/>
+        <transition to="(EF) Gravar mensagem nao pode entrar no fluxo" name="(EF) Gravar mensagem nao pode entrar no fluxo"/>
+        <transition to="(EF) Penhora eletrônica - Ajud" name="(EF) Penhora eletrônica - Ajud"/>
+        <transition to="(EF) Autos recebidos da secretaria" name="(EF) Autos recebidos da secretaria"/>
+        <transition to="(EF) Suspensão de processo" name="(EF) Suspensão de processo"/>
+        <transition to="(EF) Redistribuição de processo" name="(EF) Redistribuição de processo"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:paj:sub_fluxo_unico')}"/>
+        </event>
+    </decision>
+    <node name="(EF) Gravar mensagem nao pode entrar no fluxo">
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:aviso_secretaria_analisar', 'O processo não pôde ser movimentado pois há ações sendo efetuadas em outras tarefas. Para movimentá-lo, é necessário finalizar os procedimentos nas demais caixas e deixá-lo, apenas, em &quot;(EF) Secretaria - ANALISAR&quot;.')}"/>
+        </event>
+    </node>
+    <process-state name="(EF) Redistribuição de processo">
+        <sub-process name="(EF) Redistribuição" binding="late"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(EF) Arquivamento de processo">
+        <sub-process name="(EF) Arquivamento" binding="late"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(EF) Cancelamento de distribuição">
+        <sub-process name="(EF) Cancelamento da distribuição" binding="late"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(EF) Suspensão de processo">
+        <sub-process name="(EF) Controle de suspensão" binding="late"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(EF) Encaminhamento para instância superior">
+        <sub-process name="(EF) Remessa à instância superior" binding="late"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(EF) Dar cumprimento a ato judicial de central de calculos">
+        <sub-process name="(EF) Cumprimento de decisão" binding="late"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(EF) Penhora eletrônica - Ajud">
+        <sub-process name="(EF) Ajud" binding="late"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+    </process-state>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Fluxo básico geral">
+        <task name="Nó de Desvio - (EF) Fluxo básico geral"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+        <transition to="(EF) Secretaria aguardando cumprimento - AGUARDAR" name="(EF) Secretaria aguardando cumprimento - AGUARDAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>

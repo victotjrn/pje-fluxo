@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Cancelamento da distribuição">
+    <description><![CDATA[Código do fluxo: EF_CANDIST
+
+Descrição: Fluxo responsável pelo cancelamento da distribuição de processos.
+
+Raia        Localização    Papel
+Secretaria   Secretaria    Chefe de Secretaria
+Secretaria   Gabinete      Magistrado]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Cancelamento da distribuição">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(EF) ~Cancelamento da distribuição - CONFIRMAR" name="(EF) ~Cancelamento da distribuição - CONFIRMAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(EF) ~Cancelamento da distribuição - CONFIRMAR">
+        <task name="(EF) ~Cancelamento da distribuição - CONFIRMAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+1. Variável: aviso1   
+   Label: ATENÇÃO! Ao selecionar a opção "Confirmar cancelamento da distribuição", o processo não poderá mais ser movimentado.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Nó de Desvio - (EF) Cancelamento da distribuição" name="Nó de Desvio - (EF) Cancelamento da distribuição">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Lançar movimento de cancelamento da distribuição" name="Confirmar cancelamento da distribuição"/>
+        <transition to="(EF) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(EF) Lançar movimento de cancelamento da distribuição">
+        <transition to="(EF) ~Cancelamento da distribuição confirmado" name="(EF) ~Cancelamento da distribuição confirmado"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(488).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:andamento')}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:arquivado')}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(EF) ~Cancelamento da distribuição confirmado">
+        <task name="(EF) ~Cancelamento da distribuição confirmado" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+1. Variável: aviso1   
+   Label: O processo teve o cancelamento da sua distribuição efetuada, não poderá mais ser movimentado.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Nó de Desvio - (EF) Cancelamento da distribuição" name="Nó de Desvio - (EF) Cancelamento da distribuição">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Preparação de decisão sobre reativação" name="Enviar concluso sobre reativação"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <process-state name="(EF) Preparação de decisão sobre reativação">
+        <sub-process name="(EF) Preparar ato judicial de decisão sobre reativação" binding="late"/>
+        <transition to="(EF) Manter cancelamento da distribuição?" name="(EF) Manter cancelamento da distribuição?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:decisao_reativacao', true)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:paj:decisao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:paj:decisao_reativacao')}"/>
+        </event>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:arq:manter_arquivado') == true ? '(EF) ~Cancelamento da distribuição confirmado' : '(EF) Lançar movimento de reativação'}" name="(EF) Manter cancelamento da distribuição?">
+        <transition to="(EF) Lançar movimento de reativação" name="(EF) Lançar movimento de reativação"/>
+        <transition to="(EF) ~Cancelamento da distribuição confirmado" name="(EF) ~Cancelamento da distribuição confirmado"/>
+    </decision>
+    <node name="(EF) Lançar movimento de reativação">
+        <transition to="(EF) Apagar variáveis do fluxo" name="(EF) Apagar variáveis do fluxo"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(849).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:arquivado')}"/>
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:andamento')}"/>
+        </event>
+    </node>
+    <node name="(EF) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:arq:manter_arquivado')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Cancelamento da distribuição">
+        <task name="Nó de Desvio - (EF) Cancelamento da distribuição" swimlane="Nó de Desvio - (EF) Cancelamento da distribuição"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) ~Cancelamento da distribuição - CONFIRMAR" name="(EF) ~Cancelamento da distribuição - CONFIRMAR"/>
+        <transition to="(EF) ~Cancelamento da distribuição confirmado" name="(EF) ~Cancelamento da distribuição confirmado"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

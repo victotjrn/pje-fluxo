@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Controle de prazos e retorno de expedientes">
+    <description><![CDATA[Controla prazos e retorno de expedientes.]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,8:5852,8:5853,6:1469')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(EF) É via ofício?" name="(EF) É via ofício?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('ef:cpre:oficio') ? '(EF) Ofício pendente de devolução - AGUARDAR' : '(EF) É via correios?'}" name="(EF) É via ofício?">
+        <transition to="(EF) É via correios?" name="(EF) É via correios?"/>
+        <transition to="(EF) Ofício pendente de devolução - AGUARDAR" name="(EF) Ofício pendente de devolução - AGUARDAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Ofício pendente de devolução - AGUARDAR">
+        <task name="(EF) Ofício pendente de devolução - AGUARDAR" swimlane="Secretaria"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Ofício pendente de resposta - AGUARDAR" name="Encarminhar para aguardar resposta de ofício"/>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Ofício pendente de resposta - AGUARDAR">
+        <task name="(EF) Ofício pendente de resposta - AGUARDAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+    </task-node>
+    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('ef:cpre:correios') ? '(EF) Devolução de AR - AGUARDAR' : '(EF) É via mandado?'}" name="(EF) É via correios?">
+        <transition to="(EF) Devolução de AR - AGUARDAR" name="(EF) Devolução de AR - AGUARDAR"/>
+        <transition to="(EF) É via mandado?" name="(EF) É via mandado?"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Devolução de AR - AGUARDAR">
+        <task name="(EF) Devolução de AR - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="avisoHaExpedientes" mapped-name="textAlert:avisoHaExpedientes" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_exped_controleCorreios" mapped-name="frame:WEB-INF_xhtml_flx_exped_controleCorreios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: avisoHaExpedientes
+   Label: #{tramitacaoProcessualService.recuperaVariavel('avisoHaExpedientes') != null ? tramitacaoProcessualService.recuperaVariavel('avisoHaExpedientes') : ''}
+   Escritura: Sim
+   Obrig.: Não
+   Tipo: Aviso 
+
+2. Variável: WEB-INF_xhtml_flx_exped_controleCorreios  
+   Label: Inserir informação de AR
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Há expedientes em aberto?" name="Registrar devolução do AR"/>
+        <event type="task-assign">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('comunicacaoProcessualAction:idsExpedientes', entityManager.createNativeQuery(&quot;select string_agg(cast(pe.id_processo_expediente as text), ',') from tb_processo_expediente pe where pe.in_meio_expedicao_expediente = 'C' and pe.id_processo_trf = &quot;.concat(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf)).getSingleResult().toString())}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:registroCiencia', false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('avisoHaExpedientes')}"/>
+            <action expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0  ? tramitacaoProcessualService.apagaVariavel('avisoHaExpedientes') : tramitacaoProcessualService.gravaVariavel('avisoHaExpedientes', 'Todos os expedientes estão fechados. Por favor clicar em &quot;Cancelar e sair da tarefa&quot;') }"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('textAlert:avisoHaExpedientes')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Devolução de AR - REGISTRAR">
+        <task name="(EF) Devolução de AR - REGISTRAR" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_controleCorreios" mapped-name="frame:WEB-INF_xhtml_flx_exped_controleCorreios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: WEB-INF_xhtml_flx_exped_controleCorreios  
+   Label: Verificar cumprimento de AR
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Devolução de AR - AGUARDAR" name="Retornar para aguardar devolução do AR"/>
+        <transition to="(EF) Existe citação?" name="Finalizar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:edicaoNumeroAR',false)}"/>
+        </event>
+    </task-node>
+    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('ef:cpre:mandado') ? '(EF) Mandado pendente de devolução - AGUARDAR' : '(EF) É via carta precatória ou rogatória?'}" name="(EF) É via mandado?">
+        <transition to="(EF) Mandado pendente de devolução - AGUARDAR" name="(EF) Mandado pendente de devolução - AGUARDAR"/>
+        <transition to="(EF) É via carta precatória ou rogatória?" name="(EF) É via carta precatória ou rogatória?"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Mandado pendente de devolução - AGUARDAR">
+        <task name="(EF) Mandado pendente de devolução - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: MovimentarLote  
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+    </task-node>
+    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('ef:cpre:carta') ? '(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR' : '(EF) É via MP?'}" name="(EF) É via carta precatória ou rogatória?">
+        <transition to="(EF) É via MP?" name="(EF) É via MP?"/>
+        <transition to="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR" name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Aguardando carta precatória ou rogatória">
+        <task name="(EF) Aguardando carta precatória ou rogatória" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_expedientes_precatorias" mapped-name="frame:Processo_Fluxo_expedientes_precatorias" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: Processo_Fluxo_expedientes_precatorias
+   Label: Preparar carta de ordem ou precatória
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR" name="Registrar devolução de carta precatória ou rogatória"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR">
+        <task name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_expedientes_precatorias" mapped-name="frame:Processo_Fluxo_expedientes_precatorias" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: Processo_Fluxo_expedientes_precatorias
+   Label: Preparar carta de ordem ou precatória
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR" name="Registrar devolução de carta precatória ou rogatória"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR">
+        <task name="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_registroCiencia" mapped-name="frame:WEB-INF_xhtml_flx_exped_registroCiencia" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: WEB-INF_xhtml_flx_exped_registroCiencia
+   Label: Registrar devolução e ciência
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Prazo decorrido, finalizar e sair da tarefa"/>
+        <transition to="(EF) Processos com prazo em curso - AGUARDAR" name="Prazo em aberto, aguardar decurso de prazo"/>
+        <event type="task-create">
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('pje:fluxo:registrociencia:meios','L')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('ef:cpre:MP') ? '(EF) Manifestação do MP - AGUARDAR' : '(EF) É via sistema?'}" name="(EF) É via MP?">
+        <transition to="(EF) É via sistema?" name="(EF) É via sistema?"/>
+        <transition to="(EF) Manifestação do MP - AGUARDAR" name="(EF) Manifestação do MP - AGUARDAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Manifestação do MP - AGUARDAR">
+        <task name="(EF) Manifestação do MP - AGUARDAR" swimlane="Secretaria"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Prazos continuam em aberto MP?" name="Verificar existência de prazo em aberto">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Verificar existência de prazo em aberto')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', 'true')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 ? '(EF) Manifestação do MP - AGUARDAR' : '(EF) Processos com prazo decorrido para manifestação do MP - AGUARDAR'}" name="(EF) Prazos continuam em aberto MP?">
+        <transition to="(EF) Manifestação do MP - AGUARDAR" name="(EF) Manifestação do MP - AGUARDAR"/>
+        <transition to="(EF) Processos com prazo decorrido para manifestação do MP - AGUARDAR" name="(EF) Processos com prazo decorrido para manifestação do MP - AGUARDAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Processos com prazo decorrido para manifestação do MP - AGUARDAR">
+        <task name="(EF) Processos com prazo decorrido para manifestação do MP - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: MovimentarLote
+   Label: Registrar devolução e ciência
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('ef:cpre:sistema') ? '(EF) Há prazo em aberto?' : '(EF) Controlar retorno de expediente'}" name="(EF) É via sistema?">
+        <transition to="(EF) Há prazo em aberto?" name="(EF) Há prazo em aberto?"/>
+        <transition to="(EF) Controlar retorno de expediente" name="(EF) Controlar retorno de expediente"/>
+    </decision>
+    <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 ? '(EF) Processos com prazo em curso - AGUARDAR' : 'Término'}" name="(EF) Há prazo em aberto?">
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Processos com prazo em curso - AGUARDAR" name="(EF) Processos com prazo em curso - AGUARDAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Processos com prazo em curso - AGUARDAR">
+        <task name="(EF) Processos com prazo em curso - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: MovimentarLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação]]></description>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Prazos continuam em aberto?" name="Verificar existência de prazo em aberto">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Verificar existência de prazo em aberto')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaCiencia', 'true')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaCiencia')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 ? '(EF) Processos com prazo em curso - AGUARDAR' : '(EF) Processos com prazos decorridos - AGUARDAR'}" name="(EF) Prazos continuam em aberto?">
+        <transition to="(EF) Processos com prazo em curso - AGUARDAR" name="(EF) Processos com prazo em curso - AGUARDAR"/>
+        <transition to="(EF) Processos com prazos decorridos - AGUARDAR" name="(EF) Processos com prazos decorridos - AGUARDAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Processos com prazos decorridos - AGUARDAR">
+        <task name="(EF) Processos com prazos decorridos - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: MovimentarLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação]]></description>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Controlar retorno de expediente">
+        <task name="(EF) Controlar retorno de expediente" swimlane="Secretaria"/>
+        <transition to="(EF) Ofício pendente de devolução - AGUARDAR" name="Aguardar devolução de ofício"/>
+        <transition to="(EF) Ofício pendente de resposta - AGUARDAR" name="Aguardar resposta de ofício"/>
+        <transition to="(EF) Há expediente AR em aberto?" name="Aguardar devolução do AR"/>
+        <transition to="(EF) Há expediente em aberto?" name="Registrar devolução do AR"/>
+        <transition to="(EF) Há prazo em aberto?" name="Processos com prazo em curso"/>
+        <transition to="(EF) Mandado pendente de devolução - AGUARDAR" name="Aguardar devolução de mandado"/>
+        <transition to="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR" name="Aguardar carta precatória ou rogatória"/>
+        <transition to="(EF) Manifestação do MP - AGUARDAR" name="Aguardando manifestação do MP"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+        <task name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" swimlane="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Ofício pendente de devolução - AGUARDAR" name="(EF) Ofício pendente de devolução - AGUARDAR"/>
+        <transition to="(EF) Ofício pendente de resposta - AGUARDAR" name="(EF) Ofício pendente de resposta - AGUARDAR"/>
+        <transition to="(EF) Devolução de AR - AGUARDAR" name="(EF) Devolução de AR - AGUARDAR"/>
+        <transition to="(EF) Devolução de AR - REGISTRAR" name="(EF) Devolução de AR - REGISTRAR"/>
+        <transition to="(EF) Controlar retorno de expediente" name="(EF) Controlar retorno de expediente"/>
+        <transition to="(EF) Mandado pendente de devolução - AGUARDAR" name="(EF) Mandado pendente de devolução - AGUARDAR"/>
+        <transition to="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR" name="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR"/>
+        <transition to="(EF) Manifestação do MP - AGUARDAR" name="(EF) Manifestação do MP - AGUARDAR"/>
+        <transition to="(EF) Processos com prazo decorrido para manifestação do MP - AGUARDAR" name="(EF) Processos com prazo decorrido para manifestação do MP - AGUARDAR"/>
+        <transition to="(EF) Processos com prazo em curso - AGUARDAR" name="(EF) Processos com prazo em curso - AGUARDAR"/>
+        <transition to="(EF) Processos com prazos decorridos - AGUARDAR" name="(EF) Processos com prazos decorridos - AGUARDAR"/>
+        <transition to="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR" name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR"/>
+        <transition to="(EF) Aguardando carta precatória ou rogatória" name="(EF) Aguardando carta precatória ou rogatória"/>
+    </task-node>
+    <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(EF) Devolução de AR - REGISTRAR' : '(EF) Controlar retorno de expediente'}" name="(EF) Há expediente em aberto?">
+        <transition to="(EF) Devolução de AR - REGISTRAR" name="(EF) Devolução de AR - REGISTRAR"/>
+        <transition to="(EF) Controlar retorno de expediente" name="(EF) Controlar retorno de expediente"/>
+    </decision>
+    <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(EF) Devolução de AR - REGISTRAR' : '(EF) Devolução de AR - AGUARDAR'}" name="(EF) Há expedientes em aberto?">
+        <transition to="(EF) Devolução de AR - AGUARDAR" name="(EF) Devolução de AR - AGUARDAR"/>
+        <transition to="(EF) Devolução de AR - REGISTRAR" name="(EF) Devolução de AR - REGISTRAR"/>
+    </decision>
+    <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(EF) Devolução de AR - AGUARDAR' : '(EF) Controlar retorno de expediente'}" name="(EF) Há expediente AR em aberto?">
+        <transition to="(EF) Devolução de AR - AGUARDAR" name="(EF) Devolução de AR - AGUARDAR"/>
+        <transition to="(EF) Controlar retorno de expediente" name="(EF) Controlar retorno de expediente"/>
+    </decision>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT (*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = 65 AND ppe.fechado = false AND ppe.dtCienciaParte IS NOT NULL&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(EF) Registrar SERASAJUD' : 'Finalizar e sair da tarefa'}" name="(EF) Existe citação?">
+        <transition to="(EF) Há prazo em aberto?" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Registrar SERASAJUD" name="(EF) Registrar SERASAJUD"/>
+    </decision>
+    <process-state name="(EF) Registrar SERASAJUD">
+        <sub-process name="(EF) Registrar SERASAJUD" binding="late"/>
+        <transition to="(EF) Há prazo em aberto?" name="Finalizar e sair da tarefa"/>
+    </process-state>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Ajud">
+    <description><![CDATA[Código do fluxo: EF_AJUD.
+
+Descrição: Fluxo responsável pelas tarefas do Ajud.
+
+Raia        Localização   Papel
+Secretaria  Secretaria    Chefe de Secretaria
+Secretaria  Gabinete      Magistrado]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Ajud">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(EF) Ajud" name="(EF) Ajud"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(EF) Ajud">
+        <task name="(EF) Ajud" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso1
+   Label: Processo encontra-se aguardando bloqueio automatizado
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Ajud - Penhora parcial" name="Penhora parcial"/>
+        <transition to="(EF) Ajud - Penhora integral" name="Penhora integral"/>
+        <transition to="(EF) Ajud - Erro" name="Erro"/>
+        <transition to="Nó de Desvio - (EF) Ajud" name="Nó de Desvio - (EF) Ajud">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Ajud - Penhora parcial">
+        <task name="(EF) Ajud - Penhora parcial" swimlane="Secretaria"/>
+        <transition to="Término" name="Finalizar tarefa"/>
+        <transition to="Nó de Desvio - (EF) Ajud" name="Nó de Desvio - (EF) Ajud">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Ajud" name="Retornar para Ajud"/>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Ajud - Penhora integral">
+        <task name="(EF) Ajud - Penhora integral" swimlane="Secretaria"/>
+        <transition to="Término" name="Finalizar tarefa"/>
+        <transition to="Nó de Desvio - (EF) Ajud" name="Nó de Desvio - (EF) Ajud">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Ajud" name="Retornar para Ajud"/>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Ajud - Erro">
+        <task name="(EF) Ajud - Erro" swimlane="Secretaria"/>
+        <transition to="Término" name="Finalizar tarefa"/>
+        <transition to="Nó de Desvio - (EF) Ajud" name="Nó de Desvio - (EF) Ajud">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Ajud" name="Retornar para Ajud"/>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Ajud">
+        <task name="Nó de Desvio - (EF) Ajud" swimlane="Nó de Desvio - (EF) Ajud"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Ajud - Penhora integral" name="(EF) Ajud - Penhora integral"/>
+        <transition to="(EF) Ajud - Erro" name="(EF) Ajud - Erro"/>
+        <transition to="(EF) Ajud - Penhora parcial" name="(EF) Ajud - Penhora parcial"/>
+        <transition to="(EF) Ajud" name="(EF) Ajud"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
