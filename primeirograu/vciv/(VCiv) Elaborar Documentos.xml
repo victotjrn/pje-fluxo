@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Elaborar Documentos">
-    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros..................]]></description>  
+    <description><![CDATA[Fluxo destinado a elaboração de documentos do tipo Alvará, Ofício e outros.
+
+Parâmetros
+1. pje:tjrn:classesValorRecuperado: Classes nas quais deve ser informado o valor recuperado]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,5:1338,8:5852,8:5853,6:5901')}"/>
@@ -113,7 +116,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada entrega alvara" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Entregar Alvará')}"/>
@@ -183,7 +186,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada imprimir oficio" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir Ofício')}"/>
@@ -213,7 +216,7 @@
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Imprimir Ofício" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Assinar ofício pelo magistrado" name="Encaminhar para assinatura do magistrado"/>
         <event type="task-create">
@@ -244,7 +247,7 @@
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Imprimir Ofício" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir Ofício')}"/>
@@ -315,7 +318,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Junção em Elaborar Documentos" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Junção em Elaborar Documentos')}"/>
@@ -393,7 +396,7 @@
         </transition>
         <transition to="(VCiv) Certificar Trânsito em Julgado" name="Retornar para certificar"/>
         <transition to="(VCiv) Imprimir Certidão de Trânsito em Julgado" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
@@ -420,7 +423,7 @@
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) É classe VEF?" name="Finalizar tarefa"/>
+        <transition to="(VCiv) Informa valor recuperado?" name="Finalizar tarefa"/>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:cumpridec:certificar_decurso') ? '(VCiv) Certificar decurso de prazo' : '(VCiv) Junção em Elaborar Documentos'}" name="(VCiv) É certificar decurso de prazo?">
         <transition to="(VCiv) Junção em Elaborar Documentos" name="(VCiv) Junção em Elaborar Documentos"/>
@@ -472,7 +475,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Imprimir certidão de decurso de prazo" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
@@ -539,7 +542,7 @@
             <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada entrega precatória e rogatória" name="Documento já assinado! Encaminhar para secretaria 2">
-            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada entrega precatória e rogatória" name="(VCiv) Imprimir outros documentos">
             <condition expression="#{true}"/>
@@ -577,7 +580,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Imprimir outros documentos" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Imprimir outros documentos')}"/>
@@ -590,23 +593,27 @@
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',172)}"/>
         </event>
     </task-node>
-    <decision expression="#{parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) ? '(VCiv) Informar valor recuperado' : '(VCiv) Junção em Elaborar Documentos'}" name="(VCiv) É classe VEF?">
+    <decision expression="#{parametroUtil.getParametro('pje:tjrn:classesValorRecuperado').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) ? '(VCiv) Informar valor recuperado' : '(VCiv) Junção em Elaborar Documentos'}" name="(VCiv) Informa valor recuperado?">
         <transition to="(VCiv) Junção em Elaborar Documentos" name="(VCiv) Junção em Elaborar Documentos"/>
         <transition to="(VCiv) Informar valor recuperado" name="(VCiv) Informar valor recuperado"/>
     </decision>
     <task-node end-tasks="true" name="(VCiv) Informar valor recuperado">
         <task name="(VCiv) Informar valor recuperado" swimlane="Secretaria">
             <controller>
+                <variable name="aviso_valor_recuperado_1" mapped-name="textAlert:aviso_valor_recuperado_1" access="read,write"/>
                 <variable name="vef_valor_recuperado" mapped-name="text:vef_valor_recuperado" access="read,write,required"/>
-                <variable name="aviso_valor_recuperado" mapped-name="textAlert:aviso_valor_recuperado" access="read,write"/>
+                <variable name="aviso_valor_recuperado_2" mapped-name="textAlert:aviso_valor_recuperado_2" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[Variáveis:
 
+aviso_valor_recuperado_1: #{tramitacaoProcessualService.recuperaVariavel('aviso_erro_valor_recuperado') != null ? tramitacaoProcessualService.recuperaVariavel('aviso_erro_valor_recuperado') : ''}
+
+
 vef_valor_recuperado: "Informe o valor recuperado(Formato: 9.999,99):" - Texto
 
 
-aviso_valor_recuperado: "O valor recuperado deve ser informado para cumprimento da meta 5 do CNJ."
+aviso_valor_recuperado_2: "O valor recuperado deve ser informado para cumprimento da meta 5 do CNJ."
 - Aviso]]></description>
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
@@ -615,12 +622,19 @@ aviso_valor_recuperado: "O valor recuperado deve ser informado para cumprimento 
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('data_valor_recuperado', dateUtil.getDataAtual('dd/MM/yyyy'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('valor_recuperado', tramitacaoProcessualService.recuperaVariavelTarefa('text:vef_valor_recuperado')) }"/>
+            <action expression="#tramitacaoProcessualService.apagaVariavel('aviso_erro_valor_recuperado')"/>
         </event>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel(&quot;valor_recuperado&quot;).toString().matches(&quot;^\\d{1,3}(?:\\.\\d{3})*,\\d{2}$&quot;) ? '(VCiv) Junção em Elaborar Documentos':'(VCiv) Informar valor recuperado'}" name="(VCiv) Valor válido ?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel(&quot;valor_recuperado&quot;).toString().matches(&quot;^\\d{1,3}(?:\\.\\d{3})*,\\d{2}$&quot;) ? '(VCiv) Junção em Elaborar Documentos':'(VCiv) Aviso valor inválido'}" name="(VCiv) Valor válido ?">
         <transition to="(VCiv) Junção em Elaborar Documentos" name="(VCiv) Junção em Elaborar Documentos"/>
-        <transition to="(VCiv) Informar valor recuperado" name="(VCiv) Informar valor recuperado"/>
+        <transition to="(VCiv) Aviso valor inválido" name="(VCiv) Aviso valor inválido"/>
     </decision>
+    <node name="(VCiv) Aviso valor inválido">
+        <transition to="(VCiv) Informar valor recuperado" name="(VCiv) Informar valor recuperado"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('aviso_erro_valor_recuperado', 'Formato inválido. Favor, informar o valor novamente.')}"/>
+        </event>
+    </node>
     <process-state name="(VCiv) Deslocar secretaria unificada alvara">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Expedir Alvará" name="(VCiv) Expedir Alvará"/>
@@ -744,4 +758,3 @@ aviso_valor_recuperado: "O valor recuperado deve ser informado para cumprimento 
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
-
