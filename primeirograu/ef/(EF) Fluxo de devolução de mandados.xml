@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Fluxo de devolução de mandados"> 
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Fluxo de devolução de mandados">
+    <description><![CDATA[Fluxo de devolução de mandados.
+
+Parâmetro: pje:fluxo:incidental:sempreDisparar]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (EF) Fluxo de devolução de mandados">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
-    </swimlane>
-    <swimlane name="solicitante">
-        <assignment actor-id="#{actor.id}"/>
-    </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -17,53 +14,53 @@
         <transition to="(EF) É execução fiscal?" name="(EF) É execução fiscal?"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) ? 'Antes' : 'Não é execução fiscal'}" name="(EF) É execução fiscal?">
+    <decision expression="#{parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) ? '(EF) Lançar sinalizador no fluxo' : 'Término'}" name="(EF) É execução fiscal?">
         <transition to="Término" name="Término"/>
         <transition to="(EF) Lançar sinalizador no fluxo" name="(EF) Lançar sinalizador no fluxo"/>
-        <transition to="Antes" name="Antes"/>
-        <transition to="Não é execução fiscal" name="Não é execução fiscal"/>
     </decision>
-    <task-node end-tasks="true" name="Antes">
-        <task name="Antes" swimlane="Secretaria"/>
-        <transition to="(EF) Lançar sinalizador no fluxo" name="(EF) Lançar sinalizador no fluxo"/>
-        <transition to="Nó de Desvio - (EF) Fluxo de devolução de mandados" name="Nó de Desvio - (EF) Fluxo de devolução de mandados">
-            <condition expression="#{true}"/>
-        </transition>
-    </task-node>
     <node name="(EF) Lançar sinalizador no fluxo">
         <transition to="Término" name="Término"/>
-        <transition to="Depois" name="Depois"/>
         <event type="node-enter">
             <action expression="#{processoJudicialService.sinalizarFluxo(tramitacaoProcessualService.recuperaProcesso(), 'pje:aguarda_devolucao_mandado', true, false, true)};"/>
         </event>
     </node>
-    <task-node end-tasks="true" name="Depois">
-        <task name="Depois" swimlane="Secretaria"/>
-        <transition to="Término" name="Término"/>
-        <transition to="Nó de Desvio - (EF) Fluxo de devolução de mandados" name="Nó de Desvio - (EF) Fluxo de devolução de mandados">
-            <condition expression="#{true}"/>
-        </transition>
-    </task-node>
-    <task-node end-tasks="true" name="Não é execução fiscal">
-        <task name="Não é execução fiscal" swimlane="Secretaria"/>
-        <transition to="Término" name="Término"/>
-        <transition to="Nó de Desvio - (EF) Fluxo de devolução de mandados" name="Nó de Desvio - (EF) Fluxo de devolução de mandados">
-            <condition expression="#{true}"/>
-        </transition>
-    </task-node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (EF) Fluxo de devolução de mandados">
         <task name="Nó de Desvio - (EF) Fluxo de devolução de mandados" swimlane="Nó de Desvio - (EF) Fluxo de devolução de mandados"/>
         <transition to="Término" name="Término"/>
-        <transition to="Antes" name="Antes"/>
-        <transition to="Depois" name="Depois"/>
-        <transition to="Não é execução fiscal" name="Não é execução fiscal"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -72,40 +69,13 @@
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>

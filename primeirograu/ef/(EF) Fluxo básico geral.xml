@@ -258,6 +258,9 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
         <transition to="(EF) Gravar variavel fluxo unico - Enviar concluso para sentença" name="10 - Enviar concluso para sentença"/>
         <transition to="(EF) Gravar variavel fluxo unico - Enviar à Contadoria Judicial - COJUD" name="11 - Enviar à Contadoria Judicial - COJUD"/>
         <transition to="(EF) Gravar variavel fluxo unico - Enviar à Penhora eletrônica - Ajud" name="12 - Enviar à Penhora eletrônica - Ajud"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_cumprimento')}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -369,7 +372,7 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: aviso1
-   Label: O processo encontra-se pendente de cumprimento em tarefas paralelas. Para dar continuidade, será necessário cumprir todas as tarefas pendentes e, só assim, retornar para a tarefa "(EF) Secretaria - ANALISAR".
+   Label: O processo encontra-se pendente de cumprimento em tarefas paralelas. Para dar continuidade, será necessário cumprir todas as tarefas pendentes e, só assim, retornar para as opções de cumprimento.
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso]]></description>
@@ -377,8 +380,13 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
         <transition to="Nó de Desvio - (EF) Fluxo básico geral" name="Nó de Desvio - (EF) Fluxo básico geral">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_cumprimento', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Secretaria - ANALISAR')}"/>
         </event>
         <event type="task-end">
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>

@@ -21,7 +21,7 @@
     </decision>
     <task-node end-tasks="true" name="(EF) Ofício pendente de devolução - AGUARDAR">
         <task name="(EF) Ofício pendente de devolução - AGUARDAR" swimlane="Secretaria"/>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
@@ -32,7 +32,7 @@
         <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('ef:cpre:correios') ? '(EF) Devolução de AR - AGUARDAR' : '(EF) É via mandado?'}" name="(EF) É via correios?">
         <transition to="(EF) Devolução de AR - AGUARDAR" name="(EF) Devolução de AR - AGUARDAR"/>
@@ -61,7 +61,7 @@
         <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <transition to="(EF) Há expedientes em aberto?" name="Registrar devolução do AR"/>
         <event type="task-assign">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('comunicacaoProcessualAction:idsExpedientes', entityManager.createNativeQuery(&quot;select string_agg(cast(pe.id_processo_expediente as text), ',') from tb_processo_expediente pe where pe.in_meio_expedicao_expediente = 'C' and pe.id_processo_trf = &quot;.concat(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf)).getSingleResult().toString())}"/>
@@ -117,7 +117,7 @@
         <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Finalizar e sair da tarefa"/>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('ef:cpre:carta') ? '(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR' : '(EF) É via MP?'}" name="(EF) É via carta precatória ou rogatória?">
         <transition to="(EF) É via MP?" name="(EF) É via MP?"/>
@@ -140,7 +140,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR" name="Registrar devolução de carta precatória ou rogatória"/>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
     </task-node>
     <task-node end-tasks="true" name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR">
         <task name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR" swimlane="Secretaria">
@@ -159,7 +159,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR" name="Registrar devolução de carta precatória ou rogatória"/>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
     </task-node>
     <task-node end-tasks="true" name="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR">
         <task name="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR" swimlane="Secretaria">
@@ -177,7 +177,7 @@
         <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Prazo decorrido, finalizar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Prazo decorrido, finalizar e sair da tarefa"/>
         <transition to="(EF) Processos com prazo em curso - AGUARDAR" name="Prazo em aberto, aguardar decurso de prazo"/>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setVariable('pje:fluxo:registrociencia:meios','L')}"/>
@@ -189,7 +189,7 @@
     </decision>
     <task-node end-tasks="true" name="(EF) Manifestação do MP - AGUARDAR">
         <task name="(EF) Manifestação do MP - AGUARDAR" swimlane="Secretaria"/>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
@@ -221,7 +221,7 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
-        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Finalizar e sair da tarefa"/>
         <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
@@ -231,7 +231,7 @@
         <transition to="(EF) Controlar retorno de expediente" name="(EF) Controlar retorno de expediente"/>
     </decision>
     <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 ? '(EF) Processos com prazo em curso - AGUARDAR' : 'Término'}" name="(EF) Há prazo em aberto?">
-        <transition to="Término" name="Término"/>
+        <transition to="(EF) Devolução à secretaria" name="Término"/>
         <transition to="(EF) Processos com prazo em curso - AGUARDAR" name="(EF) Processos com prazo em curso - AGUARDAR"/>
     </decision>
     <task-node end-tasks="true" name="(EF) Processos com prazo em curso - AGUARDAR">
@@ -247,7 +247,7 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação]]></description>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
@@ -281,7 +281,7 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação]]></description>
-        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Finalizar e sair da tarefa"/>
         <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
@@ -299,25 +299,7 @@
         <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
-    </task-node>
-    <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
-        <task name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" swimlane="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes"/>
-        <transition to="Término" name="Término"/>
-        <transition to="(EF) Ofício pendente de devolução - AGUARDAR" name="(EF) Ofício pendente de devolução - AGUARDAR"/>
-        <transition to="(EF) Ofício pendente de resposta - AGUARDAR" name="(EF) Ofício pendente de resposta - AGUARDAR"/>
-        <transition to="(EF) Devolução de AR - AGUARDAR" name="(EF) Devolução de AR - AGUARDAR"/>
-        <transition to="(EF) Devolução de AR - REGISTRAR" name="(EF) Devolução de AR - REGISTRAR"/>
-        <transition to="(EF) Controlar retorno de expediente" name="(EF) Controlar retorno de expediente"/>
-        <transition to="(EF) Mandado pendente de devolução - AGUARDAR" name="(EF) Mandado pendente de devolução - AGUARDAR"/>
-        <transition to="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR" name="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR"/>
-        <transition to="(EF) Manifestação do MP - AGUARDAR" name="(EF) Manifestação do MP - AGUARDAR"/>
-        <transition to="(EF) Processos com prazo decorrido para manifestação do MP - AGUARDAR" name="(EF) Processos com prazo decorrido para manifestação do MP - AGUARDAR"/>
-        <transition to="(EF) Processos com prazo em curso - AGUARDAR" name="(EF) Processos com prazo em curso - AGUARDAR"/>
-        <transition to="(EF) Processos com prazos decorridos - AGUARDAR" name="(EF) Processos com prazos decorridos - AGUARDAR"/>
-        <transition to="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR" name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR"/>
-        <transition to="(EF) Aguardando carta precatória ou rogatória" name="(EF) Aguardando carta precatória ou rogatória"/>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
     </task-node>
     <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(EF) Devolução de AR - REGISTRAR' : '(EF) Controlar retorno de expediente'}" name="(EF) Há expediente em aberto?">
         <transition to="(EF) Devolução de AR - REGISTRAR" name="(EF) Devolução de AR - REGISTRAR"/>
@@ -338,7 +320,29 @@
     <process-state name="(EF) Registrar SERASAJUD">
         <sub-process name="(EF) Registrar SERASAJUD" binding="late"/>
         <transition to="(EF) Há prazo em aberto?" name="Finalizar e sair da tarefa"/>
-    </process-state>  
+    </process-state>
+    <process-state name="(EF) Devolução à secretaria">
+        <sub-process name="(EF) Fluxo de devolução à secretaria" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
+        <task name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" swimlane="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Ofício pendente de devolução - AGUARDAR" name="(EF) Ofício pendente de devolução - AGUARDAR"/>
+        <transition to="(EF) Ofício pendente de resposta - AGUARDAR" name="(EF) Ofício pendente de resposta - AGUARDAR"/>
+        <transition to="(EF) Devolução de AR - AGUARDAR" name="(EF) Devolução de AR - AGUARDAR"/>
+        <transition to="(EF) Devolução de AR - REGISTRAR" name="(EF) Devolução de AR - REGISTRAR"/>
+        <transition to="(EF) Controlar retorno de expediente" name="(EF) Controlar retorno de expediente"/>
+        <transition to="(EF) Mandado pendente de devolução - AGUARDAR" name="(EF) Mandado pendente de devolução - AGUARDAR"/>
+        <transition to="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR" name="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR"/>
+        <transition to="(EF) Manifestação do MP - AGUARDAR" name="(EF) Manifestação do MP - AGUARDAR"/>
+        <transition to="(EF) Processos com prazo decorrido para manifestação do MP - AGUARDAR" name="(EF) Processos com prazo decorrido para manifestação do MP - AGUARDAR"/>
+        <transition to="(EF) Processos com prazo em curso - AGUARDAR" name="(EF) Processos com prazo em curso - AGUARDAR"/>
+        <transition to="(EF) Processos com prazos decorridos - AGUARDAR" name="(EF) Processos com prazos decorridos - AGUARDAR"/>
+        <transition to="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR" name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR"/>
+        <transition to="(EF) Aguardando carta precatória ou rogatória" name="(EF) Aguardando carta precatória ou rogatória"/>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

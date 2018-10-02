@@ -23,11 +23,15 @@ Secretaria  Gabinete      Magistrado]]></description>
     <!-- NODES -->
     <task-node end-tasks="true" name="(EF) Expedir precatório e(ou) RPV">
         <task name="(EF) Expedir precatório e(ou) RPV" swimlane="Secretaria"/>
-        <transition to="Término" name="Finalizar tarefa"/>
         <transition to="Nó de Desvio - (EF) Expedir precatório e(ou) RPV" name="Nó de Desvio - (EF) Expedir precatório e(ou) RPV">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Devolução à secretaria" name="Finalizar e sair da tarefa"/>
     </task-node>
+    <process-state name="(EF) Devolução à secretaria">
+        <sub-process name="(EF) Fluxo de devolução à secretaria" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (EF) Expedir precatório e(ou) RPV">
         <task name="Nó de Desvio - (EF) Expedir precatório e(ou) RPV" swimlane="Nó de Desvio - (EF) Expedir precatório e(ou) RPV"/>

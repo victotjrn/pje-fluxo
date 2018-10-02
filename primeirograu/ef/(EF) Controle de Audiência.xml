@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Controle de Audiência">
-    <description><![CDATA[Fluxo responsável por controlar as audiências.........]]></description>  
+    <description><![CDATA[Fluxo responsável por controlar as audiências.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (EF) Controle de Audiência">
         <assignment actor-id="#{actor.id}"/>
@@ -38,10 +38,10 @@
         <transition to="(EF) Redesignar audiência" name="03 - Redesignar audiência"/>
         <transition to="(EF) Cancelar audiência" name="04 - Cancelar audiência"/>
         <transition to="(EF) Converter audiência em diligência" name="05 - Converter audiência em diligência"/>
-        <transition to="Término" name="06 - Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (EF) Controle de Audiência" name="Nó de Desvio - (EF) Controle de Audiência">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Devolução à secretaria" name="06 - Cancelar e sair da tarefa"/>
     </task-node>
     <task-node end-tasks="true" name="(EF) Cancelar audiência">
         <task name="(EF) Cancelar audiência" swimlane="Secretaria">
@@ -56,12 +56,12 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="(EF) Intimar da designação" name="Intimar do cancelamento via sistema/correios"/>
         <transition to="(EF) Intimar da designação - mandado" name="Intimar do cancelamento via mandado"/>
         <transition to="Nó de Desvio - (EF) Controle de Audiência" name="Nó de Desvio - (EF) Controle de Audiência">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:cumpridec:expedir_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:cumpridec:citar_intimar')}"/>
@@ -80,12 +80,12 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="(EF) Intimar da designação" name="Intimar da diligência via sistema/correios"/>
         <transition to="(EF) Intimar da designação - mandado" name="Intimar da diligência via mandado"/>
         <transition to="Nó de Desvio - (EF) Controle de Audiência" name="Nó de Desvio - (EF) Controle de Audiência">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:cumpridec:expedir_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:cumpridec:citar_intimar')}"/>
@@ -170,7 +170,7 @@
         </event>
     </task-node>
     <node name="(EF) Apagar minuta em elaboração">
-        <transition to="Término" name="Término"/>
+        <transition to="(EF) Devolução à secretaria" name="(EF) Devolução à secretaria"/>
         <event type="node-enter">
             <action expression="#{documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_audiencia')}"/>
         </event>
@@ -178,13 +178,13 @@
     <task-node end-tasks="true" name="(EF) Realizar audiência">
         <task name="(EF) Realizar audiência" swimlane="Secretaria"/>
         <transition to="(EF) Minutar ata de audiência" name="Minutar ata de audiência"/>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (EF) Controle de Audiência" name="Nó de Desvio - (EF) Controle de Audiência">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Informar dados da audiência" name="(EF) Informar dados da audiência">
             <condition expression="#{tramitacaoProcessualService.recuperaVariavel('processo') == 156177}"/>
         </transition>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
         </event>
@@ -425,12 +425,12 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame]]></description>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="(EF) Intimar da designação" name="Intimar da redesignação via sistema/correios"/>
         <transition to="(EF) Intimar da designação - mandado" name="Intimar da redesignação via mandado"/>
         <transition to="Nó de Desvio - (EF) Controle de Audiência" name="Nó de Desvio - (EF) Controle de Audiência">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:cumpridec:expedir_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:cumpridec:citar_intimar')}"/>
@@ -442,6 +442,61 @@
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:aud:expedir_mandado_aud', true)}"/>
         </event>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(EF) Assinar ata de audiência pelo conciliador' : '(EF) Informar dados da audiência'}" name="(EF) Preencheu dados audiência - conciliador?">
+        <transition to="(EF) Informar dados da audiência" name="(EF) Informar dados da audiência"/>
+        <transition to="(EF) Assinar ata de audiência pelo conciliador" name="(EF) Assinar ata de audiência pelo conciliador"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(EF) Assinar ata de audiência pelo magistrado' : '(EF) Informar dados da audiência'}" name="(EF) Preencheu dados da audiência - magistrado ?">
+        <transition to="(EF) Informar dados da audiência" name="(EF) Informar dados da audiência"/>
+        <transition to="(EF) Assinar ata de audiência pelo magistrado" name="(EF) Assinar ata de audiência pelo magistrado"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(EF) Informar movimentação' : '(EF) Informar dados da audiência'}" name="(EF) Preencheu dados da audiência - ato judicial ?">
+        <transition to="(EF) Informar dados da audiência" name="(EF) Informar dados da audiência"/>
+        <transition to="(EF) Informar movimentação" name="(EF) Informar movimentação"/>
+    </decision>
+    <node name="(EF) Ajustar audiência e movimentação">
+        <transition to="(EF) Devolução à secretaria" name="(EF) Devolução à secretaria"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:audienciaSelecionada', processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()))}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{processoAudienciaHome.instance.setStatusAudiencia(tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada'))}"/>
+            <action expression="#{processoAudienciaHome.update()}"/>
+            <action expression="#{processoAudienciaHome.registrarMovimentoAudiencia()}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:statusAudienciaSelecionada')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:audienciaSelecionada')}"/>
+        </event>
+    </node>
+    <process-state name="(EF) Intimar da audiência">
+        <sub-process name="(EF) Preparar Ato de Comunicação - Audiências" binding="late"/>
+        <transition to="(EF) Devolução à secretaria" name="(EF) Devolução à secretaria"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:aud:citar_intimar_aud', true)}"/>
+        </event>
+    </process-state>
+    <process-state name="(EF) Intimar da audiência - mandado">
+        <sub-process name="(EF) Preparar Ato de Comunicação - Audiências" binding="late"/>
+        <transition to="(EF) Devolução à secretaria" name="(EF) Devolução à secretaria"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:aud:expedir_mandado_aud', true)}"/>
+        </event>
+    </process-state>
+    <task-node end-tasks="true" name="(EF) Selecionar opção de intimação">
+        <task name="(EF) Selecionar opção de intimação" swimlane="Secretaria">
+            <controller/>
+        </task>
+        <description><![CDATA[aviso: Ao clicar no botão Concluir controle de audiência o processo será encaminhado para Análise da secretaria]]></description>
+        <transition to="(EF) Intimar da audiência" name="Intimar da audiência via sistema/correios"/>
+        <transition to="(EF) Intimar da audiência - mandado" name="Intimar da audiência via mandado"/>
+        <transition to="Nó de Desvio - (EF) Controle de Audiência" name="Nó de Desvio - (EF) Controle de Audiência">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Devolução à secretaria" name="Finalizar e sair da tarefa"/>
+    </task-node>
+    <process-state name="(EF) Devolução à secretaria">
+        <sub-process name="(EF) Fluxo de devolução à secretaria" binding="late"/>
+        <transition to="Término" name="Término"/>
     </process-state>
     <end-state name="Término">
         <event type="node-enter">
@@ -463,59 +518,8 @@
         <transition to="(EF) Assinar ata de audiência com ato judicial" name="(EF) Assinar ata de audiência com ato judicial"/>
         <transition to="(EF) Assinar ata de audiência pelo conciliador" name="(EF) Assinar ata de audiência pelo conciliador"/>
         <transition to="(EF) Redesignar audiência" name="(EF) Redesignar audiência"/>
-        <transition to="Término" name="Término"/>
         <transition to="(EF) Selecionar opção de intimação" name="(EF) Selecionar opção de intimação"/>
-    </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(EF) Assinar ata de audiência pelo conciliador' : '(EF) Informar dados da audiência'}" name="(EF) Preencheu dados audiência - conciliador?">
-        <transition to="(EF) Informar dados da audiência" name="(EF) Informar dados da audiência"/>
-        <transition to="(EF) Assinar ata de audiência pelo conciliador" name="(EF) Assinar ata de audiência pelo conciliador"/>
-    </decision>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(EF) Assinar ata de audiência pelo magistrado' : '(EF) Informar dados da audiência'}" name="(EF) Preencheu dados da audiência - magistrado ?">
-        <transition to="(EF) Informar dados da audiência" name="(EF) Informar dados da audiência"/>
-        <transition to="(EF) Assinar ata de audiência pelo magistrado" name="(EF) Assinar ata de audiência pelo magistrado"/>
-    </decision>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada') != null ? '(EF) Informar movimentação' : '(EF) Informar dados da audiência'}" name="(EF) Preencheu dados da audiência - ato judicial ?">
-        <transition to="(EF) Informar dados da audiência" name="(EF) Informar dados da audiência"/>
-        <transition to="(EF) Informar movimentação" name="(EF) Informar movimentação"/>
-    </decision>
-    <node name="(EF) Ajustar audiência e movimentação">
         <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:audienciaSelecionada', processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()))}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{processoAudienciaHome.instance.setStatusAudiencia(tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada'))}"/>
-            <action expression="#{processoAudienciaHome.update()}"/>
-            <action expression="#{processoAudienciaHome.registrarMovimentoAudiencia()}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:statusAudienciaSelecionada')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:audienciaSelecionada')}"/>
-        </event>
-    </node>
-    <process-state name="(EF) Intimar da audiência">
-        <sub-process name="(EF) Preparar Ato de Comunicação - Audiências" binding="late"/>
-        <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:aud:citar_intimar_aud', true)}"/>
-        </event>
-    </process-state>
-    <process-state name="(EF) Intimar da audiência - mandado">
-        <sub-process name="(EF) Preparar Ato de Comunicação - Audiências" binding="late"/>
-        <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:aud:expedir_mandado_aud', true)}"/>
-        </event>
-    </process-state>
-    <task-node end-tasks="true" name="(EF) Selecionar opção de intimação">
-        <task name="(EF) Selecionar opção de intimação" swimlane="Secretaria">
-            <controller/>
-        </task>
-        <description><![CDATA[aviso: Ao clicar no botão Concluir controle de audiência o processo será encaminhado para Análise da secretaria]]></description>
-        <transition to="Término" name="Finalizar e sair da tarefa"/>
-        <transition to="(EF) Intimar da audiência" name="Intimar da audiência via sistema/correios"/>
-        <transition to="(EF) Intimar da audiência - mandado" name="Intimar da audiência via mandado"/>
-        <transition to="Nó de Desvio - (EF) Controle de Audiência" name="Nó de Desvio - (EF) Controle de Audiência">
-            <condition expression="#{true}"/>
-        </transition>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

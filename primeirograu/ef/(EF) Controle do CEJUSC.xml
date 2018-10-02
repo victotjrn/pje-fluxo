@@ -6,11 +6,11 @@
     <swimlane name="Nó de Desvio - (EF) Controle do CEJUSC">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="CEJUSC">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886,5:1338,6:1469,6:5197')}"/>
-    </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197')}"/>
+    </swimlane>
+    <swimlane name="CEJUSC">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886,5:1338,6:1469,6:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -95,10 +95,10 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote]]></description>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (EF) Controle do CEJUSC" name="Nó de Desvio - (EF) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
@@ -119,10 +119,10 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote]]></description>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (EF) Controle do CEJUSC" name="Nó de Desvio - (EF) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
@@ -143,10 +143,10 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote]]></description>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="Nó de Desvio - (EF) Controle do CEJUSC" name="Nó de Desvio - (EF) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
@@ -344,36 +344,6 @@
         <transition to="Nó de Desvio - (EF) Controle do CEJUSC" name="Nó de Desvio - (EF) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-    </task-node>
-    <end-state name="Término">
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('cejusc:dpvat')}"/>
-        </event>
-    </end-state>
-    <task-node end-tasks="true" name="Nó de Desvio - (EF) Controle do CEJUSC">
-        <task name="Nó de Desvio - (EF) Controle do CEJUSC" swimlane="Nó de Desvio - (EF) Controle do CEJUSC"/>
-        <transition to="Término" name="Término"/>
-        <transition to="(CEJUSC) Designar audiência" name="(CEJUSC) Designar audiência"/>
-        <transition to="(CEJUSC) Análise do CEJUSC" name="(CEJUSC) Análise do CEJUSC"/>
-        <transition to="(CEJUSC) Intimar da audiência" name="(CEJUSC) Intimar da audiência"/>
-        <transition to="(CEJUSC) Elaborar documento" name="(CEJUSC) Elaborar documento"/>
-        <transition to="(CEJUSC) Processo com prazo em curso" name="(CEJUSC) Processo com prazo em curso"/>
-        <transition to="(CEJUSC) Processo com prazo decorrido" name="(CEJUSC) Processo com prazo decorrido"/>
-        <transition to="(CEJUSC) Assinar documento" name="(CEJUSC) Assinar documento"/>
-        <transition to="(CEJUSC) Imprimir Documento" name="(CEJUSC) Imprimir Documento"/>
-        <transition to="(CEJUSC) Informar conteúdo DJe" name="(CEJUSC) Informar conteúdo DJe"/>
-        <transition to="(CEJUSC) Ignorar conteúdo DJe" name="(CEJUSC) Ignorar conteúdo DJe"/>
-        <transition to="(CEJUSC) Confirmar conteúdo DJe" name="(CEJUSC) Confirmar conteúdo DJe"/>
-        <transition to="(CEJUSC) Audiências realizadas sem acordo" name="(CEJUSC) Audiências realizadas sem acordo"/>
-        <transition to="(CEJUSC) Audiências realizadas com acordo" name="(CEJUSC) Audiências realizadas com acordo"/>
-        <transition to="(CEJUSC) Audiências não realizadas" name="(CEJUSC) Audiências não realizadas"/>
-        <transition to="(CEJUSC) Escolher tipo de devolução" name="(CEJUSC) Escolher tipo de devolução"/>
-        <transition to="(CEJUSC) Aviso CEJUSC" name="(CEJUSC) Aviso CEJUSC"/>
-        <transition to="(CEJUSC) Designar audiência DPVAT" name="(CEJUSC) Designar audiência DPVAT"/>
-        <transition to="(CEJUSC) Selecionar CEJUSC" name="(CEJUSC) Selecionar CEJUSC"/>
-        <transition to="(CEJUSC) Audiências realizadas com ausência parcial das partes" name="(CEJUSC) Audiências realizadas com ausência parcial das partes"/>
-        <transition to="(CEJUSC) Audiências realizadas com acordo parcial" name="(CEJUSC) Audiências realizadas com acordo parcial"/>
-        <transition to="(CEJUSC) Selecionar Central de Mandados" name="(CEJUSC) Selecionar Central de Mandados"/>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Informar conteúdo DJe">
         <task name="(CEJUSC) Informar conteúdo DJe" swimlane="CEJUSC">
@@ -605,7 +575,7 @@
         <transition to="Nó de Desvio - (EF) Controle do CEJUSC" name="Nó de Desvio - (EF) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
     </task-node>
     <node name="(CEJUSC) Desclocar DPVAT NATAL">
         <transition to="(CEJUSC) Designar audiência DPVAT" name="(CEJUSC) Designar audiência DPVAT NATAL"/>
@@ -712,7 +682,7 @@ aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiên
         <transition to="Nó de Desvio - (EF) Controle do CEJUSC" name="Nó de Desvio - (EF) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
@@ -729,13 +699,47 @@ aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiên
         <transition to="Nó de Desvio - (EF) Controle do CEJUSC" name="Nó de Desvio - (EF) Controle do CEJUSC">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('juizo de origem').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('CEJUSC').lancarMovimento()}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
         </event>
+    </task-node>
+    <process-state name="(EF) Devolução à secretaria">
+        <sub-process name="(EF) Fluxo de devolução à secretaria" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('cejusc:dpvat')}"/>
+        </event>
+    </end-state>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Controle do CEJUSC">
+        <task name="Nó de Desvio - (EF) Controle do CEJUSC" swimlane="Nó de Desvio - (EF) Controle do CEJUSC"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(CEJUSC) Designar audiência" name="(CEJUSC) Designar audiência"/>
+        <transition to="(CEJUSC) Análise do CEJUSC" name="(CEJUSC) Análise do CEJUSC"/>
+        <transition to="(CEJUSC) Intimar da audiência" name="(CEJUSC) Intimar da audiência"/>
+        <transition to="(CEJUSC) Elaborar documento" name="(CEJUSC) Elaborar documento"/>
+        <transition to="(CEJUSC) Processo com prazo em curso" name="(CEJUSC) Processo com prazo em curso"/>
+        <transition to="(CEJUSC) Processo com prazo decorrido" name="(CEJUSC) Processo com prazo decorrido"/>
+        <transition to="(CEJUSC) Assinar documento" name="(CEJUSC) Assinar documento"/>
+        <transition to="(CEJUSC) Imprimir Documento" name="(CEJUSC) Imprimir Documento"/>
+        <transition to="(CEJUSC) Informar conteúdo DJe" name="(CEJUSC) Informar conteúdo DJe"/>
+        <transition to="(CEJUSC) Ignorar conteúdo DJe" name="(CEJUSC) Ignorar conteúdo DJe"/>
+        <transition to="(CEJUSC) Confirmar conteúdo DJe" name="(CEJUSC) Confirmar conteúdo DJe"/>
+        <transition to="(CEJUSC) Audiências realizadas sem acordo" name="(CEJUSC) Audiências realizadas sem acordo"/>
+        <transition to="(CEJUSC) Audiências realizadas com acordo" name="(CEJUSC) Audiências realizadas com acordo"/>
+        <transition to="(CEJUSC) Audiências não realizadas" name="(CEJUSC) Audiências não realizadas"/>
+        <transition to="(CEJUSC) Escolher tipo de devolução" name="(CEJUSC) Escolher tipo de devolução"/>
+        <transition to="(CEJUSC) Aviso CEJUSC" name="(CEJUSC) Aviso CEJUSC"/>
+        <transition to="(CEJUSC) Designar audiência DPVAT" name="(CEJUSC) Designar audiência DPVAT"/>
+        <transition to="(CEJUSC) Selecionar CEJUSC" name="(CEJUSC) Selecionar CEJUSC"/>
+        <transition to="(CEJUSC) Audiências realizadas com ausência parcial das partes" name="(CEJUSC) Audiências realizadas com ausência parcial das partes"/>
+        <transition to="(CEJUSC) Audiências realizadas com acordo parcial" name="(CEJUSC) Audiências realizadas com acordo parcial"/>
+        <transition to="(CEJUSC) Selecionar Central de Mandados" name="(CEJUSC) Selecionar Central de Mandados"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
