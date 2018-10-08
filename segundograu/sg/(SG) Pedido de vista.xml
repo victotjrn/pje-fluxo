@@ -48,24 +48,94 @@ Magistrado  Assessoria Segundo Grau  Assessoria
    Label: Neste processo consta um pedido de vista referente à última sessão de julgamento. Analise os autos disponibilizados nas pastas compartilhadas para essa finalidade e, ao término da análise, encaminhe o processo à próxima sessão de julgamento.
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso]]></description>
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em lote
+
+3. Variável: WEB-INF_xhtml_flx_votacaoVogal
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
         <transition to="Nó de Desvio - (SG) Pedido de vista" name="Nó de Desvio - (SG) Pedido de vista">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Finalizar e sair da tarefa"/>
         <transition to="(SG) Encaminhamento para gabinete substituto - ENCAMINHAR" name="Encaminhar para gabinete substituto"/>
-        <transition to="Término" name="Término">
+        <transition to="(SG) Houve julgamento?" name="(SG) Houve julgamento?">
             <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Apagar variáveis do fluxo" name="Finalizar e sair da tarefa">
+            <condition expression="#{org.jboss.seam.security.identity.hasRole('magistrado') or org.jboss.seam.security.identity.hasRole('idSecretarioSessao')}"/>
         </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:flx:votacaoVogal:transicaoAutomatica:papeis')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
         </event>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Encaminhar para gabinete substituto')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Término')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Houve julgamento?')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:flx:votacaoVogal:transicaoAutomatica:papeis','magistrado,pje:magistrado')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
+        </event>
+    </task-node>
+    <decision expression="#{ empty processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao') ? 'situacao padrao' : processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao')}" name="(SG) Houve julgamento?">
+        <transition to="(SG) Sessão de julgamento [voto vista] - AGUARDAR" name="situacao padrao"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="julgado"/>
+        <transition to="(SG) Sessão de julgamento [voto vista] - AGUARDAR" name="adiado"/>
+        <transition to="(SG) Sessão de julgamento [voto vista] - AGUARDAR" name="pedidoVista"/>
+        <transition to="(SG) Sessão de julgamento [voto vista] - AGUARDAR" name="retiradoJulgamento"/>
+    </decision>
+    <task-node end-tasks="true" name="(SG) Sessão de julgamento [voto vista] - AGUARDAR">
+        <task name="(SG) Sessão de julgamento [voto vista] - AGUARDAR" swimlane="Magistrado">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_votacaoVogal" mapped-name="frame:WEB-INF_xhtml_flx_votacaoVogal" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: WEB-INF_xhtml_flx_votacaoVogal
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em lote]]></description>
+        <transition to="Nó de Desvio - (SG) Pedido de vista" name="Nó de Desvio - (SG) Pedido de vista">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Houve julgamento?" name="(SG) Houve julgamento?">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Apagar variáveis do fluxo" name="Finalizar e sair da tarefa"/>
+        <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:flx:votacaoVogal:exp:manipulaLiberacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Houve julgamento?')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:flx:votacaoVogal:exp:manipulaLiberacao', false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Encaminhamento para gabinete substituto - ENCAMINHAR">
@@ -321,12 +391,21 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso()}"/>
         </event>
     </node>
+    <node name="(SG) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:colegiadoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
+        </event>
+    </node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Pedido de vista">
         <task name="Nó de Desvio - (SG) Pedido de vista" swimlane="Nó de Desvio - (SG) Pedido de vista"/>
         <transition to="Término" name="Término"/>
         <transition to="(SG) Pedido de vista - ANALISAR" name="(SG) Pedido de vista - ANALISAR"/>
         <transition to="(SG) Encaminhamento para gabinete substituto - ENCAMINHAR" name="(SG) Encaminhamento para gabinete substituto - ENCAMINHAR"/>
+        <transition to="(SG) Sessão de julgamento [voto vista] - AGUARDAR" name="(SG) Sessão de julgamento [voto vista] - AGUARDAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="superstate-enter">
