@@ -111,13 +111,14 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para decisão de urgência inicial" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão">
             <condition expression="#{true}"/>
@@ -173,7 +174,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para despacho inicial" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de despacho" name="(VCiv) Junção de despacho">
             <condition expression="#{true}"/>
@@ -226,13 +227,14 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para despacho" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de despacho" name="(VCiv) Junção de despacho">
             <condition expression="#{true}"/>
@@ -285,13 +287,14 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para sentença" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de sentença" name="(VCiv) Junção de sentença">
             <condition expression="#{true}"/>
@@ -403,13 +406,14 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para decisão de urgência" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão">
             <condition expression="#{true}"/>
@@ -462,13 +466,14 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para sentença de homologação e(ou) extinção" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de sentença" name="(VCiv) Junção de sentença">
             <condition expression="#{true}"/>
@@ -539,13 +544,14 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para decisão de Emb. Declaração" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão">
             <condition expression="#{true}"/>
@@ -598,6 +604,7 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão">
@@ -607,7 +614,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para decisão sobre recurso" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
@@ -657,11 +664,12 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[]]></description>
         <transition to="(VCiv) Concluso para decisão" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão">
             <condition expression="#{true}"/>
@@ -716,6 +724,7 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="(VCiv) Junção de despacho" name="(VCiv) Junção de despacho">
@@ -725,7 +734,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para despacho de cumprimento de sentença" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de despacho" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
@@ -772,6 +781,7 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão">
@@ -781,7 +791,7 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para decisão sobre reativação" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
@@ -831,10 +841,11 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="(VCiv) Concluso para decisão de penhora online" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão">
             <condition expression="#{true}"/>
@@ -890,13 +901,14 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para decisão de desbloqueio" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
             <condition expression="#{true}"/>
@@ -948,13 +960,14 @@
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="confirmarMovimentacao" mapped-name="homologadorEventoTree:confirmarMovimentacao" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <transition to="(VCiv) Junção de decisão" name="(VCiv) Junção de decisão">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Concluso para decisão de suspensão" name="Retornar para minuta">
-            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso > 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="Nó de Desvio - (VCiv) Preparar Ato Judicial" name="Nó de Desvio - (VCiv) Preparar Ato Judicial">
             <condition expression="#{true}"/>
