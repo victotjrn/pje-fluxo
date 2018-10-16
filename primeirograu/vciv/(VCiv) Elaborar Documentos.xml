@@ -676,7 +676,7 @@ aviso_valor_recuperado_2: "O valor recuperado deve ser informado para cumpriment
         </event>
     </process-state>
     <node name="(VCiv) Deslocar gabinete oficio">
-        <transition to="(VCiv) Assinar Ofício" name="(VCiv) Assinar Ofício"/>
+        <transition to="(VCiv) Assinar ofício pelo magistrado" name="(VCiv) Assinar ofício pelo magistrado"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:deslocamento:orgaoDestino')}"/>
