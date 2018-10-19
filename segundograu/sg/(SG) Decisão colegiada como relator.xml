@@ -306,7 +306,7 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <condition expression="#{not processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')).selecionadoPauta}"/>
         </transition>
         <transition to="(SG) Retirar aptidão para julgamento" name="Pedir retirada de julgamento">
-            <condition expression="#{processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')).selecionadoPauta and sessaoProcessoDocumentoManager.recuperaElementosJulgamento(processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')), null, authenticator.getOrgaoJulgadorAtual(), false, false).get(0).sessao.dataFechamentoPauta == null }"/>
+            <condition expression="#{processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')).selecionadoPauta and not empty sessaoProcessoDocumentoManager.recuperaElementosJulgamento(processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')), null, authenticator.getOrgaoJulgadorAtual(), false, false) and sessaoProcessoDocumentoManager.recuperaElementosJulgamento(processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')), null, authenticator.getOrgaoJulgadorAtual(), false, false).get(0).sessao.dataFechamentoPauta == null }"/>
         </transition>
         <transition to="(SG) Houve julgamento?" name="(SG) Houve julgamento?">
             <condition expression="#{true}"/>
