@@ -91,7 +91,7 @@ Secretaria  Secretaria      Chefe de Secretaria]]></description>
         </transition>
         <transition to="(EF) Certidão de oposição de embargos [urgente] - EXPEDIR" name="Retornar para expedição de certidão"/>
         <transition to="(EF) Lançar movimento de expedição de certidão" name="Documento já assinado">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>

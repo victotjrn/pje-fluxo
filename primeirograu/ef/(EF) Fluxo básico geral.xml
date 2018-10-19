@@ -85,7 +85,6 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
                 <variable name="ef_fbg_infojud_infoseg_consultar" mapped-name="sim_nao:ef_fbg_infojud_infoseg_consultar" access="read,write"/>
                 <variable name="ef_fbg_publicar_dje" mapped-name="sim_nao:ef_fbg_publicar_dje" access="read,write"/>
                 <variable name="ef_fbg_renajud_consultar" mapped-name="sim_nao:ef_fbg_renajud_consultar" access="read,write"/>
-                <variable name="ef_fbg_intimar_eletronicamente" mapped-name="sim_nao:ef_fbg_intimar_eletronicamente" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -236,12 +235,6 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
     Label: Renajud - Consultar
     Escrita: Sim
     Obrig.: Não
-    Tipo: Checkbox
-
-26. Variável: ef_fbg_intimar_eletronicamente
-    Label: Intimar advogados (automaticamente)
-    Escrita: Sim
-    Obrig.: Não
     Tipo: Checkbox]]></description>
         <transition to="Nó de Desvio - (EF) Fluxo básico geral" name="Nó de Desvio - (EF) Fluxo básico geral">
             <condition expression="#{true}"/>
@@ -257,7 +250,8 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
         <transition to="(EF) Gravar variavel fluxo unico - Enviar concluso para despacho" name="09 - Enviar concluso para despacho"/>
         <transition to="(EF) Gravar variavel fluxo unico - Enviar concluso para sentença" name="10 - Enviar concluso para sentença"/>
         <transition to="(EF) Gravar variavel fluxo unico - Enviar à Contadoria Judicial - COJUD" name="11 - Enviar à Contadoria Judicial - COJUD"/>
-        <transition to="(EF) Gravar variavel fluxo unico - Enviar à Penhora eletrônica - Ajud" name="12 - Enviar à Penhora eletrônica - Ajud"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Enviar à Penhora eletrônica - Poti" name="12 - Enviar à Penhora eletrônica - Poti"/>
+        <transition to="(EF) Gravar variavel fluxo unico - Intimar advogados automaticamente" name="13 - Intimar advogados (automaticamente)"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_cumprimento')}"/>
         </event>
@@ -286,7 +280,6 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_infojud_infoseg_consultar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_publicar_dje')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_renajud_consultar')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_intimar_eletronicamente')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:fbg:aviso_secretaria_analisar')}"/>
         </event>
         <event type="task-end">
@@ -312,7 +305,6 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_infojud_infoseg_consultar') == true ? '{ef_fbg_infojud_infoseg_consultar}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_publicar_dje') == true ? '{ef_fbg_publicar_dje}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_renajud_consultar') == true ? '{ef_fbg_renajud_consultar}' : ''))}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_intimar_eletronicamente') == true ? '{ef_fbg_intimar_eletronicamente}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_aguardar_laudo_tecnico')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_alterar_tipo_documento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_bacenjud_minutar')}"/>
@@ -334,7 +326,6 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_infojud_infoseg_consultar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_publicar_dje')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_renajud_consultar')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_intimar_eletronicamente')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
@@ -372,11 +363,11 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
         <description><![CDATA[*Variáveis*
 
 1. Variável: aviso1
-   Label: O processo encontra-se pendente de cumprimento em tarefas paralelas. Para dar continuidade, será necessário cumprir todas as tarefas pendentes e, só assim, retornar para as opções de cumprimento.
+   Label: O processo encontra-se pendente de cumprimento em tarefas paralelas. Para dar continuidade, será necessário cumprir todas as tarefas pendentes e, só assim, retornar para "(EF) Secretaria - ANALISAR".
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso]]></description>
-        <transition to="(EF) Secretaria - ANALISAR" name="Retornar para as opções de cumprimento"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="Retornar para &quot;(EF) Secretaria - ANALISAR&quot;"/>
         <transition to="Nó de Desvio - (EF) Fluxo básico geral" name="Nó de Desvio - (EF) Fluxo básico geral">
             <condition expression="#{true}"/>
         </transition>
@@ -457,10 +448,16 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Dar cumprimento a ato judicial de central de calculos')}"/>
         </event>
     </node>
-    <node name="(EF) Gravar variavel fluxo unico - Enviar à Penhora eletrônica - Ajud">
+    <node name="(EF) Gravar variavel fluxo unico - Enviar à Penhora eletrônica - Poti">
         <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Penhora eletrônica - Ajud')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Penhora eletrônica - Poti')}"/>
+        </event>
+    </node>
+    <node name="(EF) Gravar variavel fluxo unico - Intimar advogados automaticamente">
+        <transition to="(EF) Pode ir para subfluxo único?" name="(EF) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:sub_fluxo_unico', '(EF) Intimar advogados automaticamente')}"/>
         </event>
     </node>
     <decision expression="#{entityManager.createNativeQuery(&quot;select count(*) from vs_situacao_processo_new s where s.nm_tarefa &lt;&gt; '(EF) Secretaria - ANALISAR' AND s.id_processo_trf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(EF) Gravar mensagem nao pode entrar no fluxo' : tramitacaoProcessualService.recuperaVariavel('ef:paj:sub_fluxo_unico')}" name="(EF) Pode ir para subfluxo único?">
@@ -469,10 +466,11 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
         <transition to="(EF) Encaminhamento para instância superior" name="(EF) Encaminhamento para instância superior"/>
         <transition to="(EF) Dar cumprimento a ato judicial de central de calculos" name="(EF) Dar cumprimento a ato judicial de central de calculos"/>
         <transition to="(EF) Gravar mensagem nao pode entrar no fluxo" name="(EF) Gravar mensagem nao pode entrar no fluxo"/>
-        <transition to="(EF) Penhora eletrônica - Ajud" name="(EF) Penhora eletrônica - Ajud"/>
+        <transition to="(EF) Penhora eletrônica - Poti" name="(EF) Penhora eletrônica - Poti"/>
         <transition to="(EF) Autos recebidos da secretaria" name="(EF) Autos recebidos da secretaria"/>
         <transition to="(EF) Suspensão de processo" name="(EF) Suspensão de processo"/>
         <transition to="(EF) Redistribuição de processo" name="(EF) Redistribuição de processo"/>
+        <transition to="(EF) Intimar advogados automaticamente" name="(EF) Intimar advogados automaticamente"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:paj:sub_fluxo_unico')}"/>
         </event>
@@ -507,8 +505,12 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
         <sub-process name="(EF) Cumprimento de decisão" binding="late"/>
         <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
     </process-state>
-    <process-state name="(EF) Penhora eletrônica - Ajud">
-        <sub-process name="(EF) Ajud" binding="late"/>
+    <process-state name="(EF) Penhora eletrônica - Poti">
+        <sub-process name="(EF) Poti" binding="late"/>
+        <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(EF) Intimar advogados automaticamente">
+        <sub-process name="(EF) Intimações eletrônicas" binding="late"/>
         <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR"/>
     </process-state>
     <end-state name="Término"/>

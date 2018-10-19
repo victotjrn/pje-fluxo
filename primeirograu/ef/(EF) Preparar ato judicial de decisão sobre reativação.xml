@@ -138,7 +138,7 @@ Magistrado  Secretaria  Chefe de Secretaria]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Enviar autos à secretaria" name="Documento já assinado! Encaminhar para secretaria">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="Nó de Desvio - (EF) Preparar ato judicial de decisão sobre reativação" name="Nó de Desvio - (EF) Preparar ato judicial de decisão sobre reativação">
             <condition expression="#{true}"/>

@@ -245,24 +245,14 @@ Descrição: Fluxo lançador de fluxo paralelo.]]></description>
             <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_PAC', processInstance.contextInstance.variables)}"/>
         </event>
     </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_renajud_consultar}') == true ? '(EF) Renajud - Consultar' : '(EF) Intimar eletronicamente?'}" name="(EF) Renajud - Consultar?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_renajud_consultar}') == true ? '(EF) Renajud - Consultar' : 'Término'}" name="(EF) Renajud - Consultar?">
         <transition to="(EF) Renajud - Consultar" name="(EF) Renajud - Consultar"/>
-        <transition to="(EF) Intimar eletronicamente?" name="(EF) Intimar eletronicamente?"/>
+        <transition to="Término" name="Término"/>
     </decision>
     <node name="(EF) Renajud - Consultar">
-        <transition to="(EF) Intimar eletronicamente?" name="(EF) Intimar eletronicamente?"/>
+        <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_RENAJUD', processInstance.contextInstance.variables)}"/>
-        </event>
-    </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_intimar_eletronicamente}') == true ? '(EF) Intimar eletronicamente' : 'Término'}" name="(EF) Intimar eletronicamente?">
-        <transition to="(EF) Intimar eletronicamente" name="(EF) Intimar eletronicamente"/>
-        <transition to="Término" name="Término"/>
-    </decision>
-    <node name="(EF) Intimar eletronicamente">
-        <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_INTELET', processInstance.contextInstance.variables)}"/>
         </event>
     </node>
     <end-state name="Término"/>

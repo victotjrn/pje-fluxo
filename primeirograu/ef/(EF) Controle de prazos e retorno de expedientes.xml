@@ -4,7 +4,7 @@
     <description><![CDATA[Controla prazos e retorno de expedientes.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,8:5852,8:5853,6:1469')}" actor-id="#{actor.id}"/>

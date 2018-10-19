@@ -100,7 +100,7 @@ Magistrado  Secretaria  Chefe de Secretaria]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="Término" name="Documento já assinado">
-            <condition expression="#{not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="Término" name="Término">
             <condition expression="#{true}"/>

@@ -3,11 +3,11 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Conclusão para Decisão de Urgência">
     <description><![CDATA[Código do fluxo: EF_PAJ_EXEF_DEC_URG]]></description>  
     <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Conclusão para Decisão de Urgência">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
     <swimlane name="Assessor">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,6:5901,7:5197,8:5852,8:5853,5:1338')}"/>
-    </swimlane>
-    <swimlane name="Nó de Desvio - (EF) Conclusão para Decisão de Urgência">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,6:5901,7:5197,8:5852,8:5853,5:1338')}"/>

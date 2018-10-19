@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Intimações eletrônicas">
-    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido. EF_INTELET]]></description>  
+    <description><![CDATA[Realiza intimações eletrônicas do último ato proferido. EF_INTELET.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (EF) Intimações eletrônicas">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
@@ -18,34 +18,231 @@
     <task-node end-tasks="true" name="(EF) Intimação eletrônica - INFORMAR">
         <task name="(EF) Intimação eletrônica - INFORMAR" swimlane="Secretaria">
             <controller>
-                <variable name="prazoIntimacaoAtivo" mapped-name="number:prazoIntimacaoAtivo" access="read,write,required"/>
-                <variable name="prazoIntimacaoPassivo" mapped-name="number:prazoIntimacaoPassivo" access="read,write,required"/>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+                <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
 
-1. Variável: prazoIntimacaoAtivo
-   Label: Prazo em dias para o(s) advogado(s) do polo ativo (0 - para sem prazo; 99 - para não intimar)
-   Escrita: Sim
-   Obrig.: Sim
-   Tipo: Numérico
+1. Variável: aviso1
+   Label: #{tramitacaoProcessualService.recuperaVariavel('prazoIntAtvMsg')}
 
-2. Variável: prazoIntimacaoPassivo
-   Label: Prazo em dias para o(s) advogado(s) do polo passivo (0 - para sem prazo; 99 - para não intimar)
-   Escrita: Sim
-   Obrig.: Sim
-   Tipo: Numérico]]></description>
+2. Variável: aviso2
+   Label: #{tramitacaoProcessualService.recuperaVariavel('prazoIntPasMsg')}
+
+3. Variável: movimentarEmLote
+   Label:]]></description>
         <transition to="Nó de Desvio - (EF) Intimações eletrônicas" name="Nó de Desvio - (EF) Intimações eletrônicas">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Separação em intimação eletrônica" name="Prosseguir"/>
         <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Polo ativo - Sem prazo" name="Prazo para os advogados/representantes do polo ativo: Sem prazo">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo ativo - Prazo de 5 dias" name="Prazo para os advogados/representantes do polo ativo: 005 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo ativo - Prazo de 10 dias" name="Prazo para os advogados/representantes do polo ativo: 010 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo ativo - Prazo de 15 dias" name="Prazo para os advogados/representantes do polo ativo: 015 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo ativo - Prazo de 20 dias" name="Prazo para os advogados/representantes do polo ativo: 020 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo ativo - Prazo de 30 dias" name="Prazo para os advogados/representantes do polo ativo: 030 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo ativo - Prazo de 60 dias" name="Prazo para os advogados/representantes do polo ativo: 060 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo ativo - Prazo de 90 dias" name="Prazo para os advogados/representantes do polo ativo: 090 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo ativo - Prazo de 120 dias" name="Prazo para os advogados/representantes do polo ativo: 120 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo ativo - Não intimar" name="Prazo para os advogados/representantes do polo ativo: Não intimar">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo passivo - Sem prazo" name="Prazo para os advogados/representantes do polo passivo: Sem prazo">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo passivo - Prazo de 5 dias" name="Prazo para os advogados/representantes do polo passivo: 005 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo passivo - Prazo de 10 dias" name="Prazo para os advogados/representantes do polo passivo: 010 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo passivo - Prazo de 15 dias" name="Prazo para os advogados/representantes do polo passivo: 015 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo passivo - Prazo de 20 dias" name="Prazo para os advogados/representantes do polo passivo: 020 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo passivo - Prazo de 30 dias" name="Prazo para os advogados/representantes do polo passivo: 030 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo passivo - Prazo de 60 dias" name="Prazo para os advogados/representantes do polo passivo: 060 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo passivo - Prazo de 90 dias" name="Prazo para os advogados/representantes do polo passivo: 90 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo passivo - Prazo de 120 dias" name="Prazo para os advogados/representantes do polo passivo: 120 dias">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Polo passivo - Não intimar" name="Prazo para os advogados/representantes do polo passivo: Não intimar">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
+        </transition>
+        <transition to="(EF) Limpar prazos" name="Retornar para a escolha de prazos dos advogados/representantes do polo ativo">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
+        </transition>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntAtvMsg', tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? 'Defina o prazo para os advogados/representantes do polo ativo.' : 'Prazo para os advogados/representantes do polo ativo: '.concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 0 ? 'Sem prazo' : (tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 99 ? 'Não intimar' : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo'))).concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != 0 and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != 99 ? ' dias' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntPasMsg', tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == null ? (tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? '' : 'Defina o prazo para os advogados/representantes do polo passivo.') : 'Prazo para os advogados/representantes do polo passivo: '.concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 0 ? 'Sem prazo' : (tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 99 ? 'Não intimar' : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo'))).concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != 0 and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != 99 ? ' dias' : ''))}"/>
+        </event>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacaoAtivo', '99')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('number:prazoIntimacaoPassivo', '99')}"/>
         </event>
     </task-node>
+    <node name="(EF) Polo ativo - Sem prazo">
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoAtivo', 0)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo ativo - Prazo de 5 dias">
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoAtivo', 5)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo ativo - Prazo de 10 dias">
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoAtivo', 10)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo ativo - Prazo de 15 dias">
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoAtivo', 15)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo ativo - Prazo de 20 dias">
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoAtivo', 20)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo ativo - Prazo de 30 dias">
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoAtivo', 30)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo ativo - Prazo de 60 dias">
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoAtivo', 60)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo ativo - Prazo de 90 dias">
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoAtivo', 90)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo ativo - Prazo de 120 dias">
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoAtivo', 120)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo ativo - Não intimar">
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoAtivo', 99)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo passivo - Sem prazo">
+        <transition to="(EF) Separação em intimação eletrônica" name="(EF) Separação em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoPassivo', 0)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo passivo - Prazo de 5 dias">
+        <transition to="(EF) Separação em intimação eletrônica" name="(EF) Separação em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoPassivo', 5)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo passivo - Prazo de 10 dias">
+        <transition to="(EF) Separação em intimação eletrônica" name="(EF) Separação em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoPassivo', 10)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo passivo - Prazo de 15 dias">
+        <transition to="(EF) Separação em intimação eletrônica" name="(EF) Separação em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoPassivo', 15)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo passivo - Prazo de 20 dias">
+        <transition to="(EF) Separação em intimação eletrônica" name="(EF) Separação em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoPassivo', 20)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo passivo - Prazo de 30 dias">
+        <transition to="(EF) Separação em intimação eletrônica" name="(EF) Separação em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoPassivo', 30)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo passivo - Prazo de 60 dias">
+        <transition to="(EF) Separação em intimação eletrônica" name="(EF) Separação em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoPassivo', 60)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo passivo - Prazo de 90 dias">
+        <transition to="(EF) Separação em intimação eletrônica" name="(EF) Separação em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoPassivo', 90)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo passivo - Prazo de 120 dias">
+        <transition to="(EF) Separação em intimação eletrônica" name="(EF) Separação em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoPassivo', 120)})"/>
+        </event>
+    </node>
+    <node name="(EF) Polo passivo - Não intimar">
+        <transition to="(EF) Separação em intimação eletrônica" name="(EF) Separação em intimação eletrônica"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntimacaoPassivo', 99)})"/>
+        </event>
+    </node>
+    <node name="(EF) Limpar prazos">
+        <transition to="(EF) Intimação eletrônica - INFORMAR" name="(EF) Intimação eletrônica - INFORMAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntimacaoAtivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntimacaoPassivo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntAtvMsg')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('prazoIntPasMsg')}"/>
+        </event>
+    </node>
     <fork name="(EF) Separação em intimação eletrônica">
         <transition to="(EF) Tem polo ativo ?" name="(EF) Tem polo ativo ?"/>
         <transition to="(EF) Tem polo passivo ?" name="(EF) Tem polo passivo ?"/>
@@ -89,6 +286,7 @@
                 <variable name="advogadosPoloPassivo" mapped-name="textAlert:advogadosPoloPassivo" access="read,write"/>
                 <variable name="avisoConfirmar" mapped-name="textAlert:avisoConfirmar" access="read,write"/>
                 <variable name="avisoRetornar" mapped-name="textAlert:avisoRetornar" access="read,write"/>
+                <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -113,7 +311,10 @@
    Label: Ao CONFIRMAR, o advogado cadastrado no processo, mas que não tenha a situação regular no sistema PJe, não será intimado deste último ato produzido.
 
 7. Variável: avisoRetornar
-   Label: Ao RETORNAR, esta intimação eletrônica será cancelada.]]></description>
+   Label: Ao RETORNAR, esta intimação eletrônica será cancelada.
+
+8. Variável: movimentarEmLote
+   Label:]]></description>
         <transition to="Nó de Desvio - (EF) Intimações eletrônicas" name="Nó de Desvio - (EF) Intimações eletrônicas">
             <condition expression="#{true}"/>
         </transition>

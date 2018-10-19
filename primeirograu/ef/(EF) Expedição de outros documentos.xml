@@ -94,6 +94,9 @@ Secretaria  Secretaria   Servidor Geral]]></description>
         <transition to="Nó de Desvio - (EF) Expedição de outros documentos" name="Nó de Desvio - (EF) Expedição de outros documentos">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Lançar movimento de expedição de outros documentos" name="Documento já assinado! Encaminhar para secretaria.">
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174,34')}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Lançar movimento de expedição de outros documentos')}"/>
