@@ -48,7 +48,6 @@ Secretaria  Gabinete      Magistrado]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Apagar variáveis" name="Cancelar e sair da tarefa"/>
-        <transition to="(VCiv) Poti - Em processamento" name="Em processamento"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti', 'true')}"/>
@@ -78,10 +77,6 @@ Secretaria  Gabinete      Magistrado]]></description>
         <transition to="(VCiv) Qual é o retorno?" name="(VCiv) Qual é o retorno?">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Poti - Bloqueio integral" name="Bloqueio integral"/>
-        <transition to="(VCiv) Poti - Bloqueio parcial" name="Bloqueio parcial"/>
-        <transition to="(VCiv) Poti - Bloqueio não efetivado (Insuficiência de saldo)" name="Bloqueio não efetivado (Insuficiência de saldo)"/>
-        <transition to="(VCiv) Poti - Erros" name="Erros"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
