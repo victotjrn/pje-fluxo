@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Poti">
-    <description><![CDATA[Código do fluxo: VCiv_POTI..
+    <description><![CDATA[Código do fluxo: VCiv_POTI.
 
 Descrição: Fluxo responsável pelas tarefas do Poti.
 
@@ -85,9 +85,9 @@ Secretaria  Gabinete      Magistrado]]></description>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq_int', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq_parc', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq_neg', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-int', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-parc', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-neg', 'true')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:erros', 'true')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Qual é o retorno?')}"/>
         </event>
@@ -96,14 +96,14 @@ Secretaria  Gabinete      Magistrado]]></description>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno') == null ? 'erros' : tramitacaoProcessualService.recuperaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno')}" name="(VCiv) Qual é o retorno?">
-        <transition to="(VCiv) Poti - Bloqueio integral" name="bloq_int"/>
-        <transition to="(VCiv) Poti - Bloqueio parcial" name="bloq_parc"/>
-        <transition to="(VCiv) Poti - Bloqueio não efetivado (Insuficiência de saldo)" name="bloq_neg"/>
+        <transition to="(VCiv) Poti - Bloqueio integral" name="bloq-int"/>
+        <transition to="(VCiv) Poti - Bloqueio parcial" name="bloq-parc"/>
+        <transition to="(VCiv) Poti - Bloqueio não efetivado (Insuficiência de saldo)" name="bloq-neg"/>
         <transition to="(VCiv) Poti - Erros" name="erros"/>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq_int')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq_parc')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq_neg')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-int')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-parc')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-neg')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:erros')}"/>
         </event>
     </decision>
@@ -211,9 +211,9 @@ Secretaria  Gabinete      Magistrado]]></description>
         <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq_int')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq_parc')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq_neg')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-int')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-parc')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-neg')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:erros')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
