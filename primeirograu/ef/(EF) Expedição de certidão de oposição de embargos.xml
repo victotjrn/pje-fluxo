@@ -45,14 +45,12 @@ Secretaria  Secretaria      Chefe de Secretaria]]></description>
         </transition>
         <transition to="(EF) Certidão de oposição de embargos - ASSINAR" name="Encaminhar para assinatura"/>
         <event type="task-create">
-            <action expression="#{tipoDocumento.set('TipoDocumento',57)}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '57')}"/>
             <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_certidao'))}"/>
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
         </event>
     </task-node>
@@ -166,5 +164,6 @@ Secretaria  Secretaria      Chefe de Secretaria]]></description>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
-    <!-- ACTIONS --> 
+    <!-- ACTIONS -->
+    <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/> 
 </process-definition>

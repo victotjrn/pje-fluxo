@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Conclusão para Decisão de Urgência">
-    <description><![CDATA[Código do fluxo: EF_PAJ_EXEF_DEC_URG]]></description>  
+    <description><![CDATA[Código do fluxo: EF_PAJ_EXEF_DEC_URG.]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (EF) Conclusão para Decisão de Urgência">
-        <assignment actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Assessor">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,6:5901,7:5197,8:5852,8:5853,5:1338')}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (EF) Conclusão para Decisão de Urgência">
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,6:5901,7:5197,8:5852,8:5853,5:1338')}"/>
@@ -48,10 +48,11 @@
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_decisao'))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
-            <action expression="#{tipoDocumento.set('minutaEmElaboracao',62,63,64)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_decisao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
@@ -98,6 +99,10 @@
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Certificar Conclusão sem Efeito?')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('Processo_Fluxo_revisarMinutaTipoProcessoDocumento')}"/>
         </event>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>

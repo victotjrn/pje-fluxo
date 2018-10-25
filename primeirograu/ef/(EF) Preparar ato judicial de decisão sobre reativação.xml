@@ -2,6 +2,7 @@
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Preparar ato judicial de decisão sobre reativação">
     <description><![CDATA[Código do fluxo: EF_PAJ_DEC_REAT.
+
 Descrição: Fluxo destinado ao preparo de atos judiciais de decisões sobre reativação.
 Raia        Localização Papel
 Assessoria  Gabinete    Magistrado
@@ -55,12 +56,12 @@ Magistrado  Secretaria  Chefe de Secretaria]]></description>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
             <action expression="#{not empty processoHome.idProcessoDocumento ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
-            <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Concluso para decisão sobre reativação - CONFIRMAR">

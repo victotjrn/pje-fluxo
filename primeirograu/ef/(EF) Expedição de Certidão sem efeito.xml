@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Expedição de Certidão sem efeito">
     <description><![CDATA[Código do fluxo: EF_EXP_CERTEF
 
-Descrição: Fluxo destinado a expedição de certidão sem efeito...]]></description>  
+Descrição: Fluxo destinado a expedição de certidão sem efeito.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (EF) Expedição de Certidão sem efeito">
         <assignment actor-id="#{actor.id}"/>
@@ -46,14 +46,12 @@ Descrição: Fluxo destinado a expedição de certidão sem efeito...]]></description
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tipoDocumento.set('TipoDocumento',57)}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos','Cancelar e sair da tarefa')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_outros_documentos'))}"/>
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
@@ -99,7 +97,7 @@ Descrição: Fluxo destinado a expedição de certidão sem efeito...]]></description
             <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57,67,174')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','57')}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Lançar movimento de expedição de certidão sem efeito')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('condicaoLancamentoMovimentosTemporario', '${true}')}"/>
         </event>

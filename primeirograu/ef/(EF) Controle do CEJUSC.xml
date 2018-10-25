@@ -323,6 +323,9 @@
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Imprimir Documento')}"/>
         </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('Processo_Fluxo_revisarMinutaTipoProcessoDocumento')}"/>
+        </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',34,57)}"/>
         </event>

@@ -29,9 +29,19 @@ Magistrado  Secretaria  Chefe de Secretaria]]></description>
     </start-state>  
     <!-- NODES -->
     <node name="(EF) Lançar movimento de concluso">
-        <transition to="(EF) Concluso para decisão inicial - MINUTAR" name="(EF) Concluso para decisão inicial - MINUTAR"/>
+        <transition to="(EF) Fazer triagem na minuta" name="(EF) Fazer triagem na minuta"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
+        </event>
+    </node>
+    <node name="(EF) Fazer triagem na minuta">
+        <transition to="(EF) Concluso para decisão inicial - MINUTAR" name="(EF) Concluso para decisão inicial - MINUTAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fluxo:tarefa_triagem', 'conclusoMinutar')}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_SELETOR_CAIXA', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:fluxo:tarefa_triagem')}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="(EF) Concluso para decisão inicial - MINUTAR">
@@ -57,17 +67,27 @@ Magistrado  Secretaria  Chefe de Secretaria]]></description>
         <transition to="Nó de Desvio - (EF) Preparar ato judicial de decisão inicial" name="Nó de Desvio - (EF) Preparar ato judicial de decisão inicial">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Concluso para decisão inicial - ASSINAR" name="Encaminhar para assinatura"/>
+        <transition to="(EF) Fazer triagem na assinatura" name="Encaminhar para assinatura"/>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
             <action expression="#{not empty processoHome.idProcessoDocumento ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
         </event>
         <event type="task-start">
-            <action expression="#{tipoDocumento.set('TipoDocumento',63,64)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64,'.concat(parametroUtil.getParametro('idTipoDocumentoDecisaoCitacao')))}"/>
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
         </event>
     </task-node>
+    <node name="(EF) Fazer triagem na assinatura">
+        <transition to="(EF) Concluso para decisão inicial - ASSINAR" name="(EF) Concluso para decisão inicial - ASSINAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fluxo:tarefa_triagem', 'conclusoAssinar')}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_SELETOR_CAIXA', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:fluxo:tarefa_triagem')}"/>
+        </event>
+    </node>
     <task-node end-tasks="true" name="(EF) Concluso para decisão inicial - ASSINAR">
         <task name="(EF) Concluso para decisão inicial - ASSINAR" swimlane="Magistrado">
             <controller>
@@ -95,26 +115,36 @@ Magistrado  Secretaria  Chefe de Secretaria]]></description>
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Assinatura em Lote]]></description>
-        <transition to="(EF) Concluso para decisão inicial - MINUTAR" name="Retornar para minuta"/>
         <transition to="Nó de Desvio - (EF) Preparar ato judicial de decisão inicial" name="Nó de Desvio - (EF) Preparar ato judicial de decisão inicial">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Documento já assinado">
+        <transition to="(EF) Limpar caixa" name="Documento já assinado">
             <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <transition to="Término" name="Término">
+        <transition to="(EF) Limpar caixa" name="(EF) Limpar caixa">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Fazer triagem na minuta" name="Retornar para minuta"/>
         <event type="task-create">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Término')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64,'.concat(parametroUtil.getParametro('idTipoDocumentoDecisaoCitacao')))}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Limpar caixa')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
+    <node name="(EF) Limpar caixa">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fluxo:tarefa_triagem', 'Término')}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_SELETOR_CAIXA', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:fluxo:tarefa_triagem')}"/>
+        </event>
+    </node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (EF) Preparar ato judicial de decisão inicial">
         <task name="Nó de Desvio - (EF) Preparar ato judicial de decisão inicial" swimlane="Nó de Desvio - (EF) Preparar ato judicial de decisão inicial"/>
@@ -135,10 +165,10 @@ Magistrado  Secretaria  Chefe de Secretaria]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
+    <event type="before-signal">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="process-start">

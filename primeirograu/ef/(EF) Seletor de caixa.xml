@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Seletor de caixa">
+    <description><![CDATA[Fluxo para definir a subcaixa da triagem da Execução Fiscal.]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Seletor de caixa">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(EF) Limpar caixa?" name="(EF) Limpar caixa?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{'Término'.equals(tramitacaoProcessualService.recuperaVariavel('ef:fluxo:tarefa_triagem')) ? '(EF) Limpar caixa' : '(EF) Documento insuficiente?'}" name="(EF) Limpar caixa?">
+        <transition to="(EF) Limpar caixa" name="(EF) Limpar caixa"/>
+        <transition to="(EF) Documento insuficiente?" name="(EF) Documento insuficiente?"/>
+    </decision>
+    <decision expression="#{(entityManager.createNativeQuery(parametroUtil.getParametro('paj:query_parte_sem_doc')).setParameter(&quot;idProcesso&quot;, tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).getSingleResult() == 1 ? '(EF) Definir tipo docInsuf' : '(EF) Ação contra o Poder Público?')}" name="(EF) Documento insuficiente?">
+        <transition to="(EF) Definir tipo docInsuf" name="(EF) Definir tipo docInsuf"/>
+        <transition to="(EF) Ação contra o Poder Público?" name="(EF) Ação contra o Poder Público?"/>
+    </decision>
+    <node name="(EF) Definir tipo docInsuf">
+        <transition to="(EF) Atualizar caixa" name="(EF) Atualizar caixa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fluxo:tipo_triagem', 'docInsuf')}"/>
+        </event>
+    </node>
+    <decision expression="#{(entityManager.createNativeQuery(parametroUtil.getParametro('paj:query_poder_publico')).setParameter(&quot;idProcesso&quot;, tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).getSingleResult() == 1 ? '(EF) Definir tipo poderPublico' : '(EF) Valor da causa acima de R$ 50.000,00?')}" name="(EF) Ação contra o Poder Público?">
+        <transition to="(EF) Definir tipo poderPublico" name="(EF) Definir tipo poderPublico"/>
+        <transition to="(EF) Valor da causa acima de R$ 50.000,00?" name="(EF) Valor da causa acima de R$ 50.000,00?"/>
+    </decision>
+    <node name="(EF) Definir tipo poderPublico">
+        <transition to="(EF) Atualizar caixa" name="(EF) Atualizar caixa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fluxo:tipo_triagem', 'poderPublico')}"/>
+        </event>
+    </node>
+    <decision expression="#{(entityManager.createNativeQuery(parametroUtil.getParametro('paj:query_valor_causa_acima_50000')).setParameter(&quot;idProcesso&quot;, tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).getSingleResult() == 1 ? '(EF) Definir tipo acima50000' : '(EF) Definir tipo execFisc')}" name="(EF) Valor da causa acima de R$ 50.000,00?">
+        <transition to="(EF) Definir tipo acima50000" name="(EF) Definir tipo acima50000"/>
+        <transition to="(EF) Definir tipo execFisc" name="(EF) Definir tipo execFisc"/>
+    </decision>
+    <node name="(EF) Definir tipo acima50000">
+        <transition to="(EF) Atualizar caixa" name="(EF) Atualizar caixa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fluxo:tipo_triagem', 'acima50000')}"/>
+        </event>
+    </node>
+    <node name="(EF) Definir tipo execFisc">
+        <transition to="(EF) Atualizar caixa" name="(EF) Atualizar caixa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fluxo:tipo_triagem', 'execFisc')}"/>
+        </event>
+    </node>
+    <node name="(EF) Atualizar caixa">
+        <transition to="(EF) Apagar variáveis" name="(EF) Apagar variáveis"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fluxo:idCaixaParametro', parametroUtil.getParametro('idCaixa:'.concat(tramitacaoProcessualService.recuperaVariavel('ef:fluxo:tarefa_triagem')).concat(':').concat(tramitacaoProcessualService.recuperaVariavel('ef:fluxo:tipo_triagem'))))}"/>
+            <action expression="#{entityManager.createNativeQuery('UPDATE tb_processo SET id_caixa = '.concat( tramitacaoProcessualService.recuperaVariavel('ef:fluxo:idCaixaParametro') == null ? 'NULL' : tramitacaoProcessualService.recuperaVariavel('ef:fluxo:idCaixaParametro') ).concat(' WHERE id_processo = :idProcesso')).setParameter('idProcesso', tramitacaoProcessualService.recuperaVariavel('processo')).executeUpdate()}"/>
+        </event>
+    </node>
+    <node name="(EF) Limpar caixa">
+        <transition to="(EF) Apagar variáveis" name="(EF) Apagar variáveis"/>
+        <event type="node-enter">
+            <action expression="#{entityManager.createNativeQuery('UPDATE tb_processo SET id_caixa = NULL WHERE id_processo = :idProcesso').setParameter('idProcesso', tramitacaoProcessualService.recuperaVariavel('processo')).executeUpdate()}"/>
+        </event>
+    </node>
+    <node name="(EF) Apagar variáveis">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:fluxo:tarefa_triagem')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:fluxo:tipo_triagem')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:fluxo:idCaixaParametro')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Seletor de caixa">
+        <task name="Nó de Desvio - (EF) Seletor de caixa" swimlane="Nó de Desvio - (EF) Seletor de caixa"/>
+        <transition to="Término" name="Término"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
