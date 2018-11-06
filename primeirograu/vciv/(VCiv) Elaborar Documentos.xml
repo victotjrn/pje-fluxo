@@ -110,7 +110,7 @@ Parâmetros
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada alvara" name="Retornar para expedição de alvará">
-            <condition expression="#{processoHome.instance.idProcesso &gt; 0 empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada entrega alvara" name="(VCiv) Entregar Alvará">
             <condition expression="#{true}"/>
@@ -180,7 +180,7 @@ Parâmetros
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada oficio" name="Retornar para expedição de ofício">
-            <condition expression="#{processoHome.instance.idProcesso &gt; 0 empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada imprimir oficio" name="(VCiv) Imprimir Ofício">
             <condition expression="#{true}"/>
@@ -213,7 +213,7 @@ Parâmetros
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Expedir Ofício" name="Retornar para expedição de ofício">
-            <condition expression="#{processoHome.instance.idProcesso &gt; 0 empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Imprimir Ofício" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
@@ -244,7 +244,7 @@ Parâmetros
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Expedir Ofício" name="Retornar para expedição de ofício">
-            <condition expression="#{processoHome.instance.idProcesso &gt; 0 empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Imprimir Ofício" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
@@ -309,7 +309,7 @@ Parâmetros
             </controller>
         </task>
         <transition to="(VCiv) Expedir outros documentos" name="Retornar para expedição de outros documentos">
-            <condition expression="#{processoHome.instance.idProcesso &gt; 0 empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
@@ -466,7 +466,7 @@ Parâmetros
             </controller>
         </task>
         <transition to="(VCiv) Certificar decurso de prazo" name="Retornar para certificar">
-            <condition expression="#{processoHome.instance.idProcesso &gt; 0 empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
@@ -539,7 +539,7 @@ Parâmetros
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada precatória e rogatória" name="Retornar para expedição de outros documentos">
-            <condition expression="#{processoHome.instance.idProcesso &gt; 0 empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada entrega precatória e rogatória" name="Documento já assinado! Encaminhar para secretaria 2">
             <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
@@ -574,7 +574,7 @@ Parâmetros
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Expedir outros documentos" name="Retornar para expedição de outros documentos">
-            <condition expression="#{processoHome.instance.idProcesso &gt; 0 empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Imprimir outros documentos" name="(VCiv) Imprimir outros documentos">
             <condition expression="#{true}"/>
