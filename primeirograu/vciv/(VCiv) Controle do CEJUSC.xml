@@ -110,7 +110,7 @@ expressão p/ quando ativar parnamirim:
         </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(CEJUSC) Separação preparação intimação')}"/>
-            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,69,65,71')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,69,65,71,229')}"/>
             <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,S,D,M,L,N,T')}"/>
         </event>
     </task-node>
