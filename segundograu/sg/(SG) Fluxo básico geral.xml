@@ -27,10 +27,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:andamento')}"/>
         </event>
     </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:fbg:direcionar_secretaria') == true ? '(SG) Secretaria - ANALISAR' : '(SG) Acrescentar situação do processo em andamento'}" name="(SG) Direciona diretamente para secretaria?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:fbg:direcionar_secretaria') == true ? '(SG) Secretaria - ANALISAR' : '(SG) Prevenção'}" name="(SG) Direciona diretamente para secretaria?">
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
-        <transition to="(SG) Acrescentar situação do processo em andamento" name="(SG) Acrescentar situação do processo em andamento"/>
+        <transition to="(SG) Prevenção" name="(SG) Prevenção"/>
     </decision>
+    <process-state name="(SG) Prevenção">
+        <sub-process name="(SG) Prevencao" binding="late"/>
+        <transition to="(SG) Acrescentar situação do processo em andamento" name="(SG) Acrescentar situação do processo em andamento"/>
+    </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial == 198 ? '(SG) Preparação de despacho inicial' : '(SG) Tem pedido de urgência?'}" name="(SG) É apelação?">
         <transition to="(SG) Tem pedido de urgência?" name="(SG) Tem pedido de urgência?"/>
         <transition to="(SG) Preparação de despacho inicial" name="(SG) Preparação de despacho inicial"/>
