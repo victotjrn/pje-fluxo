@@ -88,6 +88,9 @@ Magistrado  Assessoria Segundo Grau  Assessor
         <transition to="(SG) Registrar aptidão para inclusão em mesa" name="Solicitar inclusão em mesa">
             <condition expression="#{(not (tramitacaoProcessualService.recuperaProcesso().selecionadoPauta or tramitacaoProcessualService.recuperaProcesso().selecionadoJulgamento)) and votacaoColegiadoAction.isRelatorioAssinado()}"/>
         </transition>
+        <transition to="(SG) Sinalizar manualmente o julgamento" name="Encaminhar manualmente para preparação do acórdão">
+            <condition expression="#{sessaoPautaProcessoTrfManager.isProcessoJulgadoUltimaSessao(processoJudicialManager.findById(processInstance.contextInstance.getVariable('processo')))}"/>
+        </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:votacaoColegiado:controlaLiberacao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:deccolrel:decisaoColegiadaVazia')}"/>

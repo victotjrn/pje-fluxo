@@ -81,7 +81,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         </event>
         <event type="task-create">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Encaminhar para gabinete substituto')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Encaminhar para gabinete substituto,Finalizar e sair da tarefa')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) Houve julgamento?')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao', true)}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:flx:votacaoVogal:transicaoAutomatica:papeis','magistrado,pje:magistrado')}"/>
@@ -125,6 +125,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(SG) Encaminhamento para gabinete substituto - ENCAMINHAR" name="Encaminhar para gabinete substituto"/>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:colegiado:aguardaSessao')}"/>
