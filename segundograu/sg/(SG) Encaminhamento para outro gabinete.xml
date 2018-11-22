@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Encaminhamento para outro gabinete">
     <description><![CDATA[Código do fluxo: SG_ENC_GAB
 
-Descrição: Fluxo destinado para o encaminhamento do processo a outros gabinetes..
+Descrição: Fluxo destinado para o encaminhamento do processo a outros gabinetes.
 
 Raia        Localização              Papel
 Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
@@ -13,7 +13,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483,602:5906')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -27,34 +27,34 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv1Gab1" name="Encaminhar para Gab. Des. Cláudio Santos na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(15))}"/>
+            <condition expression="#{(orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(15))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(20))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(42))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(52)))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv1Gab2" name="Encaminhar para Gab. Des. Dilermando Mota na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(14))}"/>
+            <condition expression="#{(orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(14))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(20))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(42))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(52)))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv1Gab3" name="Encaminhar para Gab. Des. Cornélio Alves na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(41))}"/>
+            <condition expression="#{(orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(41))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(20))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(42))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(52)))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv2Gab1" name="Encaminhar para Gab. Desª. Judite Nunes na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(20))}"/>
+            <condition expression="#{(orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(20))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(15))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(42))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(52)))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv2Gab2" name="Encaminhar para Gab. Des. Virgílio Macêdo Junior na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(23))}"/>
+            <condition expression="#{(orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(23))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(15))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(42))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(52)))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv2Gab3" name="Encaminhar para Gab. Des. Ibanez Monteiro na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(18))}"/>
+            <condition expression="#{(orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(18))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(15))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(42))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(52)))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv3Gab1" name="Encaminhar para Gab. Des. Amaury Moura Sobrinho na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(42))}"/>
+            <condition expression="#{(orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(42))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(15))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(20))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(52)))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv3Gab2" name="Encaminhar para Gab. Des. João Rebouças na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(19))}"/>
+            <condition expression="#{(orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(19))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(15))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(20))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(52)))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv3Gab3" name="Encaminhar para Gab. Des. Vivaldo Pinheiro na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(24))}"/>
+            <condition expression="#{(orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(24))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(15))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(20))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(52)))}"/>
         </transition>
         <transition to="(SG) Encaminhar para CCv3Gab4" name="Encaminhar para Gab. Des. Amílcar Maia na Câmara Cível">
-            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(12))}"/>
+            <condition expression="#{(orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(12))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(15))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(20))) or (orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(52)))}"/>
         </transition>
         <transition to="(SG) Encaminhar para PlenoGab01" name="Encaminhar para Gab. Des. Amaury Moura Sobrinho no Pleno">
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(11))}"/>
@@ -99,37 +99,46 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(28))}"/>
         </transition>
         <transition to="(SG) Encaminhar para SCvGab01" name="Encaminhar para Gab. Des. Amaury Moura Sobrinho na Seção Cível">
-            <condition expression="#{true}"/>
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(61))}"/>
         </transition>
         <transition to="(SG) Encaminhar para SCvGab02" name="Encaminhar para Gab. Desª. Judite Nunes na Seção Cível">
-            <condition expression="#{true}"/>
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(58))}"/>
         </transition>
         <transition to="(SG) Encaminhar para SCvGab03" name="Encaminhar para Gab. Des. Expedito Ferreira de Souza na Seção Cível">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Encaminhar para SCvGab04" name="Encaminhar para Gab. Des. João Rebouças na Seção Cível">
-            <condition expression="#{true}"/>
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(63))}"/>
         </transition>
         <transition to="(SG) Encaminhar para SCvGab05" name="Encaminhar para Gab. Des. Vivaldo Pinheiro na Seção Cível">
-            <condition expression="#{true}"/>
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(62))}"/>
         </transition>
         <transition to="(SG) Encaminhar para SCvGab06" name="Encaminhar para Gab. Des. Amílcar Maia na Seção Cível">
-            <condition expression="#{true}"/>
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(64))}"/>
         </transition>
         <transition to="(SG) Encaminhar para SCvGab07" name="Encaminhar para Gab. Des. Dilermando Mota na Seção Cível">
-            <condition expression="#{true}"/>
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(57))}"/>
         </transition>
         <transition to="(SG) Encaminhar para SCvGab08" name="Encaminhar para Gab. Des. Virgílio Macêdo Junior na Seção Cível">
-            <condition expression="#{true}"/>
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(59))}"/>
         </transition>
         <transition to="(SG) Encaminhar para SCvGab09" name="Encaminhar para Gab. Des. Ibanez Monteiro na Seção Cível">
-            <condition expression="#{true}"/>
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(60))}"/>
         </transition>
         <transition to="(SG) Encaminhar para SCvGab10" name="Encaminhar para Gab. Des. Cornélio Alves na Seção Cível">
-            <condition expression="#{true}"/>
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(56))}"/>
         </transition>
         <transition to="(SG) Encaminhar para Presidência" name="Encaminhar para Gab. da Presidência"/>
         <transition to="(SG) Apagar variáveis do fluxo" name="Cancelar e sair da tarefa"/>
+        <transition to="(SG) Encaminhar para CCrGab1" name="Encaminhar para Gab. Des. Saraiva Sobrinho na Câmara Criminal">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(52))}"/>
+        </transition>
+        <transition to="(SG) Encaminhar para CCrGab2" name="Encaminhar para Gab. Des. Gilson Barbosa na Câmara Criminal">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(54))}"/>
+        </transition>
+        <transition to="(SG) Encaminhar para CCrGab3" name="Encaminhar para Gab. Des. Glauber Rêgo na Câmara Criminal">
+            <condition expression="#{orgaoJulgadorManager.orgaosPorColegiado(authenticator.getOrgaoJulgadorColegiadoAtual()).contains(orgaoJulgadorService.findById(51))}"/>
+        </transition>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:idOjcOrigem', tramitacaoProcessualService.recuperaProcesso().orgaoJulgadorColegiado.idOrgaoJulgadorColegiado)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:idOjOrigem', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador)}"/>
@@ -309,14 +318,14 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Amaury Moura Sobrinho na Seção Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),32,9,37,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),61,16,88,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para SCvGab02">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Desª. Judite Nunes na Seção Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),39,9,43,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),58,16,97,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para SCvGab03">
@@ -330,56 +339,77 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. João Rebouças na Seção Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),30,9,35,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),63,16,94,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para SCvGab05">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Vivaldo Pinheiro na Seção Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),28,9,32,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),62,16,96,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para SCvGab06">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Amílcar Maia na Seção Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),26,9,29,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),64,16,89,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para SCvGab07">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Dilermando Mota na Seção Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),44,9,48,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),57,16,92,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para SCvGab08">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Virgílio Macêdo Junior na Seção Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),36,9,41,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),59,16,95,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para SCvGab09">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Ibanez Monteiro na Seção Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),34,9,39,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),60,16,93,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para SCvGab10">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Cornélio Alves na Seção Cível') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),42,9,46,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),56,16,91,false)}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCrGab1">
+        <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Saraiva Sobrinho na Câmara Criminal') }"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),52,15,64,false)}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCrGab2">
+        <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Gilson Barbosa na Câmara Criminal') }"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),54,15,62,false)}"/>
+        </event>
+    </node>
+    <node name="(SG) Encaminhar para CCrGab3">
+        <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. Des. Glauber Rêgo na Câmara Criminal') }"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),51,15,63,false)}"/>
         </event>
     </node>
     <node name="(SG) Encaminhar para Presidência">
         <transition to="(SG) Registrar movimentação de remessa" name="(SG) Registrar movimentação de remessa"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:encgab:OrgJulgadorDestino', 'Gab. da Presidência') }"/>
-            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),13,10,54,false)}"/>
+            <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(),65,8,83,false)}"/>
         </event>
     </node>
     <node name="(SG) Registrar movimentação de remessa">
@@ -391,13 +421,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <process-state name="(SG) Conclusão para decisão mediante encaminhamento">
         <sub-process name="(SG) Preparar ato judicial" binding="late"/>
         <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_encaminhamento', true)}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao_encaminhamento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:decisao')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:decisao_encaminhamento', true)}"/>
         </event>
     </process-state>
     <node name="(SG) Apagar variáveis do fluxo">
@@ -420,10 +450,37 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Encaminhamento para outro gabinete - ENCAMINHAR" name="(SG) Encaminhamento para outro gabinete - ENCAMINHAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -432,40 +489,13 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>
