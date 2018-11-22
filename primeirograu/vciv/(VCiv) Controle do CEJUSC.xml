@@ -492,9 +492,7 @@ aviso2: Além disso, o Centro Judiciário de Solução de Conflitos somente recebe p
     <node name="(CEJUSC) Desclocar DPVAT MOSSORO">
         <transition to="(CEJUSC) Designar audiência DPVAT" name="(CEJUSC) Designar audiência DPVAT MOSSORO"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 107)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 265)}"/>
-            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(processInstance.contextInstance.getVariable('processo'))}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(processInstance.contextInstance.getVariable('processo'), 107, 265, null)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('cejusc:dpvat', true)}"/>
         </event>
     </node>
