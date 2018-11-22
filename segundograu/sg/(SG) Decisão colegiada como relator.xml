@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Decisão colegiada como relator">
-    <description><![CDATA[Código do fluxo: SG_DECCOLREL
+    <description><![CDATA[Código do fluxo: SG_DECCOLREL.
 
 Descrição: Fluxo destinado a preparação de decisões colegiadas como relator do processo.
 
@@ -80,7 +80,7 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:deccolrel:enviarMagistrado', true)}"/>
         </transition>
         <transition to="(SG) Sessão de julgamento - AGUARDAR" name="Aguardar sessão de julgamento">
-            <condition expression="#{(tramitacaoProcessualService.recuperaProcesso().selecionadoJulgamento or tramitacaoProcessualService.recuperaProcesso().selecionadoPauta)}"/>
+            <condition expression="#{(tramitacaoProcessualService.recuperaProcesso().selecionadoJulgamento or tramitacaoProcessualService.recuperaProcesso().selecionadoPauta) or ( not empty processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao') and  processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao') != 'julgado')}"/>
         </transition>
         <transition to="(SG) Pode solicitar inclusão em pauta?" name="Solicitar inclusão em pauta">
             <condition expression="#{(not (tramitacaoProcessualService.recuperaProcesso().selecionadoPauta or tramitacaoProcessualService.recuperaProcesso().selecionadoJulgamento)) and votacaoColegiadoAction.isRelatorioAssinado()}"/>
@@ -180,7 +180,7 @@ Magistrado  Assessoria Segundo Grau  Assessor
         <transition to="(SG) Voto, relatório e ementa - MINUTAR" name="Retornar à assessoria para minutar"/>
         <transition to="(SG) Voto, relatório e ementa - CONFIRMAR" name="Retornar à assessoria para confirmar"/>
         <transition to="(SG) Sessão de julgamento - AGUARDAR" name="Aguardar sessão de julgamento">
-            <condition expression="#{(tramitacaoProcessualService.recuperaProcesso().selecionadoJulgamento or tramitacaoProcessualService.recuperaProcesso().selecionadoPauta)}"/>
+            <condition expression="#{(tramitacaoProcessualService.recuperaProcesso().selecionadoJulgamento or tramitacaoProcessualService.recuperaProcesso().selecionadoPauta) or ( not empty processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao') and  processInstance.contextInstance.getVariable('pje:fluxo:colegiado:situacao') != 'julgado')}"/>
         </transition>
         <transition to="(SG) Houve disponibilização aos demais gabinetes?" name="Liberar para votação antecipada">
             <condition expression="#{empty tramitacaoProcessualService.recuperaVariavel('pje:flx:colegiado:disponibilizado')}"/>
