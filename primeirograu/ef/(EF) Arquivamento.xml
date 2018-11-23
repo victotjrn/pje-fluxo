@@ -312,18 +312,8 @@ Secretaria   Gabinete      Magistrado]]></description>
         </event>
     </decision>
     <process-state name="(EF) Citar e(ou) intimar sobre reativação">
-        <sub-process name="(EF) Preparar Ato de Comunicação" binding="late"/>
+        <sub-process name="(EF) Expedição de intimação sobre reativação" binding="late"/>
         <transition to="(EF) ~Despachados sobre reativação" name="(EF) ~Despachados sobre reativação"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:lanc:citar_intimar_reativacao', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:lanc:publicar_dje', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:lanc:citar_intimar', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:lanc:intimar_mp', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:lanc:expedir_mandado', false)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:lanc:citar_intimar_reativacao')}"/>
-        </event>
     </process-state>
     <node name="(EF) Lançar movimentação arquivamento reunião de processos">
         <transition to="(EF) ~Arquivado - Reunião de processos" name="(EF) ~Arquivado - Reunião de processos"/>

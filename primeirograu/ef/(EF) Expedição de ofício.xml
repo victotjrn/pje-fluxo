@@ -84,61 +84,61 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="(EF) Apagar minuta não assinada de ofício" name="(EF) Apagar minuta não assinada de ofício"/>
     </process-state>
     <node name="(EF) Sem prazo">
-        <transition to="(EF) Ofício pendente de escolha de assinatura" name="(EF) Ofício pendente de escolha de assinatura"/>
+        <transition to="(EF) Ofício pendente de escolha de assinatura - SELECIONAR" name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:oficio', 0)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 5 dias">
-        <transition to="(EF) Ofício pendente de escolha de assinatura" name="(EF) Ofício pendente de escolha de assinatura"/>
+        <transition to="(EF) Ofício pendente de escolha de assinatura - SELECIONAR" name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:oficio', 5)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 10 dias">
-        <transition to="(EF) Ofício pendente de escolha de assinatura" name="(EF) Ofício pendente de escolha de assinatura"/>
+        <transition to="(EF) Ofício pendente de escolha de assinatura - SELECIONAR" name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:oficio', 10)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 15 dias">
-        <transition to="(EF) Ofício pendente de escolha de assinatura" name="(EF) Ofício pendente de escolha de assinatura"/>
+        <transition to="(EF) Ofício pendente de escolha de assinatura - SELECIONAR" name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:oficio', 15)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 20 dias">
-        <transition to="(EF) Ofício pendente de escolha de assinatura" name="(EF) Ofício pendente de escolha de assinatura"/>
+        <transition to="(EF) Ofício pendente de escolha de assinatura - SELECIONAR" name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:oficio', 20)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 30 dias">
-        <transition to="(EF) Ofício pendente de escolha de assinatura" name="(EF) Ofício pendente de escolha de assinatura"/>
+        <transition to="(EF) Ofício pendente de escolha de assinatura - SELECIONAR" name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:oficio', 30)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 60 dias">
-        <transition to="(EF) Ofício pendente de escolha de assinatura" name="(EF) Ofício pendente de escolha de assinatura"/>
+        <transition to="(EF) Ofício pendente de escolha de assinatura - SELECIONAR" name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:oficio', 60)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 90 dias">
-        <transition to="(EF) Ofício pendente de escolha de assinatura" name="(EF) Ofício pendente de escolha de assinatura"/>
+        <transition to="(EF) Ofício pendente de escolha de assinatura - SELECIONAR" name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:oficio', 90)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 120 dias">
-        <transition to="(EF) Ofício pendente de escolha de assinatura" name="(EF) Ofício pendente de escolha de assinatura"/>
+        <transition to="(EF) Ofício pendente de escolha de assinatura - SELECIONAR" name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:oficio', 120)}"/>
         </event>
     </node>
-    <task-node end-tasks="true" name="(EF) Ofício pendente de escolha de assinatura">
-        <task name="(EF) Ofício pendente de escolha de assinatura" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR">
+        <task name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
                 <variable name="expedir_oficio" mapped-name="textEditCombo:expedir_oficio" access="read,write"/>
@@ -355,7 +355,7 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="(EF) Ofício - EXPEDIR" name="(EF) Ofício - EXPEDIR"/>
         <transition to="(EF) Ofício [chefe de secretaria] - ASSINAR" name="(EF) Ofício [chefe de secretaria] - ASSINAR"/>
         <transition to="(EF) Ofício [magistrado] - ASSINAR" name="(EF) Ofício [magistrado] - ASSINAR"/>
-        <transition to="(EF) Ofício pendente de escolha de assinatura" name="(EF) Ofício pendente de escolha de assinatura"/>
+        <transition to="(EF) Ofício pendente de escolha de assinatura - SELECIONAR" name="(EF) Ofício pendente de escolha de assinatura - SELECIONAR"/>
         <transition to="(EF) Ofício - IMPRIMIR" name="(EF) Ofício - IMPRIMIR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->

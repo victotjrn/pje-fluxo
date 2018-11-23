@@ -52,8 +52,8 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         <transition to="(EF) Registrar movimento de expedição de citação" name="(EF) Registrar movimento de expedição de citação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Citação pendente de assinatura pela secretaria - ASSINAR" name="Encaminhar para assinatura da secretaria"/>
-        <transition to="(EF) Citação pendente de assinatura pelo gabinete - ASSINAR" name="Encaminhar para assinatura do gabinete"/>
+        <transition to="(EF) Citação genérica pendente de assinatura pela secretaria - ASSINAR" name="Encaminhar para assinatura da secretaria"/>
+        <transition to="(EF) Citação genérica pendente de assinatura pelo gabinete - ASSINAR" name="Encaminhar para assinatura do gabinete"/>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Registrar movimento de expedição de citação')}"/>
@@ -73,8 +73,8 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp', org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Citação pendente de assinatura pela secretaria - ASSINAR">
-        <task name="(EF) Citação pendente de assinatura pela secretaria - ASSINAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Citação genérica pendente de assinatura pela secretaria - ASSINAR">
+        <task name="(EF) Citação genérica pendente de assinatura pela secretaria - ASSINAR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
             </controller>
@@ -93,7 +93,7 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Citação genérica - EXPEDIR" name="Retornar para preparação da minuta do citação"/>
-        <transition to="(EF) Citação pendente de assinatura pelo gabinete - ASSINAR" name="Encaminhar para assinatura do gabinete"/>
+        <transition to="(EF) Citação genérica pendente de assinatura pelo gabinete - ASSINAR" name="Encaminhar para assinatura do gabinete"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Registrar movimento de expedição de citação')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '65')}"/>
@@ -112,8 +112,8 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp',org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Citação pendente de assinatura pelo gabinete - ASSINAR">
-        <task name="(EF) Citação pendente de assinatura pelo gabinete - ASSINAR" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(EF) Citação genérica pendente de assinatura pelo gabinete - ASSINAR">
+        <task name="(EF) Citação genérica pendente de assinatura pelo gabinete - ASSINAR" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
             </controller>
@@ -160,12 +160,12 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         <transition to="(EF) Existe mais de uma central de mandados?" name="(EF) Existe mais de uma central de mandados?"/>
         <transition to="(EF) Controle de prazo de citação após expedição" name="(EF) Controle de prazo de citação após expedição"/>
     </decision>
-    <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(EF) Citação pendente de escolha da central de mandados - SELECIONAR' : '(EF) Encaminhar para central de mandados'}" name="(EF) Existe mais de uma central de mandados?">
-        <transition to="(EF) Citação pendente de escolha da central de mandados - SELECIONAR" name="(EF) Citação pendente de escolha da central de mandados - SELECIONAR"/>
+    <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(EF) Citação genérica pendente de escolha da central de mandados - SELECIONAR' : '(EF) Encaminhar para central de mandados'}" name="(EF) Existe mais de uma central de mandados?">
+        <transition to="(EF) Citação genérica pendente de escolha da central de mandados - SELECIONAR" name="(EF) Citação genérica pendente de escolha da central de mandados - SELECIONAR"/>
         <transition to="(EF) Encaminhar para central de mandados" name="(EF) Encaminhar para central de mandados"/>
     </decision>
-    <task-node end-tasks="true" name="(EF) Citação pendente de escolha da central de mandados - SELECIONAR">
-        <task name="(EF) Citação pendente de escolha da central de mandados - SELECIONAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Citação genérica pendente de escolha da central de mandados - SELECIONAR">
+        <task name="(EF) Citação genérica pendente de escolha da central de mandados - SELECIONAR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_expedientes_centralmandados" mapped-name="frame:Processo_Fluxo_expedientes_centralmandados" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -196,7 +196,7 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         </event>
     </node>
     <process-state name="(EF) Controle de prazo de citação após expedição">
-        <sub-process name="(EF) Controle de prazo - citação" binding="late"/>
+        <sub-process name="(EF) Controle de prazos de citação" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
     <end-state name="Término"/>
@@ -204,9 +204,9 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         <task name="Nó de Desvio - (EF) Preparar ato de comunicação de citação" swimlane="Nó de Desvio - (EF) Preparar ato de comunicação de citação"/>
         <transition to="Término" name="Término"/>
         <transition to="(EF) Citação genérica - EXPEDIR" name="(EF) Citação genérica - EXPEDIR"/>
-        <transition to="(EF) Citação pendente de escolha da central de mandados - SELECIONAR" name="(EF) Citação pendente de escolha da central de mandados - SELECIONAR"/>
-        <transition to="(EF) Citação pendente de assinatura pela secretaria - ASSINAR" name="(EF) Citação pendente de assinatura pela secretaria - ASSINAR"/>
-        <transition to="(EF) Citação pendente de assinatura pelo gabinete - ASSINAR" name="(EF) Citação pendente de assinatura pelo gabinete - ASSINAR"/>
+        <transition to="(EF) Citação genérica pendente de escolha da central de mandados - SELECIONAR" name="(EF) Citação genérica pendente de escolha da central de mandados - SELECIONAR"/>
+        <transition to="(EF) Citação genérica pendente de assinatura pela secretaria - ASSINAR" name="(EF) Citação genérica pendente de assinatura pela secretaria - ASSINAR"/>
+        <transition to="(EF) Citação genérica pendente de assinatura pelo gabinete - ASSINAR" name="(EF) Citação genérica pendente de assinatura pelo gabinete - ASSINAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

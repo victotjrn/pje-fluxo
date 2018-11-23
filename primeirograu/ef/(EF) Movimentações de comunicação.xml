@@ -50,7 +50,7 @@ Secretaria   Secretaria    Conciliador Judicial]]></description>
         <transition to="(EF) Junção preparação intimação" name="(EF) Junção preparação intimação"/>
     </decision>
     <node name="(EF) Lançar movimento de Expedição de Aviso de Recebimento">
-        <transition to="(EF) Imprimir citações e(ou) intimações de audiência" name="(EF) Imprimir citações e(ou) intimações de audiência"/>
+        <transition to="(EF) Citações e(ou) intimações de audiência - IMPRIMIR" name="(EF) Citações e(ou) intimações de audiência - IMPRIMIR"/>
         <event type="node-enter">
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(74).lancarMovimento()}')}"/>
         </event>
@@ -67,8 +67,8 @@ Secretaria   Secretaria    Conciliador Judicial]]></description>
             <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('M', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(78).lancarMovimento()}')}"/>
         </event>
     </node>
-    <task-node end-tasks="true" name="(EF) Imprimir citações e(ou) intimações de audiência">
-        <task name="(EF) Imprimir citações e(ou) intimações de audiência" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Citações e(ou) intimações de audiência - IMPRIMIR">
+        <task name="(EF) Citações e(ou) intimações de audiência - IMPRIMIR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_expedientes_correios" mapped-name="frame:Processo_Fluxo_expedientes_correios" access="read,write"/>
             </controller>
@@ -99,7 +99,7 @@ Secretaria   Secretaria    Conciliador Judicial]]></description>
     <task-node end-tasks="true" name="Nó de Desvio - (EF) Movimentações de comunicação">
         <task name="Nó de Desvio - (EF) Movimentações de comunicação" swimlane="Nó de Desvio - (EF) Movimentações de comunicação"/>
         <transition to="Término" name="Término"/>
-        <transition to="(EF) Imprimir citações e(ou) intimações de audiência" name="(EF) Imprimir citações e(ou) intimações de audiência"/>
+        <transition to="(EF) Citações e(ou) intimações de audiência - IMPRIMIR" name="(EF) Citações e(ou) intimações de audiência - IMPRIMIR"/>
     </task-node>
     <end-state name="Término"/>  
     <!-- PROCESS-EVENTS -->

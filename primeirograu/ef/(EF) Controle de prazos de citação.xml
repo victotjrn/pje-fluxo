@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Controle de prazos de citação">
+    <description><![CDATA[Código do fluxo: EF_CONTPRAZOS_CIT
+
+Descrição: Fluxo destinado ao controle de prazos de citação.
+
+Raia        Localização     Papel
+Secretaria  Secretaria      Chefe de Secretaria]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Controle de prazos de citação">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(EF) É via correios?" name="(EF) É via correios?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{'C'.equals(tramitacaoProcessualService.recuperaVariavel('ef:meioExp:citacao')) ? '(EF) Citação pendente de AR - AGUARDAR' : '(EF) Citação com prazo em curso - AGUARDAR'}" name="(EF) É via correios?">
+        <transition to="(EF) Citação pendente de AR - AGUARDAR" name="(EF) Citação pendente de AR - AGUARDAR"/>
+        <transition to="(EF) Citação com prazo em curso - AGUARDAR" name="(EF) Citação com prazo em curso - AGUARDAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Citação pendente de AR - AGUARDAR">
+        <task name="(EF) Citação pendente de AR - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="avisoHaExpedientes" mapped-name="textAlert:avisoHaExpedientes" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_exped_controleCorreios" mapped-name="frame:WEB-INF_xhtml_flx_exped_controleCorreios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: avisoHaExpedientes
+   Label: #{tramitacaoProcessualService.recuperaVariavel('avisoHaExpedientes') != null ? tramitacaoProcessualService.recuperaVariavel('avisoHaExpedientes') : ''}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: WEB-INF_xhtml_flx_exped_controleCorreios
+   Label: Inserir informação de AR
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Há expedientes em aberto?" name="Registrar devolução do AR"/>
+        <transition to="(EF) Citação pendente de AR [030 dias] - AGUARDAR" name="(EF) Citação pendente de AR [030 dias] - AGUARDAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-assign">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('comunicacaoProcessualAction:idsExpedientes', entityManager.createNativeQuery(&quot;select string_agg(cast(pe.id_processo_expediente as text), ',') from tb_processo_expediente pe where pe.in_meio_expedicao_expediente = 'C' and pe.id_processo_trf = &quot;.concat(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf)).getSingleResult().toString())}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:registroCiencia', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda30', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Citação pendente de AR [030 dias] - AGUARDAR')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('avisoHaExpedientes')}"/>
+            <action expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0  ? tramitacaoProcessualService.apagaVariavel('avisoHaExpedientes') : tramitacaoProcessualService.gravaVariavel('avisoHaExpedientes', 'Todos os expedientes estão fechados. Por favor clicar em &quot;Cancelar e sair da tarefa&quot;') }"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('textAlert:avisoHaExpedientes')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda30')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Citação pendente de AR [030 dias] - AGUARDAR">
+        <task name="(EF) Citação pendente de AR [030 dias] - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_controleCorreios" mapped-name="frame:WEB-INF_xhtml_flx_exped_controleCorreios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: WEB-INF_xhtml_flx_exped_controleCorreios
+   Label: Inserir informação de AR
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Há expedientes em aberto?" name="Registrar devolução do AR"/>
+        <transition to="(EF) Citação pendente de AR [060 dias] - AGUARDAR" name="(EF) Citação pendente de AR [060 dias] - AGUARDAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda60', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Citação pendente de AR [060 dias] - AGUARDAR')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('avisoHaExpedientes')}"/>
+            <action expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0  ? tramitacaoProcessualService.apagaVariavel('avisoHaExpedientes') : tramitacaoProcessualService.gravaVariavel('avisoHaExpedientes', 'Todos os expedientes estão fechados. Por favor clicar em &quot;Cancelar e sair da tarefa&quot;') }"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('textAlert:avisoHaExpedientes')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda60')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Citação pendente de AR [060 dias] - AGUARDAR">
+        <task name="(EF) Citação pendente de AR [060 dias] - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_controleCorreios" mapped-name="frame:WEB-INF_xhtml_flx_exped_controleCorreios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: WEB-INF_xhtml_flx_exped_controleCorreios
+   Label: Inserir informação de AR
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Há expedientes em aberto?" name="Registrar devolução do AR"/>
+        <transition to="(EF) Citação pendente de AR [100 dias ou mais] - AGUARDAR" name="(EF) Citação pendente de AR [100 dias ou mais] - AGUARDAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda100', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Citação pendente de AR [100 dias ou mais] - AGUARDAR')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('avisoHaExpedientes')}"/>
+            <action expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0  ? tramitacaoProcessualService.apagaVariavel('avisoHaExpedientes') : tramitacaoProcessualService.gravaVariavel('avisoHaExpedientes', 'Todos os expedientes estão fechados. Por favor clicar em &quot;Cancelar e sair da tarefa&quot;') }"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('textAlert:avisoHaExpedientes')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda100')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Citação pendente de AR [100 dias ou mais] - AGUARDAR">
+        <task name="(EF) Citação pendente de AR [100 dias ou mais] - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_controleCorreios" mapped-name="frame:WEB-INF_xhtml_flx_exped_controleCorreios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: WEB-INF_xhtml_flx_exped_controleCorreios
+   Label: Inserir informação de AR
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Há expedientes em aberto?" name="Registrar devolução do AR"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(EF) Citação pendente de registro de AR - REGISTRAR' : '(EF) Citação pendente de AR - AGUARDAR'}" name="(EF) Há expedientes em aberto?">
+        <transition to="(EF) Citação pendente de AR - AGUARDAR" name="(EF) Citação pendente de AR - AGUARDAR"/>
+        <transition to="(EF) Citação pendente de registro de AR - REGISTRAR" name="(EF) Citação pendente de registro de AR - REGISTRAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Citação pendente de registro de AR - REGISTRAR">
+        <task name="(EF) Citação pendente de registro de AR - REGISTRAR" swimlane="Secretaria">
+            <controller>
+                <variable name="avisoPendencias" mapped-name="textAlert:avisoPendencias" access="read,write"/>
+                <variable name="WEB-INF_xhtml_flx_exped_controleCorreios" mapped-name="frame:WEB-INF_xhtml_flx_exped_controleCorreios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: avisoPendencias
+   Label: #{tramitacaoProcessualService.recuperaVariavel('ef:avisoPendencias')}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: WEB-INF_xhtml_flx_exped_controleCorreios
+   Label: Verificar cumprimento de AR
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Citação pendente de AR - AGUARDAR" name="Retornar para aguardar devolução do AR"/>
+        <transition to="(EF) Há AR pendente de registro?" name="Finalizar registro de AR"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:edicaoNumeroAR',false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:avisoPendencias')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{(entityManager.createNativeQuery(parametroUtil.getParametro('pac_cit:query_ar_pendente_registro').replace(&quot;:idProcessoExpediente&quot;, tramitacaoProcessualService.recuperaVariavel('ef:citacao:idProcessoExpediente'))).getSingleResult() == 1 ? '(EF) Citação pendente de registro de AR - REGISTRAR' : '(EF) Todos citados?')}" name="(EF) Há AR pendente de registro?">
+        <transition to="(EF) Citação pendente de registro de AR - REGISTRAR" name="(EF) Citação pendente de registro de AR - REGISTRAR"/>
+        <transition to="(EF) Todos citados?" name="(EF) Todos citados?"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:avisoPendencias', 'Para prosseguir, é necessário registrar todos os ARs.')}"/>
+        </event>
+    </decision>
+    <decision expression="#{(entityManager.createNativeQuery(parametroUtil.getParametro('pac_cit:query_ar_todos_citados').replace(&quot;:idProcessoExpediente&quot;, tramitacaoProcessualService.recuperaVariavel('ef:citacao:idProcessoExpediente'))).getSingleResult() == 1 ? '(EF) Citação [Citados] - ANALISAR' : '(EF) Todos não citados?')}" name="(EF) Todos citados?">
+        <transition to="(EF) Citação [Citados] - ANALISAR" name="(EF) Citação [Citados] - ANALISAR"/>
+        <transition to="(EF) Todos não citados?" name="(EF) Todos não citados?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:avisoPendencias')}"/>
+        </event>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Citação [Citados] - ANALISAR">
+        <task name="(EF) Citação [Citados] - ANALISAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Penhora eletrônica - Poti" name="01 - Enviar à Penhora eletrônica - Poti"/>
+        <transition to="(EF) Bacen Jud" name="02 - Enviar ao Bacen Jud"/>
+        <transition to="(EF) Mandado de penhora" name="03 - Expedir mandado de penhora"/>
+        <transition to="(EF) Suspender" name="04 - Suspender processo"/>
+        <transition to="Término" name="05 - Enviar para a análise da secretaria"/>
+        <event type="node-enter">
+            <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Citação [Citados] - ANALISAR', true, false, true, true)}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{processoHome.limparCaixaTriagem()}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <process-state name="(EF) Penhora eletrônica - Poti">
+        <sub-process name="(EF) Poti" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <process-state name="(EF) Bacen Jud">
+        <sub-process name="(EF) Bacen Jud" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <process-state name="(EF) Mandado de penhora">
+        <sub-process name="(EF) Expedição de mandado de penhora" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <process-state name="(EF) Suspender">
+        <sub-process name="(EF) Controle de suspensão" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <decision expression="#{(entityManager.createNativeQuery(parametroUtil.getParametro('pac_cit:query_ar_todos_nao_citados').replace(&quot;:idProcessoExpediente&quot;, tramitacaoProcessualService.recuperaVariavel('ef:citacao:idProcessoExpediente'))).getSingleResult() == 1 ? '(EF) Citação [Não citados] - ANALISAR' : '(EF) Citação [Parcialmente citados] - ANALISAR')}" name="(EF) Todos não citados?">
+        <transition to="(EF) Citação [Não citados] - ANALISAR" name="(EF) Citação [Não citados] - ANALISAR"/>
+        <transition to="(EF) Citação [Parcialmente citados] - ANALISAR" name="(EF) Citação [Parcialmente citados] - ANALISAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Citação [Não citados] - ANALISAR">
+        <task name="(EF) Citação [Não citados] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: A comunicação foi frustrada. Para dar continuidade, clique na próxima ação abaixo.]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Infojud" name="Infojud / Infoseg / TRE - Consultar"/>
+        <event type="node-enter">
+            <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Citação [Não citados] - ANALISAR', true, false, true, true)}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{processoHome.limparCaixaTriagem()}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <process-state name="(EF) Infojud">
+        <sub-process name="(EF) Infojud, Infoseg ou TRE" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <task-node end-tasks="true" name="(EF) Citação [Parcialmente citados] - ANALISAR">
+        <task name="(EF) Citação [Parcialmente citados] - ANALISAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Enviar para a análise da secretaria"/>
+        <event type="node-enter">
+            <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Citação [Parcialmente citados] - ANALISAR', true, false, true, true)}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{processoHome.limparCaixaTriagem()}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Citação com prazo em curso - AGUARDAR">
+        <task name="(EF) Citação com prazo em curso - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo contém citação com prazo em curso. Após o fechamento de todos os prazos que estão abertos, o processo será encaminhado automaticamente para tarefa "(EF) Citação com prazo decorrido - ANALISAR".
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(EF) Prazos de citações continuam em aberto?" name="(EF) Prazos de citações continuam em aberto?">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Prazos de citações continuam em aberto?')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND ppe.tipoPrazo != 'S' AND ppe.fechado = false AND pe.tipoProcessoDocumento.idTipoProcessoDocumento IN (65,(select valorVariavel from Parametro where nomeVariavel = 'idTipoDocumentoDecisaoCitacao'))&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(EF) Citação com prazo em curso - AGUARDAR' : '(EF) Citação com prazo decorrido - ANALISAR'}" name="(EF) Prazos de citações continuam em aberto?">
+        <transition to="(EF) Citação com prazo em curso - AGUARDAR" name="(EF) Citação com prazo em curso - AGUARDAR"/>
+        <transition to="(EF) Citação com prazo decorrido - ANALISAR" name="(EF) Citação com prazo decorrido - ANALISAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Citação com prazo decorrido - ANALISAR">
+        <task name="(EF) Citação com prazo decorrido - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Citação com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Citação com prazo decorrido [030 dias] - ANALISAR" name="(EF) Citação com prazo decorrido [030 dias] - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda30', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Citação com prazo decorrido [030 dias] - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda30')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Citação com prazo decorrido [030 dias] - ANALISAR">
+        <task name="(EF) Citação com prazo decorrido [030 dias] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Citação com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Citação com prazo decorrido [060 dias] - ANALISAR" name="(EF) Citação com prazo decorrido [060 dias] - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda60', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Citação com prazo decorrido [060 dias] - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda60')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Citação com prazo decorrido [060 dias] - ANALISAR">
+        <task name="(EF) Citação com prazo decorrido [060 dias] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Citação com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Citação com prazo decorrido [100 dias ou mais] - ANALISAR" name="(EF) Citação com prazo decorrido [100 dias ou mais] - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda100', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Citação com prazo decorrido [100 dias ou mais] - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda100')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Citação com prazo decorrido [100 dias ou mais] - ANALISAR">
+        <task name="(EF) Citação com prazo decorrido [100 dias ou mais] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Citação com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de citação" name="Nó de Desvio - (EF) Controle de prazos de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Controle de prazos de citação">
+        <task name="Nó de Desvio - (EF) Controle de prazos de citação" swimlane="Nó de Desvio - (EF) Controle de prazos de citação"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Citação pendente de AR - AGUARDAR" name="(EF) Citação pendente de AR - AGUARDAR"/>
+        <transition to="(EF) Citação pendente de registro de AR - REGISTRAR" name="(EF) Citação pendente de registro de AR - REGISTRAR"/>
+        <transition to="(EF) Citação pendente de AR [030 dias] - AGUARDAR" name="(EF) Citação pendente de AR [030 dias] - AGUARDAR"/>
+        <transition to="(EF) Citação pendente de AR [060 dias] - AGUARDAR" name="(EF) Citação pendente de AR [060 dias] - AGUARDAR"/>
+        <transition to="(EF) Citação pendente de AR [100 dias ou mais] - AGUARDAR" name="(EF) Citação pendente de AR [100 dias ou mais] - AGUARDAR"/>
+        <transition to="(EF) Citação [Citados] - ANALISAR" name="(EF) Citação [Citados] - ANALISAR"/>
+        <transition to="(EF) Citação [Não citados] - ANALISAR" name="(EF) Citação [Não citados] - ANALISAR"/>
+        <transition to="(EF) Citação [Parcialmente citados] - ANALISAR" name="(EF) Citação [Parcialmente citados] - ANALISAR"/>
+        <transition to="(EF) Citação com prazo em curso - AGUARDAR" name="(EF) Citação com prazo em curso - AGUARDAR"/>
+        <transition to="(EF) Citação com prazo decorrido - ANALISAR" name="(EF) Citação com prazo decorrido - ANALISAR"/>
+        <transition to="(EF) Citação com prazo decorrido [030 dias] - ANALISAR" name="(EF) Citação com prazo decorrido [030 dias] - ANALISAR"/>
+        <transition to="(EF) Citação com prazo decorrido [060 dias] - ANALISAR" name="(EF) Citação com prazo decorrido [060 dias] - ANALISAR"/>
+        <transition to="(EF) Citação com prazo decorrido [100 dias ou mais] - ANALISAR" name="(EF) Citação com prazo decorrido [100 dias ou mais] - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>

@@ -367,7 +367,7 @@
         <transition to="(EF) Controle de Prazo" name="(EF) Controle de Prazo"/>
     </process-state>
     <process-state name="(EF) Controle de Prazo">
-        <sub-process name="(EF) Controle de prazo - intimação" binding="late"/>
+        <sub-process name="(EF) Controle de prazos de intimação" binding="late"/>
         <transition to="(EF) Devolução à secretaria" name="(EF) Devolução à secretaria"/>
     </process-state>
     <process-state name="(EF) Devolução à secretaria">

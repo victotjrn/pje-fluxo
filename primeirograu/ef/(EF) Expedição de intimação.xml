@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Expedição de intimação">
-    <description><![CDATA[Código do fluxo: EF_EXP_INT
+    <description><![CDATA[Código do fluxo: EF_EXP_INT.
 
 Descrição: Preparar intimação.
 
@@ -30,14 +30,49 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(EF) Intimação - EXPEDIR" name="(EF) Intimação - EXPEDIR"/>
+        <transition to="(EF) Intimação pendente de documento - SELECIONAR" name="(EF) Intimação pendente de documento - SELECIONAR"/>
     </start-state>  
     <!-- NODES -->
+    <task-node end-tasks="true" name="(EF) Intimação pendente de documento - SELECIONAR">
+        <task name="(EF) Intimação pendente de documento - SELECIONAR" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Expedição de intimação" name="Nó de Desvio - (EF) Expedição de intimação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Intimação - EXPEDIR" name="01 - Novo documento"/>
+        <transition to="(EF) Documento do processo" name="02 - Documento do processo"/>
+        <transition to="(EF) Preparar comunicação padrão" name="03 - Preparar comunicação (padrão)"/>
+        <transition to="(EF) Apagar variáveis e minuta não assinada de intimação" name="04 - Cancelar e sair da tarefa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:exp_int:docProcesso')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:prazoAtivo:intimacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:prazoAtivo:intimacao:texto')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:prazoPassivo:intimacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:prazoPassivo:intimacao:texto')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
     <task-node end-tasks="true" name="(EF) Intimação - EXPEDIR">
         <task name="(EF) Intimação - EXPEDIR" swimlane="Secretaria">
             <controller>
                 <variable name="minuta_intimacao" mapped-name="textEditCombo:minuta_intimacao" access="read,write"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -52,21 +87,23 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
    Label: 
    Escrita: Sim
    Obrig.: Não
-   Tipo: Habilitar Minutar em Lote]]></description>
+   Tipo: Habilitar Minutar em Lote
+
+3. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
         <transition to="Nó de Desvio - (EF) Expedição de intimação" name="Nó de Desvio - (EF) Expedição de intimação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Sem prazo" name="Prazo para manifestação: Sem prazo"/>
-        <transition to="(EF) Prazo de 5 dias" name="Prazo para manifestação: 005 dias"/>
-        <transition to="(EF) Prazo de 10 dias" name="Prazo para manifestação: 010 dias"/>
-        <transition to="(EF) Prazo de 15 dias" name="Prazo para manifestação: 015 dias"/>
-        <transition to="(EF) Prazo de 20 dias" name="Prazo para manifestação: 020 dias"/>
-        <transition to="(EF) Prazo de 30 dias" name="Prazo para manifestação: 030 dias"/>
-        <transition to="(EF) Prazo de 60 dias" name="Prazo para manifestação: 060 dias"/>
-        <transition to="(EF) Prazo de 90 dias" name="Prazo para manifestação: 090 dias"/>
-        <transition to="(EF) Prazo de 120 dias" name="Prazo para manifestação: 120 dias"/>
-        <transition to="(EF) Apagar minuta não assinada de intimação" name="Cancelar e sair da tarefa"/>
-        <transition to="(EF) Preparar comunicação padrão" name="Preparar comunicação (padrão)"/>
+        <transition to="(EF) Intimação pendente de escolha de destinatário - SELECIONAR" name="01 - Prosseguir"/>
+        <transition to="(EF) Preparar comunicação padrão" name="02 - Preparar comunicação (padrão)"/>
+        <transition to="(EF) Intimação pendente de documento - SELECIONAR" name="03 - Retornar para a escolha de documento"/>
+        <transition to="(EF) Apagar variáveis e minuta não assinada de intimação" name="04 - Cancelar e sair da tarefa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_int:docProcesso', false)}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{tipoDocumento.set('TipoDocumento',60)}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','60')}"/>
@@ -78,89 +115,36 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_int:idProcessoDocumento', ( ( not empty processoHome.idProcessoDocumento)  ? processoHome.idProcessoDocumento : null ) )}"/>
         </event>
     </task-node>
+    <node name="(EF) Documento do processo">
+        <transition to="(EF) Intimação pendente de escolha de destinatário - SELECIONAR" name="(EF) Intimação pendente de escolha de destinatário - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_int:idProcessoDocumento', tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_int:docProcesso', true)}"/>
+        </event>
+    </node>
     <process-state name="(EF) Preparar comunicação padrão">
         <sub-process name="(EF) Preparar ato de comunicação de intimação" binding="late"/>
-        <transition to="(EF) Apagar minuta não assinada de intimação" name="(EF) Apagar minuta não assinada de intimação"/>
+        <transition to="(EF) Apagar variáveis e minuta não assinada de intimação" name="(EF) Apagar minuta não assinada de intimação"/>
     </process-state>
-    <node name="(EF) Sem prazo">
-        <transition to="(EF) Intimação pendente de escolha de destinatário" name="(EF) Intimação pendente de escolha de destinatário"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:intimacao', 0)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 5 dias">
-        <transition to="(EF) Intimação pendente de escolha de destinatário" name="(EF) Intimação pendente de escolha de destinatário"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:intimacao', 5)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 10 dias">
-        <transition to="(EF) Intimação pendente de escolha de destinatário" name="(EF) Intimação pendente de escolha de destinatário"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:intimacao', 10)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 15 dias">
-        <transition to="(EF) Intimação pendente de escolha de destinatário" name="(EF) Intimação pendente de escolha de destinatário"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:intimacao', 15)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 20 dias">
-        <transition to="(EF) Intimação pendente de escolha de destinatário" name="(EF) Intimação pendente de escolha de destinatário"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:intimacao', 20)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 30 dias">
-        <transition to="(EF) Intimação pendente de escolha de destinatário" name="(EF) Intimação pendente de escolha de destinatário"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:intimacao', 30)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 60 dias">
-        <transition to="(EF) Intimação pendente de escolha de destinatário" name="(EF) Intimação pendente de escolha de destinatário"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:intimacao', 60)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 90 dias">
-        <transition to="(EF) Intimação pendente de escolha de destinatário" name="(EF) Intimação pendente de escolha de destinatário"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:intimacao', 90)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 120 dias">
-        <transition to="(EF) Intimação pendente de escolha de destinatário" name="(EF) Intimação pendente de escolha de destinatário"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:intimacao', 120)}"/>
-        </event>
-    </node>
-    <task-node end-tasks="true" name="(EF) Intimação pendente de escolha de destinatário">
-        <task name="(EF) Intimação pendente de escolha de destinatário" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Intimação pendente de escolha de destinatário - SELECIONAR">
+        <task name="(EF) Intimação pendente de escolha de destinatário - SELECIONAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
-                <variable name="minuta_intimacao" mapped-name="textEditCombo:minuta_intimacao" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[* Variáveis *
 
 1. Variável: aviso1
-   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao')).concat(' dias.'))}
+   Label: #{'Documento: '.concat(tramitacaoProcessualService.gravaVariavel('ef:exp_int:docProcesso')?'Último ato proferido':'Novo documento').concat('.')}
     Escrita: Sim
     Obrig.: Não
     Tipo: Aviso
 
-2. Variável: minuta_intimacao
-   Label: Minuta em elaboração de intimação
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Editor
-
-3. Variável: movimentacaoLote
+2. Variável: movimentacaoLote
    Label: 
    Escrita: Sim
    Obrig.: Não
@@ -168,17 +152,14 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="Nó de Desvio - (EF) Expedição de intimação" name="Nó de Desvio - (EF) Expedição de intimação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Destinatário: partes do polo ativo" name="Destinatário: partes do polo ativo"/>
-        <transition to="(EF) Destinatário: partes do polo passivo" name="Destinatário: partes do polo passivo"/>
-        <transition to="(EF) Destinatário: partes dos polos ativo e passivo" name="Destinatário: partes dos polos ativo e passivo"/>
-        <transition to="(EF) Destinatário: representantes do polo ativo" name="Destinatário: representantes do polo ativo"/>
-        <transition to="(EF) Destinatário: representantes do polo passivo" name="Destinatário: representantes do polo passivo"/>
-        <transition to="(EF) Destinatário: representantes dos polos ativo e passivo" name="Destinatário: representantes dos polos ativo e passivo"/>
-        <transition to="(EF) Intimação - EXPEDIR" name="Retornar para expedição"/>
-        <transition to="(EF) Apagar minuta não assinada de intimação" name="Cancelar e sair da tarefa"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_int:idProcessoDocumento', processoHome.idProcessoDocumento)}"/>
-        </event>
+        <transition to="(EF) Destinatário: partes do polo ativo" name="01 - Destinatário: partes do polo ativo"/>
+        <transition to="(EF) Destinatário: partes do polo passivo" name="02 - Destinatário: partes do polo passivo"/>
+        <transition to="(EF) Destinatário: partes dos polos ativo e passivo" name="03 - Destinatário: partes dos polos ativo e passivo"/>
+        <transition to="(EF) Destinatário: representantes do polo ativo" name="04 - Destinatário: representantes do polo ativo"/>
+        <transition to="(EF) Destinatário: representantes do polo passivo" name="05 - Destinatário: representantes do polo passivo"/>
+        <transition to="(EF) Destinatário: representantes dos polos ativo e passivo" name="06 - Destinatário: representantes dos polos ativo e passivo"/>
+        <transition to="(EF) Apagar variáveis e minuta não assinada de intimação" name="07 - Cancelar e sair da tarefa"/>
+        <transition to="(EF) Intimação pendente de documento - SELECIONAR" name="08 - Retornar para expedição"/>
         <event type="task-create">
             <action expression="#{tipoDocumento.set('TipoDocumento',60)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','60')}"/>
@@ -192,100 +173,326 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         </event>
     </task-node>
     <node name="(EF) Destinatário: partes do polo ativo">
-        <transition to="(EF) Intimação pendente de escolha do meio de expedição" name="(EF) Intimação pendente de escolha do meio de expedição"/>
+        <transition to=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR" name=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:intimacao', 'A')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:intimacao', 'partes do polo ativo')}"/>
         </event>
     </node>
     <node name="(EF) Destinatário: partes do polo passivo">
-        <transition to="(EF) Intimação pendente de escolha do meio de expedição" name="(EF) Intimação pendente de escolha do meio de expedição"/>
+        <transition to=" (EF) Intimação pendente de escolha de prazo do polo passivo - SELECIONAR" name=" (EF) Intimação pendente de escolha de prazo do polo passivo - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:intimacao', 'P')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:intimacao', 'partes do polo passivo')}"/>
         </event>
     </node>
     <node name="(EF) Destinatário: partes dos polos ativo e passivo">
-        <transition to="(EF) Intimação pendente de escolha do meio de expedição" name="(EF) Intimação pendente de escolha do meio de expedição"/>
+        <transition to=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR" name=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:intimacao', 'T')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:intimacao', 'partes dos polos ativo e passivo')}"/>
         </event>
     </node>
     <node name="(EF) Destinatário: representantes do polo ativo">
-        <transition to="(EF) Intimação pendente de escolha do meio de expedição" name="(EF) Intimação pendente de escolha do meio de expedição"/>
+        <transition to=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR" name=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:intimacao', 'RA')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:intimacao', 'representantes do polo ativo')}"/>
         </event>
     </node>
     <node name="(EF) Destinatário: representantes do polo passivo">
-        <transition to="(EF) Intimação pendente de escolha do meio de expedição" name="(EF) Intimação pendente de escolha do meio de expedição"/>
+        <transition to=" (EF) Intimação pendente de escolha de prazo do polo passivo - SELECIONAR" name=" (EF) Intimação pendente de escolha de prazo do polo passivo - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:intimacao', 'RP')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:intimacao', 'representantes do polo passivo')}"/>
         </event>
     </node>
     <node name="(EF) Destinatário: representantes dos polos ativo e passivo">
-        <transition to="(EF) Intimação pendente de escolha do meio de expedição" name="(EF) Intimação pendente de escolha do meio de expedição"/>
+        <transition to=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR" name=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:intimacao', 'RT')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:intimacao', 'representantes dos polos ativo e passivo')}"/>
         </event>
     </node>
-    <task-node end-tasks="true" name="(EF) Intimação pendente de escolha do meio de expedição">
-        <task name="(EF) Intimação pendente de escolha do meio de expedição" swimlane="Secretaria">
+    <task-node end-tasks="true" name=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR">
+        <task name=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
                 <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
-                <variable name="minuta_intimacao" mapped-name="textEditCombo:minuta_intimacao" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[* Variáveis *
 
 1. Variável: aviso1
-   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao')).concat(' dias.'))}
+   Label: #{'Documento: '.concat(tramitacaoProcessualService.gravaVariavel('ef:exp_int:docProcesso')?'Último ato proferido':'Novo documento').concat('.')}
     Escrita: Sim
     Obrig.: Não
     Tipo: Aviso
 
 2. Variável: aviso2
-   Label: #{'Destinatário: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:intimacao')).concat('.')}
+   Label: #{'Destinatários: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:intimacao')).concat('.')}
     Escrita: Sim
     Obrig.: Não
     Tipo: Aviso
 
-3. Variável: minuta_intimacao
-   Label: Minuta em elaboração de intimação
-   Escrita: Sim
-   Obrig.: Sim
-   Tipo: Editor
-
-4. Variável: movimentacaoLote
+3. Variável: movimentacaoLote
    Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote]]></description>
-        <transition to="(EF) Meio de expedição: Correios" name="Meio de expedição: Correios"/>
-        <transition to="(EF) Meio de expedição: Sistema" name="Meio de expedição: Sistema"/>
-        <transition to="(EF) Meio de expedição: Central de Mandados" name="Meio de expedição: Central de Mandados"/>
         <transition to="Nó de Desvio - (EF) Expedição de intimação" name="Nó de Desvio - (EF) Expedição de intimação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Intimação - EXPEDIR" name="Retornar para minuta de intimação"/>
-        <transition to="(EF) Apagar minuta não assinada de intimação" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Ativo - Sem prazo" name="01 - Prazo para o polo ativo: Sem prazo"/>
+        <transition to="(EF) Ativo - Prazo de 5 dias" name="02 - Prazo para o polo ativo: 5 dias"/>
+        <transition to="(EF) Ativo - Prazo de 10 dias" name="03 - Prazo para o polo ativo: 10 dias"/>
+        <transition to="(EF) Ativo - Prazo de 15 dias" name="04 - Prazo para o polo ativo: 15 dias"/>
+        <transition to="(EF) Ativo - Prazo de 20 dias" name="05 - Prazo para o polo ativo: 20 dias"/>
+        <transition to="(EF) Ativo - Prazo de 30 dias" name="06 - Prazo para o polo ativo: 30 dias"/>
+        <transition to="(EF) Ativo - Prazo de 60 dias" name="07 - Prazo para o polo ativo: 60 dias"/>
+        <transition to="(EF) Ativo - Prazo de 90 dias" name="08 - Prazo para o polo ativo: 90 dias"/>
+        <transition to="(EF) Ativo - Prazo de 120 dias" name="09 - Prazo para o polo ativo: 120 dias"/>
+        <transition to="(EF) Apagar variáveis e minuta não assinada de intimação" name="10 - Cancelar e sair da tarefa"/>
+        <transition to="(EF) Intimação pendente de documento - SELECIONAR" name="11 - Retornar para minuta de intimação"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_intimacao'))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
-        <event type="task-start">
-            <action expression="#{tipoDocumento.set('TipoDocumento',60)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','60')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+    </task-node>
+    <node name="(EF) Ativo - Sem prazo">
+        <transition to="(EF) Intimar polo passivo?" name="(EF) Intimar polo passivo?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao', 0)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao:texto', 'Prazo para o polo ativo: Sem prazo.')}"/>
         </event>
+    </node>
+    <node name="(EF) Ativo - Prazo de 5 dias">
+        <transition to="(EF) Intimar polo passivo?" name="(EF) Intimar polo passivo?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao', 5)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao:texto', 'Prazo para o polo ativo: 5 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Ativo - Prazo de 10 dias">
+        <transition to="(EF) Intimar polo passivo?" name="(EF) Intimar polo passivo?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao', 10)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao:texto', 'Prazo para o polo ativo: 10 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Ativo - Prazo de 15 dias">
+        <transition to="(EF) Intimar polo passivo?" name="(EF) Intimar polo passivo?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao', 15)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao:texto', 'Prazo para o polo ativo: 15 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Ativo - Prazo de 20 dias">
+        <transition to="(EF) Intimar polo passivo?" name="(EF) Intimar polo passivo?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao', 20)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao:texto', 'Prazo para o polo ativo: 20 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Ativo - Prazo de 30 dias">
+        <transition to="(EF) Intimar polo passivo?" name="(EF) Intimar polo passivo?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao', 30)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao:texto', 'Prazo para o polo ativo: 30 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Ativo - Prazo de 60 dias">
+        <transition to="(EF) Intimar polo passivo?" name="(EF) Intimar polo passivo?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao', 60)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao:texto', 'Prazo para o polo ativo: 60 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Ativo - Prazo de 90 dias">
+        <transition to="(EF) Intimar polo passivo?" name="(EF) Intimar polo passivo?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao', 90)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao:texto', 'Prazo para o polo ativo: 90 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Ativo - Prazo de 120 dias">
+        <transition to="(EF) Intimar polo passivo?" name="(EF) Intimar polo passivo?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao', 120)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoAtivo:intimacao:texto', 'Prazo para o polo ativo: 120 dias.')}"/>
+        </event>
+    </node>
+    <decision name="(EF) Intimar polo passivo?">
+        <transition to=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR" name=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR"/>
+        <transition to="(EF) Apenas via sistema?" name="(EF) Apenas via sistema?"/>
+    </decision>
+    <task-node end-tasks="true" name=" (EF) Intimação pendente de escolha de prazo do polo passivo - SELECIONAR">
+        <task name=" (EF) Intimação pendente de escolha de prazo do polo passivo - SELECIONAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso1
+   Label: #{'Documento: '.concat(tramitacaoProcessualService.gravaVariavel('ef:exp_int:docProcesso')?'Último ato proferido':'Novo documento').concat('.')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+2. Variável: aviso2
+   Label: #{'Destinatários: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:intimacao')).concat('.')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+3. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Expedição de intimação" name="Nó de Desvio - (EF) Expedição de intimação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Passivo - Sem prazo" name="01 - Prazo para o polo passivo: Sem prazo"/>
+        <transition to="(EF) Passivo - Prazo de 5 dias" name="02 - Prazo para o polo passivo: 5 dias"/>
+        <transition to="(EF) Passivo - Prazo de 10 dias" name="03 - Prazo para o polo passivo: 10 dias"/>
+        <transition to="(EF) Passivo - Prazo de 15 dias" name="04 - Prazo para o polo passivo: 15 dias"/>
+        <transition to="(EF) Passivo - Prazo de 20 dias" name="05 - Prazo para o polo passivo: 20 dias"/>
+        <transition to="(EF) Passivo - Prazo de 30 dias" name="06 - Prazo para o polo passivo: 30 dias"/>
+        <transition to="(EF) Passivo - Prazo de 60 dias" name="07 - Prazo para o polo passivo: 60 dias"/>
+        <transition to="(EF) Passivo - Prazo de 90 dias" name="08 - Prazo para o polo passivo: 90 dias"/>
+        <transition to="(EF) Passivo - Prazo de 120 dias" name="09 - Prazo para o polo passivo: 120 dias"/>
+        <transition to="(EF) Apagar variáveis e minuta não assinada de intimação" name="10 - Cancelar e sair da tarefa"/>
+        <transition to="(EF) Intimação pendente de documento - SELECIONAR" name="11 - Retornar para minuta de intimação"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(EF) Passivo - Sem prazo">
+        <transition to="(EF) Apenas via sistema?" name="(EF) Apenas via sistema?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao', 0)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao:texto', 'Prazo para o polo passivo: Sem prazo.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Passivo - Prazo de 5 dias">
+        <transition to="(EF) Apenas via sistema?" name="(EF) Apenas via sistema?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao', 5)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao:texto', 'Prazo para o polo passivo: 5 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Passivo - Prazo de 10 dias">
+        <transition to="(EF) Apenas via sistema?" name="(EF) Apenas via sistema?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao', 10)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao:texto', 'Prazo para o polo passivo: 10 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Passivo - Prazo de 15 dias">
+        <transition to="(EF) Apenas via sistema?" name="(EF) Apenas via sistema?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao', 15)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao:texto', 'Prazo para o polo passivo: 15 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Passivo - Prazo de 20 dias">
+        <transition to="(EF) Apenas via sistema?" name="(EF) Apenas via sistema?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao', 20)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao:texto', 'Prazo para o polo passivo: 20 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Passivo - Prazo de 30 dias">
+        <transition to="(EF) Apenas via sistema?" name="(EF) Apenas via sistema?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao', 30)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao:texto', 'Prazo para o polo passivo: 30 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Passivo - Prazo de 60 dias">
+        <transition to="(EF) Apenas via sistema?" name="(EF) Apenas via sistema?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao', 60)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao:texto', 'Prazo para o polo passivo: 60 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Passivo - Prazo de 90 dias">
+        <transition to="(EF) Apenas via sistema?" name="(EF) Apenas via sistema?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao', 90)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao:texto', 'Prazo para o polo passivo: 90 dias.')}"/>
+        </event>
+    </node>
+    <node name="(EF) Passivo - Prazo de 120 dias">
+        <transition to="(EF) Apenas via sistema?" name="(EF) Apenas via sistema?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao', 120)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoPassivo:intimacao:texto', 'Prazo para o polo passivo: 120 dias.')}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:meioExp:intimacao') == 'E' ? '(EF) Intimação - ASSINAR' : '(EF) Intimação pendente de escolha do meio de expedição - SELECIONAR'}" name="(EF) Apenas via sistema?">
+        <transition to="(EF) Intimação pendente de escolha do meio de expedição - SELECIONAR" name="(EF) Intimação pendente de escolha do meio de expedição - SELECIONAR"/>
+        <transition to="(EF) Intimação - ASSINAR" name="(EF) Intimação - ASSINAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Intimação pendente de escolha do meio de expedição - SELECIONAR">
+        <task name="(EF) Intimação pendente de escolha do meio de expedição - SELECIONAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+                <variable name="aviso3" mapped-name="textAlert:aviso3" access="read,write"/>
+                <variable name="aviso4" mapped-name="textAlert:aviso4" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso1
+   Label: #{'Documento: '.concat(tramitacaoProcessualService.gravaVariavel('ef:exp_int:docProcesso')?'Último ato proferido':'Novo documento').concat('.')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+2. Variável: aviso2
+   Label: #{'Destinatários: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:intimacao')).concat('.')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+3. Variável: aviso3
+   Label: #{tramitacaoProcessualService.recuperaVariavel('ef:prazoAtivo:intimacao:texto')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+4. Variável: aviso4
+   Label: #{tramitacaoProcessualService.recuperaVariavel('ef:prazoPassivo:intimacao:texto')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+5. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(EF) Meio de expedição: Correios" name="01 - Meio de expedição: Correios"/>
+        <transition to="(EF) Meio de expedição: Sistema" name="02 - Meio de expedição: Sistema"/>
+        <transition to="(EF) Meio de expedição: Central de Mandados" name="03 - Meio de expedição: Central de Mandados"/>
+        <transition to="Nó de Desvio - (EF) Expedição de intimação" name="Nó de Desvio - (EF) Expedição de intimação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Apagar variáveis e minuta não assinada de intimação" name="04 - Cancelar e sair da tarefa"/>
+        <transition to="(EF) Intimação pendente de documento - SELECIONAR" name="05 - Retornar para minuta de intimação"/>
     </task-node>
     <node name="(EF) Meio de expedição: Correios">
         <transition to="(EF) Intimação - ASSINAR" name="(EF) Intimação - ASSINAR"/>
@@ -319,7 +526,7 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <description><![CDATA[* Variáveis *
 
 1. Variável: aviso1
-   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao')).concat(' dias.'))}
+   Label: #{'Prazo para o polo ativo: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao')).concat(' dias.'))}
     Escrita: Sim
     Obrig.: Não
     Tipo: Aviso
@@ -356,10 +563,10 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="Nó de Desvio - (EF) Expedição de intimação" name="Nó de Desvio - (EF) Expedição de intimação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Intimação - EXPEDIR" name="Retornar para minuta de intimação"/>
         <transition to="(EF) É Correios?" name="(EF) É Correios?">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Intimação pendente de documento - SELECIONAR" name="Retornar para minuta de intimação"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','60')}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) É Correios?')}"/>
@@ -376,7 +583,8 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
     <node name="(EF) Lançar movimento de intimação - Correios">
         <transition to="(EF) Intimação - IMPRIMIR" name="(EF) Intimação - IMPRIMIR"/>
         <event type="node-enter">
-            <action expression="#{atoComunicacaoService.intimarPolosCorreios(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:exp_int:idProcessoDocumento'), 80)}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('A') or tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('T') ? atoComunicacaoService.intimarPolosCorreios(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').replace('T', 'A'), tramitacaoProcessualService.recuperaVariavel('ef:prazoAtivo:intimacao') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('ef:prazoAtivo:intimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('ef:prazoAtivo:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:exp_int:idProcessoDocumento'), 80) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('P') or tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('T') ? atoComunicacaoService.intimarPolosCorreios(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').replace('T', 'P'), tramitacaoProcessualService.recuperaVariavel('ef:prazoPassivo:intimacao') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('ef:prazoPassivo:intimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('ef:prazoPassivo:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:exp_int:idProcessoDocumento'), 80) : ''}"/>
         </event>
     </node>
     <task-node end-tasks="true" name="(EF) Intimação - IMPRIMIR">
@@ -417,7 +625,8 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
     <node name="(EF) Lançar movimento de intimação - Sistema">
         <transition to="(EF) Publicação no DJe" name="(EF) Publicação no DJe"/>
         <event type="node-enter">
-            <action expression="#{atoComunicacaoService.intimarPolosEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:exp_int:idProcessoDocumento'))}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('A') or tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('T') ? atoComunicacaoService.intimarPolosEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').replace('T', 'A'), tramitacaoProcessualService.recuperaVariavel('ef:prazoAtivo:intimacao') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('ef:prazoAtivo:intimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('ef:prazoAtivo:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:exp_int:idProcessoDocumento')) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('P') or tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('T') ? atoComunicacaoService.intimarPolosEletronicamente(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').replace('T', 'P'), tramitacaoProcessualService.recuperaVariavel('ef:prazoPassivo:intimacao') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('ef:prazoPassivo:intimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('ef:prazoPassivo:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:exp_int:idProcessoDocumento')) : ''}"/>
         </event>
     </node>
     <process-state name="(EF) Publicação no DJe">
@@ -426,14 +635,14 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
     </process-state>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:meioExp:intimacao') == 'M' ? '(EF) Existe alguma Central de Mandados?' : '(EF) Apagar minuta não assinada de intimação'}" name="(EF) É Central de Mandados?">
         <transition to="(EF) Existe alguma Central de Mandados?" name="(EF) Existe alguma Central de Mandados?"/>
-        <transition to="(EF) Apagar minuta não assinada de intimação" name="(EF) Apagar minuta não assinada de intimação"/>
+        <transition to="(EF) Apagar variáveis e minuta não assinada de intimação" name="(EF) Apagar minuta não assinada de intimação"/>
     </decision>
-    <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(EF) Intimação pendente de escolha de Central de Mandados' : '(EF) Lançar movimento de intimação - Central de Mandados'}" name="(EF) Existe alguma Central de Mandados?">
-        <transition to="(EF) Intimação pendente de escolha de Central de Mandados" name="(EF) Intimação pendente de escolha de Central de Mandados"/>
+    <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(EF) Intimação pendente de escolha de Central de Mandados - SELECIONAR' : '(EF) Lançar movimento de intimação - Central de Mandados'}" name="(EF) Existe alguma Central de Mandados?">
+        <transition to="(EF) Intimação pendente de escolha de Central de Mandados - SELECIONAR" name="(EF) Intimação pendente de escolha de Central de Mandados - SELECIONAR"/>
         <transition to="(EF) Lançar movimento de intimação - Central de Mandados" name="(EF) Lançar movimento de intimação - Central de Mandados"/>
     </decision>
-    <task-node end-tasks="true" name="(EF) Intimação pendente de escolha de Central de Mandados">
-        <task name="(EF) Intimação pendente de escolha de Central de Mandados" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Intimação pendente de escolha de Central de Mandados - SELECIONAR">
+        <task name="(EF) Intimação pendente de escolha de Central de Mandados - SELECIONAR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_expedientes_centralmandados" mapped-name="frame:Processo_Fluxo_expedientes_centralmandados" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -468,17 +677,27 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
     <node name="(EF) Lançar movimento de intimação - Central de Mandados">
         <transition to="(EF) Controle de prazos de intimação" name="(EF) Controle de prazos de intimação"/>
         <event type="node-enter">
-            <action expression="#{atoComunicacaoService.intimarPolosMandado(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:exp_int:idProcessoDocumento'))}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('A') or tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('T') ? atoComunicacaoService.intimarPolosMandado(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').replace('T', 'A'), tramitacaoProcessualService.recuperaVariavel('ef:prazoAtivo:intimacao') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('ef:prazoAtivo:intimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('ef:prazoAtivo:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:exp_int:idProcessoDocumento'), 78) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('P') or tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').contains('T') ? atoComunicacaoService.intimarPolosMandado(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:intimacao').replace('T', 'P'), tramitacaoProcessualService.recuperaVariavel('ef:prazoPassivo:intimacao') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('ef:prazoPassivo:intimacao') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('ef:prazoPassivo:intimacao'), tramitacaoProcessualService.recuperaVariavel('ef:exp_int:idProcessoDocumento'), 78) : ''}"/>
         </event>
     </node>
     <process-state name="(EF) Controle de prazos de intimação">
-        <sub-process name="(EF) Controle de prazo - intimação" binding="late"/>
-        <transition to="(EF) Apagar minuta não assinada de intimação" name="(EF) Apagar minuta não assinada de intimação"/>
+        <sub-process name="(EF) Controle de prazos de intimação" binding="late"/>
+        <transition to="(EF) Apagar variáveis e minuta não assinada de intimação" name="(EF) Apagar minuta não assinada de intimação"/>
     </process-state>
-    <node name="(EF) Apagar minuta não assinada de intimação">
+    <node name="(EF) Apagar variáveis e minuta não assinada de intimação">
         <transition to="(EF) Devolução à secretaria" name="(EF) Devolução à secretaria"/>
         <event type="node-enter">
             <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_intimacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:prazoAtivo:intimacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:prazoAtivo:intimacao:texto')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:prazoPassivo:intimacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:prazoPassivo:intimacao:texto')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:destExpediente:intimacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:destExpediente:texto:intimacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:meioExp:intimacao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:exp_int:idProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:exp_int:docProcesso')}"/>
         </event>
     </node>
     <process-state name="(EF) Devolução à secretaria">
@@ -491,10 +710,13 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="Término" name="Término"/>
         <transition to="(EF) Intimação - EXPEDIR" name="(EF) Intimação - EXPEDIR"/>
         <transition to="(EF) Intimação - ASSINAR" name="(EF) Intimação - ASSINAR"/>
-        <transition to="(EF) Intimação pendente de escolha de destinatário" name="(EF) Intimação pendente de escolha de destinatário"/>
-        <transition to="(EF) Intimação pendente de escolha do meio de expedição" name="(EF) Intimação pendente de escolha do meio de expedição"/>
+        <transition to="(EF) Intimação pendente de escolha de destinatário - SELECIONAR" name="(EF) Intimação pendente de escolha de destinatário - SELECIONAR"/>
+        <transition to="(EF) Intimação pendente de escolha do meio de expedição - SELECIONAR" name="(EF) Intimação pendente de escolha do meio de expedição - SELECIONAR"/>
         <transition to="(EF) Intimação - IMPRIMIR" name="(EF) Intimação - IMPRIMIR"/>
-        <transition to="(EF) Intimação pendente de escolha de Central de Mandados" name="(EF) Intimação pendente de escolha de Central de Mandados"/>
+        <transition to="(EF) Intimação pendente de escolha de Central de Mandados - SELECIONAR" name="(EF) Intimação pendente de escolha de Central de Mandados - SELECIONAR"/>
+        <transition to="(EF) Intimação pendente de documento - SELECIONAR" name="(EF) Intimação pendente de documento - SELECIONAR"/>
+        <transition to=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR" name=" (EF) Intimação pendente de escolha de prazo do polo ativo - SELECIONAR"/>
+        <transition to=" (EF) Intimação pendente de escolha de prazo do polo passivo - SELECIONAR" name=" (EF) Intimação pendente de escolha de prazo do polo passivo - SELECIONAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

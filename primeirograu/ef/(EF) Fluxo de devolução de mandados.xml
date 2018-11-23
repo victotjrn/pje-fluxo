@@ -16,8 +16,14 @@ Parâmetro: pje:fluxo:incidental:sempreDisparar]]></description>
     <!-- NODES -->
     <decision expression="#{parametroUtil.getParametro('pje:tjrn:classesVEF').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().classeJudicial.codClasseJudicial).concat('_')) ? '(EF) Lançar sinalizador no fluxo' : 'Término'}" name="(EF) É execução fiscal?">
         <transition to="Término" name="Término"/>
-        <transition to="(EF) Lançar sinalizador no fluxo" name="(EF) Lançar sinalizador no fluxo"/>
+        <transition to="(EF) Atualizar frameDefaultTransition" name="(EF) Atualizar frameDefaultTransition"/>
     </decision>
+    <node name="(EF) Atualizar frameDefaultTransition">
+        <transition to="(EF) Lançar sinalizador no fluxo" name="(EF) Lançar sinalizador no fluxo"/>
+        <event type="node-enter">
+            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro('pje:update_devolucao_mandado')).setParameter('idProcesso1', tramitacaoProcessualService.recuperaVariavel('processo')).setParameter('idProcesso2', tramitacaoProcessualService.recuperaVariavel('processo')).executeUpdate()}"/>
+        </event>
+    </node>
     <node name="(EF) Lançar sinalizador no fluxo">
         <transition to="Término" name="Término"/>
         <event type="node-enter">

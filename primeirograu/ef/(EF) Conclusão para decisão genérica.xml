@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Conclusão para Decisão de Urgência">
-    <description><![CDATA[Código do fluxo: EF_PAJ_EXEF_DEC_URG]]></description>  
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Conclusão para decisão genérica">
+    <description><![CDATA[Código do fluxo: EF_PAJ_EXEF_DEC_GEN]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Assessor">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('6:1469,6:5901,7:5197,8:5852,8:5853,5:1338')}"/>
     </swimlane>
-    <swimlane name="Nó de Desvio - (EF) Conclusão para Decisão de Urgência">
+    <swimlane name="Nó de Desvio - (EF) Conclusão para decisão genérica">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Magistrado">
@@ -15,11 +15,11 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(EF) Concluso para decisão de urgência - MINUTAR" name="(EF) Concluso para decisão de urgência - MINUTAR"/>
+        <transition to="(EF) Concluso para decisão - MINUTAR" name="(EF) Concluso para decisão - MINUTAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(EF) Concluso para decisão de urgência - MINUTAR">
-        <task name="(EF) Concluso para decisão de urgência - MINUTAR" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(EF) Concluso para decisão - MINUTAR">
+        <task name="(EF) Concluso para decisão - MINUTAR" swimlane="Magistrado">
             <controller>
                 <variable name="minuta_decisao" mapped-name="textEditCombo:minuta_decisao" access="read,write"/>
                 <variable name="MinutaEmLote" mapped-name="minutarLote:MinutaEmLote" access="read,write"/>
@@ -38,8 +38,8 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Minutar em Lote]]></description>
-        <transition to="(EF) Concluso para decisão de urgência - ASSINAR" name="Encaminhar para assinatura"/>
-        <transition to="Nó de Desvio - (EF) Conclusão para Decisão de Urgência" name="Nó de Desvio - (EF) Conclusão para Decisão de Urgência">
+        <transition to="(EF) Concluso para decisão - ASSINAR" name="Encaminhar para assinatura"/>
+        <transition to="Nó de Desvio - (EF) Conclusão para decisão genérica" name="Nó de Desvio - (EF) Conclusão para decisão genérica">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Emissão de certidão sem efeito" name="Emitir certidão de conclusão sem efeito"/>
@@ -56,8 +56,8 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('textEditCombo:minuta_decisao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao') == null ? tramitacaoProcessualService.recuperaVariavel('minutaEmElaboracao') : tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minutaEmElaboracao'))}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Concluso para decisão de urgência - ASSINAR">
-        <task name="(EF) Concluso para decisão de urgência - ASSINAR" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(EF) Concluso para decisão - ASSINAR">
+        <task name="(EF) Concluso para decisão - ASSINAR" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
@@ -83,21 +83,21 @@
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Assinatura em Lote]]></description>
-        <transition to="(EF) Concluso para decisão de urgência - MINUTAR" name="Retornar para minuta"/>
+        <transition to="(EF) Concluso para decisão - MINUTAR" name="Retornar para minuta"/>
         <transition to="(EF) Encaminhar para despachados" name="(EF) Encaminhar para despachados">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Encaminhar para despachados" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <transition to="Nó de Desvio - (EF) Conclusão para Decisão de Urgência" name="Nó de Desvio - (EF) Conclusão para Decisão de Urgência">
+        <transition to="Nó de Desvio - (EF) Conclusão para decisão genérica" name="Nó de Desvio - (EF) Conclusão para decisão genérica">
             <condition expression="#{true}"/>
         </transition>
         <event type="node-enter">
             <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',62,63,64)}"/>
         </event>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Encaminhar para despachados')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Certificar Conclusão sem Efeito?')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '62,63,64')}"/>
         </event>
         <event type="task-end">
@@ -109,23 +109,23 @@
         </event>
     </task-node>
     <process-state name="(EF) Encaminhar para despachados">
-        <sub-process name="(EF) Autos recebidos do gabinete - decisão de urgência" binding="late"/>
+        <sub-process name="(EF) Autos recebidos do gabinete - Genérico" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
     <process-state name="(EF) Emissão de certidão sem efeito">
         <sub-process name="(EF) Expedição de Certidão sem efeito" binding="late"/>
         <transition to="(EF) Emitiu certidão sem efeito ?" name="(EF) Emitiu certidão sem efeito ?"/>
     </process-state>
-    <decision expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 57 ? 'Término' : '(EF) Concluso para decisão de urgência - MINUTAR'}" name="(EF) Emitiu certidão sem efeito ?">
-        <transition to="(EF) Concluso para decisão de urgência - MINUTAR" name="(EF) Concluso para decisão de urgência - MINUTAR"/>
+    <decision expression="#{documentoJudicialService.getDocumento(tramitacaoProcessualService.recuperaVariavel('pje:atoProferido')).getTipoProcessoDocumento().idTipoProcessoDocumento == 57 ? 'Término' : '(EF) Concluso para decisão - MINUTAR'}" name="(EF) Emitiu certidão sem efeito ?">
+        <transition to="(EF) Concluso para decisão - MINUTAR" name="(EF) Concluso para decisão - MINUTAR"/>
         <transition to="Término" name="Término"/>
     </decision>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (EF) Conclusão para Decisão de Urgência">
-        <task name="Nó de Desvio - (EF) Conclusão para Decisão de Urgência" swimlane="Nó de Desvio - (EF) Conclusão para Decisão de Urgência"/>
-        <transition to="(EF) Concluso para decisão de urgência - MINUTAR" name="(EF) Concluso para decisão de urgência - MINUTAR"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Conclusão para decisão genérica">
+        <task name="Nó de Desvio - (EF) Conclusão para decisão genérica" swimlane="Nó de Desvio - (EF) Conclusão para decisão genérica"/>
+        <transition to="(EF) Concluso para decisão - MINUTAR" name="(EF) Concluso para decisão - MINUTAR"/>
         <transition to="Término" name="Término"/>
-        <transition to="(EF) Concluso para decisão de urgência - ASSINAR" name="(EF) Concluso para decisão de urgência - ASSINAR"/>
+        <transition to="(EF) Concluso para decisão - ASSINAR" name="(EF) Concluso para decisão - ASSINAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

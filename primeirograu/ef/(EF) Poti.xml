@@ -48,6 +48,7 @@ Secretaria  Gabinete      Magistrado]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Apagar variáveis" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Poti - Em processamento" name="Poti - Em processamento"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti', 'true')}"/>
@@ -60,7 +61,7 @@ Secretaria  Gabinete      Magistrado]]></description>
     <task-node end-tasks="true" name="(EF) Poti - Em processamento">
         <task name="(EF) Poti - Em processamento" swimlane="Secretaria">
             <controller>
-                <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
+                <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read"/>
             </controller>
         </task>
         <description><![CDATA[* Variáveis *
@@ -77,6 +78,10 @@ Secretaria  Gabinete      Magistrado]]></description>
         <transition to="(EF) Qual é o retorno?" name="(EF) Qual é o retorno?">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(EF) Poti - Bloqueio integral com transferência" name="Poti - Bloqueio integral com transferência"/>
+        <transition to="(EF) Poti - Bloqueio parcial com transferência" name="Poti - Bloqueio parcial com transferência"/>
+        <transition to="(EF) Poti - Bloqueio não efetivado por insuficiência de saldo" name="Poti - Bloqueio não efetivado por insuficiência de saldo"/>
+        <transition to="(EF) Poti - Erros" name="Poti - Erros"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
@@ -91,9 +96,9 @@ Secretaria  Gabinete      Magistrado]]></description>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno') == null ? 'erros' : tramitacaoProcessualService.recuperaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno')}" name="(EF) Qual é o retorno?">
-        <transition to="(EF) Poti - Bloqueio integral" name="bloq-int"/>
-        <transition to="(EF) Poti - Bloqueio parcial" name="bloq-parc"/>
-        <transition to="(EF) Poti - Bloqueio não efetivado (Insuficiência de saldo)" name="bloq-neg"/>
+        <transition to="(EF) Poti - Bloqueio integral com transferência" name="bloq-int"/>
+        <transition to="(EF) Poti - Bloqueio parcial com transferência" name="bloq-parc"/>
+        <transition to="(EF) Poti - Bloqueio não efetivado por insuficiência de saldo" name="bloq-neg"/>
         <transition to="(EF) Poti - Erros" name="erros"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-int')}"/>
@@ -102,8 +107,8 @@ Secretaria  Gabinete      Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:erros')}"/>
         </event>
     </decision>
-    <task-node end-tasks="true" name="(EF) Poti - Bloqueio integral">
-        <task name="(EF) Poti - Bloqueio integral" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Poti - Bloqueio integral com transferência">
+        <task name="(EF) Poti - Bloqueio integral com transferência" swimlane="Secretaria">
             <controller>
                 <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
             </controller>
@@ -120,6 +125,7 @@ Secretaria  Gabinete      Magistrado]]></description>
         </transition>
         <transition to="(EF) Poti" name="Retornar para Poti"/>
         <transition to="(EF) Apagar variáveis" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Intimação eletrônica" name="Expedir mandado de intimação da penhora"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -127,8 +133,12 @@ Secretaria  Gabinete      Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Poti - Bloqueio parcial">
-        <task name="(EF) Poti - Bloqueio parcial" swimlane="Secretaria">
+    <process-state name="(EF) Intimação eletrônica">
+        <sub-process name="(EF) Intimações eletrônicas" binding="late"/>
+        <transition to="(EF) Apagar variáveis" name="(EF) Apagar variáveis"/>
+    </process-state>
+    <task-node end-tasks="true" name="(EF) Poti - Bloqueio parcial com transferência">
+        <task name="(EF) Poti - Bloqueio parcial com transferência" swimlane="Secretaria">
             <controller>
                 <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
             </controller>
@@ -145,6 +155,7 @@ Secretaria  Gabinete      Magistrado]]></description>
         </transition>
         <transition to="(EF) Poti" name="Retornar para Poti"/>
         <transition to="(EF) Apagar variáveis" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Renajud" name="Enviar para restrição e penhora veicular - RENAJUD"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -152,8 +163,8 @@ Secretaria  Gabinete      Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Poti - Bloqueio não efetivado (Insuficiência de saldo)">
-        <task name="(EF) Poti - Bloqueio não efetivado (Insuficiência de saldo)" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Poti - Bloqueio não efetivado por insuficiência de saldo">
+        <task name="(EF) Poti - Bloqueio não efetivado por insuficiência de saldo" swimlane="Secretaria">
             <controller>
                 <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
             </controller>
@@ -170,6 +181,7 @@ Secretaria  Gabinete      Magistrado]]></description>
         </transition>
         <transition to="(EF) Poti" name="Retornar para Poti"/>
         <transition to="(EF) Apagar variáveis" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Renajud" name="Enviar para restrição e penhora veicular - RENAJUD"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -177,6 +189,10 @@ Secretaria  Gabinete      Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
+    <process-state name="(EF) Renajud">
+        <sub-process name="(EF) Renajud" binding="late"/>
+        <transition to="(EF) Apagar variáveis" name="(EF) Apagar variáveis"/>
+    </process-state>
     <task-node end-tasks="true" name="(EF) Poti - Erros">
         <task name="(EF) Poti - Erros" swimlane="Secretaria">
             <controller>
@@ -218,9 +234,9 @@ Secretaria  Gabinete      Magistrado]]></description>
     <task-node end-tasks="true" name="Nó de Desvio - (EF) Poti">
         <task name="Nó de Desvio - (EF) Poti" swimlane="Nó de Desvio - (EF) Poti"/>
         <transition to="(EF) Poti - Em processamento" name="(EF) Poti - Em processamento"/>
-        <transition to="(EF) Poti - Bloqueio integral" name="(EF) Poti - Bloqueio integral"/>
-        <transition to="(EF) Poti - Bloqueio parcial" name="(EF) Poti - Bloqueio parcial"/>
-        <transition to="(EF) Poti - Bloqueio não efetivado (Insuficiência de saldo)" name="(EF) Poti - Bloqueio não efetivado (Insuficiência de saldo)"/>
+        <transition to="(EF) Poti - Bloqueio integral com transferência" name="(EF) Poti - Bloqueio integral com transferência"/>
+        <transition to="(EF) Poti - Bloqueio parcial com transferência" name="(EF) Poti - Bloqueio parcial com transferência"/>
+        <transition to="(EF) Poti - Bloqueio não efetivado por insuficiência de saldo" name="(EF) Poti - Bloqueio não efetivado por insuficiência de saldo"/>
         <transition to="(EF) Poti - Erros" name="(EF) Poti - Erros"/>
         <transition to="Término" name="Término"/>
         <transition to="(EF) Poti" name="(EF) Poti"/>

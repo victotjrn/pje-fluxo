@@ -37,12 +37,12 @@ Magistrado   Assessoria    Assessor]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:aud:citar_intimar_aud')}"/>
         </event>
     </end-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:aud:citar_intimar_aud') ? '(EF) Preparar citação e(ou) intimação da audiência' : '(EF) É Mandado?'}" name="(EF) É citação e(ou) intimação?">
-        <transition to="(EF) Preparar citação e(ou) intimação da audiência" name="(EF) Preparar citação e(ou) intimação da audiência"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:aud:citar_intimar_aud') ? '(EF) Audiência pendente de citação e(ou) intimação - PREPARAR' : '(EF) É Mandado?'}" name="(EF) É citação e(ou) intimação?">
+        <transition to="(EF) Audiência pendente de citação e(ou) intimação - PREPARAR" name="(EF) Audiência pendente de citação e(ou) intimação - PREPARAR"/>
         <transition to="(EF) É Mandado?" name="(EF) É Mandado?"/>
     </decision>
-    <task-node end-tasks="true" name="(EF) Preparar citação e(ou) intimação da audiência">
-        <task name="(EF) Preparar citação e(ou) intimação da audiência" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Audiência pendente de citação e(ou) intimação - PREPARAR">
+        <task name="(EF) Audiência pendente de citação e(ou) intimação - PREPARAR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
             </controller>
@@ -74,8 +74,8 @@ Magistrado   Assessoria    Assessor]]></description>
         <transition to="(EF) Publicacao DJe" name="(EF) Publicacao DJe"/>
         <transition to="(EF) Separação em controle de prazo" name="(EF) Separação em controle de prazo"/>
     </decision>
-    <task-node end-tasks="true" name="(EF) Informar conteúdo DJe">
-        <task name="(EF) Informar conteúdo DJe" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Audiência pendente de conteúdo DJe - INFORMAR">
+        <task name="(EF) Audiência pendente de conteúdo DJe - INFORMAR" swimlane="Secretaria">
             <controller>
                 <variable name="Aviso1" mapped-name="textAlert:Aviso1" access="read,write"/>
                 <variable name="Aviso2" mapped-name="textAlert:Aviso2" access="read,write"/>
@@ -130,7 +130,7 @@ Magistrado   Assessoria    Assessor]]></description>
    Obrig.: Não
    Tipo: Frame]]></description>
         <transition to="(EF) Preencheu conteúdo DJe?" name="Prosseguir"/>
-        <transition to="(EF) Ignorar conteúdo DJe" name="Ignorar conteúdo DJe"/>
+        <transition to="(EF) Audiência pendente de conteúdo DJe - IGNORAR" name="Ignorar conteúdo DJe"/>
         <transition to="Nó de Desvio - (EF) Preparar Ato de Comunicação - Audiências" name="Nó de Desvio - (EF) Preparar Ato de Comunicação - Audiências">
             <condition expression="#{true}"/>
         </transition>
@@ -144,8 +144,8 @@ Magistrado   Assessoria    Assessor]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('text:ef_conteudo_dje')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Ignorar conteúdo DJe">
-        <task name="(EF) Ignorar conteúdo DJe" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Audiência pendente de conteúdo DJe - IGNORAR">
+        <task name="(EF) Audiência pendente de conteúdo DJe - IGNORAR" swimlane="Secretaria">
             <controller>
                 <variable name="Aviso_DJe" mapped-name="textAlert:Aviso_DJe" access="read,write"/>
             </controller>
@@ -157,18 +157,18 @@ Magistrado   Assessoria    Assessor]]></description>
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso]]></description>
-        <transition to="(EF) Informar conteúdo DJe" name="Não"/>
+        <transition to="(EF) Audiência pendente de conteúdo DJe - INFORMAR" name="Não"/>
         <transition to="Término" name="Sim"/>
         <transition to="Nó de Desvio - (EF) Preparar Ato de Comunicação - Audiências" name="Nó de Desvio - (EF) Preparar Ato de Comunicação - Audiências">
             <condition expression="#{true}"/>
         </transition>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('magistrado_dje_temp') == null || tramitacaoProcessualService.recuperaVariavel('conteudo_dje_temp') == &quot;&quot; ? '(EF) Informar conteúdo DJe' : '(EF) Confirmar conteúdo DJe'}" name="(EF) Preencheu conteúdo DJe?">
-        <transition to="(EF) Informar conteúdo DJe" name="(EF) Informar conteúdo DJe"/>
-        <transition to="(EF) Confirmar conteúdo DJe" name="(EF) Confirmar conteúdo DJe"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('magistrado_dje_temp') == null || tramitacaoProcessualService.recuperaVariavel('conteudo_dje_temp') == &quot;&quot; ? '(EF) Audiência pendente de conteúdo DJe - INFORMAR' : '(EF) Audiência pendente de conteúdo DJe - CONFIRMAR'}" name="(EF) Preencheu conteúdo DJe?">
+        <transition to="(EF) Audiência pendente de conteúdo DJe - INFORMAR" name="(EF) Audiência pendente de conteúdo DJe - INFORMAR"/>
+        <transition to="(EF) Audiência pendente de conteúdo DJe - CONFIRMAR" name="(EF) Audiência pendente de conteúdo DJe - CONFIRMAR"/>
     </decision>
-    <task-node end-tasks="true" name="(EF) Confirmar conteúdo DJe">
-        <task name="(EF) Confirmar conteúdo DJe" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Audiência pendente de conteúdo DJe - CONFIRMAR">
+        <task name="(EF) Audiência pendente de conteúdo DJe - CONFIRMAR" swimlane="Secretaria">
             <controller>
                 <variable name="Aviso4" mapped-name="textAlert:Aviso4" access="read,write"/>
                 <variable name="Aviso5" mapped-name="textAlert:Aviso5" access="read,write"/>
@@ -208,7 +208,7 @@ Magistrado   Assessoria    Assessor]]></description>
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso]]></description>
-        <transition to="(EF) Informar conteúdo DJe" name="Retornar para ajustar conteúdo"/>
+        <transition to="(EF) Audiência pendente de conteúdo DJe - INFORMAR" name="Retornar para ajustar conteúdo"/>
         <transition to="(EF) Gravar Variáveis DJe" name="Enviar para publicação no DJe"/>
         <transition to="Nó de Desvio - (EF) Preparar Ato de Comunicação - Audiências" name="Nó de Desvio - (EF) Preparar Ato de Comunicação - Audiências">
             <condition expression="#{true}"/>
@@ -224,12 +224,12 @@ Magistrado   Assessoria    Assessor]]></description>
             <action expression="#{tramitacaoProcessualService.recuperaVariavel('ef:lanc:publicar_dje') ? tramitacaoProcessualService.gravaVariavel('id_oj_dje_direto', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador) : tramitacaoProcessualService.gravaVariavel('id_oj_dje', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador)}"/>
         </event>
     </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:aud:expedir_mandado_aud') ? '(EF) Expedir Mandado de audiência' : 'Término'}" name="(EF) É Mandado?">
-        <transition to="(EF) Expedir Mandado de audiência" name="(EF) Expedir Mandado de audiência"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:aud:expedir_mandado_aud') ? '(EF) Audiência pendente de mandado - EXPEDIR' : 'Término'}" name="(EF) É Mandado?">
+        <transition to="(EF) Audiência pendente de mandado - EXPEDIR" name="(EF) Audiência pendente de mandado - EXPEDIR"/>
         <transition to="Término" name="Término"/>
     </decision>
-    <task-node end-tasks="true" name="(EF) Expedir Mandado de audiência">
-        <task name="(EF) Expedir Mandado de audiência" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Audiência pendente de mandado - EXPEDIR">
+        <task name="(EF) Audiência pendente de mandado - EXPEDIR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_prepararExpediente" mapped-name="frame:Processo_Fluxo_prepararExpediente" access="read,write"/>
             </controller>
@@ -254,12 +254,12 @@ Magistrado   Assessoria    Assessor]]></description>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,69,65,167,168,169,170')}"/>
         </event>
     </task-node>
-    <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(EF) Selecionar Central de Mandados' : '(EF) Lançar movimentações mandado'}" name="(EF) Existe alguma Central de Mandados?">
-        <transition to="(EF) Selecionar Central de Mandados" name="(EF) Selecionar Central de Mandados"/>
+    <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(EF) Audiência pendente de escolha de Central de Mandados - SELECIONAR' : '(EF) Lançar movimentações mandado'}" name="(EF) Existe alguma Central de Mandados?">
+        <transition to="(EF) Audiência pendente de escolha de Central de Mandados - SELECIONAR" name="(EF) Audiência pendente de escolha de Central de Mandados - SELECIONAR"/>
         <transition to="(EF) Lançar movimentações mandado" name="(EF) Lançar movimentações mandado"/>
     </decision>
-    <task-node end-tasks="true" name="(EF) Selecionar Central de Mandados">
-        <task name="(EF) Selecionar Central de Mandados" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Audiência pendente de escolha de Central de Mandados - SELECIONAR">
+        <task name="(EF) Audiência pendente de escolha de Central de Mandados - SELECIONAR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_expedientes_centralmandados" mapped-name="frame:Processo_Fluxo_expedientes_centralmandados" access="read,write"/>
             </controller>
@@ -293,12 +293,12 @@ Magistrado   Assessoria    Assessor]]></description>
     <task-node end-tasks="true" name="Nó de Desvio - (EF) Preparar Ato de Comunicação - Audiências">
         <task name="Nó de Desvio - (EF) Preparar Ato de Comunicação - Audiências"/>
         <transition to="Término" name="Término"/>
-        <transition to="(EF) Preparar citação e(ou) intimação da audiência" name="(EF) Preparar citação e(ou) intimação da audiência"/>
-        <transition to="(EF) Informar conteúdo DJe" name="(EF) Informar conteúdo DJe"/>
-        <transition to="(EF) Ignorar conteúdo DJe" name="(EF) Ignorar conteúdo DJe"/>
-        <transition to="(EF) Confirmar conteúdo DJe" name="(EF) Confirmar conteúdo DJe"/>
-        <transition to="(EF) Expedir Mandado de audiência" name="(EF) Expedir Mandado de audiência"/>
-        <transition to="(EF) Selecionar Central de Mandados" name="(EF) Selecionar Central de Mandados"/>
+        <transition to="(EF) Audiência pendente de citação e(ou) intimação - PREPARAR" name="(EF) Audiência pendente de citação e(ou) intimação - PREPARAR"/>
+        <transition to="(EF) Audiência pendente de conteúdo DJe - INFORMAR" name="(EF) Audiência pendente de conteúdo DJe - INFORMAR"/>
+        <transition to="(EF) Audiência pendente de conteúdo DJe - IGNORAR" name="(EF) Audiência pendente de conteúdo DJe - IGNORAR"/>
+        <transition to="(EF) Audiência pendente de conteúdo DJe - CONFIRMAR" name="(EF) Audiência pendente de conteúdo DJe - CONFIRMAR"/>
+        <transition to="(EF) Audiência pendente de mandado - EXPEDIR" name="(EF) Audiência pendente de mandado - EXPEDIR"/>
+        <transition to="(EF) Audiência pendente de escolha de Central de Mandados - SELECIONAR" name="(EF) Audiência pendente de escolha de Central de Mandados - SELECIONAR"/>
     </task-node>
     <process-state name="(EF) Lançar movimentações">
         <sub-process name="(EF) Movimentações de comunicação" binding="late"/>

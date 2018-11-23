@@ -12,11 +12,11 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(EF) Suspender processo" name="(EF) Suspender processo"/>
+        <transition to="(EF) Suspensão de processo - INFORMAR" name="(EF) Suspensão de processo - INFORMAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(EF) Suspender processo">
-        <task name="(EF) Suspender processo" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Suspensão de processo - INFORMAR">
+        <task name="(EF) Suspensão de processo - INFORMAR" swimlane="Secretaria">
             <controller>
                 <variable name="ef_cs_data_limite_suspensao" mapped-name="date:ef_cs_data_limite_suspensao" access="read,write"/>
             </controller>
@@ -28,7 +28,7 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Data]]></description>
-        <transition to="(EF) Confirmar suspensão do processo" name="Selecionar e confirmar suspensão do processo"/>
+        <transition to="(EF) Suspensão de processo - CONFIRMAR" name="Selecionar e confirmar suspensão do processo"/>
         <transition to="Término" name="Ignorar suspensão do processo"/>
         <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
             <condition expression="#{true}"/>
@@ -41,8 +41,8 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('dls', tramitacaoProcessualService.recuperaVariavelTarefa('date:ef_cs_data_limite_suspensao'))}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Confirmar suspensão do processo">
-        <task name="(EF) Confirmar suspensão do processo" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Suspensão de processo - CONFIRMAR">
+        <task name="(EF) Suspensão de processo - CONFIRMAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso_susp1" mapped-name="textAlert:aviso_susp1" access="read,write"/>
                 <variable name="aviso_susp2" mapped-name="textAlert:aviso_susp2" access="read,write"/>
@@ -61,10 +61,10 @@
    Escrita: Sim
    Obrig.: Não
    Tipo: Aviso]]></description>
-        <transition to="(EF) Processos suspensos - art. 40" name="Suspender processo pelo art. 40"/>
-        <transition to="(EF) Processos suspensos - parcelamento" name="Suspender processo por parcelamento"/>
+        <transition to="(EF) Suspensão de processo pelo art. 40 - AGUARDAR" name="Suspender processo pelo art. 40"/>
+        <transition to="(EF) Suspensão de processo por parcelamento - AGUARDAR" name="Suspender processo por parcelamento"/>
         <transition to="(EF) Houve data limite de suspensão?" name="Suspender processo por outros motivos"/>
-        <transition to="(EF) Suspender processo" name="Retificar data de suspensão do processo"/>
+        <transition to="(EF) Suspensão de processo - INFORMAR" name="Retificar data de suspensão do processo"/>
         <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
             <condition expression="#{true}"/>
         </transition>
@@ -72,8 +72,8 @@
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Processos suspensos - art. 40">
-        <task name="(EF) Processos suspensos - art. 40" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Suspensão de processo pelo art. 40 - AGUARDAR">
+        <task name="(EF) Suspensão de processo pelo art. 40 - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso_susp1" mapped-name="textAlert:aviso_susp1" access="read,write"/>
                 <variable name="aviso_susp2" mapped-name="textAlert:aviso_susp2" access="read,write"/>
@@ -97,15 +97,21 @@
         </transition>
         <transition to="(EF) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
         <transition to="(EF) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <event type="node-enter">
+            <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Suspensão de processo pelo art. 40 - AGUARDAR', false, false, false, true)}"/>
+        </event>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{processoHome.limparCaixaTriagem()}"/>
         </event>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cs:suspensao_art40', 'true')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Processos suspensos - parcelamento">
-        <task name="(EF) Processos suspensos - parcelamento" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Suspensão de processo por parcelamento - AGUARDAR">
+        <task name="(EF) Suspensão de processo por parcelamento - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso_susp1" mapped-name="textAlert:aviso_susp1" access="read,write"/>
                 <variable name="aviso_susp2" mapped-name="textAlert:aviso_susp2" access="read,write"/>
@@ -136,12 +142,12 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cs:suspensao_parcelamento', 'true')}"/>
         </event>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('dls') != null  ? '(EF) Processos suspensos - com prazo' : '(EF) Processos suspensos - sem prazo'}" name="(EF) Houve data limite de suspensão?">
-        <transition to="(EF) Processos suspensos - com prazo" name="(EF) Processos suspensos - com prazo"/>
-        <transition to="(EF) Processos suspensos - sem prazo" name="(EF) Processos suspensos - sem prazo"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('dls') != null  ? '(EF) Suspensão de processo com prazo - AGUARDAR' : '(EF) Suspensão de processo sem prazo - AGUARDAR'}" name="(EF) Houve data limite de suspensão?">
+        <transition to="(EF) Suspensão de processo com prazo - AGUARDAR" name="(EF) Suspensão de processo com prazo - AGUARDAR"/>
+        <transition to="(EF) Suspensão de processo sem prazo - AGUARDAR" name="(EF) Suspensão de processo sem prazo - AGUARDAR"/>
     </decision>
-    <task-node end-tasks="true" name="(EF) Processos suspensos - com prazo">
-        <task name="(EF) Processos suspensos - com prazo" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Suspensão de processo com prazo - AGUARDAR">
+        <task name="(EF) Suspensão de processo com prazo - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso_susp1" mapped-name="textAlert:aviso_susp1" access="read,write"/>
                 <variable name="aviso_susp2" mapped-name="textAlert:aviso_susp2" access="read,write"/>
@@ -172,8 +178,8 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cs:suspensao_com_prazo', 'true')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Processos suspensos - sem prazo">
-        <task name="(EF) Processos suspensos - sem prazo" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Suspensão de processo sem prazo - AGUARDAR">
+        <task name="(EF) Suspensão de processo sem prazo - AGUARDAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso_susp1" mapped-name="textAlert:aviso_susp1" access="read,write"/>
             </controller>
@@ -198,19 +204,11 @@
         </event>
     </task-node>
     <process-state name="(EF) Conclusão para decisão sobre encerramento da suspensão">
-        <sub-process name="(EF) Preparar Ato Judicial" binding="late"/>
-        <transition to="(EF) Despachados sobre encerramento da suspensão" name="(EF) Despachados sobre encerramento da suspensão"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fbc:decisao', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fbc:decisao_generica', 'true')}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fbc:decisao')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fbc:decisao_generica')}"/>
-        </event>
+        <sub-process name="(EF) Conclusão para decisão genérica" binding="late"/>
+        <transition to="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR" name="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR"/>
     </process-state>
-    <task-node end-tasks="true" name="(EF) Despachados sobre encerramento da suspensão">
-        <task name="(EF) Despachados sobre encerramento da suspensão" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR">
+        <task name="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
             </controller>
@@ -225,10 +223,10 @@
         <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Processos suspensos - art. 40" name="Manter processo suspenso pelo art. 40">
+        <transition to="(EF) Suspensão de processo pelo art. 40 - AGUARDAR" name="Manter processo suspenso pelo art. 40">
             <condition expression="#{tramitacaoProcessualService.recuperaVariavel('ef:cs:suspensao_art40')=='true'}"/>
         </transition>
-        <transition to="(EF) Processos suspensos - parcelamento" name="Manter processo suspenso por parcelamento">
+        <transition to="(EF) Suspensão de processo por parcelamento - AGUARDAR" name="Manter processo suspenso por parcelamento">
             <condition expression="#{tramitacaoProcessualService.recuperaVariavel('ef:cs:suspensao_parcelamento') == 'true'}"/>
         </transition>
         <transition to="(EF) Houve data limite de suspensão?" name="Manter processo suspenso por outro motivo">
@@ -253,14 +251,14 @@
                 <variable name="" mapped-name="null:" access="read,write"/>
             </controller>
         </task>
-        <transition to="(EF) Suspender processo" name="(EF) Suspender processo"/>
-        <transition to="(EF) Processos suspensos - art. 40" name="(EF) Processos suspensos - art. 40"/>
-        <transition to="(EF) Processos suspensos - parcelamento" name="(EF) Processos suspensos - parcelamento"/>
-        <transition to="(EF) Processos suspensos - com prazo" name="(EF) Processos suspensos - com prazo"/>
-        <transition to="(EF) Processos suspensos - sem prazo" name="(EF) Processos suspensos - sem prazo"/>
+        <transition to="(EF) Suspensão de processo - INFORMAR" name="(EF) Suspensão de processo - INFORMAR"/>
+        <transition to="(EF) Suspensão de processo pelo art. 40 - AGUARDAR" name="(EF) Suspensão de processo pelo art. 40 - AGUARDAR"/>
+        <transition to="(EF) Suspensão de processo por parcelamento - AGUARDAR" name="(EF) Suspensão de processo por parcelamento - AGUARDAR"/>
+        <transition to="(EF) Suspensão de processo com prazo - AGUARDAR" name="(EF) Suspensão de processo com prazo - AGUARDAR"/>
+        <transition to="(EF) Suspensão de processo sem prazo - AGUARDAR" name="(EF) Suspensão de processo sem prazo - AGUARDAR"/>
         <transition to="Término" name="Término"/>
-        <transition to="(EF) Despachados sobre encerramento da suspensão" name="(EF) Despachados sobre encerramento da suspensão"/>
-        <transition to="(EF) Confirmar suspensão do processo" name="(EF) Confirmar suspensão do processo"/>
+        <transition to="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR" name="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR"/>
+        <transition to="(EF) Suspensão de processo - CONFIRMAR" name="(EF) Suspensão de processo - CONFIRMAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

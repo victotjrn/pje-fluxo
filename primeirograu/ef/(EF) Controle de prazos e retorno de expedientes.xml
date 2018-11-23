@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Controle de prazos e retorno de expedientes">
-    <description><![CDATA[Controla prazos e retorno de expedientes.]]></description>  
+    <description><![CDATA[Controla prazos e retorno de expedientes..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
         <assignment actor-id="#{actor.id}"/>
@@ -123,25 +123,6 @@
         <transition to="(EF) É via MP?" name="(EF) É via MP?"/>
         <transition to="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR" name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR"/>
     </decision>
-    <task-node end-tasks="true" name="(EF) Aguardando carta precatória ou rogatória">
-        <task name="(EF) Aguardando carta precatória ou rogatória" swimlane="Secretaria">
-            <controller>
-                <variable name="Processo_Fluxo_expedientes_precatorias" mapped-name="frame:Processo_Fluxo_expedientes_precatorias" access="read,write"/>
-            </controller>
-        </task>
-        <description><![CDATA[* Variáveis *
-
-1. Variável: Processo_Fluxo_expedientes_precatorias
-   Label: Preparar carta de ordem ou precatória
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Frame]]></description>
-        <transition to="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes" name="Nó de Desvio - (EF) Controle de prazos e retorno de expedientes">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR" name="Registrar devolução de carta precatória ou rogatória"/>
-        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
-    </task-node>
     <task-node end-tasks="true" name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR">
         <task name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR" swimlane="Secretaria">
             <controller>
@@ -226,9 +207,9 @@
             <condition expression="#{true}"/>
         </transition>
     </task-node>
-    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('ef:cpre:sistema') ? '(EF) Há prazo em aberto?' : '(EF) Controlar retorno de expediente'}" name="(EF) É via sistema?">
+    <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('ef:cpre:sistema') ? '(EF) Há prazo em aberto?' : '(EF) Controlar retorno de expediente - SELECIONAR'}" name="(EF) É via sistema?">
         <transition to="(EF) Há prazo em aberto?" name="(EF) Há prazo em aberto?"/>
-        <transition to="(EF) Controlar retorno de expediente" name="(EF) Controlar retorno de expediente"/>
+        <transition to="(EF) Controlar retorno de expediente - SELECIONAR" name="(EF) Controlar retorno de expediente - SELECIONAR"/>
     </decision>
     <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 ? '(EF) Processos com prazo em curso - AGUARDAR' : 'Término'}" name="(EF) Há prazo em aberto?">
         <transition to="(EF) Devolução à secretaria" name="Término"/>
@@ -286,8 +267,8 @@
             <condition expression="#{true}"/>
         </transition>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Controlar retorno de expediente">
-        <task name="(EF) Controlar retorno de expediente" swimlane="Secretaria"/>
+    <task-node end-tasks="true" name="(EF) Controlar retorno de expediente - SELECIONAR">
+        <task name="(EF) Controlar retorno de expediente - SELECIONAR" swimlane="Secretaria"/>
         <transition to="(EF) Ofício pendente de devolução - AGUARDAR" name="Aguardar devolução de ofício"/>
         <transition to="(EF) Ofício pendente de resposta - AGUARDAR" name="Aguardar resposta de ofício"/>
         <transition to="(EF) Há expediente AR em aberto?" name="Aguardar devolução do AR"/>
@@ -301,17 +282,17 @@
         </transition>
         <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
     </task-node>
-    <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(EF) Devolução de AR - REGISTRAR' : '(EF) Controlar retorno de expediente'}" name="(EF) Há expediente em aberto?">
+    <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(EF) Devolução de AR - REGISTRAR' : '(EF) Controlar retorno de expediente - SELECIONAR'}" name="(EF) Há expediente em aberto?">
         <transition to="(EF) Devolução de AR - REGISTRAR" name="(EF) Devolução de AR - REGISTRAR"/>
-        <transition to="(EF) Controlar retorno de expediente" name="(EF) Controlar retorno de expediente"/>
+        <transition to="(EF) Controlar retorno de expediente - SELECIONAR" name="(EF) Controlar retorno de expediente - SELECIONAR"/>
     </decision>
     <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(EF) Devolução de AR - REGISTRAR' : '(EF) Devolução de AR - AGUARDAR'}" name="(EF) Há expedientes em aberto?">
         <transition to="(EF) Devolução de AR - AGUARDAR" name="(EF) Devolução de AR - AGUARDAR"/>
         <transition to="(EF) Devolução de AR - REGISTRAR" name="(EF) Devolução de AR - REGISTRAR"/>
     </decision>
-    <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(EF) Devolução de AR - AGUARDAR' : '(EF) Controlar retorno de expediente'}" name="(EF) Há expediente AR em aberto?">
+    <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(EF) Devolução de AR - AGUARDAR' : '(EF) Controlar retorno de expediente - SELECIONAR'}" name="(EF) Há expediente AR em aberto?">
         <transition to="(EF) Devolução de AR - AGUARDAR" name="(EF) Devolução de AR - AGUARDAR"/>
-        <transition to="(EF) Controlar retorno de expediente" name="(EF) Controlar retorno de expediente"/>
+        <transition to="(EF) Controlar retorno de expediente - SELECIONAR" name="(EF) Controlar retorno de expediente - SELECIONAR"/>
     </decision>
     <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT (*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.tipoProcessoDocumento.idTipoProcessoDocumento = 65 AND ppe.fechado = false AND ppe.dtCienciaParte IS NOT NULL&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(EF) Registrar SERASAJUD' : 'Finalizar e sair da tarefa'}" name="(EF) Existe citação?">
         <transition to="(EF) Há prazo em aberto?" name="Finalizar e sair da tarefa"/>
@@ -333,7 +314,7 @@
         <transition to="(EF) Ofício pendente de resposta - AGUARDAR" name="(EF) Ofício pendente de resposta - AGUARDAR"/>
         <transition to="(EF) Devolução de AR - AGUARDAR" name="(EF) Devolução de AR - AGUARDAR"/>
         <transition to="(EF) Devolução de AR - REGISTRAR" name="(EF) Devolução de AR - REGISTRAR"/>
-        <transition to="(EF) Controlar retorno de expediente" name="(EF) Controlar retorno de expediente"/>
+        <transition to="(EF) Controlar retorno de expediente - SELECIONAR" name="(EF) Controlar retorno de expediente - SELECIONAR"/>
         <transition to="(EF) Mandado pendente de devolução - AGUARDAR" name="(EF) Mandado pendente de devolução - AGUARDAR"/>
         <transition to="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR" name="(EF) Carta precatória ou rogatória pendente de devolução - REGISTRAR"/>
         <transition to="(EF) Manifestação do MP - AGUARDAR" name="(EF) Manifestação do MP - AGUARDAR"/>
@@ -341,7 +322,6 @@
         <transition to="(EF) Processos com prazo em curso - AGUARDAR" name="(EF) Processos com prazo em curso - AGUARDAR"/>
         <transition to="(EF) Processos com prazos decorridos - AGUARDAR" name="(EF) Processos com prazos decorridos - AGUARDAR"/>
         <transition to="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR" name="(EF) Carta precatória ou rogatória pendente de devolução - AGUARDAR"/>
-        <transition to="(EF) Aguardando carta precatória ou rogatória" name="(EF) Aguardando carta precatória ou rogatória"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Expedir precatório e(ou) RPV">
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Expedição de precatório e(ou) RPV">
     <description><![CDATA[Código do fluxo: EF_EXP_PREC_RPV.
 
 Descrição: Fluxo para expedir precatório e/ou RPV.
@@ -9,7 +9,7 @@ Raia        Localização   Papel
 Secretaria  Secretaria    Chefe de Secretaria
 Secretaria  Gabinete      Magistrado]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (EF) Expedir precatório e(ou) RPV">
+    <swimlane name="Nó de Desvio - (EF) Expedição de precatório e(ou) RPV">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
@@ -18,12 +18,12 @@ Secretaria  Gabinete      Magistrado]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(EF) Expedir precatório e(ou) RPV" name="(EF) Expedir precatório e(ou) RPV"/>
+        <transition to="(EF) Precatório e(ou) RPV - EXPEDIR" name="(EF) Precatório e(ou) RPV - EXPEDIR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(EF) Expedir precatório e(ou) RPV">
-        <task name="(EF) Expedir precatório e(ou) RPV" swimlane="Secretaria"/>
-        <transition to="Nó de Desvio - (EF) Expedir precatório e(ou) RPV" name="Nó de Desvio - (EF) Expedir precatório e(ou) RPV">
+    <task-node end-tasks="true" name="(EF) Precatório e(ou) RPV - EXPEDIR">
+        <task name="(EF) Precatório e(ou) RPV - EXPEDIR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (EF) Expedição de precatório e(ou) RPV" name="Nó de Desvio - (EF) Expedição de precatório e(ou) RPV">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Devolução à secretaria" name="Finalizar e sair da tarefa"/>
@@ -33,10 +33,10 @@ Secretaria  Gabinete      Magistrado]]></description>
         <transition to="Término" name="Término"/>
     </process-state>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (EF) Expedir precatório e(ou) RPV">
-        <task name="Nó de Desvio - (EF) Expedir precatório e(ou) RPV" swimlane="Nó de Desvio - (EF) Expedir precatório e(ou) RPV"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Expedição de precatório e(ou) RPV">
+        <task name="Nó de Desvio - (EF) Expedição de precatório e(ou) RPV" swimlane="Nó de Desvio - (EF) Expedição de precatório e(ou) RPV"/>
         <transition to="Término" name="Término"/>
-        <transition to="(EF) Expedir precatório e(ou) RPV" name="(EF) Expedir precatório e(ou) RPV"/>
+        <transition to="(EF) Precatório e(ou) RPV - EXPEDIR" name="(EF) Precatório e(ou) RPV - EXPEDIR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

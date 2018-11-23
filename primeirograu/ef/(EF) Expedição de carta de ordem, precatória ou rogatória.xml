@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Expedição de carta de ordem, precatória ou rogatória">
-    <description><![CDATA[Código do fluxo: EF_EXP_CARTA
+    <description><![CDATA[Código do fluxo: EF_EXP_CARTA.
 
 Descrição: Preparar cartas de ordem, precatória ou rogatória..
 
@@ -85,61 +85,61 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="(EF) Apagar minuta não assinada de carta" name="(EF) Apagar minuta não assinada de carta"/>
     </process-state>
     <node name="(EF) Sem prazo">
-        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:carta', 0)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 5 dias">
-        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:carta', 5)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 10 dias">
-        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:carta', 10)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 15 dias">
-        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:carta', 15)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 20 dias">
-        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:carta', 20)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 30 dias">
-        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:carta', 30)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 60 dias">
-        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:carta', 60)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 90 dias">
-        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:carta', 90)}"/>
         </event>
     </node>
     <node name="(EF) Prazo de 120 dias">
-        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:carta', 120)}"/>
         </event>
     </node>
-    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário">
-        <task name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR">
+        <task name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR" swimlane="Secretaria">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
                 <variable name="minuta_carta" mapped-name="textEditCombo:minuta_carta" access="read,write"/>
@@ -208,6 +208,7 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
     <node name="(EF) Destinatário: partes dos polos ativo e passivo">
         <transition to="(EF) Carta de ordem, precatória ou rogatória - ASSINAR" name="(EF) Carta de ordem, precatória ou rogatória - ASSINAR"/>
         <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:carta', 'T')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:carta', 'partes dos polos ativo e passivo')}"/>
         </event>
     </node>
@@ -348,7 +349,7 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="Término" name="Término"/>
         <transition to="(EF) Carta de ordem, precatória ou rogatória - EXPEDIR" name="(EF) Carta de ordem, precatória ou rogatória - EXPEDIR"/>
         <transition to="(EF) Carta de ordem, precatória ou rogatória - ASSINAR" name="(EF) Carta de ordem, precatória ou rogatória - ASSINAR"/>
-        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR" name="(EF) Carta de ordem, precatória ou rogatória pendente de escolha de destinatário - SELECIONAR"/>
         <transition to="(EF) Carta de ordem, precatória ou rogatória - IMPRIMIR" name="(EF) Carta de ordem, precatória ou rogatória - IMPRIMIR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
