@@ -243,7 +243,7 @@ Parâmetros
         <transition to="Nó de Desvio - (VCiv) Elaborar Documentos" name="Nó de Desvio - (VCiv) Elaborar Documentos">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Expedir Ofício" name="Retornar para expedição de ofício">
+        <transition to="(VCiv) Deslocar secretaria unificada oficio" name="Retornar para expedição de ofício">
             <condition expression="#{processoHome.instance.idProcesso &gt; 0 and empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <transition to="(VCiv) Deslocar secretaria unificada imprimir oficio" name="Documento já assinado! Encaminhar para secretaria">
