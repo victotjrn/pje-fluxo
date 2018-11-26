@@ -40,7 +40,7 @@
         <transition to="Fluxo de conhecimento do JEASGA" name="Fluxo de conhecimento do JEASGA"/>
         <transition to="É competência de EF?" name="É competência de EF?"/>
     </decision>
-    <decision expression="#{processoTrfHome.possuiClasse(13) || processoTrfHome.possuiClasse(23) ? 'Fluxo de conhecimento de EF' : 'Fluxo de conhecimento de VCiv'}" name="É competência de EF?">
+    <decision expression="#{(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador == 146) &amp;&amp; processoTrfHome.possuiClasse(23) ? 'Fluxo de conhecimento de EF' : 'Fluxo de conhecimento de VCiv'}" name="É competência de EF?">
         <transition to="Fluxo de conhecimento de VCiv" name="Fluxo de conhecimento de VCiv"/>
         <transition to="Fluxo de conhecimento de EF" name="Fluxo de conhecimento de EF"/>
     </decision>
