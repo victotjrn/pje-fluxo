@@ -57,7 +57,6 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
                 <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
                 <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
                 <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
-                <variable name="ef_fbg_aguardar_laudo_tecnico" mapped-name="sim_nao:ef_fbg_aguardar_laudo_tecnico" access="read,write"/>
                 <variable name="ef_fbg_alterar_tipo_documento" mapped-name="sim_nao:ef_fbg_alterar_tipo_documento" access="read,write"/>
                 <variable name="ef_fbg_bacenjud_minutar" mapped-name="sim_nao:ef_fbg_bacenjud_minutar" access="read,write"/>
                 <variable name="ef_fbg_serasajud_solicitar" mapped-name="sim_nao:ef_fbg_serasajud_solicitar" access="read,write"/>
@@ -104,11 +103,16 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
    Escrita: Sim
    Obrig.: Não
 
+/** 
+
+ESTA VARIÁVEL É APENAS PARA A CLASSE "EMBARGOS À EXECUÇÃO". COMO O FLUXO, A PRINCÍPIO, FOI DESENVOLVIDO PARA CONTEMPLAR AS DUAS CLASSES, E DEPOIS FOI DIRECIONADO APENAS PARA A CLASSE "EXECUÇÃO FISCAL", ENTÃO ELA É MANTIDA AQUI, CASO MUDEM DE IDEIA NOVAMENTE. 
+
 5. Variável: ef_fbg_aguardar_laudo_tecnico
    Label: Aguardar Perícia / Laudo Técnico / Outros
    Escrita: Sim
    Obrig.: Não
    Tipo: Checkbox
+**/
 
 6. Variável: ef_fbg_alterar_tipo_documento
    Label: Alterar tipo de documento
@@ -252,7 +256,6 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_aguardar_laudo_tecnico')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_alterar_tipo_documento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_bacenjud_minutar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_serasajud_solicitar')}"/>
@@ -277,7 +280,6 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', '')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_aguardar_laudo_tecnico') == true ? '{ef_fbg_aguardar_laudo_tecnico}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_alterar_tipo_documento') == true ? '{ef_fbg_alterar_tipo_documento}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_bacenjud_minutar') == true ? '{ef_fbg_bacenjud_minutar}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_serasajud_solicitar') == true ? '{ef_fbg_serasajud_solicitar}' : ''))}"/>
@@ -298,7 +300,6 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_infojud_infoseg_consultar') == true ? '{ef_fbg_infojud_infoseg_consultar}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_publicar_dje') == true ? '{ef_fbg_publicar_dje}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_renajud_consultar') == true ? '{ef_fbg_renajud_consultar}' : ''))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_aguardar_laudo_tecnico')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_alterar_tipo_documento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_bacenjud_minutar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_serasajud_solicitar')}"/>
