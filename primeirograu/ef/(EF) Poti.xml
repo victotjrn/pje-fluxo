@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Poti">
-    <description><![CDATA[CÃ³digo do fluxo: EF_POTI.
+    <description><![CDATA[Código do fluxo: EF_POTI.
 
-DescriÃ§Ã£o: Fluxo responsÃ¡vel pelas tarefas do Poti.
+Descrição: Fluxo responsável pelas tarefas do Poti.
 
-Raia        LocalizaÃ§Ã£o   Papel
+Raia        Localização   Papel
 Secretaria  Secretaria    Chefe de Secretaria
 Secretaria  Gabinete      Magistrado]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="NÃ³ de Desvio - (EF) Poti">
+    <swimlane name="Nó de Desvio - (EF) Poti">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
-    <start-state name="InÃ­cio">
+    <start-state name="Início">
         <task name="Tarefa inicial"/>
         <transition to="(EF) Poti" name="(EF) Poti"/>
     </start-state>  
@@ -28,33 +28,33 @@ Secretaria  Gabinete      Magistrado]]></description>
                 <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[* VariÃ¡veis *
+        <description><![CDATA[* Variáveis *
 
-1. VariÃ¡vel: aviso1
+1. Variável: aviso1
    Label: Processo encontra-se aguardando bloqueio automatizado.
    Escrita: Sim
-   Obrig.: NÃ£o
+   Obrig.: Não
    Tipo: Aviso
 
-2. VariÃ¡vel: movimentarEmLote
+2. Variável: movimentarEmLote
    Label: 
    Escrita: Sim
-   Obrig.: NÃ£o
-   Tipo: Habilitar MovimentaÃ§Ã£o em Lote]]></description>
-        <transition to="NÃ³ de Desvio - (EF) Poti" name="NÃ³ de Desvio - (EF) Poti">
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Poti" name="Nó de Desvio - (EF) Poti">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Poti - Em processamento" name="(EF) Poti - Em processamento">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Apagar variÃ¡veis" name="Cancelar e sair da tarefa"/>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
+        <transition to="(EF) Apagar variáveis" name="Cancelar e sair da tarefa"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti', 'true')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Poti - Em processamento')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Poti - Em processamento">
@@ -63,23 +63,20 @@ Secretaria  Gabinete      Magistrado]]></description>
                 <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read"/>
             </controller>
         </task>
-        <description><![CDATA[* VariÃ¡veis *
+        <description><![CDATA[* Variáveis *
 
-1. VariÃ¡vel: movimentarEmLote
+1. Variável: movimentarEmLote
    Label: 
    Escrita: Sim
-   Obrig.: NÃ£o
-   Tipo: Habilitar MovimentaÃ§Ã£o em Lote]]></description>
-        <transition to="NÃ³ de Desvio - (EF) Poti" name="NÃ³ de Desvio - (EF) Poti">
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Poti" name="Nó de Desvio - (EF) Poti">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Apagar variÃ¡veis" name="Cancelar e sair da tarefa"/>
-        <transition to="(EF) Qual Ã© o retorno?" name="(EF) Qual Ã© o retorno?">
+        <transition to="(EF) Apagar variáveis" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Qual é o retorno?" name="(EF) Qual é o retorno?">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
@@ -87,13 +84,16 @@ Secretaria  Gabinete      Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-parc', 'true')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-neg', 'true')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:erros', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Qual Ã© o retorno?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Qual é o retorno?')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno') == null ? 'erros' : tramitacaoProcessualService.recuperaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno')}" name="(EF) Qual Ã© o retorno?">
-        <transition to="(EF) Poti - Bloqueio integral com transferÃªncia" name="bloq-int"/>
-        <transition to="(EF) Poti - Bloqueio parcial com transferÃªncia" name="bloq-parc"/>
-        <transition to="(EF) Poti - Bloqueio nÃ£o efetivado por insuficiÃªncia de saldo" name="bloq-neg"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno') == null ? 'erros' : tramitacaoProcessualService.recuperaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno')}" name="(EF) Qual é o retorno?">
+        <transition to="(EF) Poti - Bloqueio integral com transferência" name="bloq-int"/>
+        <transition to="(EF) Poti - Bloqueio parcial com transferência" name="bloq-parc"/>
+        <transition to="(EF) Poti - Bloqueio não efetivado por insuficiência de saldo" name="bloq-neg"/>
         <transition to="(EF) Poti - Erros" name="erros"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-int')}"/>
@@ -102,91 +102,91 @@ Secretaria  Gabinete      Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:erros')}"/>
         </event>
     </decision>
-    <task-node end-tasks="true" name="(EF) Poti - Bloqueio integral com transferÃªncia">
-        <task name="(EF) Poti - Bloqueio integral com transferÃªncia" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Poti - Bloqueio integral com transferência">
+        <task name="(EF) Poti - Bloqueio integral com transferência" swimlane="Secretaria">
             <controller>
                 <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[* VariÃ¡veis *
+        <description><![CDATA[* Variáveis *
 
-1. VariÃ¡vel: movimentarEmLote
+1. Variável: movimentarEmLote
    Label: 
    Escrita: Sim
-   Obrig.: NÃ£o
-   Tipo: Habilitar MovimentaÃ§Ã£o em Lote]]></description>
-        <transition to="NÃ³ de Desvio - (EF) Poti" name="NÃ³ de Desvio - (EF) Poti">
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Poti" name="Nó de Desvio - (EF) Poti">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Poti" name="Retornar para Poti"/>
-        <transition to="(EF) Apagar variÃ¡veis" name="Finalizar e sair da tarefa"/>
-        <transition to="(EF) IntimaÃ§Ã£o eletrÃ´nica" name="Expedir mandado de intimaÃ§Ã£o da penhora"/>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
+        <transition to="(EF) Apagar variáveis" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Expedição de mandado de penhora e intimação" name="Expedir mandado de penhora e intimação"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
     </task-node>
-    <process-state name="(EF) IntimaÃ§Ã£o eletrÃ´nica">
-        <sub-process name="(EF) IntimaÃ§Ãµes eletrÃ´nicas" binding="late"/>
-        <transition to="(EF) Apagar variÃ¡veis" name="(EF) Apagar variÃ¡veis"/>
+    <process-state name="(EF) Expedição de mandado de penhora e intimação">
+        <sub-process name="(EF) Expedição de mandado de penhora e intimação" binding="late"/>
+        <transition to="(EF) Apagar variáveis" name="(EF) Apagar variáveis"/>
     </process-state>
-    <task-node end-tasks="true" name="(EF) Poti - Bloqueio parcial com transferÃªncia">
-        <task name="(EF) Poti - Bloqueio parcial com transferÃªncia" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Poti - Bloqueio parcial com transferência">
+        <task name="(EF) Poti - Bloqueio parcial com transferência" swimlane="Secretaria">
             <controller>
                 <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[* VariÃ¡veis *
+        <description><![CDATA[* Variáveis *
 
-1. VariÃ¡vel: movimentarEmLote
+1. Variável: movimentarEmLote
    Label: 
    Escrita: Sim
-   Obrig.: NÃ£o
-   Tipo: Habilitar MovimentaÃ§Ã£o em Lote]]></description>
-        <transition to="NÃ³ de Desvio - (EF) Poti" name="NÃ³ de Desvio - (EF) Poti">
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Poti" name="Nó de Desvio - (EF) Poti">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Poti" name="Retornar para Poti"/>
-        <transition to="(EF) Apagar variÃ¡veis" name="Finalizar e sair da tarefa"/>
-        <transition to="(EF) Renajud" name="Enviar para restriÃ§Ã£o e penhora veicular - RENAJUD"/>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
+        <transition to="(EF) Apagar variáveis" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Renajud" name="Enviar para restrição e penhora veicular - RENAJUD"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Poti - Bloqueio nÃ£o efetivado por insuficiÃªncia de saldo">
-        <task name="(EF) Poti - Bloqueio nÃ£o efetivado por insuficiÃªncia de saldo" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Poti - Bloqueio não efetivado por insuficiência de saldo">
+        <task name="(EF) Poti - Bloqueio não efetivado por insuficiência de saldo" swimlane="Secretaria">
             <controller>
                 <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[* VariÃ¡veis *
+        <description><![CDATA[* Variáveis *
 
-1. VariÃ¡vel: movimentarEmLote
+1. Variável: movimentarEmLote
    Label: 
    Escrita: Sim
-   Obrig.: NÃ£o
-   Tipo: Habilitar MovimentaÃ§Ã£o em Lote]]></description>
-        <transition to="NÃ³ de Desvio - (EF) Poti" name="NÃ³ de Desvio - (EF) Poti">
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Poti" name="Nó de Desvio - (EF) Poti">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Poti" name="Retornar para Poti"/>
-        <transition to="(EF) Apagar variÃ¡veis" name="Finalizar e sair da tarefa"/>
-        <transition to="(EF) Renajud" name="Enviar para restriÃ§Ã£o e penhora veicular - RENAJUD"/>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
+        <transition to="(EF) Apagar variáveis" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Renajud" name="Enviar para restrição e penhora veicular - RENAJUD"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <process-state name="(EF) Renajud">
         <sub-process name="(EF) Renajud" binding="late"/>
-        <transition to="(EF) Apagar variÃ¡veis" name="(EF) Apagar variÃ¡veis"/>
+        <transition to="(EF) Apagar variáveis" name="(EF) Apagar variáveis"/>
     </process-state>
     <task-node end-tasks="true" name="(EF) Poti - Erros">
         <task name="(EF) Poti - Erros" swimlane="Secretaria">
@@ -194,27 +194,27 @@ Secretaria  Gabinete      Magistrado]]></description>
                 <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[* VariÃ¡veis *
+        <description><![CDATA[* Variáveis *
 
-1. VariÃ¡vel: movimentarEmLote
+1. Variável: movimentarEmLote
    Label: 
    Escrita: Sim
-   Obrig.: NÃ£o
-   Tipo: Habilitar MovimentaÃ§Ã£o em Lote]]></description>
-        <transition to="NÃ³ de Desvio - (EF) Poti" name="NÃ³ de Desvio - (EF) Poti">
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Poti" name="Nó de Desvio - (EF) Poti">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Poti" name="Retornar para Poti"/>
-        <transition to="(EF) Apagar variÃ¡veis" name="Finalizar e sair da tarefa"/>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
-        </event>
+        <transition to="(EF) Apagar variáveis" name="Finalizar e sair da tarefa"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
     </task-node>
-    <node name="(EF) Apagar variÃ¡veis">
-        <transition to="TÃ©rmino" name="TÃ©rmino"/>
+    <node name="(EF) Apagar variáveis">
+        <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-int')}"/>
@@ -225,49 +225,22 @@ Secretaria  Gabinete      Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
     </node>
-    <end-state name="TÃ©rmino"/>
-    <task-node end-tasks="true" name="NÃ³ de Desvio - (EF) Poti">
-        <task name="NÃ³ de Desvio - (EF) Poti" swimlane="NÃ³ de Desvio - (EF) Poti"/>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Poti">
+        <task name="Nó de Desvio - (EF) Poti" swimlane="Nó de Desvio - (EF) Poti"/>
         <transition to="(EF) Poti - Em processamento" name="(EF) Poti - Em processamento"/>
-        <transition to="(EF) Poti - Bloqueio integral com transferÃªncia" name="(EF) Poti - Bloqueio integral com transferÃªncia"/>
-        <transition to="(EF) Poti - Bloqueio parcial com transferÃªncia" name="(EF) Poti - Bloqueio parcial com transferÃªncia"/>
-        <transition to="(EF) Poti - Bloqueio nÃ£o efetivado por insuficiÃªncia de saldo" name="(EF) Poti - Bloqueio nÃ£o efetivado por insuficiÃªncia de saldo"/>
+        <transition to="(EF) Poti - Bloqueio integral com transferência" name="(EF) Poti - Bloqueio integral com transferência"/>
+        <transition to="(EF) Poti - Bloqueio parcial com transferência" name="(EF) Poti - Bloqueio parcial com transferência"/>
+        <transition to="(EF) Poti - Bloqueio não efetivado por insuficiência de saldo" name="(EF) Poti - Bloqueio não efetivado por insuficiência de saldo"/>
         <transition to="(EF) Poti - Erros" name="(EF) Poti - Erros"/>
-        <transition to="TÃ©rmino" name="TÃ©rmino"/>
+        <transition to="Término" name="Término"/>
         <transition to="(EF) Poti" name="(EF) Poti"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="superstate-enter">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-end">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-start">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -276,13 +249,40 @@ Secretaria  Gabinete      Magistrado]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="task-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="node-enter">
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>
