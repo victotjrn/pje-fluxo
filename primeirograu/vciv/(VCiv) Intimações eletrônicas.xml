@@ -160,7 +160,7 @@ avisoRetornar: Ao RETORNAR, esta intimação eletrônica não mais ocorrerá e o proc
         <transition to="(VCiv) Separação execução intimação" name="(VCiv) Separação execução intimação"/>
         <transition to="(VCiv) Sinalizar cancelamento" name="(VCiv) Sinalizar cancelamento"/>
     </decision>
-    <decision expression="#{processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10) ? '(VCiv) Controle de Prazo' : '(VCiv) Informar DJe'}" name="(VCiv) É fazenda ?">
+    <decision expression="#{util.eval(parametroUtil.getParametro('pje:tjrn:vciv:DefinicaoPublicaDJe')) ?  '(VCiv) Controle de Prazo' : '(VCiv) Informar DJe'}" name="(VCiv) É fazenda ?">
         <transition to="(VCiv) Controle de Prazo" name="(VCiv) Controle de Prazo"/>
         <transition to="(VCiv) Informar DJe" name="(VCiv) Informar DJe"/>
     </decision>  
