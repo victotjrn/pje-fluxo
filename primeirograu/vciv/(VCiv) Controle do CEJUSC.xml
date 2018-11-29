@@ -54,7 +54,7 @@ expressão p/ quando ativar parnamirim:
         <transition to="(CEJUSC) Elaborar documento" name="Expedir Ato Ordinatório"/>
         <event type="task-start">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idTipoAudiencia', '23,24,25,21')}"/>
-            <action name="upd" expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 105) :       (authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;MOSSOR&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 99) :  authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;PARNAMIRIM&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 110) : authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;CAIC&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 268) : null)}"/>
+            <action name="upd" expression="#{authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NATAL&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 105) :       (authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;MOSSOR&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 99) :  authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;PARNAMIRIM&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 110) : authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;CAIC&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 268) : authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;NOVOS&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 310) : authenticator.getUsuarioLocalizacaoAtual().toString().toUpperCase().contains(&quot;FERROS&quot;) ? tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:idOrgaoJulgador', 309) : null)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Análise do CEJUSC">
@@ -110,7 +110,7 @@ expressão p/ quando ativar parnamirim:
         </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(CEJUSC) Separação preparação intimação')}"/>
-            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,69,65,71')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,69,65,71,229')}"/>
             <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,S,D,M,L,N,T')}"/>
         </event>
     </task-node>
@@ -492,9 +492,7 @@ aviso2: Além disso, o Centro Judiciário de Solução de Conflitos somente recebe p
     <node name="(CEJUSC) Desclocar DPVAT MOSSORO">
         <transition to="(CEJUSC) Designar audiência DPVAT" name="(CEJUSC) Designar audiência DPVAT MOSSORO"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoDestino', 107)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino', 265)}"/>
-            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(processInstance.contextInstance.getVariable('processo'))}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(processInstance.contextInstance.getVariable('processo'), 107, 265, null)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('cejusc:dpvat', true)}"/>
         </event>
     </node>
@@ -822,7 +820,7 @@ aviso4:A opção "CEJUSC - DPVAT - PERÍCIA" encaminhará o processo para a realizaç
         <transition to="(CEJUSC) PERÍCIA não realizada" name="(CEJUSC) PERÍCIA não realizada"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:colegiadoDestino'))}"/>
-            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro(pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro('pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>
     <task-node end-tasks="true" name="(CEJUSC) PERÍCIA não realizada">

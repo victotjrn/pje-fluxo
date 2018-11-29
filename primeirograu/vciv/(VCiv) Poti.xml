@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Poti">
+    <description><![CDATA[Código do fluxo: VCiv_POTI.
+
+Descrição: Fluxo responsável pelas tarefas do Poti.
+
+Raia        Localização   Papel
+Secretaria  Secretaria    Chefe de Secretaria
+Secretaria  Gabinete      Magistrado]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (VCiv) Poti">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(VCiv) Poti" name="(VCiv) Poti"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(VCiv) Poti">
+        <task name="(VCiv) Poti" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso1
+   Label: Processo encontra-se aguardando bloqueio automatizado.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentarEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (VCiv) Poti" name="Nó de Desvio - (VCiv) Poti">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Poti - Em processamento" name="(VCiv) Poti - Em processamento">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Apagar variáveis" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Poti - Em processamento')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Poti - Em processamento">
+        <task name="(VCiv) Poti - Em processamento" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: movimentarEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (VCiv) Poti" name="Nó de Desvio - (VCiv) Poti">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Apagar variáveis" name="Cancelar e sair da tarefa"/>
+        <transition to="(VCiv) Qual é o retorno?" name="(VCiv) Qual é o retorno?">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-int', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-parc', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-neg', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:poti:var:erros', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(VCiv) Qual é o retorno?')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno') == null ? 'erros' : tramitacaoProcessualService.recuperaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno')}" name="(VCiv) Qual é o retorno?">
+        <transition to="(VCiv) Poti - Bloqueio integral" name="bloq-int"/>
+        <transition to="(VCiv) Poti - Bloqueio parcial" name="bloq-parc"/>
+        <transition to="(VCiv) Poti - Bloqueio não efetivado (Insuficiência de saldo)" name="bloq-neg"/>
+        <transition to="(VCiv) Poti - Erros" name="erros"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-int')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-parc')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-neg')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:erros')}"/>
+        </event>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Poti - Bloqueio integral">
+        <task name="(VCiv) Poti - Bloqueio integral" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: movimentarEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (VCiv) Poti" name="Nó de Desvio - (VCiv) Poti">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Poti" name="Retornar para Poti"/>
+        <transition to="(VCiv) Apagar variáveis" name="Finalizar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Poti - Bloqueio parcial">
+        <task name="(VCiv) Poti - Bloqueio parcial" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: movimentarEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (VCiv) Poti" name="Nó de Desvio - (VCiv) Poti">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Poti" name="Retornar para Poti"/>
+        <transition to="(VCiv) Apagar variáveis" name="Finalizar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Poti - Bloqueio não efetivado (Insuficiência de saldo)">
+        <task name="(VCiv) Poti - Bloqueio não efetivado (Insuficiência de saldo)" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: movimentarEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (VCiv) Poti" name="Nó de Desvio - (VCiv) Poti">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Poti" name="Retornar para Poti"/>
+        <transition to="(VCiv) Apagar variáveis" name="Finalizar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Poti - Erros">
+        <task name="(VCiv) Poti - Erros" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarEmLote" mapped-name="movimentarLote:movimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: movimentarEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (VCiv) Poti" name="Nó de Desvio - (VCiv) Poti">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(VCiv) Poti" name="Retornar para Poti"/>
+        <transition to="(VCiv) Apagar variáveis" name="Finalizar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(VCiv) Apagar variáveis">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-int')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-parc')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:bloq-neg')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:erros')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:tjrn:fluxo:poti:var:retorno')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Poti">
+        <task name="Nó de Desvio - (VCiv) Poti" swimlane="Nó de Desvio - (VCiv) Poti"/>
+        <transition to="(VCiv) Poti - Em processamento" name="(VCiv) Poti - Em processamento"/>
+        <transition to="(VCiv) Poti - Bloqueio integral" name="(VCiv) Poti - Bloqueio integral"/>
+        <transition to="(VCiv) Poti - Bloqueio parcial" name="(VCiv) Poti - Bloqueio parcial"/>
+        <transition to="(VCiv) Poti - Bloqueio não efetivado (Insuficiência de saldo)" name="(VCiv) Poti - Bloqueio não efetivado (Insuficiência de saldo)"/>
+        <transition to="(VCiv) Poti - Erros" name="(VCiv) Poti - Erros"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Poti" name="(VCiv) Poti"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

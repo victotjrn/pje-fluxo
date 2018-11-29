@@ -182,6 +182,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Conclusão para sentença de homologação e(ou) extinção" name="16 - Enviar concluso para sentença de homologação e/ou extinção"/>
         <transition to="(VCiv) Dar cumprimento a ato judicial de central de calculos" name="17 - Enviar à Contadoria Judicial - COJUD"/>
+        <transition to="(VCiv) Penhora eletrônica - Poti" name="18 - Enviar à Penhora eletrônica - Poti"/>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_laudo_tecnico', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_laudo_tecnico'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:aguardar_audiencia', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_aguardar_audiencia'))}"/>
@@ -925,7 +926,11 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         </transition>
         <transition to="(VCiv) Análise da secretaria" name="Encaminhar para análise da secretaria"/>
         <transition to="(VCiv) Citar e(ou) intimar" name="Citar e(ou) intimar"/>
-    </task-node>  
+    </task-node>
+    <process-state name="(VCiv) Penhora eletrônica - Poti">
+        <sub-process name="(VCiv) Poti" binding="late"/>
+        <transition to="(VCiv) Análise da secretaria" name="(VCiv) Análise da secretaria"/>
+    </process-state>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>

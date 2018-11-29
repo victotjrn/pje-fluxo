@@ -37,6 +37,7 @@
             <action expression="#{not empty processoHome.idProcessoDocumento ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{ entityManager.createNativeQuery('select count(1) from client.vs_situacao_processo_new where nm_tarefa = \'(VCiv) Expedir alvará(s)\' and id_processo_trf = '.concat(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf)).getSingleResult() &gt; 1 ? '' : ( processoJudicialService.sinalizarFluxo(tramitacaoProcessualService.recuperaProcesso(), 'pje:tjrn:fluxo:var:sair_tarefa_expedir_alvara', true, false, true) )}"/>
         </event>
         <event type="task-start">
             <action expression="#{tipoDocumento.set('TipoDocumento', 91)}"/>
@@ -136,7 +137,6 @@ Tipo: Aviso]]></description>
         <transition to="(VCiv) Expedir alvará(s)" name="(VCiv) Expedir alvará(s)"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:colegiadoDestino'))}"/>
-            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro(pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada assinado">
@@ -144,7 +144,7 @@ Tipo: Aviso]]></description>
         <transition to="(VCiv) Alvará(s) assinado(s)" name="(VCiv) Alvará(s) assinado(s)"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:colegiadoDestino'))}"/>
-            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro(pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro('pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada termino">
@@ -152,15 +152,15 @@ Tipo: Aviso]]></description>
         <transition to="Término" name="Término"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:colegiadoDestino'))}"/>
-            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro(pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro('pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada inicio">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="(VCiv) Expedir alvará(s)" name="(VCiv) Expedir alvará(s)"/>
         <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:colegiadoDestino'))}"/>
-            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro(pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaProcesso()}"/>
+            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro('pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
         </event>
     </process-state>  
     <!-- PROCESS-EVENTS -->

@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Encaminhar para preparaÃ§Ã£o de alvarÃ¡s">
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Encaminhar para preparação de alvarás">
     <description><![CDATA[....]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
     </swimlane>  
     <!-- START-STATE -->
-    <start-state name="InÃ­cio">
+    <start-state name="Início">
         <task name="Tarefa inicial"/>
         <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(VCiv) Informar quantidade de alvarÃ¡s">
-        <task name="(VCiv) Informar quantidade de alvarÃ¡s" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(VCiv) Informar quantidade de alvarás">
+        <task name="(VCiv) Informar quantidade de alvarás" swimlane="Secretaria">
             <controller>
                 <variable name="quantidadeAlvaras" mapped-name="number:quantidadeAlvaras" access="read,write"/>
             </controller>
         </task>
-        <transition to="NÃ³ de Desvio - (VCiv) Encaminhar para preparaÃ§Ã£o de alvarÃ¡s" name="NÃ³ de Desvio - (VCiv) Encaminhar para preparaÃ§Ã£o de alvarÃ¡s">
+        <transition to="Nó de Desvio - (VCiv) Encaminhar para preparação de alvarás" name="Nó de Desvio - (VCiv) Encaminhar para preparação de alvarás">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(VCiv) Apagar variaveis de fluxo" name="Cancelar e sair da tarefa"/>
-        <transition to="(VCiv) Quantidade de alvarÃ¡s estÃ¡ vazio?" name="Enviar para elaboraÃ§Ã£o de alvarÃ¡"/>
+        <transition to="(VCiv) Quantidade de alvarás está vazio?" name="Enviar para elaboração de alvará"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
@@ -35,59 +35,63 @@
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:quantAlv', 0)}"/>
         </event>
     </task-node>
-    <decision expression="#{(not empty tramitacaoProcessualService.recuperaVariavel('quantidadeAlvaras') and tramitacaoProcessualService.recuperaVariavel('quantidadeAlvaras') != 0 and tramitacaoProcessualService.recuperaVariavel('quantidadeAlvaras') &lt; 100) ? '(VCiv) Enviar para elaboraÃ§Ã£o de alvarÃ¡?' : '(VCiv) Informar quantidade de alvarÃ¡s'}" name="(VCiv) Quantidade de alvarÃ¡s estÃ¡ vazio?">
-        <transition to="(VCiv) Informar quantidade de alvarÃ¡s" name="(VCiv) Informar quantidade de alvarÃ¡s"/>
-        <transition to="(VCiv) Enviar para elaboraÃ§Ã£o de alvarÃ¡?" name="(VCiv) Enviar para elaboraÃ§Ã£o de alvarÃ¡?"/>
+    <decision expression="#{(not empty tramitacaoProcessualService.recuperaVariavel('quantidadeAlvaras') and tramitacaoProcessualService.recuperaVariavel('quantidadeAlvaras') != 0 and tramitacaoProcessualService.recuperaVariavel('quantidadeAlvaras') &lt; 100) ? '(VCiv) Enviar para elaboração de alvará?' : '(VCiv) Informar quantidade de alvarás'}" name="(VCiv) Quantidade de alvarás está vazio?">
+        <transition to="(VCiv) Informar quantidade de alvarás" name="(VCiv) Informar quantidade de alvarás"/>
+        <transition to="(VCiv) Enviar para elaboração de alvará?" name="(VCiv) Enviar para elaboração de alvará?"/>
     </decision>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:quantAlv') == (tramitacaoProcessualService.recuperaVariavel('quantidadeAlvaras') ) ? '(VCiv) Aguardando expediÃ§Ã£o de alvarÃ¡(s)': '(VCiv) Encaminhar para elaboraÃ§Ã£o de alvarÃ¡s'}" name="(VCiv) Enviar para elaboraÃ§Ã£o de alvarÃ¡?">
-        <transition to="(VCiv) Encaminhar para elaboraÃ§Ã£o de alvarÃ¡s" name="(VCiv) Encaminhar para elaboraÃ§Ã£o de alvarÃ¡s"/>
-        <transition to="(VCiv) Aguardando expediÃ§Ã£o de alvarÃ¡(s)" name="(VCiv) Aguardando expediÃ§Ã£o de alvarÃ¡(s)"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fluxo:quantAlv') == (tramitacaoProcessualService.recuperaVariavel('quantidadeAlvaras') ) ? '(VCiv) Aguardando expedição de alvará(s)': '(VCiv) Encaminhar para elaboração de alvarás'}" name="(VCiv) Enviar para elaboração de alvará?">
+        <transition to="(VCiv) Encaminhar para elaboração de alvarás" name="(VCiv) Encaminhar para elaboração de alvarás"/>
+        <transition to="(VCiv) Aguardando expedição de alvará(s)" name="(VCiv) Aguardando expedição de alvará(s)"/>
     </decision>
-    <node name="(VCiv) Encaminhar para elaboraÃ§Ã£o de alvarÃ¡s">
-        <transition to="(VCiv) Enviar para elaboraÃ§Ã£o de alvarÃ¡?" name="(VCiv) Enviar para elaboraÃ§Ã£o de alvarÃ¡?"/>
+    <node name="(VCiv) Encaminhar para elaboração de alvarás">
+        <transition to="(VCiv) Enviar para elaboração de alvará?" name="(VCiv) Enviar para elaboração de alvará?"/>
         <event type="node-enter">
-            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'VCiv_ELAB_ALV', null, null, null, true,processInstance.contextInstance.variables)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'VCiv_ELAB_ALV',tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino'),tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino'), null, true,processInstance.contextInstance.variables)}"/>
         </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:quantAlv', tramitacaoProcessualService.recuperaVariavel('pje:fluxo:quantAlv')+1)}"/>
         </event>
     </node>
-    <task-node end-tasks="true" name="(VCiv) Aguardando expediÃ§Ã£o de alvarÃ¡(s)">
-        <task name="(VCiv) Aguardando expediÃ§Ã£o de alvarÃ¡(s)" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(VCiv) Aguardando expedição de alvará(s)">
+        <task name="(VCiv) Aguardando expedição de alvará(s)" swimlane="Secretaria">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[VariÃ¡veis:
+        <description><![CDATA[Variáveis:
 1 - Aviso
-Label: O processo foi encaminhado para duas tarefas distintas. Para expedir alvarÃ¡, o usuÃ¡rio deverÃ¡ acessar (VCiv) Expedir AlvarÃ¡(s).]]></description>
-        <transition to="(VCiv) Informar quantidade de alvarÃ¡s" name="Expedir novo(s) alvarÃ¡(s)"/>
-        <transition to="NÃ³ de Desvio - (VCiv) Encaminhar para preparaÃ§Ã£o de alvarÃ¡s" name="NÃ³ de Desvio - (VCiv) Encaminhar para preparaÃ§Ã£o de alvarÃ¡s">
+Label: O processo foi encaminhado para duas tarefas distintas. Para expedir alvará, o usuário deverá acessar (VCiv) Expedir Alvará(s).]]></description>
+        <transition to="(VCiv) Informar quantidade de alvarás" name="Expedir novo(s) alvará(s)"/>
+        <transition to="Nó de Desvio - (VCiv) Encaminhar para preparação de alvarás" name="Nó de Desvio - (VCiv) Encaminhar para preparação de alvarás">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="TÃ©rmino" name="Encaminhar para anÃ¡lise de secretaria"/>
+        <transition to="Término" name="Encaminhar para análise de secretaria"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:tjrn:fluxo:var:sair_tarefa_expedir_alvara', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Encaminhar para análise de secretaria')}"/>
+        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:quantAlv')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('quantidadeAlvaras')}"/>
         </event>
     </task-node>
     <node name="(VCiv) Apagar variaveis de fluxo">
-        <transition to="TÃ©rmino" name="TÃ©rmino"/>
+        <transition to="Término" name="Término"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:quantAlv')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('quantidadeAlvaras')}"/>
         </event>
     </node>
-    <end-state name="TÃ©rmino"/>
-    <task-node end-tasks="true" name="NÃ³ de Desvio - (VCiv) Encaminhar para preparaÃ§Ã£o de alvarÃ¡s">
-        <task name="NÃ³ de Desvio - (VCiv) Encaminhar para preparaÃ§Ã£o de alvarÃ¡s"/>
-        <transition to="TÃ©rmino" name="TÃ©rmino"/>
-        <transition to="(VCiv) Informar quantidade de alvarÃ¡s" name="(VCiv) Informar quantidade de alvarÃ¡s"/>
-        <transition to="(VCiv) Aguardando expediÃ§Ã£o de alvarÃ¡(s)" name="(VCiv) Aguardando expediÃ§Ã£o de alvarÃ¡(s)"/>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Encaminhar para preparação de alvarás">
+        <task name="Nó de Desvio - (VCiv) Encaminhar para preparação de alvarás"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Informar quantidade de alvarás" name="(VCiv) Informar quantidade de alvarás"/>
+        <transition to="(VCiv) Aguardando expedição de alvará(s)" name="(VCiv) Aguardando expedição de alvará(s)"/>
     </task-node>
     <process-state name="(VCiv) Deslocar secretaria unificada">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
-        <transition to="(VCiv) Informar quantidade de alvarÃ¡s" name="(VCiv) Informar quantidade de alvarÃ¡s"/>
+        <transition to="(VCiv) Informar quantidade de alvarás" name="(VCiv) Informar quantidade de alvarás"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:colegiadoDestino'))}"/>
             <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro('pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>

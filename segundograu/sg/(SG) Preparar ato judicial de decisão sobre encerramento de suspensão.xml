@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Preparar ato judicial de decisão sobre encerramento de suspensão">
-    <description><![CDATA[Código do fluxo: SG_PAJ_DEC_ENC_SUSP.
+    <description><![CDATA[Código do fluxo: SG_PAJ_DEC_ENC_SUSP
 
 Descrição: Fluxo destinado ao preparo de atos judiciais de decisões sobre encerramento de suspensão.
 
@@ -63,6 +63,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <transition to="Nó de Desvio - (SG) Preparar ato judicial de decisão sobre encerramento de suspensão" name="Nó de Desvio - (SG) Preparar ato judicial de decisão sobre encerramento de suspensão">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(SG) Encaminhar para preparação do voto, relatório e ementa" name="Encaminhar para preparação do voto, relatório e ementa"/>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
@@ -74,7 +75,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
         <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Prosseguir através de ato ordinatório,Encaminhar para decisão genérica')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Encaminhar para preparação do voto, relatório e ementa')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:lancamentoMovimentoObrigatorio','true')}"/>
         </event>
     </task-node>
@@ -178,6 +179,20 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <sub-process name="(SG) Autos recebidos do gabinete" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
+    <process-state name="(SG) Encaminhar para preparação do voto, relatório e ementa">
+        <sub-process name="(SG) Decisão colegiada como relator" binding="late"/>
+        <transition to="(SG) Houve julgamento?" name="(SG) Houve julgamento?"/>
+        <event type="node-leave">
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
+        </event>
+    </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:conclusao_cancelada') == true ? '(SG) Concluso para decisão sobre encerramento de suspensão - MINUTAR' : 'Término'}" name="(SG) Houve julgamento?">
+        <transition to="(SG) Concluso para decisão sobre encerramento de suspensão - MINUTAR" name="(SG) Concluso para decisão sobre encerramento de suspensão - MINUTAR"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:conclusao_cancelada')}"/>
+        </event>
+    </decision>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Preparar ato judicial de decisão sobre encerramento de suspensão">
         <task name="Nó de Desvio - (SG) Preparar ato judicial de decisão sobre encerramento de suspensão" swimlane="Nó de Desvio - (SG) Preparar ato judicial de decisão sobre encerramento de suspensão"/>
@@ -237,4 +252,3 @@ Magistrado  Assessoria Segundo Grau  Assessoria
     </event>  
     <!-- ACTIONS --> 
 </process-definition>
-
