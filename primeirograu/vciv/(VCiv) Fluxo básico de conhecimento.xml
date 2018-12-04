@@ -126,10 +126,10 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
                 <variable name="vciv_fbc_encaminhar_cejusc" mapped-name="sim_nao:vciv_fbc_encaminhar_cejusc" access="read,write"/>
                 <variable name="vciv_fbc_encerrar_prazo" mapped-name="sim_nao:vciv_fbc_encerrar_prazo" access="read,write"/>
                 <variable name="vciv_fbc_expedir_alvaras" mapped-name="sim_nao:vciv_fbc_expedir_alvaras" access="read,write"/>
-                <variable name="vciv_fbc_expedir_carta_precatoria" mapped-name="sim_nao:vciv_fbc_expedir_carta_precatoria" access="read,write"/>
+                <variable name="vciv_fbc_expedir_carta_precatorias" mapped-name="sim_nao:vciv_fbc_expedir_carta_precatorias" access="read,write"/>
                 <variable name="vciv_fbc_expedir_carta_rogatoria" mapped-name="sim_nao:vciv_fbc_expedir_carta_rogatoria" access="read,write"/>
                 <variable name="vciv_fbc_expedir_mandado" mapped-name="sim_nao:vciv_fbc_expedir_mandado" access="read,write"/>
-                <variable name="vciv_fbc_expedir_oficio" mapped-name="sim_nao:vciv_fbc_expedir_oficio" access="read,write"/>
+                <variable name="vciv_fbc_expedir_oficios" mapped-name="sim_nao:vciv_fbc_expedir_oficios" access="read,write"/>
                 <variable name="vciv_fbc_expedir_outros_documentos" mapped-name="sim_nao:vciv_fbc_expedir_outros_documentos" access="read,write"/>
                 <variable name="vciv_fbc_expedir_precatorio_rpv" mapped-name="sim_nao:vciv_fbc_expedir_precatorio_rpv" access="read,write"/>
                 <variable name="vciv_fbc_registrar_serasajud" mapped-name="sim_nao:vciv_fbc_registrar_serasajud" access="read,write"/>
@@ -196,6 +196,8 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:controlar_audiencia', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_controlar_audiencia'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_alvara', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_alvara'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_alvaras', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_alvaras'))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_oficios', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_oficios'))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_cartas_precatorias', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_precatorias'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_carta_precatoria', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_precatoria'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_mandado', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_mandado'))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:expedir_oficio', tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:vciv_fbc_expedir_oficio'))}"/>
@@ -228,6 +230,8 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_controlar_retorno_expediente')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_alvara')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_alvaras')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_oficios')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_precatorias')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_carta_precatoria')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:vciv_fbc_expedir_oficio')}"/>

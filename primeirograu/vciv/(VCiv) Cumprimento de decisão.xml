@@ -6,11 +6,11 @@
     <swimlane name="Nó de Desvio - (VCiv) Cumprimento de decisão">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="Conciliação">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,7:5197,7:5886,6:1469')}"/>
-    </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Conciliação">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,7:5197,7:5886,6:1469')}"/>
     </swimlane>
     <swimlane name="Secretaria e Servidor de cálculo">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:5891')}"/>
@@ -55,6 +55,8 @@
         <transition to="(VCiv) Encerrar prazo?" name="(VCiv) Encerrar prazo?"/>
         <transition to="(VCiv) Alterar tipo de documento ?" name="(VCiv) Alterar tipo de documento ?"/>
         <transition to="(VCiv) Expedir Alvarás?" name="(VCiv) Expedir Alvarás?"/>
+        <transition to="(VCiv) Expedir Ofícios?" name="(VCiv) Expedir Ofícios?"/>
+        <transition to="(VCiv) Expedir Cartas Precatórias?" name="(VCiv) Expedir Cartas Precatórias?"/>        
         <transition to="(VCiv) Serasajud?" name="(VCiv) Serasajud?"/>
     </fork>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:suspender') ? '(VCiv) Suspensão de processo' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Suspender?">
@@ -93,7 +95,6 @@
             </controller>
         </task>
         <description><![CDATA[*Variaveis*
-
 1. Variável: movimentacaoLote
    Label: Movimentar em lote
    Escrita: Sim
@@ -875,6 +876,26 @@
         <sub-process name="(VCiv) Encaminhar para preparação de alvarás" binding="late"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
     </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:expedir_oficios') ? '(VCiv) Expedição de Ofícios' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Expedir Ofícios?">
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
+        <transition to="(VCiv) Expedição de Ofícios" name="(VCiv) Expedição de Ofícios"/>
+    </decision>
+    <process-state name="(VCiv) Expedição de Ofícios">
+        <sub-process name="(VCiv) Encaminhar para preparação de ofícios" binding="late"/>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
+    </process-state>
+
+<decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:expedir_cartas_precatorias') ? '(VCiv) Expedição de Cartas Precatórias' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Expedir Cartas Precatórias?">
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
+        <transition to="(VCiv) Expedição de Cartas Precatórias" name="(VCiv) Expedição de Cartas Precatórias"/>
+    </decision>
+
+<process-state name="(VCiv) Expedição de Cartas Precatórias">
+        <sub-process name="(VCiv) Encaminhar para preparação de carta precatória" binding="late"/>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
+    </process-state>
+
+
     <process-state name="(VCiv) Registrar SERASAJUD">
         <sub-process name="(VCiv) Registrar SERASAJUD" binding="late"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
