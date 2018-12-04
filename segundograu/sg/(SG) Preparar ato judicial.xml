@@ -25,11 +25,11 @@ Descrição: Fluxo destinado ao controle de atos judicias.]]></description>
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
         </event>
     </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_urgencia_inicial') == true ? '(SG) Encaminhar para análise urgente de prevenção' : '(SG) Concluso para decisão sobre encerramento de suspensão?'}" name="(SG) Concluso para decisão de urgência inicial?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_urgencia_inicial') == true ? ' (SG) Encaminhar para análise urgente de prevenção' : '(SG) Concluso para decisão sobre encerramento de suspensão?'}" name="(SG) Concluso para decisão de urgência inicial?">
         <transition to="(SG) Concluso para decisão sobre encerramento de suspensão?" name="(SG) Concluso para decisão sobre encerramento de suspensão?"/>
         <transition to=" (SG) Encaminhar para análise urgente de prevenção" name=" (SG) Encaminhar para análise urgente de prevenção"/>
     </decision>
-    <process-state name="(SG) Encaminhar para análise urgente de prevenção">
+    <process-state name=" (SG) Encaminhar para análise urgente de prevenção">
         <sub-process name="(SG) Prevencao" binding="late"/>
         <transition to="(SG) Preparação de decisão de urgência inicial" name="(SG) Preparação de decisão de urgência inicial"/>
     </process-state>
