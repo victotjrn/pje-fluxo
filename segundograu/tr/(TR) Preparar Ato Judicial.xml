@@ -633,17 +633,17 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(TR) Concluso para despacho inicial" name="Retornar para minuta"/>
-        <transition to="Término" name="Término">
+        <transition to="(TR) Gravar variável de RecIno assinado" name="(TR) Gravar variável de RecIno assinado">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Documento já assinado! Encaminhar para secretaria">
+        <transition to="(TR) Gravar variável de RecIno assinado" name="Documento já assinado! Encaminhar para secretaria">
             <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
         <event type="task-start">
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
         <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Término')}"/>
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(TR) Gravar variável de RecIno assinado')}"/>
         </event>
     </task-node>
     <decision expression="#{true == tramitacaoProcessualService.recuperaVariavel('tr:paj:despacho_generico') ? '(TR) Concluso para despacho' : '(TR) É despacho de cumprimento de acórdão?'}" name="(TR) É despacho genérico?">
@@ -804,6 +804,12 @@
         <transition to="(TR) Certificar Conclusão sem Efeito" name="(TR) Certificar Conclusão sem Efeito"/>
         <event type="node-enter">
             <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
+        </event>
+    </node>
+    <node name="(TR) Gravar variável de RecIno assinado">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('tr:paj:RecIno_Inicial') == true ? tramitacaoProcessualService.gravaVariavel('tr:paj:RecIno_Assinado', true) : ''}"/>
         </event>
     </node>
     <process-state name="Encaminhar para redirec">
