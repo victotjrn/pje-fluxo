@@ -25,10 +25,14 @@ Descrição: Fluxo destinado ao controle de atos judicias.]]></description>
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(6).lancarMovimento()}"/>
         </event>
     </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_urgencia_inicial') == true ? '(SG) Preparação de decisão de urgência inicial' : '(SG) Concluso para decisão sobre encerramento de suspensão?'}" name="(SG) Concluso para decisão de urgência inicial?">
-        <transition to="(SG) Preparação de decisão de urgência inicial" name="(SG) Preparação de decisão de urgência inicial"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:decisao_urgencia_inicial') == true ? ' (SG) Encaminhar para análise urgente de prevenção' : '(SG) Concluso para decisão sobre encerramento de suspensão?'}" name="(SG) Concluso para decisão de urgência inicial?">
         <transition to="(SG) Concluso para decisão sobre encerramento de suspensão?" name="(SG) Concluso para decisão sobre encerramento de suspensão?"/>
+        <transition to=" (SG) Encaminhar para análise urgente de prevenção" name=" (SG) Encaminhar para análise urgente de prevenção"/>
     </decision>
+    <process-state name=" (SG) Encaminhar para análise urgente de prevenção">
+        <sub-process name="(SG) Prevencao" binding="late"/>
+        <transition to="(SG) Preparação de decisão de urgência inicial" name="(SG) Preparação de decisão de urgência inicial"/>
+    </process-state>
     <process-state name="(SG) Preparação de decisão de urgência inicial">
         <sub-process name="(SG) Preparar ato judicial de decisão de urgência inicial" binding="late"/>
         <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
@@ -83,10 +87,14 @@ Descrição: Fluxo destinado ao controle de atos judicias.]]></description>
             <action expression="#{preencherMovimento.deCodigo(51).comComplementoDeCodigo(3).doTipoDominio().preencherComElementoDeCodigo(5).lancarMovimento()}"/>
         </event>
     </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:despacho_inicial') == true ? '(SG) Preparação de despacho inicial' : '(SG) Enviar para autos recebidos da secretaria'}" name="(SG) Concluso para despacho inicial?">
-        <transition to="(SG) Preparação de despacho inicial" name="(SG) Preparação de despacho inicial"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:paj:despacho_inicial') == true ? '(SG) Encaminhar para análise de prevenção' : '(SG) Enviar para autos recebidos da secretaria'}" name="(SG) Concluso para despacho inicial?">
         <transition to="(SG) Enviar para autos recebidos da secretaria" name="(SG) Enviar para autos recebidos da secretaria"/>
+        <transition to="(SG) Encaminhar para análise de prevenção" name="(SG) Encaminhar para análise de prevenção"/>
     </decision>
+    <process-state name="(SG) Encaminhar para análise de prevenção">
+        <sub-process name="(SG) Prevencao" binding="late"/>
+        <transition to="(SG) Preparação de despacho inicial" name="(SG) Preparação de despacho inicial"/>
+    </process-state>
     <process-state name="(SG) Preparação de despacho inicial">
         <sub-process name="(SG) Preparar ato judicial de despacho inicial" binding="late"/>
         <transition to="(SG) Apagar variáveis do fluxo" name="(SG) Apagar variáveis do fluxo"/>
@@ -121,10 +129,37 @@ Descrição: Fluxo destinado ao controle de atos judicias.]]></description>
         <transition to="Término" name="Término"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -133,40 +168,13 @@ Descrição: Fluxo destinado ao controle de atos judicias.]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>
