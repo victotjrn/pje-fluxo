@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Cumprimento de decisão">
-    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria...]]></description>  
+    <description><![CDATA[Fluxo para cumprimento de determinações do magistrado e outras providências da Secretaria..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (VCiv) Cumprimento de decisão">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="Conciliação">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,7:5197,7:5886,6:1469')}"/>
-    </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Conciliação">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,7:5197,7:5886,6:1469')}"/>
     </swimlane>
     <swimlane name="Secretaria e Servidor de cálculo">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:5891')}"/>
@@ -215,7 +215,9 @@
         <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Junção em cumprimento de decisão" name="Ignorar envio à instância superior"/>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="Ignorar envio à instância superior">
+            <action expression="#{intercomunicacaoRemessaHome.permiteCancelarRemessa()}"/>
+        </transition>
         <transition to="(VCiv) Encaminhar para instância superior - eletronicamente" name="Encaminhar para instância superior - eletronicamente">
             <condition expression="#{ util.eval(parametroUtil.getParametro('pje:tjrn:vciv:orgaoJulgadorRemessaEletronica')) }"/>
         </transition>
@@ -230,15 +232,19 @@
         <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Junção em cumprimento de decisão" name="Ignorar envio para instância superior eletronicamente"/>
         <transition to="(VCiv) Aguardando julgamento da instância superior - eletronicamente" name="(VCiv) Aguardando julgamento da instância superior - eletronicamente">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(VCiv) Junção em cumprimento de decisão" name="Ignorar envio para instância superior eletronicamente"/>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(VCiv) Aguardando julgamento da instância superior - eletronicamente')}"/>
         </event>
+        <event type="task-end">
+            <action name="upd" expression="#{intercomunicacaoRemessaHome.permiteCancelarRemessa()}"/>
+        </event>
         <event type="task-start">
             <action expression="#{taskInstanceUtil.setVariable('comboMotivoRemessa','18;37,38,39,40,90')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Ignorar envio para instância superior eletronicamente')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(VCiv) Aguardando julgamento da instância superior - eletronicamente">
