@@ -17,9 +17,13 @@ Secretaria  Secretaria Segundo Grau  Chefe de Secretaria]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(EF) Processo distribuído?" name="(EF) Processo distribuído?"/>
+        <transition to="(EF) Processo do fluxo EF?" name="(EF) Processo do fluxo EF?"/>
     </start-state>  
     <!-- NODES -->
+    <decision expression="#{(entityManager.createNativeQuery(parametroUtil.getParametro('ef:query_processo_ef')).setParameter(&quot;idProcesso&quot;, tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).getSingleResult() == 1 ? '(EF) Processo distribuído?' : 'Término')}" name="(EF) Processo do fluxo EF?">
+        <transition to="(EF) Processo distribuído?" name="(EF) Processo distribuído?"/>
+        <transition to="Término" name="Término"/>
+    </decision>
     <decision expression="#{not empty tramitacaoProcessualService.recuperaProcesso().processo.numeroProcesso ? '(EF) Foi juntado pelo Ministério Público?' : 'Término'}" name="(EF) Processo distribuído?">
         <transition to="(EF) Foi juntado pelo Ministério Público?" name="(EF) Foi juntado pelo Ministério Público?"/>
         <transition to="Término" name="Término"/>
