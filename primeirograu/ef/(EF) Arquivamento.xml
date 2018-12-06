@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Arquivamento">
-    <description><![CDATA[Código do fluxo: EF_ARQ
-Descrição: Gestão de arquivamento de processos.
-Raia        Localização    Papel
-Secretaria   Secretaria    Chefe de Secretaria
-Secretaria   Gabinete      Magistrado]]></description>  
+    <description><![CDATA[Gestão de arquivamento de processos.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (EF) Arquivamento">
         <assignment actor-id="#{actor.id}"/>
@@ -224,11 +220,18 @@ Secretaria   Gabinete      Magistrado]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Lançar movimento de Desarquivamento" name="Desarquivar o processo"/>
+        <transition to="(EF) ~Arquivo com prazo decorrido - ANALISAR" name="(EF) ~Arquivo com prazo decorrido - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaArquivamentoProvisorio', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) ~Arquivo com prazo decorrido - ANALISAR')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaArquivamentoProvisorio')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) ~Arquivo provisório - art. 40">
@@ -248,11 +251,19 @@ Secretaria   Gabinete      Magistrado]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Lançar movimento de Desarquivamento" name="Desarquivar o processo"/>
+        <transition to="(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR" name="(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR" name="a"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaArquivamentoProvisorio', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaArquivamentoProvisorio')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
         </event>
     </task-node>
     <node name="(EF) Lançar movimento de Desarquivamento">
@@ -346,6 +357,56 @@ Secretaria   Gabinete      Magistrado]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
+    <task-node end-tasks="true" name="(EF) ~Arquivo com prazo decorrido - ANALISAR">
+        <task name="(EF) ~Arquivo com prazo decorrido - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Arquivo com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Arquivamento" name="Nó de Desvio - (EF) Arquivamento">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Lançar movimento de Desarquivamento" name="Finalizar e sair da tarefa"/>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR">
+        <task name="(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Arquivo com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Arquivamento" name="Nó de Desvio - (EF) Arquivamento">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Lançar movimento de Desarquivamento" name="Finalizar e sair da tarefa"/>
+    </task-node>
     <task-node end-tasks="true" name="Nó de Desvio - (EF) Arquivamento">
         <task name="Nó de Desvio - (EF) Arquivamento" swimlane="Nó de Desvio - (EF) Arquivamento"/>
         <transition to="Término" name="Término"/>
@@ -360,6 +421,8 @@ Secretaria   Gabinete      Magistrado]]></description>
         <transition to="(EF) ~Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens" name="(EF) ~Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens"/>
         <transition to="(EF) ~Arquivado - Processos com custas pendentes" name="(EF) ~Arquivado - Processos com custas pendentes"/>
         <transition to="(EF) ~Arquivado - Reunião de processos" name="(EF) ~Arquivado - Reunião de processos"/>
+        <transition to="(EF) ~Arquivo com prazo decorrido - ANALISAR" name="(EF) ~Arquivo com prazo decorrido - ANALISAR"/>
+        <transition to="(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR" name="(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR"/>
     </task-node>
     <end-state name="Término"/>  
     <!-- PROCESS-EVENTS -->
