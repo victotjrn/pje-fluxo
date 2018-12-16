@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(CPP) Autos recebidos do gabinete [decisão sobre reativação]"> 
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (CPP) Autos recebidos do gabinete [decisão sobre reativação]">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(CPP) Autos recebidos do gabinete [decisão sobre reativação] - ANALISAR" name="(CPP) Autos recebidos do gabinete [decisão sobre reativação] - ANALISAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(CPP) Autos recebidos do gabinete [decisão sobre reativação] - ANALISAR">
+        <task name="(CPP) Autos recebidos do gabinete [decisão sobre reativação] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (CPP) Autos recebidos do gabinete [decisão sobre reativação]" name="Nó de Desvio - (CPP) Autos recebidos do gabinete [decisão sobre reativação]">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(CPP) Sinalizar reativação" name="Reativar processo"/>
+        <transition to="(CPP) Sinalizar manter arquivado" name="Manter processo arquivado"/>
+    </task-node>
+    <node name="(CPP) Sinalizar reativação">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:tjrn:cpp:sinalizacao', 'Reativar')}"/>
+        </event>
+    </node>
+    <node name="(CPP) Sinalizar manter arquivado">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:tjrn:cpp:sinalizacao', 'manterArquivado')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (CPP) Autos recebidos do gabinete [decisão sobre reativação]">
+        <task name="Nó de Desvio - (CPP) Autos recebidos do gabinete [decisão sobre reativação]" swimlane="Nó de Desvio - (CPP) Autos recebidos do gabinete [decisão sobre reativação]"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(CPP) Autos recebidos do gabinete [decisão sobre reativação] - ANALISAR" name="(CPP) Autos recebidos do gabinete [decisão sobre reativação] - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
