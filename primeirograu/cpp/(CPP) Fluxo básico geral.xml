@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(CPP) Fluxo básico geral">
+    <description><![CDATA[Código do fluxo: CPP_FBG
+
+Descrição: Fluxo de entrada de processos do CEJUSC Pré-processual.]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (CPP) Fluxo básico geral">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(CPP) Autos recebidos da autuação - ANALISAR" name="(CPP) Autos recebidos da autuação - ANALISAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(CPP) Autos recebidos da autuação - ANALISAR">
+        <task name="(CPP) Autos recebidos da autuação - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="(CPP) Existe audiência pendente?" name="Prosseguir"/>
+        <transition to="Nó de Desvio - (CPP) Fluxo básico geral" name="Nó de Desvio - (CPP) Fluxo básico geral">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:andamento')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+    </task-node>
+    <decision expression="#{processoAudienciaHome.existeAudienciaPendenteProcesso() ? '(CPP) Subfluxo Preparar carta convite' : '(CPP) Sinalizar designar audiência'}" name="(CPP) Existe audiência pendente?">
+        <transition to="(CPP) Subfluxo Preparar carta convite" name="(CPP) Subfluxo Preparar carta convite"/>
+        <transition to="(CPP) Sinalizar designar audiência" name="(CPP) Sinalizar designar audiência"/>
+    </decision>
+    <node name="(CPP) Sinalizar designar audiência">
+        <transition to="(CPP) Subfluxo Controle de audência" name="(CPP) Subfluxo Controle de audência"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:tjrn:cpp:sinalizacao', 'designarAudiencia')}"/>
+        </event>
+    </node>
+    <process-state name="(CPP) Subfluxo Controle de audência">
+        <sub-process name="(CPP) Controle de audiência" binding="late"/>
+        <transition to="(CPP) Secretaria - ANALISAR" name="(CPP) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(CPP) Subfluxo Preparar carta convite">
+        <sub-process name="(CPP) Preparar carta convite" binding="late"/>
+        <transition to="(CPP) Secretaria - ANALISAR" name="(CPP) Secretaria - ANALISAR"/>
+    </process-state>
+    <task-node end-tasks="true" name="(CPP) Secretaria - ANALISAR">
+        <task name="(CPP) Secretaria - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="(CPP) Subfluxo Controle de audência" name="Controlar audiência"/>
+        <transition to="(CPP) Subfluxo Preparar carta convite" name="Preparar carta convite"/>
+        <transition to="Nó de Desvio - (CPP) Fluxo básico geral" name="Nó de Desvio - (CPP) Fluxo básico geral">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(CPP) Subfluxo Arquivamento" name="Arquivar processo"/>
+        <transition to="Término" name="Evolução de classe"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+    </task-node>
+    <process-state name="(CPP) Subfluxo Arquivamento">
+        <sub-process name="(CPP) Arquivamento" binding="late"/>
+        <transition to="(CPP) Secretaria - ANALISAR" name="(CPP) Secretaria - ANALISAR"/>
+    </process-state>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (CPP) Fluxo básico geral">
+        <task name="Nó de Desvio - (CPP) Fluxo básico geral" swimlane="Nó de Desvio - (CPP) Fluxo básico geral"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(CPP) Autos recebidos da autuação - ANALISAR" name="(CPP) Autos recebidos da autuação - ANALISAR"/>
+        <transition to="(CPP) Secretaria - ANALISAR" name="(CPP) Secretaria - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
