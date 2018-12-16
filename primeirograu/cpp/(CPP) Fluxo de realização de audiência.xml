@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(CPP) Fluxo de realização de audiência"> 
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (CPP) Fluxo de realização de audiência">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(CPP) Audiência [ata] - MINUTAR" name="(CPP) Audiência [ata] - MINUTAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(CPP) Audiência [ata] - MINUTAR">
+        <task name="(CPP) Audiência [ata] - MINUTAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="minutaTermoAudiencia" mapped-name="textEditCombo:minutaTermoAudiencia" access="read,write"/>
+                <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (CPP) Fluxo de realização de audiência" name="Nó de Desvio - (CPP) Fluxo de realização de audiência">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(CPP) Audiência [informações] - PREENCHER" name="Preencher dados da audiência"/>
+        <transition to="(CPP) Sinalizar cancelamento da realização da audiência" name="Cancelar realização da audiência"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '87')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar realização da audiência')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('mostrarBotaoGravarNoFluxo', true)}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(CPP) Audiência [informações] - PREENCHER">
+        <task name="(CPP) Audiência [informações] - PREENCHER" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="ProcessoAudiencia_informarDadosAudiencia" mapped-name="frame:ProcessoAudiencia_informarDadosAudiencia" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (CPP) Fluxo de realização de audiência" name="Nó de Desvio - (CPP) Fluxo de realização de audiência">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(CPP) Audiência [ata] - ASSINAR" name="Encaminhar para assinatura do termo de audiência"/>
+        <transition to="(CPP) Audiência [ata] - MINUTAR" name="Retornar para minuta do termo de audiência"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:fluxo:audienciaSelecionada', processoJudicialManager.getProximaAudienciaDesignada(tramitacaoProcessualService.recuperaProcesso()))}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(CPP) Audiência [ata] - ASSINAR">
+        <task name="(CPP) Audiência [ata] - ASSINAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="assinarLote" mapped-name="assinarLote:assinarLote" access="read,write"/>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (CPP) Fluxo de realização de audiência" name="Nó de Desvio - (CPP) Fluxo de realização de audiência">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(CPP) Gravar informações da audiência" name="(CPP) Gravar informações da audiência">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(CPP) Audiência [informações] - PREENCHER" name="Retornar para as informações da audiência">
+            <condition expression="#{processoHome.instance.idProcesso &lt;= 0 and empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and not revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <transition to="(CPP) Gravar informações da audiência" name="Ata de audiência assinada! Prosseguir no fluxo">
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '87')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(CPP) Gravar informações da audiência')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavel('minutaTermoAudiencia'))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('mostrarBotaoGravarNoFluxo', true)}"/>
+        </event>
+    </task-node>
+    <node name="(CPP) Gravar informações da audiência">
+        <transition to="(CPP) Apagar variáveis do fluxo" name="(CPP) Apagar variáveis do fluxo"/>
+        <event type="node-enter">
+            <action expression="#{processoAudienciaHome.instance.setStatusAudiencia(tramitacaoProcessualService.recuperaVariavel('pje:fluxo:statusAudienciaSelecionada'))}"/>
+            <action expression="#{processoAudienciaHome.update()}"/>
+            <action expression="#{processoAudienciaHome.registrarMovimentoAudiencia()}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:tjrn:cpp:sinalizacao', '')}"/>
+        </event>
+    </node>
+    <node name="(CPP) Sinalizar cancelamento da realização da audiência">
+        <transition to="(CPP) Apagar variáveis do fluxo" name="(CPP) Apagar variáveis do fluxo"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:tjrn:cpp:sinalizacao', 'cancelarRealizacaoAudiencia')}"/>
+        </event>
+    </node>
+    <node name="(CPP) Apagar variáveis do fluxo">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
+            <action expression="#{tramitacaoProcesualService.apagaVariavel('minutaTermoAudiencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:audienciaSelecionada')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:statusAudienciaSelecionada')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (CPP) Fluxo de realização de audiência">
+        <task name="Nó de Desvio - (CPP) Fluxo de realização de audiência" swimlane="Nó de Desvio - (CPP) Fluxo de realização de audiência"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(CPP) Audiência [ata] - MINUTAR" name="(CPP) Audiência [ata] - MINUTAR"/>
+        <transition to="(CPP) Audiência [informações] - PREENCHER" name="(CPP) Audiência [informações] - PREENCHER"/>
+        <transition to="(CPP) Audiência [ata] - ASSINAR" name="(CPP) Audiência [ata] - ASSINAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>
