@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SAJ) Saj migracao">
+    <description><![CDATA[...]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (SAJ) Saj migracao">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(SAJ) Processos migrados do SAJ" name="(SAJ) Processos migrados do SAJ"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(SAJ) Processos migrados do SAJ">
+        <task name="(SAJ) Processos migrados do SAJ" swimlane="Secretaria"/>
+        <transition to="(SAJ) Processos migrados do SAJ" name="(SAJ) Processos migrados do SAJ">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Arquivado" name="(SAJ) Arquivado">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Em Tramitação na Turma Recursal" name="(SAJ) Em Tramitação na Turma Recursal">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Concluso para Despacho" name="(SAJ) Concluso para Despacho">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Concluso para Decisão" name="(SAJ) Concluso para Decisão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Concluso para Sentença" name="(SAJ) Concluso para Sentença">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Concluso para Pedido de Urgência" name="(SAJ) Concluso para Pedido de Urgência">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Concluso para Analise de Recurso" name="(SAJ) Concluso para Analise de Recurso">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Concluso para Despacho Inicial" name="(SAJ) Concluso para Despacho Inicial">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Concluso para Desinteresse" name="(SAJ) Concluso para Desinteresse">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Concluso para Competencia Declinada" name="(SAJ) Concluso para Competencia Declinada">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Concluso para Aguard. Sistemas online" name="(SAJ) Concluso para Aguard. Sistemas online">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Concluso para Embargos de Declaração" name="(SAJ) Concluso para Embargos de Declaração">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Concluso para Embargos a Execução" name="(SAJ) Concluso para Embargos a Execução">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Aguard. Manifestação de Intimação" name="(SAJ) Aguard. Manifestação de Intimação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Aguard. Cump. Diligência Interna" name="(SAJ) Aguard. Cump. Diligência Interna">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Aguard. retorno de Mandado Judicial" name="(SAJ) Aguard. retorno de Mandado Judicial">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Aguard. retorno de Carta Precatória" name="(SAJ) Aguard. retorno de Carta Precatória">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Aguard. retorno da Turma Recursal" name="(SAJ) Aguard. retorno da Turma Recursal">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Aguard. manifestação do Magistrado" name="(SAJ) Aguard. manifestação do Magistrado">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Elaboração de Cálculo" name="(SAJ) Elaboração de Cálculo">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Aud. Conciliação realizada sem realização no sistema" name="(SAJ) Aud. Conciliação realizada sem realização no sistema">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SAJ) Controle de Sobrestamento-Suspensão" name="(SAJ) Controle de Sobrestamento-Suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SAJ) Saj migracao">
+        <task name="Nó de Desvio - (SAJ) Saj migracao" swimlane="Nó de Desvio - (SAJ) Saj migracao"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SAJ) Processos migrados do SAJ" name="(SAJ) Processos migrados do SAJ"/>
+        <transition to="(SAJ) Arquivado" name="(SAJ) Arquivado"/>
+        <transition to="(SAJ) Em Tramitação na Turma Recursal" name="(SAJ) Em Tramitação na Turma Recursal"/>
+        <transition to="(SAJ) Concluso para Despacho" name="(SAJ) Concluso para Despacho"/>
+        <transition to="(SAJ) Concluso para Decisão" name="(SAJ) Concluso para Decisão"/>
+        <transition to="(SAJ) Concluso para Sentença" name="(SAJ) Concluso para Sentença"/>
+        <transition to="(SAJ) Concluso para Pedido de Urgência" name="(SAJ) Concluso para Pedido de Urgência"/>
+        <transition to="(SAJ) Concluso para Analise de Recurso" name="(SAJ) Concluso para Analise de Recurso"/>
+        <transition to="(SAJ) Concluso para Despacho Inicial" name="(SAJ) Concluso para Despacho Inicial"/>
+        <transition to="(SAJ) Concluso para Desinteresse" name="(SAJ) Concluso para Desinteresse"/>
+        <transition to="(SAJ) Concluso para Competencia Declinada" name="(SAJ) Concluso para Competencia Declinada"/>
+        <transition to="(SAJ) Concluso para Aguard. Sistemas online" name="(SAJ) Concluso para Aguard. Sistemas online"/>
+        <transition to="(SAJ) Concluso para Embargos de Declaração" name="(SAJ) Concluso para Embargos de Declaração"/>
+        <transition to="(SAJ) Concluso para Embargos a Execução" name="(SAJ) Concluso para Embargos a Execução"/>
+        <transition to="(SAJ) Aguard. Manifestação de Intimação" name="(SAJ) Aguard. Manifestação de Intimação"/>
+        <transition to="(SAJ) Aguard. Cump. Diligência Interna" name="(SAJ) Aguard. Cump. Diligência Interna"/>
+        <transition to="(SAJ) Aguard. retorno de Mandado Judicial" name="(SAJ) Aguard. retorno de Mandado Judicial"/>
+        <transition to="(SAJ) Aguard. retorno de Carta Precatória" name="(SAJ) Aguard. retorno de Carta Precatória"/>
+        <transition to="(SAJ) Aguard. retorno da Turma Recursal" name="(SAJ) Aguard. retorno da Turma Recursal"/>
+        <transition to="(SAJ) Aguard. manifestação do Magistrado" name="(SAJ) Aguard. manifestação do Magistrado"/>
+        <transition to="(SAJ) Elaboração de Cálculo" name="(SAJ) Elaboração de Cálculo"/>
+        <transition to="(SAJ) Aud. Conciliação realizada sem realização no sistema" name="(SAJ) Aud. Conciliação realizada sem realização no sistema"/>
+        <transition to="(SAJ) Controle de Sobrestamento-Suspensão" name="(SAJ) Controle de Sobrestamento-Suspensão"/>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Arquivado">
+        <task name="(SAJ) Arquivado" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Em Tramitação na Turma Recursal">
+        <task name="(SAJ) Em Tramitação na Turma Recursal" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Concluso para Despacho">
+        <task name="(SAJ) Concluso para Despacho" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Concluso para Decisão">
+        <task name="(SAJ) Concluso para Decisão" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Concluso para Sentença">
+        <task name="(SAJ) Concluso para Sentença" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Concluso para Pedido de Urgência">
+        <task name="(SAJ) Concluso para Pedido de Urgência" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Concluso para Analise de Recurso">
+        <task name="(SAJ) Concluso para Analise de Recurso" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Concluso para Despacho Inicial">
+        <task name="(SAJ) Concluso para Despacho Inicial" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Concluso para Desinteresse">
+        <task name="(SAJ) Concluso para Desinteresse" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Concluso para Competencia Declinada">
+        <task name="(SAJ) Concluso para Competencia Declinada" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Concluso para Aguard. Sistemas online">
+        <task name="(SAJ) Concluso para Aguard. Sistemas online" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Concluso para Embargos de Declaração">
+        <task name="(SAJ) Concluso para Embargos de Declaração" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Concluso para Embargos a Execução">
+        <task name="(SAJ) Concluso para Embargos a Execução" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Aguard. Manifestação de Intimação">
+        <task name="(SAJ) Aguard. Manifestação de Intimação" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Aguard. Cump. Diligência Interna">
+        <task name="(SAJ) Aguard. Cump. Diligência Interna" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Aguard. retorno de Mandado Judicial">
+        <task name="(SAJ) Aguard. retorno de Mandado Judicial" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Aguard. retorno de Carta Precatória">
+        <task name="(SAJ) Aguard. retorno de Carta Precatória" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Aguard. retorno da Turma Recursal">
+        <task name="(SAJ) Aguard. retorno da Turma Recursal" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Aguard. manifestação do Magistrado">
+        <task name="(SAJ) Aguard. manifestação do Magistrado" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Elaboração de Cálculo">
+        <task name="(SAJ) Elaboração de Cálculo" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Aud. Conciliação realizada sem realização no sistema">
+        <task name="(SAJ) Aud. Conciliação realizada sem realização no sistema" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(SAJ) Controle de Sobrestamento-Suspensão">
+        <task name="(SAJ) Controle de Sobrestamento-Suspensão" swimlane="Secretaria"/>
+        <transition to="Término" name="Término"/>
+        <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
