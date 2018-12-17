@@ -130,10 +130,14 @@ Secretaria  Secretaria               Chefe de Secretaria]]></description>
         <sub-process name="(CPP) Fluxo de realização de audiência" binding="late"/>
         <transition to="(CPP) Realização da audiêcia foi cancelada?" name="(CPP) Realização da audiêcia foi cancelada?"/>
     </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:tjrn:cpp:sinalizacao') == 'cancelarRealizacaoAudiencia' ? '(CPP) Audiência - REALIZAR' : '(CPP) Audiência - CONTROLAR'}" name="(CPP) Realização da audiêcia foi cancelada?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:tjrn:cpp:sinalizacao') == 'cancelarRealizacaoAudiencia' ? '(CPP) Audiência - REALIZAR' : '(CPP) Subfluxo evolução de classe'}" name="(CPP) Realização da audiêcia foi cancelada?">
         <transition to="(CPP) Audiência - REALIZAR" name="(CPP) Audiência - REALIZAR"/>
-        <transition to="(CPP) Audiência - CONTROLAR" name="(CPP) Audiência - CONTROLAR"/>
+        <transition to="(CPP) Subfluxo evolução de classe" name="(CPP) Subfluxo evolução de classe"/>
     </decision>
+    <process-state name="(CPP) Subfluxo evolução de classe">
+        <sub-process name="(CPP) Fluxo de evolução de classe" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
     <task-node end-tasks="true" name="(CPP) Audiência - AGUARDAR">
         <task name="(CPP) Audiência - AGUARDAR" swimlane="Secretaria">
             <controller>

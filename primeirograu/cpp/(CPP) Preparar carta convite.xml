@@ -70,6 +70,7 @@
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','227')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,M')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(CPP) Separação em preparação de carta convite')}"/>
@@ -115,6 +116,9 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(CPP) Junção em preparação de carta convite" name="Prosseguir para próxima tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
     </task-node>
     <decision expression="#{comunicacaoProcessualAction.getExpedientesMandados().size() &gt; 0 ? '(CPP) Existe mais de uma central de mandados?' : '(CPP) Junção em preparação de carta convite'}" name="(CPP) Existe expediente com meio Mandado?">
         <transition to="(CPP) Junção em preparação de carta convite" name="(CPP) Junção em preparação de carta convite"/>

@@ -3,7 +3,7 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(CPP) Fluxo básico geral">
     <description><![CDATA[Código do fluxo: CPP_FBG
 
-Descrição: Fluxo de entrada de processos do CEJUSC Pré-processual.]]></description>  
+Descrição: Fluxo de entrada de processos do CEJUSC Pré-processual..]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (CPP) Fluxo básico geral">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -44,8 +44,12 @@ Descrição: Fluxo de entrada de processos do CEJUSC Pré-processual.]]></descripti
     </node>
     <process-state name="(CPP) Subfluxo Controle de audência">
         <sub-process name="(CPP) Controle de audiência" binding="late"/>
-        <transition to="(CPP) Secretaria - ANALISAR" name="(CPP) Secretaria - ANALISAR"/>
+        <transition to="(CPP) Evolução de classe foi realizada?" name="(CPP) Evolução de classe foi realizada?"/>
     </process-state>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:tjrn:cpp:sinalizacao') == 'evolucaoClasseConfirmada' ? 'Término' : '(CPP) Secretaria - ANALISAR'}" name="(CPP) Evolução de classe foi realizada?">
+        <transition to="(CPP) Secretaria - ANALISAR" name="(CPP) Secretaria - ANALISAR"/>
+        <transition to="Término" name="Término"/>
+    </decision>
     <process-state name="(CPP) Subfluxo Preparar carta convite">
         <sub-process name="(CPP) Preparar carta convite" binding="late"/>
         <transition to="(CPP) Secretaria - ANALISAR" name="(CPP) Secretaria - ANALISAR"/>
@@ -62,7 +66,7 @@ Descrição: Fluxo de entrada de processos do CEJUSC Pré-processual.]]></descripti
             <condition expression="#{true}"/>
         </transition>
         <transition to="(CPP) Subfluxo Arquivamento" name="Arquivar processo"/>
-        <transition to="Término" name="Evolução de classe"/>
+        <transition to="(CPP) Fluxo de evolução de classe" name="Evolução de classe"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
@@ -70,6 +74,10 @@ Descrição: Fluxo de entrada de processos do CEJUSC Pré-processual.]]></descripti
     <process-state name="(CPP) Subfluxo Arquivamento">
         <sub-process name="(CPP) Arquivamento" binding="late"/>
         <transition to="(CPP) Secretaria - ANALISAR" name="(CPP) Secretaria - ANALISAR"/>
+    </process-state>
+    <process-state name="(CPP) Fluxo de evolução de classe">
+        <sub-process name="(CPP) Fluxo de evolução de classe" binding="late"/>
+        <transition to="(CPP) Evolução de classe foi realizada?" name="(CPP) Evolução de classe foi realizada?"/>
     </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (CPP) Fluxo básico geral">

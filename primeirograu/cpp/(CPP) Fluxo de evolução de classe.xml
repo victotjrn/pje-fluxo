@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(CPP) Fluxo de evolução de classe"> 
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (CPP) Fluxo de evolução de classe">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(CPP) Evolução de classe - EFETUAR" name="(CPP) Evolução de classe - EFETUAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(CPP) Evolução de classe - EFETUAR">
+        <task name="(CPP) Evolução de classe - EFETUAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_abaEvolucaoClasse" mapped-name="frame:Processo_Fluxo_abaEvolucaoClasse" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Nó de Desvio - (CPP) Fluxo de evolução de classe" name="Nó de Desvio - (CPP) Fluxo de evolução de classe">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(CPP) Sinalizar cancelamento da evolução de classe" name="Cancelar evolução de classe"/>
+        <transition to="Término" name="Término">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Término')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar evolução de classe')}"/>
+        </event>
+    </task-node>
+    <node name="(CPP) Sinalizar cancelamento da evolução de classe">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:tjrn:cpp:sinalizacao', 'cancelarEvolucaoClasse')}"/>
+        </event>
+    </node>
+    <end-state name="Término">
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pje:tjrn:cpp:sinalizacao', 'evolucaoClasseConfirmada')}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('pje:tjrn:cpp:sinalizacao') == 'evolucaoClasseConfirmada' ? preencherMovimento.deCodigo(10966).comComplementoDeCodigo(31).doTipoDinamico().preencherComObjeto(processoTrfHome.getClasseJudicialAnterior()).comComplementoDeCodigo(32).doTipoDinamico().preencherComObjeto(processoHistoricoClasseHome.instance.getClasseJudicialAtual()).lancarMovimento() : ''}"/>
+        </event>
+    </end-state>
+    <task-node end-tasks="true" name="Nó de Desvio - (CPP) Fluxo de evolução de classe">
+        <task name="Nó de Desvio - (CPP) Fluxo de evolução de classe" swimlane="Nó de Desvio - (CPP) Fluxo de evolução de classe"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(CPP) Evolução de classe - EFETUAR" name="(CPP) Evolução de classe - EFETUAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>

@@ -96,10 +96,10 @@
     <node name="(CPP) Apagar variáveis do fluxo">
         <transition to="Término" name="Término"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
-            <action expression="#{tramitacaoProcesualService.apagaVariavel('minutaTermoAudiencia')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:audienciaSelecionada')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('pje:fluxo:statusAudienciaSelecionada')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('minutaEmElaboracao')}"/>
+            <action expression="#{tramitacaoProcesualService.apagaVariavel('minutaTermoAudiencia')}"/>
         </event>
     </node>
     <end-state name="Término"/>
