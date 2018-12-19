@@ -20,7 +20,7 @@
         <transition to="(SAJ) Processos migrados do SAJ" name="(SAJ) Processos migrados do SAJ">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Término" name="Término"/>
+        <transition to="Término" name="Encaminhar para analise de secretaria"/>
         <transition to="Nó de Desvio - (SAJ) Saj migracao" name="Nó de Desvio - (SAJ) Saj migracao">
             <condition expression="#{true}"/>
         </transition>
