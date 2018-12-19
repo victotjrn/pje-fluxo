@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="Fluxo de redirecionamento">
-    <description><![CDATA[Fluxo de redirecionamento com base na competência para controle de conflito de competência.]]></description>  
+    <description><![CDATA[Fluxo de redirecionamento com base na competência para controle de conflito de competência.....]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - Fluxo de redirecionamento">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
@@ -12,9 +12,25 @@
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="solicitante"/>
-        <transition to="É competência de Fazenda?" name="É competência de Fazenda?"/>
+        <transition to="É migração SAJ?" name="É migração SAJ?"/>
     </start-state>  
     <!-- NODES -->
+    <decision expression="#{ not empty contexts.sessionContext.get('migracao') and contexts.sessionContext.get('migracao').contains('SAJ') ? 'Entrar no saj migração' : 'É migração?' }" name="É migração SAJ?">
+        <transition to="Entrar no saj migração" name="Entrar no saj migração"/>
+        <transition to="É migração?" name="É migração?"/>
+    </decision>
+    <process-state name="Entrar no saj migração">
+        <sub-process name="(SAJ) Saj migracao" binding="late"/>
+        <transition to="Encaminhar para analise da secretaria" name="Encaminhar para analise da secretaria"/>
+    </process-state>
+    <decision expression="#{ not parametroUtil.getParametro('pje:tjrn:ip3:migracao:jurisdicoes:vara').contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao).concat(' ')) and parametroUtil.getParametro('pje:tjrn:ip3:migracao:ativo').equals('true') and tramitacaoProcessualService.recuperaProcesso().importadoSistemaLegado ? 'Entrar no projudi migração' : '(VCiv) Deslocar secretaria unificada' }" name="É migração?">
+        <transition to="Entrar no projudi migração" name="Entrar no projudi migração"/>
+        <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
+    </decision>
+    <process-state name="Entrar no projudi migração">
+        <sub-process name="(PROJUDI) Projudi migração" binding="late"/>
+        <transition to="Encaminhar para analise da secretaria" name="Encaminhar para analise da secretaria"/>
+    </process-state>
     <decision expression="#{processoTrfHome.possuiCompetencia(10) || '  101 2 14 15 82 9 10 12 13 16 17 93 94 11 18 95 7 3 4 5 6 8 71 72 '.contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat(' ')) ? 'Fluxo de conhecimento de VCiv' : 'É competência de JEC?'}" name="É competência de Fazenda?">
         <transition to="É competência de JEC?" name="É competência de JEC?"/>
         <transition to="Fluxo de conhecimento de VCiv" name="Fluxo de conhecimento de VCiv"/>
@@ -24,12 +40,20 @@
         <transition to="É classe de execução do JEC?" name="É classe de execução do JEC?"/>
         <transition to="É competência de CEJUSC?" name="É competência de CEJUSC?"/>
     </decision>
-    <decision expression="#{processoTrfHome.possuiCompetencia(18) ? 'Fluxo de conhecimento CEJUSC' : 'Fluxo de conhecimento de VCiv'}" name="É competência de CEJUSC?">
+    <decision expression="#{processoTrfHome.possuiCompetencia(18) ? 'Fluxo de conhecimento CEJUSC' : 'É jurisdição do JEASGA?'}" name="É competência de CEJUSC?">
         <transition to="Fluxo de conhecimento CEJUSC" name="Fluxo de conhecimento CEJUSC"/>
+        <transition to="É jurisdição do JEASGA?" name="É jurisdição do JEASGA?"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao == 46 ? 'Fluxo de conhecimento do JEASGA' : 'É competência de EF?'}" name="É jurisdição do JEASGA?">
+        <transition to="Fluxo de conhecimento do JEASGA" name="Fluxo de conhecimento do JEASGA"/>
+        <transition to="É competência de EF?" name="É competência de EF?"/>
+    </decision>
+    <decision expression="#{(parametroUtil.getParametro('pje:tjrn:fluxo:ef:ojs:ids').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat('_'))) &amp;&amp; processoTrfHome.possuiClasse(23) ? 'Fluxo de conhecimento de EF' : 'Fluxo de conhecimento de VCiv'}" name="É competência de EF?">
         <transition to="Fluxo de conhecimento de VCiv" name="Fluxo de conhecimento de VCiv"/>
+        <transition to="Fluxo de conhecimento de EF" name="Fluxo de conhecimento de EF"/>
     </decision>
     <process-state name="Fluxo de conhecimento do JEC">
-        <sub-process name="Fluxo básico de conhecimento" binding="late"/>
+        <sub-process name="(VCiv) Fluxo básico de conhecimento" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
     <decision expression="#{competenciaClasseAssuntoHome.processoContemClasseAssunto('159;156') ? 'Fluxo de execução do JEC' : 'Fluxo de conhecimento do JEC'}" name="É classe de execução do JEC?">
@@ -37,7 +61,7 @@
         <transition to="Fluxo de conhecimento do JEC" name="Fluxo de conhecimento do JEC"/>
     </decision>
     <process-state name="Fluxo de execução do JEC">
-        <sub-process name="Cumprimento de sentença" binding="late"/>
+        <sub-process name="(VCiv) Fluxo básico de conhecimento" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
     <process-state name="Fluxo de conhecimento de VCiv">
@@ -48,15 +72,407 @@
         <sub-process name="CEJUSC" binding="late"/>
         <transition to="Término" name="Término"/>
     </process-state>
+    <process-state name="Fluxo de conhecimento do JEASGA">
+        <sub-process name="(PP) Fluxo básico geral" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <process-state name="Fluxo de conhecimento de EF">
+        <sub-process name="(EF) Fluxo básico geral" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
     <task-node end-tasks="true" name="Nó de Desvio - Fluxo de redirecionamento">
         <task name="Nó de Desvio - Fluxo de redirecionamento" swimlane="Nó de Desvio - Fluxo de redirecionamento"/>
         <transition to="Término" name="Término"/>
-    </task-node>  
+        <transition to="(Projudi) Arquivado" name="(Projudi) Arquivado"/>
+        <transition to="(Projudi) Em Tramitação na Turma Recursal" name="(Projudi) Em Tramitação na Turma Recursal"/>
+        <transition to="(Projudi) Concluso para Despacho" name="(Projudi) Concluso para Despacho"/>
+        <transition to="(Projudi) Concluso para Decisão" name="(Projudi) Concluso para Decisão"/>
+        <transition to="(Projudi) Concluso para Sentença" name="(Projudi) Concluso para Sentença"/>
+        <transition to="(Projudi) Concluso para Homologação" name="(Projudi) Concluso para Homologação"/>
+        <transition to="(Projudi) Concluso para Pedido de Urgência" name="(Projudi) Concluso para Pedido de Urgência"/>
+        <transition to="(Projudi) Concluso para Homologação de Juiz Leigo" name="(Projudi) Concluso para Homologação de Juiz Leigo"/>
+        <transition to="(Projudi) Concluso para Arquivamento" name="(Projudi) Concluso para Arquivamento"/>
+        <transition to="(Projudi) Concluso para Analise de Recurso" name="(Projudi) Concluso para Analise de Recurso"/>
+        <transition to="(Projudi) Concluso para Entrada de Execução Extrajudicial" name="(Projudi) Concluso para Entrada de Execução Extrajudicial"/>
+        <transition to="(Projudi) Concluso para Retorno Turma Recursal" name="(Projudi) Concluso para Retorno Turma Recursal"/>
+        <transition to="(Projudi) Concluso para Despacho Inicial" name="(Projudi) Concluso para Despacho Inicial"/>
+        <transition to="(Projudi) Concluso para Audiência Imediata" name="(Projudi) Concluso para Audiência Imediata"/>
+        <transition to="(Projudi) Concluso para Decisão após audiência" name="(Projudi) Concluso para Decisão após audiência"/>
+        <transition to="(Projudi) Concluso para Extinção de Prazo Decadencial" name="(Projudi) Concluso para Extinção de Prazo Decadencial"/>
+        <transition to="(Projudi) Concluso para Desinteresse" name="(Projudi) Concluso para Desinteresse"/>
+        <transition to="(Projudi) Concluso para Competencia Declinada" name="(Projudi) Concluso para Competencia Declinada"/>
+        <transition to="(Projudi) Concluso para Aguard. Analise de Alvará" name="(Projudi) Concluso para Aguard. Analise de Alvará"/>
+        <transition to="(Projudi) Concluso para Aguard. Sistemas online" name="(Projudi) Concluso para Aguard. Sistemas online"/>
+        <transition to="(Projudi) Concluso para Embargos de Declaração" name="(Projudi) Concluso para Embargos de Declaração"/>
+        <transition to="(Projudi) Concluso para Analise de Contumacia" name="(Projudi) Concluso para Analise de Contumacia"/>
+        <transition to="(Projudi) Concluso para Analise de Revelia" name="(Projudi) Concluso para Analise de Revelia"/>
+        <transition to="(Projudi) Concluso para Homologação Desistência" name="(Projudi) Concluso para Homologação Desistência"/>
+        <transition to="(Projudi) Concluso para Embargos a Execução" name="(Projudi) Concluso para Embargos a Execução"/>
+        <transition to="(Projudi) Aguard. Manifestação de Intimação" name="(Projudi) Aguard. Manifestação de Intimação"/>
+        <transition to="(Projudi) Aguard. Cump. Pena Restritiva de Direito" name="(Projudi) Aguard. Cump. Pena Restritiva de Direito"/>
+        <transition to="(Projudi) Aguard. Cump. Diligência Interna" name="(Projudi) Aguard. Cump. Diligência Interna"/>
+        <transition to="(Projudi) Aguard. Realização Sessão de Julgamento" name="(Projudi) Aguard. Realização Sessão de Julgamento"/>
+        <transition to="(Projudi) Aguard. prestação de informação do Juiz" name="(Projudi) Aguard. prestação de informação do Juiz"/>
+        <transition to="(Projudi) Aguard. manifestação do MP" name="(Projudi) Aguard. manifestação do MP"/>
+        <transition to="(Projudi) Aguard. manifestação da Unid. Policial" name="(Projudi) Aguard. manifestação da Unid. Policial"/>
+        <transition to="(Projudi) Aguard. manifestação do Cartório Ext." name="(Projudi) Aguard. manifestação do Cartório Ext."/>
+        <transition to="(Projudi) Aguard. manif. do Setor Psicossocial" name="(Projudi) Aguard. manif. do Setor Psicossocial"/>
+        <transition to="(Projudi) Aguard. realização de cálculos" name="(Projudi) Aguard. realização de cálculos"/>
+        <transition to="(Projudi) Aguard. retorno de Mandado Judicial" name="(Projudi) Aguard. retorno de Mandado Judicial"/>
+        <transition to="(Projudi) Aguard. retorno de Carta Precatória" name="(Projudi) Aguard. retorno de Carta Precatória"/>
+        <transition to="(Projudi) Aguard. retorno da Turma Recursal" name="(Projudi) Aguard. retorno da Turma Recursal"/>
+        <transition to="(Projudi) Aguard. manifestação do Magistrado" name="(Projudi) Aguard. manifestação do Magistrado"/>
+        <transition to="(Projudi) Aguard. realização Audiência Designada" name="(Projudi) Aguard. realização Audiência Designada"/>
+        <transition to="(Projudi) Elaboração de Cálculo" name="(Projudi) Elaboração de Cálculo"/>
+        <transition to="(Projudi) Aud. Conciliação realizada sem realização no sistema" name="(Projudi) Aud. Conciliação realizada sem realização no sistema"/>
+        <transition to="(Projudi) Controle de Sobrestamento-Suspensão" name="(Projudi) Controle de Sobrestamento-Suspensão"/>
+        <transition to="(Projudi) Processo migrado do projudi" name="(Projudi) Processo migrado do projudi"/>
+        <transition to="(Projudi) Suspenso" name="(Projudi) Suspenso"/>
+        <transition to="(Projudi) Suspenso - Art. 40" name="(Projudi) Suspenso - Art. 40"/>
+        <transition to="(Projudi) Suspenso Parcelamento" name="(Projudi) Suspenso Parcelamento"/>
+        <transition to="(Projudi) Arquivado provisoriamente" name="(Projudi) Arquivado provisoriamente"/>
+        <transition to="(Projudi) Enviado à Central de Avaliação" name="(Projudi) Enviado à Central de Avaliação"/>
+    </task-node>
+    <process-state name="(VCiv) Deslocar secretaria unificada">
+        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
+        <transition to="É competência de Fazenda?" name="É competência de Fazenda?"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:colegiadoDestino'))}"/>
+            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro('pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+        </event>
+    </process-state>
+    <task-node end-tasks="true" name="(Projudi) Processo migrado do projudi">
+        <task name="(Projudi) Processo migrado do projudi" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Arquivado">
+        <task name="(Projudi) Arquivado" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Suspenso">
+        <task name="(Projudi) Suspenso" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Suspenso - Art. 40">
+        <task name="(Projudi) Suspenso - Art. 40" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Suspenso Parcelamento">
+        <task name="(Projudi) Suspenso Parcelamento" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Arquivado provisoriamente">
+        <task name="(Projudi) Arquivado provisoriamente" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Enviado à Central de Avaliação">
+        <task name="(Projudi) Enviado à Central de Avaliação" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Em Tramitação na Turma Recursal">
+        <task name="(Projudi) Em Tramitação na Turma Recursal" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Despacho">
+        <task name="(Projudi) Concluso para Despacho" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Decisão">
+        <task name="(Projudi) Concluso para Decisão" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Sentença">
+        <task name="(Projudi) Concluso para Sentença" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Homologação">
+        <task name="(Projudi) Concluso para Homologação" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Pedido de Urgência">
+        <task name="(Projudi) Concluso para Pedido de Urgência" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Homologação de Juiz Leigo">
+        <task name="(Projudi) Concluso para Homologação de Juiz Leigo" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Arquivamento">
+        <task name="(Projudi) Concluso para Arquivamento" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Analise de Recurso">
+        <task name="(Projudi) Concluso para Analise de Recurso" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Entrada de Execução Extrajudicial">
+        <task name="(Projudi) Concluso para Entrada de Execução Extrajudicial" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Retorno Turma Recursal">
+        <task name="(Projudi) Concluso para Retorno Turma Recursal" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Despacho Inicial">
+        <task name="(Projudi) Concluso para Despacho Inicial" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Audiência Imediata">
+        <task name="(Projudi) Concluso para Audiência Imediata" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Decisão após audiência">
+        <task name="(Projudi) Concluso para Decisão após audiência" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Extinção de Prazo Decadencial">
+        <task name="(Projudi) Concluso para Extinção de Prazo Decadencial" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Desinteresse">
+        <task name="(Projudi) Concluso para Desinteresse" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Competencia Declinada">
+        <task name="(Projudi) Concluso para Competencia Declinada" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Aguard. Analise de Alvará">
+        <task name="(Projudi) Concluso para Aguard. Analise de Alvará" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Aguard. Sistemas online">
+        <task name="(Projudi) Concluso para Aguard. Sistemas online" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Embargos de Declaração">
+        <task name="(Projudi) Concluso para Embargos de Declaração" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Analise de Contumacia">
+        <task name="(Projudi) Concluso para Analise de Contumacia" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Analise de Revelia">
+        <task name="(Projudi) Concluso para Analise de Revelia" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Homologação Desistência">
+        <task name="(Projudi) Concluso para Homologação Desistência" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Concluso para Embargos a Execução">
+        <task name="(Projudi) Concluso para Embargos a Execução" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. Manifestação de Intimação">
+        <task name="(Projudi) Aguard. Manifestação de Intimação" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. Cump. Pena Restritiva de Direito">
+        <task name="(Projudi) Aguard. Cump. Pena Restritiva de Direito" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. Cump. Diligência Interna">
+        <task name="(Projudi) Aguard. Cump. Diligência Interna" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. Realização Sessão de Julgamento">
+        <task name="(Projudi) Aguard. Realização Sessão de Julgamento" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. prestação de informação do Juiz">
+        <task name="(Projudi) Aguard. prestação de informação do Juiz" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. manifestação do MP">
+        <task name="(Projudi) Aguard. manifestação do MP" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. manifestação da Unid. Policial">
+        <task name="(Projudi) Aguard. manifestação da Unid. Policial" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. manifestação do Cartório Ext.">
+        <task name="(Projudi) Aguard. manifestação do Cartório Ext." swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. manif. do Setor Psicossocial">
+        <task name="(Projudi) Aguard. manif. do Setor Psicossocial" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. realização de cálculos">
+        <task name="(Projudi) Aguard. realização de cálculos" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. retorno de Mandado Judicial">
+        <task name="(Projudi) Aguard. retorno de Mandado Judicial" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. retorno de Carta Precatória">
+        <task name="(Projudi) Aguard. retorno de Carta Precatória" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. retorno da Turma Recursal">
+        <task name="(Projudi) Aguard. retorno da Turma Recursal" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. manifestação do Magistrado">
+        <task name="(Projudi) Aguard. manifestação do Magistrado" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aguard. realização Audiência Designada">
+        <task name="(Projudi) Aguard. realização Audiência Designada" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Elaboração de Cálculo">
+        <task name="(Projudi) Elaboração de Cálculo" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Aud. Conciliação realizada sem realização no sistema">
+        <task name="(Projudi) Aud. Conciliação realizada sem realização no sistema" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(Projudi) Controle de Sobrestamento-Suspensão">
+        <task name="(Projudi) Controle de Sobrestamento-Suspensão" swimlane="solicitante"/>
+        <transition to="Nó de Desvio - Fluxo de redirecionamento" name="Nó de Desvio - Fluxo de redirecionamento">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <node name="Encaminhar para analise da secretaria">
+        <transition to="Fluxo de conhecimento de VCiv" name="Fluxo de conhecimento de VCiv"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:redistribuir', true)}"/>
+        </event>
+    </node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -65,40 +481,13 @@
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>
