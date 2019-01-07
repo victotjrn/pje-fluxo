@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Publicações no DJe">
+    <description><![CDATA[Código do fluxo: EF_DJE...
+
+Descrição: Fluxo destinado a publicações no DJe.
+
+Raia         Localização   Papel
+Secretaria   Secretaria    Chefe de Secretaria
+Secretaria   Secretaria    Servidor de Secretaria
+Secretaria   Secretaria    Conciliador Judicial
+Secretaria   Gabinete      Magistrado
+Secretaria   Gabinete      Assessor]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Publicações no DJe">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(EF) Conteúdo DJe - INFORMAR" name="(EF) Conteúdo DJe - INFORMAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(EF) Conteúdo DJe - INFORMAR">
+        <task name="(EF) Conteúdo DJe - INFORMAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Aviso1" mapped-name="textAlert:Aviso1" access="read,write"/>
+                <variable name="Aviso2" mapped-name="textAlert:Aviso2" access="read,write"/>
+                <variable name="Aviso3" mapped-name="textAlert:Aviso3" access="read,write"/>
+                <variable name="ef_label_magistrado_dje" mapped-name="textAlert:ef_label_magistrado_dje" access="read,write"/>
+                <variable name="ef_magistrado_dje" mapped-name="combo_objetos:ef_magistrado_dje" access="read,write"/>
+                <variable name="ef_conteudo_dje" mapped-name="text:ef_conteudo_dje" access="read,write"/>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: Aviso1
+   Label: ATENÇÃO:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: Aviso2
+   Label: O sistema PJe está integrado com o sistema Hermes. Ao fazer a publicação abaixo o texto será encaminhado automaticamente para o Diário da Justiça Eletrônico.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+3. Variável: Aviso3
+   Label: Os atos encaminhados para publicação até as 17h:59m do dia corrente serão disponibilizados no DJe do mesmo dia. Após o referido horário a disponibilização ficará para o próximo dia útil.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+4. Variável: ef_label_magistrado_dje
+   Label: Informe o magistrado que proferiu o ato:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+5. Variável: ef_magistrado_dje
+   Label: #{pessoaMagistradoDAO.magistradoPorOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador)}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Combo de objetos
+
+6. Variável: ef_conteudo_dje
+   Label: Informe apenas o teor do ato a ser publicado no DJe:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Texto
+
+7. Variável: Processo_Fluxo_visualizarDecisao
+   Label: Último ato judicial
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="(EF) Preencheu conteúdo DJe?" name="Prosseguir"/>
+        <transition to="(EF) Conteúdo DJe - IGNORAR" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Publicações no DJe" name="Nó de Desvio - (EF) Publicações no DJe">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_conteudo_dje')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('magistrado_dje_temp', tramitacaoProcessualService.recuperaVariavelTarefa('combo_objetos:ef_magistrado_dje').getIdUsuario())}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('combo_objetos:ef_magistrado_dje')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('conteudo_dje_temp', tramitacaoProcessualService.strToBase64(tramitacaoProcessualService.recuperaVariavelTarefa('text:ef_conteudo_dje')))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('text:ef_conteudo_dje')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Conteúdo DJe - IGNORAR">
+        <task name="(EF) Conteúdo DJe - IGNORAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Aviso_DJe" mapped-name="textAlert:Aviso_DJe" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: Aviso_DJe
+   Label: Deseja realmente ignorar a publicação para o DJe?
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="(EF) Conteúdo DJe - INFORMAR" name="Não"/>
+        <transition to="Nó de Desvio - (EF) Publicações no DJe" name="Nó de Desvio - (EF) Publicações no DJe">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Sim"/>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('magistrado_dje_temp') == null || tramitacaoProcessualService.recuperaVariavel('conteudo_dje_temp') == &quot;&quot; ? '(EF) Conteúdo DJe - INFORMAR' : '(EF) Conteúdo DJe - CONFIRMAR'}" name="(EF) Preencheu conteúdo DJe?">
+        <transition to="(EF) Conteúdo DJe - INFORMAR" name="(EF) Conteúdo DJe - INFORMAR"/>
+        <transition to="(EF) Conteúdo DJe - CONFIRMAR" name="(EF) Conteúdo DJe - CONFIRMAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Conteúdo DJe - CONFIRMAR">
+        <task name="(EF) Conteúdo DJe - CONFIRMAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Aviso4" mapped-name="textAlert:Aviso4" access="read,write"/>
+                <variable name="Aviso5" mapped-name="textAlert:Aviso5" access="read,write"/>
+                <variable name="Aviso6" mapped-name="textAlert:Aviso6" access="read,write"/>
+                <variable name="Aviso7" mapped-name="textAlert:Aviso7" access="read,write"/>
+                <variable name="visualizar_dje" mapped-name="textAlert:visualizar_dje" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: Aviso4
+   Label: ATENÇÃO:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: Aviso5
+   Label: Caso queira ajustar o conteúdo abaixo, clique no botão "Retornar para ajustar conteúdo".
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+3. Variável: Aviso6
+   Label: Após clicar no botão "Enviar para publicação no DJe", a publicação não poderá ser mais cancelada.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+4. Variável: Aviso7
+   Label: ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+5. Variável: visualizar_dje
+   Label: #{tramitacaoProcessualService.base64ToString(tramitacaoProcessualService.recuperaVariavel('conteudo_dje_temp'))}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="(EF) Conteúdo DJe - INFORMAR" name="Retornar para ajustar conteúdo"/>
+        <transition to="(EF) Gravar Variáveis DJe" name="Enviar para publicação no DJe"/>
+        <transition to="Nó de Desvio - (EF) Publicações no DJe" name="Nó de Desvio - (EF) Publicações no DJe">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <node name="(EF) Gravar Variáveis DJe">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('ef:lanc:publicar_dje') ? tramitacaoProcessualService.gravaVariavel('conteudo_dje_direto', tramitacaoProcessualService.recuperaVariavel('conteudo_dje_temp')) : tramitacaoProcessualService.gravaVariavel('conteudo_dje', tramitacaoProcessualService.recuperaVariavel('conteudo_dje_temp')) }"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('magistrado_dje', tramitacaoProcessualService.recuperaVariavel('magistrado_dje_temp'))}"/>
+            <action expression="#{preencherMovimento.deCodigo(1061).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('ef:lanc:publicar_dje') ? tramitacaoProcessualService.gravaVariavel('data_dje_direto', dateUtil.getDataAtual('yyyy-MM-dd')) : tramitacaoProcessualService.gravaVariavel('data_dje', dateUtil.getDataAtual('yyyy-MM-dd'))}"/>
+            <action expression="#{tramitacaoProcessualService.recuperaVariavel('ef:lanc:publicar_dje') ? tramitacaoProcessualService.gravaVariavel('id_oj_dje_direto', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador) : tramitacaoProcessualService.gravaVariavel('id_oj_dje', tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador)}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Publicações no DJe">
+        <task name="Nó de Desvio - (EF) Publicações no DJe" swimlane="Nó de Desvio - (EF) Publicações no DJe"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Conteúdo DJe - INFORMAR" name="(EF) Conteúdo DJe - INFORMAR"/>
+        <transition to="(EF) Conteúdo DJe - IGNORAR" name="(EF) Conteúdo DJe - IGNORAR"/>
+        <transition to="(EF) Conteúdo DJe - CONFIRMAR" name="(EF) Conteúdo DJe - CONFIRMAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

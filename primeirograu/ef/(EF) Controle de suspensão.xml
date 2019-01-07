@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Controle de suspensão">
+    <description><![CDATA[Código do fluxo: EF_CS
+
+Descrição: Fluxo de controle de suspensão de processos.]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Controle de suspensão">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(EF) Suspensão de processo - INFORMAR" name="(EF) Suspensão de processo - INFORMAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(EF) Suspensão de processo - INFORMAR">
+        <task name="(EF) Suspensão de processo - INFORMAR" swimlane="Secretaria">
+            <controller>
+                <variable name="ef_cs_data_limite_suspensao" mapped-name="date:ef_cs_data_limite_suspensao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: ef_cs_data_limite_suspensao
+   Label: Data limite de suspensão
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Data]]></description>
+        <transition to="(EF) Suspensão de processo - CONFIRMAR" name="Selecionar e confirmar suspensão do processo"/>
+        <transition to="Término" name="Ignorar suspensão do processo"/>
+        <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('date:ef_cs_data_limite_suspensao')}"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('dls', tramitacaoProcessualService.recuperaVariavelTarefa('date:ef_cs_data_limite_suspensao'))}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Suspensão de processo - CONFIRMAR">
+        <task name="(EF) Suspensão de processo - CONFIRMAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso_susp1" mapped-name="textAlert:aviso_susp1" access="read,write"/>
+                <variable name="aviso_susp2" mapped-name="textAlert:aviso_susp2" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso_susp1
+   Label: Confirma prazo limite de suspensão para
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: aviso_susp2
+   Label: #{dateUtil.dateToString(tramitacaoProcessualService.recuperaVariavel('dls'),'dd/MM/yyyy')}?
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="(EF) Suspensão de processo pelo art. 40 - AGUARDAR" name="Suspender processo pelo art. 40"/>
+        <transition to="(EF) Suspensão de processo por parcelamento - AGUARDAR" name="Suspender processo por parcelamento"/>
+        <transition to="(EF) Houve data limite de suspensão?" name="Suspender processo por outros motivos"/>
+        <transition to="(EF) Suspensão de processo - INFORMAR" name="Retificar data de suspensão do processo"/>
+        <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-start">
+            <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Suspensão de processo pelo art. 40 - AGUARDAR">
+        <task name="(EF) Suspensão de processo pelo art. 40 - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso_susp1" mapped-name="textAlert:aviso_susp1" access="read,write"/>
+                <variable name="aviso_susp2" mapped-name="textAlert:aviso_susp2" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso_susp1
+   Label: Processo suspenso pelo art. 40, com prazo limite de suspensão para
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: aviso_susp2
+   Label: #{dateUtil.dateToString(tramitacaoProcessualService.recuperaVariavel('dls'),'dd/MM/yyyy')}.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
+        <transition to="(EF) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <transition to="(EF) Suspensão com prazo decorrido - ANALISAR" name="(EF) Suspensão com prazo decorrido - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Suspensão com prazo decorrido - ANALISAR" name="s"/>
+        <event type="node-enter">
+            <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Suspensão de processo pelo art. 40 - AGUARDAR', false, false, false, true)}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaSuspensao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Suspensão com prazo decorrido - ANALISAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{processoHome.limparCaixaTriagem()}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaSuspensao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cs:suspensao_art40', 'true')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Suspensão de processo por parcelamento - AGUARDAR">
+        <task name="(EF) Suspensão de processo por parcelamento - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso_susp1" mapped-name="textAlert:aviso_susp1" access="read,write"/>
+                <variable name="aviso_susp2" mapped-name="textAlert:aviso_susp2" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso_susp1
+   Label: Processo suspenso por parcelamento, com prazo limite de suspensão para
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: aviso_susp2
+   Label: #{dateUtil.dateToString(tramitacaoProcessualService.recuperaVariavel('dls'),'dd/MM/yyyy')}.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
+        <transition to="(EF) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <transition to="(EF) Suspensão com prazo decorrido - ANALISAR" name="(EF) Suspensão com prazo decorrido - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaSuspensao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Suspensão com prazo decorrido - ANALISAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaSuspensao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cs:suspensao_parcelamento', 'true')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('dls') != null  ? '(EF) Suspensão de processo com prazo - AGUARDAR' : '(EF) Suspensão de processo sem prazo - AGUARDAR'}" name="(EF) Houve data limite de suspensão?">
+        <transition to="(EF) Suspensão de processo com prazo - AGUARDAR" name="(EF) Suspensão de processo com prazo - AGUARDAR"/>
+        <transition to="(EF) Suspensão de processo sem prazo - AGUARDAR" name="(EF) Suspensão de processo sem prazo - AGUARDAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Suspensão de processo com prazo - AGUARDAR">
+        <task name="(EF) Suspensão de processo com prazo - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso_susp1" mapped-name="textAlert:aviso_susp1" access="read,write"/>
+                <variable name="aviso_susp2" mapped-name="textAlert:aviso_susp2" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso_susp1
+   Label: Processo suspenso com prazo limite de suspensão para
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: aviso_susp2
+   Label: #{dateUtil.dateToString(tramitacaoProcessualService.recuperaVariavel('dls'),'dd/MM/yyyy')}.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
+        <transition to="(EF) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <transition to="(EF) Suspensão com prazo decorrido - ANALISAR" name="(EF) Suspensão com prazo decorrido - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaSuspensao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Suspensão com prazo decorrido - ANALISAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaSuspensao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cs:suspensao_com_prazo', 'true')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Suspensão de processo sem prazo - AGUARDAR">
+        <task name="(EF) Suspensão de processo sem prazo - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso_susp1" mapped-name="textAlert:aviso_susp1" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso_susp1
+   Label: Processo suspenso sem prazo limite de suspensão.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
+        <transition to="(EF) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.acrescentarSituacao('jus:suspenso')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cs:suspensao_sem_prazo', 'true')}"/>
+        </event>
+    </task-node>
+    <process-state name="(EF) Conclusão para decisão sobre encerramento da suspensão">
+        <sub-process name="(EF) Conclusão para decisão genérica" binding="late"/>
+        <transition to="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR" name="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR"/>
+    </process-state>
+    <task-node end-tasks="true" name="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR">
+        <task name="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: Processo_Fluxo_visualizarDecisao
+   Label: Visualização da decisão
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Suspensão de processo pelo art. 40 - AGUARDAR" name="Manter processo suspenso pelo art. 40">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('ef:cs:suspensao_art40')=='true'}"/>
+        </transition>
+        <transition to="(EF) Suspensão de processo por parcelamento - AGUARDAR" name="Manter processo suspenso por parcelamento">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('ef:cs:suspensao_parcelamento') == 'true'}"/>
+        </transition>
+        <transition to="(EF) Houve data limite de suspensão?" name="Manter processo suspenso por outro motivo">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('ef:cs:suspensao_com_prazo') == 'true' || tramitacaoProcessualService.recuperaVariavel('ef:cs:suspensao_sem_prazo') == 'true'}"/>
+        </transition>
+        <transition to="(EF) Lançar movimento de encerramento da suspensão" name="Encerrar a suspensão do processo"/>
+    </task-node>
+    <node name="(EF) Lançar movimento de encerramento da suspensão">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(90001).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('date:ef_cs_data_limite_suspensao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('dls')}"/>
+            <action expression="#{lancadorMovimentosService.apagarMovimentosTemporarios()}"/>
+            <action expression="#{tramitacaoProcessualService.removerSituacao('jus:suspenso')}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(EF) Suspensão com prazo decorrido - ANALISAR">
+        <task name="(EF) Suspensão com prazo decorrido - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Suspensão com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
+        <transition to="(EF) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <transition to="(EF) Suspensão com prazo decorrido [030 dias] - ANALISAR" name="(EF) Suspensão com prazo decorrido [030 dias] - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda30', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Suspensão com prazo decorrido [030 dias] - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda30')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Suspensão com prazo decorrido [030 dias] - ANALISAR">
+        <task name="(EF) Suspensão com prazo decorrido [030 dias] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Suspensão com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
+        <transition to="(EF) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <transition to="(EF) Suspensão com prazo decorrido [060 dias] - ANALISAR" name="(EF) Suspensão com prazo decorrido [060 dias] - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda60', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Suspensão com prazo decorrido [060 dias] - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda60')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Suspensão com prazo decorrido [060 dias] - ANALISAR">
+        <task name="(EF) Suspensão com prazo decorrido [060 dias] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Suspensão com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
+        <transition to="(EF) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <transition to="(EF) Suspensão com prazo decorrido [100 dias ou mais] - ANALISAR" name="(EF) Suspensão com prazo decorrido [100 dias ou mais] - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda100', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Suspensão com prazo decorrido [100 dias ou mais] - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda100')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Suspensão com prazo decorrido [100 dias ou mais] - ANALISAR">
+        <task name="(EF) Suspensão com prazo decorrido [100 dias ou mais] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Suspensão com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de suspensão" name="Nó de Desvio - (EF) Controle de suspensão">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Conclusão para decisão sobre encerramento da suspensão" name="Enviar concluso para decisão sobre encerramento da suspensão"/>
+        <transition to="(EF) Lançar movimento de encerramento da suspensão" name="Encerrar suspensão do processo"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Controle de suspensão">
+        <task name="Nó de Desvio - (EF) Controle de suspensão" swimlane="Nó de Desvio - (EF) Controle de suspensão">
+            <controller>
+                <variable name="" mapped-name="null:" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="(EF) Suspensão de processo - INFORMAR" name="(EF) Suspensão de processo - INFORMAR"/>
+        <transition to="(EF) Suspensão de processo pelo art. 40 - AGUARDAR" name="(EF) Suspensão de processo pelo art. 40 - AGUARDAR"/>
+        <transition to="(EF) Suspensão de processo por parcelamento - AGUARDAR" name="(EF) Suspensão de processo por parcelamento - AGUARDAR"/>
+        <transition to="(EF) Suspensão de processo com prazo - AGUARDAR" name="(EF) Suspensão de processo com prazo - AGUARDAR"/>
+        <transition to="(EF) Suspensão de processo sem prazo - AGUARDAR" name="(EF) Suspensão de processo sem prazo - AGUARDAR"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR" name="(EF) Suspensão de processo - Despachados sobre encerramento da suspensão - ANALISAR"/>
+        <transition to="(EF) Suspensão de processo - CONFIRMAR" name="(EF) Suspensão de processo - CONFIRMAR"/>
+        <transition to="(EF) Suspensão com prazo decorrido - ANALISAR" name="(EF) Suspensão com prazo decorrido - ANALISAR"/>
+        <transition to="(EF) Suspensão com prazo decorrido [030 dias] - ANALISAR" name="(EF) Suspensão com prazo decorrido [030 dias] - ANALISAR"/>
+        <transition to="(EF) Suspensão com prazo decorrido [060 dias] - ANALISAR" name="(EF) Suspensão com prazo decorrido [060 dias] - ANALISAR"/>
+        <transition to="(EF) Suspensão com prazo decorrido [100 dias ou mais] - ANALISAR" name="(EF) Suspensão com prazo decorrido [100 dias ou mais] - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>

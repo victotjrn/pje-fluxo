@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Movimentações de comunicação">
+    <description><![CDATA[Código do fluxo: EF_MOV_PAC
+
+Descrição: Fluxo responsável pelo controle de processos enviados para conciliação na EF.
+
+Raia         Localização   Papel
+Secretaria   Secretaria    Chefe de Secretaria
+Secretaria   Secretaria    Servidor de Secretaria
+Secretaria   Gabinete      Magistrado
+Secretaria   Gabinete      Assessor
+Secretaria   Secretaria    Conciliador Judicial]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Movimentações de comunicação">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197,5:5886')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(EF) Separação preparação intimação" name="(EF) Separação preparação intimação"/>
+    </start-state>  
+    <!-- NODES -->
+    <fork name="(EF) Separação preparação intimação">
+        <transition to="(EF) É correrio ?" name="(EF) É correrio ?"/>
+        <transition to="(EF) É mandado ?" name="(EF) É mandado ?"/>
+        <transition to="(EF) É via sistema ?" name="(EF) É via sistema ?"/>
+        <transition to="(EF) É pessoalmente ?" name="(EF) É pessoalmente ?"/>
+    </fork>
+    <join name="(EF) Junção preparação intimação">
+        <transition to="Término" name="Término"/>
+    </join>
+    <decision expression="#{comunicacaoProcessualAction.getExpedientesPessoal().size() &gt; 0 ? '(EF) Registrar ciência' : '(EF) Junção preparação intimação'}" name="(EF) É pessoalmente ?">
+        <transition to="(EF) Junção preparação intimação" name="(EF) Junção preparação intimação"/>
+        <transition to="(EF) Registrar ciência" name="(EF) Registrar ciência"/>
+    </decision>
+    <decision expression="#{comunicacaoProcessualAction.getExpedientesCorreios().size() &gt; 0 ? '(EF) Lançar movimento de Expedição de Aviso de Recebimento' : '(EF) Junção preparação intimação'}" name="(EF) É correrio ?">
+        <transition to="(EF) Lançar movimento de Expedição de Aviso de Recebimento" name="(EF) Lançar movimento de Expedição de Aviso de Recebimento"/>
+        <transition to="(EF) Junção preparação intimação" name="(EF) Junção preparação intimação"/>
+    </decision>
+    <decision expression="#{comunicacaoProcessualAction.getExpedientesMandados().size() &gt; 0 ? '(EF) Lançar movimento de Expedição de mandado' : '(EF) Junção preparação intimação'}" name="(EF) É mandado ?">
+        <transition to="(EF) Lançar movimento de Expedição de mandado" name="(EF) Lançar movimento de Expedição de mandado"/>
+        <transition to="(EF) Junção preparação intimação" name="(EF) Junção preparação intimação"/>
+    </decision>
+    <decision expression="#{comunicacaoProcessualAction.getExpedientesEletronico().size() &gt; 0 ? '(EF) Lançar movimento de Expedição Outros documentos' : '(EF) Junção preparação intimação'}" name="(EF) É via sistema ?">
+        <transition to="(EF) Lançar movimento de Expedição Outros documentos" name="(EF) Lançar movimento de Expedição Outros documentos"/>
+        <transition to="(EF) Junção preparação intimação" name="(EF) Junção preparação intimação"/>
+    </decision>
+    <node name="(EF) Lançar movimento de Expedição de Aviso de Recebimento">
+        <transition to="(EF) Citações e(ou) intimações de audiência - IMPRIMIR" name="(EF) Citações e(ou) intimações de audiência - IMPRIMIR"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('C', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(74).lancarMovimento()}')}"/>
+        </event>
+    </node>
+    <node name="(EF) Lançar movimento de Expedição Outros documentos">
+        <transition to="(EF) Junção preparação intimação" name="(EF) Junção preparação intimação"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('E', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(80).lancarMovimento()}')}"/>
+        </event>
+    </node>
+    <node name="(EF) Lançar movimento de Expedição de mandado">
+        <transition to="(EF) Junção preparação intimação" name="(EF) Junção preparação intimação"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.enviarExpedientesLancarMovimentos('M', 'processoExpedienteAtual','#{preencherMovimento.deCodigo(60).associarAoDocumento(processoExpedienteAtual.getProcessoDocumento()).comComplementoDeCodigo(4).doTipoDominio().preencherComElementoDeCodigo(78).lancarMovimento()}')}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(EF) Citações e(ou) intimações de audiência - IMPRIMIR">
+        <task name="(EF) Citações e(ou) intimações de audiência - IMPRIMIR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_expedientes_correios" mapped-name="frame:Processo_Fluxo_expedientes_correios" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: Processo_Fluxo_expedientes_correios
+   Label: Imprimir citações e(ou) intimações
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Movimentações de comunicação" name="Nó de Desvio - (EF) Movimentações de comunicação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Junção preparação intimação" name="Cancelar e sair da tarefa/Informar conteúdo DJe">
+            <condition expression="#{!(processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10))}"/>
+        </transition>
+        <transition to="(EF) Junção preparação intimação" name="Cancelar e sair da tarefa">
+            <condition expression="#{(processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10))}"/>
+        </transition>
+    </task-node>
+    <node name="(EF) Registrar ciência">
+        <transition to="(EF) Junção preparação intimação" name="(EF) Junção preparação intimação"/>
+        <event type="node-enter">
+            <action expression="#{comunicacaoProcessualAction.registrarCienciaExpedientePessoal()}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Movimentações de comunicação">
+        <task name="Nó de Desvio - (EF) Movimentações de comunicação" swimlane="Nó de Desvio - (EF) Movimentações de comunicação"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Citações e(ou) intimações de audiência - IMPRIMIR" name="(EF) Citações e(ou) intimações de audiência - IMPRIMIR"/>
+    </task-node>
+    <end-state name="Término"/>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

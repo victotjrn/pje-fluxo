@@ -1,0 +1,668 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Expedição de mandado de citação e penhora">
+    <description><![CDATA[Código do fluxo: EF_EXP_MANDADO_CIT_PEN.
+
+Descrição: Preparar mandado de citação e penhora.
+
+Raia        Localização     Papel
+Secretaria  Secretaria      Chefe de Secretaria
+Secretaria  Secretaria      Servidor de Secretaria
+Secretaria  Gabinete        Magistrado
+Secretaria  Corregedoria    Servidor Corregedoria
+Secretaria  Corregedoria    Magistrado Corregedor
+Magistrado  Secretaria      Chefe de Secretaria
+Magistrado  Secretaria      Servidor de Secretaria
+Magistrado  Gabinete        Magistrado
+Magistrado  Corregedoria    Servidor Corregedoria
+Magistrado  Corregedoria    Magistrado Corregedor
+Magistrado  Gabinete        Magistrado Gabinete]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Magistrado">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(EF) Mandado de citação e penhora - EXPEDIR" name="(EF) Mandado de citação e penhora - EXPEDIR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(EF) Mandado de citação e penhora - EXPEDIR">
+        <task name="(EF) Mandado de citação e penhora - EXPEDIR" swimlane="Secretaria">
+            <controller>
+                <variable name="minuta_mandado_citacao_penhora" mapped-name="textEditCombo:minuta_mandado_citacao_penhora" access="read,write"/>
+                <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: minuta_mandado_citacao_penhora
+   Label: Minuta em elaboração de mandado de citação e penhora
+   Escrita: Sim
+   Obrig.: Sim
+   Tipo: Editor
+
+2. Variável: minutarLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Minutar em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Sem prazo" name="Prazo para manifestação: Sem prazo"/>
+        <transition to="(EF) Prazo de 5 dias" name="Prazo para manifestação: 005 dias"/>
+        <transition to="(EF) Prazo de 10 dias" name="Prazo para manifestação: 010 dias"/>
+        <transition to="(EF) Prazo de 15 dias" name="Prazo para manifestação: 015 dias"/>
+        <transition to="(EF) Prazo de 20 dias" name="Prazo para manifestação: 020 dias"/>
+        <transition to="(EF) Prazo de 30 dias" name="Prazo para manifestação: 030 dias"/>
+        <transition to="(EF) Prazo de 60 dias" name="Prazo para manifestação: 060 dias"/>
+        <transition to="(EF) Prazo de 90 dias" name="Prazo para manifestação: 090 dias"/>
+        <transition to="(EF) Prazo de 120 dias" name="Prazo para manifestação: 120 dias"/>
+        <transition to="(EF) Apagar minuta não assinada de mandado de citação e penhora" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Preparar comunicação padrão" name="Preparar comunicação (padrão)"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_mandado_citacao_penhora'))}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','95')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tiposDisponiveisIds','95')}"/>
+        </event>
+    </task-node>
+    <process-state name="(EF) Preparar comunicação padrão">
+        <sub-process name="(EF) Preparar ato de comunicação de mandado" binding="late"/>
+        <transition to="(EF) Apagar minuta não assinada de mandado de citação e penhora" name="(EF) Apagar minuta não assinada de mandado de citação e penhora"/>
+    </process-state>
+    <node name="(EF) Sem prazo">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:mandCitPen', 0)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 5 dias">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:mandCitPen', 5)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 10 dias">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:mandCitPen', 10)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 15 dias">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:mandCitPen', 15)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 20 dias">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:mandCitPen', 20)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 30 dias">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:mandCitPen', 30)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 60 dias">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:mandCitPen', 60)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 90 dias">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:mandCitPen', 90)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 120 dias">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:mandCitPen', 120)}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR">
+        <task name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="minuta_mandado_citacao_penhora" mapped-name="textEditCombo:minuta_mandado_citacao_penhora" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso1
+   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:mandCitPen') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:mandCitPen')).concat(' dias.'))}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+2. Variável: minuta_mandado_citacao_penhora
+   Label: Minuta em elaboração de mandado de citação e penhora
+   Escrita: Sim
+   Obrig.: Sim
+   Tipo: Editor
+
+3. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Destinatário: partes do polo ativo" name="Destinatário: partes do polo ativo"/>
+        <transition to="(EF) Destinatário: partes do polo passivo" name="Destinatário: partes do polo passivo"/>
+        <transition to="(EF) Destinatário: partes dos polos ativo e passivo" name="Destinatário: partes dos polos ativo e passivo"/>
+        <transition to="(EF) Mandado de citação e penhora - EXPEDIR" name="Retornar para expedição"/>
+        <transition to="(EF) Apagar minuta não assinada de mandado de citação e penhora" name="Cancelar e sair da tarefa"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_mandado_citacao_penhora:idProcessoDocumento', processoHome.idProcessoDocumento)}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tipoDocumento.set('TipoDocumento',95)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','95')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_mandado_citacao_penhora'))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(EF) Destinatário: partes do polo ativo">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de assinatura - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de assinatura - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:mandadoCitacaoPenhora', 'A')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:mandadoCitacaoPenhora', 'partes do polo ativo')}"/>
+        </event>
+    </node>
+    <node name="(EF) Destinatário: partes do polo passivo">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de assinatura - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de assinatura - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:mandadoCitacaoPenhora', 'P')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:mandadoCitacaoPenhora', 'partes do polo passivo')}"/>
+        </event>
+    </node>
+    <node name="(EF) Destinatário: partes dos polos ativo e passivo">
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de assinatura - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de assinatura - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:mandadoCitacaoPenhora', 'T')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:mandadoCitacaoPenhora', 'partes dos polos ativo e passivo')}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(EF) Mandado de citação e penhora pendente de escolha de assinatura - SELECIONAR">
+        <task name="(EF) Mandado de citação e penhora pendente de escolha de assinatura - SELECIONAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+                <variable name="minuta_mandado_citacao_penhora" mapped-name="textEditCombo:minuta_mandado_citacao_penhora" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso1
+   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:mandCitPen') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:mandCitPen')).concat(' dias.'))}
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: aviso2
+   Label: #{'Destinatário: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:mandadoCitacaoPenhora')).concat('.')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+3. Variável: minuta_mandado_citacao_penhora
+   Label: Minuta em elaboração de mandado de citação e penhora
+   Escrita: Sim
+   Obrig.: Sim
+   Tipo: Editor
+
+4. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(EF) Mandado de citação e penhora [chefe de secretaria] - ASSINAR" name="Encaminhar para assinatura do chefe de secretaria"/>
+        <transition to="(EF) Mandado de citação e penhora [magistrado] - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(EF) Mandado de citação e penhora - EXPEDIR" name="Retornar para expedição"/>
+        <transition to="(EF) Apagar minuta não assinada de mandado de citação e penhora" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Mandado de citação e penhora [chefe de secretaria] - ASSINAR">
+        <task name="(EF) Mandado de citação e penhora [chefe de secretaria] - ASSINAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+                <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso1
+   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:mandCitPen') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:mandCitPen')).concat(' dias.'))}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+2. Variável: aviso2
+   Label: #{'Destinatário: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:mandadoCitacaoPenhora')).concat('.')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+3. Variável: Processo_Fluxo_revisarMinuta
+   Label: Assinar Minuta
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+4. Variável: MovimentarEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+5. Variável: AssinaturaEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Mandado de citação e penhora - EXPEDIR" name="Retornar para minuta de mandado de citação e penhora">
+            <condition expression="#{empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and  revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <transition to="(EF) Mandado de citação e penhora [magistrado] - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR" name="Documento já assinado.">
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','95')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',95)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:expedir_mandado_citacao_penhora'))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Mandado de citação e penhora [magistrado] - ASSINAR">
+        <task name="(EF) Mandado de citação e penhora [magistrado] - ASSINAR" swimlane="Magistrado">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+                <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+                <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso1
+   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:mandCitPen') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:mandCitPen')).concat(' dias.'))}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+2. Variável: aviso2
+   Label: #{'Destinatário: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:mandadoCitacaoPenhora')).concat('.')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+3. Variável: Processo_Fluxo_revisarMinuta
+   Label: Assinar Minuta
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+4. Variável: MovimentarEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote
+
+5. Variável: AssinaturaEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Assinatura em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR"/>
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR" name="Documento já assinado.">
+            <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','95')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',95)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:expedir_mandado_citacao_penhora'))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR">
+        <task name="(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_expedientes_centralmandados" mapped-name="frame:Processo_Fluxo_expedientes_centralmandados" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: Processo_Fluxo_expedientes_centralmandados
+   Label: Expedientes da central de mandados
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Lançar movimento de expedição de mandado" name="Finalizar e prosseguir"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Lançar movimento de expedição de mandado')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(EF) Lançar movimento de expedição de mandado">
+        <transition to="(EF) Mandado de citação e penhora pendente de devolução - AGUARDAR" name="(EF) Mandado de citação e penhora pendente de devolução - AGUARDAR"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarPolosMandado(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:mandadoCitacaoPenhora'), tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:mandCitPen') == 0 ? 'S' : 'D', tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:mandCitPen') == 0 ? null : tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:mandCitPen'), tramitacaoProcessualService.recuperaVariavel('ef:exp_mandado_citacao_penhora:idProcessoDocumento'), 78)}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(EF) Mandado de citação e penhora pendente de devolução - AGUARDAR">
+        <task name="(EF) Mandado de citação e penhora pendente de devolução - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: MovimentarLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(EF) Apagar minuta não assinada de mandado de citação e penhora" name="Finalizar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Mandados de citação e penhora devolvidos - ANALISAR" name="(EF) Mandados de citação e penhora devolvidos - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Mandado de citação e penhora pendente de devolução [030 dias] - AGUARDAR" name="(EF) Mandado de citação e penhora pendente de devolução [030 dias] - AGUARDAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda30', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado de citação e penhora pendente de devolução [030 dias] - AGUARDAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de citação e penhora devolvidos - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda30')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Mandado de citação e penhora pendente de devolução [030 dias] - AGUARDAR">
+        <task name="(EF) Mandado de citação e penhora pendente de devolução [030 dias] - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: MovimentarLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(EF) Apagar minuta não assinada de mandado de citação e penhora" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Mandado de citação e penhora pendente de devolução [060 dias] - AGUARDAR" name="(EF) Mandado de citação e penhora pendente de devolução [060 dias] - AGUARDAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Mandados de citação e penhora devolvidos - ANALISAR" name="(EF) Mandados de citação e penhora devolvidos - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda60', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado de citação e penhora pendente de devolução [060 dias] - AGUARDAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de citação e penhora devolvidos - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda60')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Mandado de citação e penhora pendente de devolução [060 dias] - AGUARDAR">
+        <task name="(EF) Mandado de citação e penhora pendente de devolução [060 dias] - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: MovimentarLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(EF) Apagar minuta não assinada de mandado de citação e penhora" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Mandado de citação e penhora pendente de devolução [100 dias ou mais] - AGUARDAR" name="(EF) Mandado de citação e penhora pendente de devolução [100 dias ou mais] - AGUARDAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Mandados de citação e penhora devolvidos - ANALISAR" name="(EF) Mandados de citação e penhora devolvidos - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda100', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado de citação e penhora pendente de devolução [100 dias ou mais] - AGUARDAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de citação e penhora devolvidos - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda100')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Mandado de citação e penhora pendente de devolução [100 dias ou mais] - AGUARDAR">
+        <task name="(EF) Mandado de citação e penhora pendente de devolução [100 dias ou mais] - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarLote" mapped-name="movimentarLote:MovimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: MovimentarLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(EF) Apagar minuta não assinada de mandado de citação e penhora" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Mandados de citação e penhora devolvidos - ANALISAR" name="(EF) Mandados de citação e penhora devolvidos - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandados de citação e penhora devolvidos - ANALISAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de citação e penhora devolvidos - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Mandados de citação e penhora devolvidos - ANALISAR">
+        <task name="(EF) Mandados de citação e penhora devolvidos - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: MovimentarEmLote
+   Label:]]></description>
+        <transition to="(EF) Apagar minuta não assinada de mandado de citação e penhora" name="Finalizar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="node-enter">
+            <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Mandados de citação e penhora devolvidos - ANALISAR', true, false, true, true)}"/>
+        </event>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{processoHome.limparCaixaTriagem()}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(EF) Apagar minuta não assinada de mandado de citação e penhora">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="${documentoJudicialService.removerDocumentoAPartirDeVariavalDeFluxo('minuta_mandado_citacao_penhora')}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora">
+        <task name="Nó de Desvio - (EF) Expedição de mandado de citação e penhora" swimlane="Nó de Desvio - (EF) Expedição de mandado de citação e penhora"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Mandado de citação e penhora - EXPEDIR" name="(EF) Mandado de citação e penhora - EXPEDIR"/>
+        <transition to="(EF) Mandado de citação e penhora [chefe de secretaria] - ASSINAR" name="(EF) Mandado de citação e penhora [chefe de secretaria] - ASSINAR"/>
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de destinatário - SELECIONAR"/>
+        <transition to="(EF) Mandado de citação e penhora pendente de devolução - AGUARDAR" name="(EF) Mandado de citação e penhora pendente de devolução - AGUARDAR"/>
+        <transition to="(EF) Mandado de citação e penhora [magistrado] - ASSINAR" name="(EF) Mandado de citação e penhora [magistrado] - ASSINAR"/>
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de assinatura - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de assinatura - SELECIONAR"/>
+        <transition to="(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR" name="(EF) Mandado de citação e penhora pendente de escolha de central - SELECIONAR"/>
+        <transition to="(EF) Mandados de citação e penhora devolvidos - ANALISAR" name="(EF) Mandados de citação e penhora devolvidos - ANALISAR"/>
+        <transition to="(EF) Mandado de citação e penhora pendente de devolução [030 dias] - AGUARDAR" name="(EF) Mandado de citação e penhora pendente de devolução [030 dias] - AGUARDAR"/>
+        <transition to="(EF) Mandado de citação e penhora pendente de devolução [060 dias] - AGUARDAR" name="(EF) Mandado de citação e penhora pendente de devolução [060 dias] - AGUARDAR"/>
+        <transition to="(EF) Mandado de citação e penhora pendente de devolução [100 dias ou mais] - AGUARDAR" name="(EF) Mandado de citação e penhora pendente de devolução [100 dias ou mais] - AGUARDAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>

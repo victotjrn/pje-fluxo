@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Lançador de fluxo">
+    <description><![CDATA[Código do fluxo: EF_LANC_FLUXO
+
+Descrição: Fluxo lançador de fluxo paralelo.]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Lançador de fluxo">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(EF) É certificar decurso de prazo?" name="(EF) É certificar decurso de prazo?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_certificar_decurso}') == true ? '(EF) Expedição de certidão de decurso de prazo' : '(EF) É certificar trânsito em julgado?'}" name="(EF) É certificar decurso de prazo?">
+        <transition to="(EF) Expedição de certidão de decurso de prazo" name="(EF) Expedição de certidão de decurso de prazo"/>
+        <transition to="(EF) É certificar trânsito em julgado?" name="(EF) É certificar trânsito em julgado?"/>
+    </decision>
+    <node name="(EF) Expedição de certidão de decurso de prazo">
+        <transition to="(EF) É certificar trânsito em julgado?" name="(EF) É certificar trânsito em julgado?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_decurso_prazo', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_transito_julgado', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:alvara', false)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXPDOC', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_decurso_prazo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:alvara')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_transito_julgado')}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_certificar_transito}') == true ? '(EF) Expedição de certidão de trânsito em julgado' : '(EF) É expedir alvará?'}" name="(EF) É certificar trânsito em julgado?">
+        <transition to="(EF) Expedição de certidão de trânsito em julgado" name="(EF) Expedição de certidão de trânsito em julgado"/>
+        <transition to="(EF) É expedir alvará?" name="(EF) É expedir alvará?"/>
+    </decision>
+    <node name="(EF) Expedição de certidão de trânsito em julgado">
+        <transition to="(EF) É expedir alvará?" name="(EF) É expedir alvará?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_transito_julgado', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:alvara', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_decurso_prazo', false)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXPDOC', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_transito_julgado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:alvara')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_decurso_prazo')}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_expedir_alvaras}') == true ? '(EF) Expedição de alvará' : '(EF) Aguardar Laudo Técnico?'}" name="(EF) É expedir alvará?">
+        <transition to="(EF) Expedição de alvará" name="(EF) Expedição de alvará"/>
+        <transition to="(EF) Aguardar Laudo Técnico?" name="(EF) Aguardar Laudo Técnico?"/>
+    </decision>
+    <node name="(EF) Expedição de alvará">
+        <transition to="(EF) Aguardar Laudo Técnico?" name="(EF) Aguardar Laudo Técnico?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_transito_julgado', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:alvara', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_decurso_prazo', false)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXPDOC', processInstance.contextInstance.variables)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_transito_julgado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:alvara')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_decurso_prazo')}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_aguardar_laudo_tecnico}') == true ? '(EF) Aguardando Perícia, Laudo Técnico ou Outros' : '(EF) Alterar tipo de documento?'}" name="(EF) Aguardar Laudo Técnico?">
+        <transition to="(EF) Aguardando Perícia, Laudo Técnico ou Outros" name="(EF) Aguardando Perícia, Laudo Técnico ou Outros"/>
+        <transition to="(EF) Alterar tipo de documento?" name="(EF) Alterar tipo de documento?"/>
+    </decision>
+    <node name="(EF) Aguardando Perícia, Laudo Técnico ou Outros">
+        <transition to="(EF) Alterar tipo de documento?" name="(EF) Alterar tipo de documento?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_PER_LAU_TEC', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_alterar_tipo_documento}') == true ? '(EF) Alterar tipo de documento' : '(EF) Bacen Jud - Minutar bloqueio ou desbloqueio?'}" name="(EF) Alterar tipo de documento?">
+        <transition to="(EF) Alterar tipo de documento" name="(EF) Alterar tipo de documento"/>
+        <transition to="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio?" name="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio?"/>
+    </decision>
+    <node name="(EF) Alterar tipo de documento">
+        <transition to="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio?" name="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_RET_DOC', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_bacenjud_minutar}') == true ? '(EF) Bacen Jud - Minutar bloqueio ou desbloqueio' : '(EF) SerasaJUD - Solicitar?'}" name="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio?">
+        <transition to="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio" name="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio"/>
+        <transition to="(EF) SerasaJUD - Solicitar?" name="(EF) SerasaJUD - Solicitar?"/>
+    </decision>
+    <node name="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio">
+        <transition to="(EF) SerasaJUD - Solicitar?" name="(EF) SerasaJUD - Solicitar?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_BACENJUD', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_serasajud_solicitar}') == true ? '(EF) SerasaJUD - Solicitar' : '(EF) Citar?'}" name="(EF) SerasaJUD - Solicitar?">
+        <transition to="(EF) SerasaJUD - Solicitar" name="(EF) SerasaJUD - Solicitar"/>
+        <transition to="(EF) Citar?" name="(EF) Citar?"/>
+    </decision>
+    <node name="(EF) SerasaJUD - Solicitar">
+        <transition to="(EF) Citar?" name="(EF) Citar?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_REG_SERASAJUD', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_citar}') == true ? '(EF) Citar' : '(EF) Intimar?'}" name="(EF) Citar?">
+        <transition to="(EF) Citar" name="(EF) Citar"/>
+        <transition to="(EF) Intimar?" name="(EF) Intimar?"/>
+    </decision>
+    <node name="(EF) Citar">
+        <transition to="(EF) Intimar?" name="(EF) Intimar?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXP_CIT', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_intimar}') == true ? '(EF) Intimar' : '(EF) Controlar audiência?'}" name="(EF) Intimar?">
+        <transition to="(EF) Intimar" name="(EF) Intimar"/>
+        <transition to="(EF) Controlar audiência?" name="(EF) Controlar audiência?"/>
+    </decision>
+    <node name="(EF) Intimar">
+        <transition to="(EF) Controlar audiência?" name="(EF) Controlar audiência?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXP_INT', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_controlar_audiencia}') == true ? '(EF) Controlar audiência' : '(EF) É controlar retorno de expediente?'}" name="(EF) Controlar audiência?">
+        <transition to="(EF) Controlar audiência" name="(EF) Controlar audiência"/>
+        <transition to="(EF) É controlar retorno de expediente?" name="(EF) É controlar retorno de expediente?"/>
+    </decision>
+    <node name="(EF) Controlar audiência">
+        <transition to="(EF) É controlar retorno de expediente?" name="(EF) É controlar retorno de expediente?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_AUD', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_controlar_retorno_expediente}') == true ? '(EF) Controle de retorno de expedientes' : '(EF) CEJUSC?'}" name="(EF) É controlar retorno de expediente?">
+        <transition to="(EF) Controle de retorno de expedientes" name="(EF) Controle de retorno de expedientes"/>
+        <transition to="(EF) CEJUSC?" name="(EF) CEJUSC?"/>
+    </decision>
+    <node name="(EF) Controle de retorno de expedientes">
+        <transition to="(EF) CEJUSC?" name="(EF) CEJUSC?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_CPRE', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_encaminhar_cejusc}') == true ? '(EF) Controlar CEJUSC' : '(EF) Encerrar prazo?'}" name="(EF) CEJUSC?">
+        <transition to="(EF) Controlar CEJUSC" name="(EF) Controlar CEJUSC"/>
+        <transition to="(EF) Encerrar prazo?" name="(EF) Encerrar prazo?"/>
+    </decision>
+    <node name="(EF) Controlar CEJUSC">
+        <transition to="(EF) Encerrar prazo?" name="(EF) Encerrar prazo?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_CEJUSC', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_encerrar_prazo}') == true ? '(EF) Encerrar prazo' : '(EF) Expedir Carta?'}" name="(EF) Encerrar prazo?">
+        <transition to="(EF) Encerrar prazo" name="(EF) Encerrar prazo"/>
+        <transition to="(EF) Expedir Carta?" name="(EF) Expedir Carta?"/>
+    </decision>
+    <node name="(EF) Encerrar prazo">
+        <transition to="(EF) Expedir Carta?" name="(EF) Expedir Carta?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_ENC_PRAZO', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_expedir_carta}') == true ? '(EF) Expedição de Carta' : '(EF) Expedir Mandado?'}" name="(EF) Expedir Carta?">
+        <transition to="(EF) Expedição de Carta" name="(EF) Expedição de Carta"/>
+        <transition to="(EF) Expedir Mandado?" name="(EF) Expedir Mandado?"/>
+    </decision>
+    <node name="(EF) Expedição de Carta">
+        <transition to="(EF) Expedir Mandado?" name="(EF) Expedir Mandado?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXP_CARTA', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_expedir_mandado}') == true ? '(EF) Expedição de Mandado' : '(EF) Expedir Ofício?'}" name="(EF) Expedir Mandado?">
+        <transition to="(EF) Expedição de Mandado" name="(EF) Expedição de Mandado"/>
+        <transition to="(EF) Expedir Ofício?" name="(EF) Expedir Ofício?"/>
+    </decision>
+    <node name="(EF) Expedição de Mandado">
+        <transition to="(EF) Expedir Ofício?" name="(EF) Expedir Ofício?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:lanc:publicar_dje', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:lanc:expedir_mandado', true)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXP_MANDADO', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_expedir_oficio}') == true ? '(EF) Expedição de Ofício' : '(EF) Expedir outros documentos?'}" name="(EF) Expedir Ofício?">
+        <transition to="(EF) Expedição de Ofício" name="(EF) Expedição de Ofício"/>
+        <transition to="(EF) Expedir outros documentos?" name="(EF) Expedir outros documentos?"/>
+    </decision>
+    <node name="(EF) Expedição de Ofício">
+        <transition to="(EF) Expedir outros documentos?" name="(EF) Expedir outros documentos?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXP_OFI', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_expedir_outros_documentos}') == true ? '(EF) Expedição de outros documentos' : '(EF) Expedir precatório e(ou) RPV?'}" name="(EF) Expedir outros documentos?">
+        <transition to="(EF) Expedição de outros documentos" name="(EF) Expedição de outros documentos"/>
+        <transition to="(EF) Expedir precatório e(ou) RPV?" name="(EF) Expedir precatório e(ou) RPV?"/>
+    </decision>
+    <node name="(EF) Expedição de outros documentos">
+        <transition to="(EF) Expedir precatório e(ou) RPV?" name="(EF) Expedir precatório e(ou) RPV?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXP_OUTROSDOC', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_expedir_precatorio_rpv}') == true ? '(EF) Expedir precatório e(ou) RPV' : '(EF) Infojud ou Infoseg - Consultar?'}" name="(EF) Expedir precatório e(ou) RPV?">
+        <transition to="(EF) Expedir precatório e(ou) RPV" name="(EF) Expedir precatório e(ou) RPV"/>
+        <transition to="(EF) Infojud ou Infoseg - Consultar?" name="(EF) Infojud ou Infoseg - Consultar?"/>
+    </decision>
+    <node name="(EF) Expedir precatório e(ou) RPV">
+        <transition to="(EF) Infojud ou Infoseg - Consultar?" name="(EF) Infojud ou Infoseg - Consultar?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXP_PREC_RPV', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_infojud_infoseg_consultar}') == true ? '(EF) Infojud, Infoseg ou TRE - Consultar' : '(EF) Publicar no DJE?'}" name="(EF) Infojud ou Infoseg - Consultar?">
+        <transition to="(EF) Infojud, Infoseg ou TRE - Consultar" name="(EF) Infojud, Infoseg ou TRE - Consultar"/>
+        <transition to="(EF) Publicar no DJE?" name="(EF) Publicar no DJE?"/>
+    </decision>
+    <node name="(EF) Infojud, Infoseg ou TRE - Consultar">
+        <transition to="(EF) Publicar no DJE?" name="(EF) Publicar no DJE?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_INFOJ_INFOG_TRE', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_publicar_dje}') == true ? '(EF) Publicação no DJE' : '(EF) Renajud - Consultar?'}" name="(EF) Publicar no DJE?">
+        <transition to="(EF) Publicação no DJE" name="(EF) Publicação no DJE"/>
+        <transition to="(EF) Renajud - Consultar?" name="(EF) Renajud - Consultar?"/>
+    </decision>
+    <node name="(EF) Publicação no DJE">
+        <transition to="(EF) Renajud - Consultar?" name="(EF) Renajud - Consultar?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:lanc:publicar_dje', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:lanc:expedir_mandado', false)}"/>
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_PAC', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_renajud_consultar}') == true ? '(EF) Renajud - Consultar' : 'Término'}" name="(EF) Renajud - Consultar?">
+        <transition to="(EF) Renajud - Consultar" name="(EF) Renajud - Consultar"/>
+        <transition to="Término" name="Término"/>
+    </decision>
+    <node name="(EF) Renajud - Consultar">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_RENAJUD', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Lançador de fluxo">
+        <task name="Nó de Desvio - (EF) Lançador de fluxo" swimlane="Nó de Desvio - (EF) Lançador de fluxo"/>
+        <transition to="Término" name="Término"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Controle de prazos de carta">
+    <description><![CDATA[Código do fluxo: EF_CONTPRAZOS_CARTA
+
+Descrição: Gestão de retorno e prazos de carta precatórias.
+
+Raia        Localização     Papel
+Secretaria  Secretaria      Chefe de Secretaria
+Secretaria  Gabinete        Magistrado]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Controle de prazos de carta">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(EF) Existe expediente do tipo carta pendente de ciência?" name="(EF) Existe expediente do tipo carta pendente de ciência?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.meioExpedicaoExpediente = 'L' AND ppe.dtCienciaParte IS NULL AND ppe.fechado = false&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(EF) Carta de ordem, precatória ou rogatória - ENCAMINHAR' : '(EF) Separação em carta com ou sem prazo'}" name="(EF) Existe expediente do tipo carta pendente de ciência?">
+        <transition to="(EF) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="(EF) Carta de ordem, precatória ou rogatória - ENCAMINHAR"/>
+        <transition to="(EF) Separação em carta com ou sem prazo" name="(EF) Separação em carta com ou sem prazo"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória ou rogatória - ENCAMINHAR">
+        <task name="(EF) Carta de ordem, precatória ou rogatória - ENCAMINHAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_expedientes_precatorias" mapped-name="frame:Processo_Fluxo_expedientes_precatorias" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_expedientes_precatorias
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Carta de ordem, precatória e rogatória - AGUARDAR" name="Aguardar devolução da carta"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória e rogatória - AGUARDAR">
+        <task name="(EF) Carta de ordem, precatória e rogatória - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo encontra-se aguardando a devolução da carta. Ao ser devolvida, clique em "Registrar devolução da carta" para informar a data da devolução para que o sistema possa iniciar o prazo de cumprimento (quando aplicável).
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória - REGISTRAR" name="Registrar devolução da carta"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="Retornar para encaminhar carta"/>
+        <transition to="(EF) Carta de ordem, precatória e rogatória [030 dias] - AGUARDAR" name="(EF) Carta de ordem, precatória e rogatória [030 dias] - AGUARDAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda30', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Carta de ordem, precatória e rogatória [030 dias] - AGUARDAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda30')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória e rogatória [030 dias] - AGUARDAR">
+        <task name="(EF) Carta de ordem, precatória e rogatória [030 dias] - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo encontra-se aguardando a devolução da carta. Ao ser devolvida, clique em "Registrar devolução da carta" para informar a data da devolução para que o sistema possa iniciar o prazo de cumprimento (quando aplicável).
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Carta de ordem, precatória e rogatória [060 dias] - AGUARDAR" name="(EF) Carta de ordem, precatória e rogatória [060 dias] - AGUARDAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória - REGISTRAR" name="Registrar devolução da carta"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="Retornar para encaminhar carta"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda60', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Carta de ordem, precatória e rogatória [060 dias] - AGUARDAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda60')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória e rogatória [060 dias] - AGUARDAR">
+        <task name="(EF) Carta de ordem, precatória e rogatória [060 dias] - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo encontra-se aguardando a devolução da carta. Ao ser devolvida, clique em "Registrar devolução da carta" para informar a data da devolução para que o sistema possa iniciar o prazo de cumprimento (quando aplicável).
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Carta de ordem, precatória e rogatória [100 dias ou mais] - AGUARDAR" name="(EF) Carta de ordem, precatória e rogatória [100 dias ou mais] - AGUARDAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória - REGISTRAR" name="Registrar devolução da carta"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="Retornar para encaminhar carta"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda100', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Carta de ordem, precatória e rogatória [100 dias ou mais] - AGUARDAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda100')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória e rogatória [100 dias ou mais] - AGUARDAR">
+        <task name="(EF) Carta de ordem, precatória e rogatória [100 dias ou mais] - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo encontra-se aguardando a devolução da carta. Ao ser devolvida, clique em "Registrar devolução da carta" para informar a data da devolução para que o sistema possa iniciar o prazo de cumprimento (quando aplicável).
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória - REGISTRAR" name="Registrar devolução da carta"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="Retornar para encaminhar carta"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória ou rogatória - REGISTRAR">
+        <task name="(EF) Carta de ordem, precatória ou rogatória - REGISTRAR" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_exped_registroCiencia" mapped-name="frame:WEB-INF_xhtml_flx_exped_registroCiencia" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: WEB-INF_xhtml_flx_exped_registroCiencia
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="(EF) Carta de ordem, precatória e rogatória - AGUARDAR" name="Retornar para aguardar devolução da carta"/>
+        <transition to="(EF) Separação em carta com ou sem prazo" name="Verificar existência da prazo em aberto"/>
+    </task-node>
+    <fork name="(EF) Separação em carta com ou sem prazo">
+        <transition to="(EF) Existe prazo de expediente do tipo carta em aberto?" name="(EF) Existe prazo de expediente do tipo carta em aberto?"/>
+        <transition to="(EF) Existe expediente do tipo carta sem prazo em aberto?" name="(EF) Existe expediente do tipo carta sem prazo em aberto?"/>
+    </fork>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.meioExpedicaoExpediente = 'L' AND ppe.dtCienciaParte IS NOT NULL AND ppe.fechado = false AND ppe.tipoPrazo &lt;&gt; 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(EF) Existe registro do processo na tarefa com prazo?' : '(EF) Junção em carta com ou sem prazo'}" name="(EF) Existe prazo de expediente do tipo carta em aberto?">
+        <transition to="(EF) Junção em carta com ou sem prazo" name="(EF) Junção em carta com ou sem prazo"/>
+        <transition to="(EF) Existe registro do processo na tarefa com prazo?" name="(EF) Existe registro do processo na tarefa com prazo?"/>
+    </decision>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM SituacaoProcesso AS s WHERE s.nomeTarefa = '(EF) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR' AND s.processoTrf.idProcessoTrf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(EF) Junção em carta com ou sem prazo' : '(EF) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR'}" name="(EF) Existe registro do processo na tarefa com prazo?">
+        <transition to="(EF) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(EF) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
+        <transition to="(EF) Junção em carta com ou sem prazo" name="(EF) Junção em carta com ou sem prazo"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR">
+        <task name="(EF) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo encontra-se aguardando o prazo de cumprimento da carta. Ao decorrer, o processo será movimentado automaticamente para tarefa "(EF) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR".
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Os prazos dos expedientes do tipo carta continuam abertos?" name="(EF) Os prazos dos expedientes do tipo carta continuam abertos?">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Junção em carta com ou sem prazo" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Os prazos dos expedientes do tipo carta continuam abertos?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.meioExpedicaoExpediente = 'L' AND ppe.fechado = false AND ppe.tipoPrazo &lt;&gt; 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(EF) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR' : '(EF) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR'}" name="(EF) Os prazos dos expedientes do tipo carta continuam abertos?">
+        <transition to="(EF) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(EF) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR">
+        <task name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O prazo de cumprimento da carta foi decorrido. Favor seguir no fluxo normalmente.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentarLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Junção em carta com ou sem prazo" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [030 dias] - ANALISAR" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [030 dias] - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda30', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [030 dias] - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda30')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [030 dias] - ANALISAR">
+        <task name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [030 dias] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O prazo de cumprimento da carta foi decorrido. Favor seguir no fluxo normalmente.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentarLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Junção em carta com ou sem prazo" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [060 dias] - ANALISAR" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [060 dias] - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda60', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [060 dias] - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda60')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [060 dias] - ANALISAR">
+        <task name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [060 dias] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O prazo de cumprimento da carta foi decorrido. Favor seguir no fluxo normalmente.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentarLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Junção em carta com ou sem prazo" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [100 dias ou mais] - ANALISAR" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [100 dias ou mais] - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda100', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [100 dias ou mais] - ANALISAR')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda100')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [100 dias ou mais] - ANALISAR">
+        <task name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [100 dias ou mais] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentarLote" mapped-name="movimentarLote:movimentarLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O prazo de cumprimento da carta foi decorrido. Favor seguir no fluxo normalmente.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentarLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Junção em carta com ou sem prazo" name="Finalizar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <decision expression="#{entityManager.createQuery(&quot;SELECT COUNT(*) FROM ProcessoParteExpediente AS ppe JOIN ppe.processoExpediente AS pe WHERE ppe.processoJudicial.idProcessoTrf = :idProcessoTrf AND pe.meioExpedicaoExpediente = 'L' AND ppe.dtCienciaParte IS NOT NULL AND ppe.fechado = false AND ppe.tipoPrazo = 'S'&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(EF) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR' : '(EF) Junção em carta com ou sem prazo'}" name="(EF) Existe expediente do tipo carta sem prazo em aberto?">
+        <transition to="(EF) Junção em carta com ou sem prazo" name="(EF) Junção em carta com ou sem prazo"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR" name="(EF) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR">
+        <task name="(EF) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo encontra-se com carta sem prazo pendente de retorno. Para desconsiderar o controle nesta tarefa, clique na próxima ação abaixo.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Controle de prazos de carta" name="Nó de Desvio - (EF) Controle de prazos de carta">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Junção em carta com ou sem prazo" name="(EF) Junção em carta com ou sem prazo"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <join name="(EF) Junção em carta com ou sem prazo">
+        <transition to="Término" name="Término"/>
+    </join>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Controle de prazos de carta">
+        <task name="Nó de Desvio - (EF) Controle de prazos de carta" swimlane="Nó de Desvio - (EF) Controle de prazos de carta"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória - ENCAMINHAR" name="(EF) Carta de ordem, precatória ou rogatória - ENCAMINHAR"/>
+        <transition to="(EF) Carta de ordem, precatória e rogatória - AGUARDAR" name="(EF) Carta de ordem, precatória e rogatória - AGUARDAR"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória - REGISTRAR" name="(EF) Carta de ordem, precatória ou rogatória - REGISTRAR"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR" name="(EF) Carta de ordem, precatória ou rogatória com prazo em curso - AGUARDAR"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido - ANALISAR"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR" name="(EF) Carta de ordem, precatória ou rogatória sem prazo - ANALISAR"/>
+        <transition to="(EF) Carta de ordem, precatória e rogatória [030 dias] - AGUARDAR" name="(EF) Carta de ordem, precatória e rogatória [030 dias] - AGUARDAR"/>
+        <transition to="(EF) Carta de ordem, precatória e rogatória [060 dias] - AGUARDAR" name="(EF) Carta de ordem, precatória e rogatória [060 dias] - AGUARDAR"/>
+        <transition to="(EF) Carta de ordem, precatória e rogatória [100 dias ou mais] - AGUARDAR" name="(EF) Carta de ordem, precatória e rogatória [100 dias ou mais] - AGUARDAR"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [030 dias] - ANALISAR" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [030 dias] - ANALISAR"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [060 dias] - ANALISAR" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [060 dias] - ANALISAR"/>
+        <transition to="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [100 dias ou mais] - ANALISAR" name="(EF) Carta de ordem, precatória ou rogatória com prazo decorrido [100 dias ou mais] - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

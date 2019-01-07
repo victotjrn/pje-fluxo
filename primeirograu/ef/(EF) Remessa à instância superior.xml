@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Remessa à instância superior">
+    <description><![CDATA[Código do fluxo: EF_REM_INST_SUP.
+
+Descrição: Fluxo responsável pela remessa à instância superior.
+
+Raia        Localização   Papel
+Secretaria  Secretaria    Chefe de Secretaria
+Secretaria  Gabinete      Magistrado]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Remessa à instância superior">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(EF) Remessa à instância superior - ENCAMINHAR" name="(EF) Remessa à instância superior - ENCAMINHAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(EF) Remessa à instância superior - ENCAMINHAR">
+        <task name="(EF) Remessa à instância superior - ENCAMINHAR" swimlane="Secretaria">
+            <controller/>
+        </task>
+        <transition to="Nó de Desvio - (EF) Remessa à instância superior" name="Nó de Desvio - (EF) Remessa à instância superior">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Ignorar envio à instância superior"/>
+        <transition to="(EF) Remessa à instância superior - eletronicamente - ENCAMINHAR" name="Encaminhar para instância superior - eletronicamente">
+            <condition expression="#{ util.eval(parametroUtil.getParametro('pje:tjrn:vciv:orgaoJulgadorRemessaEletronica')) }"/>
+        </transition>
+        <transition to="(EF) Remessa à instância superior - fisicamente - ENCAMINHAR" name="Encaminhar para instância superior - fisicamente"/>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Remessa à instância superior - eletronicamente - ENCAMINHAR">
+        <task name="(EF) Remessa à instância superior - eletronicamente - ENCAMINHAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Intercomunicacao_RetificacaoAutuacao_updateRetificacaoAutuacao" mapped-name="frame:Intercomunicacao_RetificacaoAutuacao_updateRetificacaoAutuacao" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: Intercomunicacao_RetificacaoAutuacao_updateRetificacaoAutuacao
+   Label: Retificar autuação
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame]]></description>
+        <transition to="Nó de Desvio - (EF) Remessa à instância superior" name="Nó de Desvio - (EF) Remessa à instância superior">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="Término" name="Ignorar envio para instância superior eletronicamente"/>
+        <transition to="(EF) Remessa pendente de julgamento da instância superior - eletronicamente - AGUARDAR" name="(EF) Remessa pendente de julgamento da instância superior - eletronicamente - AGUARDAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Remessa pendente de julgamento da instância superior - eletronicamente - AGUARDAR')}"/>
+        </event>
+        <event type="task-start">
+            <action expression="#{taskInstanceUtil.setVariable('comboMotivoRemessa','18;37,38,39,40,90')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Remessa pendente de julgamento da instância superior - eletronicamente - AGUARDAR">
+        <task name="(EF) Remessa pendente de julgamento da instância superior - eletronicamente - AGUARDAR" swimlane="Secretaria">
+            <controller/>
+        </task>
+        <transition to="Nó de Desvio - (EF) Remessa à instância superior" name="Nó de Desvio - (EF) Remessa à instância superior">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Remessa - processos devolvidos pela instância superior - ANALISAR" name="Enviar para processos devolvidos pela instância superior">
+            <condition expression="#{ parametroUtil.getParametro('pje:tjrn:processosMovimentacaoManualAguardaRemessa').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().processo.numeroProcesso).concat('_')) }"/>
+        </transition>
+        <transition to="(EF) Remessa - processos devolvidos pela instância superior - ANALISAR" name="(EF) Remessa - processos devolvidos pela instância superior - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('Turma Recursal').comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(motivoRemessa.codigoGlossario).lancarMovimento()}"/>
+        </event>
+        <event type="task-create">
+            <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Remessa - processos devolvidos pela instância superior - ANALISAR')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Remessa - processos devolvidos pela instância superior - ANALISAR">
+        <task name="(EF) Remessa - processos devolvidos pela instância superior - ANALISAR" swimlane="Secretaria"/>
+        <transition to="Término" name="Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Remessa à instância superior" name="Nó de Desvio - (EF) Remessa à instância superior">
+            <condition expression="#{true}"/>
+        </transition>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Remessa à instância superior - fisicamente - ENCAMINHAR">
+        <task name="(EF) Remessa à instância superior - fisicamente - ENCAMINHAR" swimlane="Secretaria"/>
+        <transition to="Nó de Desvio - (EF) Remessa à instância superior" name="Nó de Desvio - (EF) Remessa à instância superior">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Remessa pendente de julgamento da instância superior - fisicamente - AGUARDAR" name="Aguardar julgamento da instância superior - fisicamente"/>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Remessa pendente de julgamento da instância superior - fisicamente - AGUARDAR">
+        <task name="(EF) Remessa pendente de julgamento da instância superior - fisicamente - AGUARDAR" swimlane="Secretaria"/>
+        <transition to="Término" name="Finalizar tarefa"/>
+        <transition to="Nó de Desvio - (EF) Remessa à instância superior" name="Nó de Desvio - (EF) Remessa à instância superior">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto('instância superior').comComplementoDeCodigo(18).doTipoLivre().preencherComTexto('em grau de recurso').lancarMovimento()}"/>
+        </event>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Remessa à instância superior">
+        <task name="Nó de Desvio - (EF) Remessa à instância superior" swimlane="Nó de Desvio - (EF) Remessa à instância superior"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Remessa à instância superior - ENCAMINHAR" name="(EF) Remessa à instância superior - ENCAMINHAR"/>
+        <transition to="(EF) Remessa à instância superior - eletronicamente - ENCAMINHAR" name="(EF) Remessa à instância superior - eletronicamente - ENCAMINHAR"/>
+        <transition to="(EF) Remessa pendente de julgamento da instância superior - eletronicamente - AGUARDAR" name="(EF) Remessa pendente de julgamento da instância superior - eletronicamente - AGUARDAR"/>
+        <transition to="(EF) Remessa - processos devolvidos pela instância superior - ANALISAR" name="(EF) Remessa - processos devolvidos pela instância superior - ANALISAR"/>
+        <transition to="(EF) Remessa à instância superior - fisicamente - ENCAMINHAR" name="(EF) Remessa à instância superior - fisicamente - ENCAMINHAR"/>
+        <transition to="(EF) Remessa pendente de julgamento da instância superior - fisicamente - AGUARDAR" name="(EF) Remessa pendente de julgamento da instância superior - fisicamente - AGUARDAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>

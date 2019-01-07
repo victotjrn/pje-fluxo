@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Autos recebidos do gabinete - decisão inicial">
+    <description><![CDATA[Código do fluxo: EF_AUT_REC_GAB_DEC_INI.
+
+Descrição: Fluxo destinado à análise de processos enviados das turmas recursais para a secretaria.
+
+Raia        Localização     Papel
+Secretaria  Secretaria      Chefe de Secretaria]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (EF) Autos recebidos do gabinete - decisão inicial">
+        <assignment actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial"/>
+        <transition to="(EF) Decisão inicial para citação?" name="(EF) Decisão inicial para citação?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{(entityManager.createNativeQuery(parametroUtil.getParametro('aut_rec:query_decisao_citacao')).setParameter(&quot;idProcesso&quot;, tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).getSingleResult() == 1 ? '(EF) Autos recebidos do gabinete [decisão inicial para citação] - ANALISAR' : '(EF) Autos recebidos do gabinete [decisão inicial] - ANALISAR')}" name="(EF) Decisão inicial para citação?">
+        <transition to="(EF) Autos recebidos do gabinete [decisão inicial] - ANALISAR" name="(EF) Autos recebidos do gabinete [decisão inicial] - ANALISAR"/>
+        <transition to="(EF) Autos recebidos do gabinete [decisão inicial para citação] - ANALISAR" name="(EF) Autos recebidos do gabinete [decisão inicial para citação] - ANALISAR"/>
+    </decision>
+    <task-node end-tasks="true" name="(EF) Autos recebidos do gabinete [decisão inicial] - ANALISAR">
+        <task name="(EF) Autos recebidos do gabinete [decisão inicial] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+1. Processo_Fluxo_visualizarDecisao
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. MovimentarEmLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não]]></description>
+        <transition to="Nó de Desvio - (EF) Autos recebidos do gabinete - decisão inicial" name="Nó de Desvio - (EF) Autos recebidos do gabinete - decisão inicial">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Redistribuir processo" name="01 - Redistribuir processo"/>
+        <transition to="(EF) Expedição de outros documentos" name="02 - Expedir outros documentos"/>
+        <transition to="(EF) Expedição de intimação" name="03 - Intimar via Sistema/Correios/Edital"/>
+        <transition to="Término" name="04 - Finalizar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) Autos recebidos do gabinete [decisão inicial para citação] - ANALISAR">
+        <task name="(EF) Autos recebidos do gabinete [decisão inicial para citação] - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+1. Processo_Fluxo_visualizarDecisao
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Frame
+
+2. MovimentarEmLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+
+3. Variável: ef_autos_dec_ini_cit_citar
+   Label: : Citar via Sistema/Correios/Edital
+
+4. Variável: ef_autos_dec_ini_cit_expedir_carta
+   Label: Expedir carta de ordem, precatória ou rogatória
+ 
+5. Variável: ef_autos_dec_ini_cit_expedir_mandado
+   Label: Expedir mandado
+
+6. Variável: ef_autos_dec_ini_cit_intimar
+   Label: Intimar via Sistema]]></description>
+        <transition to="Nó de Desvio - (EF) Autos recebidos do gabinete - decisão inicial" name="Nó de Desvio - (EF) Autos recebidos do gabinete - decisão inicial">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Expedição de citação" name="01 - Citar via Sistema/Correios/Edital"/>
+        <transition to="(EF) Expedição de carta" name="02 - Expedir carta de ordem, precatória ou rogatória"/>
+        <transition to="(EF) Expedição de mandado de citação e penhora" name="03 - Expedir mandado de citação e penhora"/>
+        <transition to="(EF) Expedir intimação via sistema" name="04 - Intimar via Sistema"/>
+        <transition to="Término" name="05 - Finalizar e sair da tarefa"/>
+        <event type="node-enter">
+            <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Autos recebidos do gabinete [decisão inicial para citação] - ANALISAR', true, false, true, true)}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{processoHome.limparCaixaTriagem()}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <process-state name="(EF) Redistribuir processo">
+        <sub-process name="(EF) Redistribuição" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <process-state name="(EF) Expedição de outros documentos">
+        <sub-process name="(EF) Expedição de outros documentos" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <process-state name="(EF) Expedição de intimação">
+        <sub-process name="(EF) Expedição de intimação" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <process-state name="(EF) Expedição de citação">
+        <sub-process name="(EF) Expedição de citação" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <process-state name="(EF) Expedição de carta">
+        <sub-process name="(EF) Expedição de carta de ordem, precatória ou rogatória" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <process-state name="(EF) Expedição de mandado de citação e penhora">
+        <sub-process name="(EF) Expedição de mandado de citação e penhora" binding="late"/>
+        <transition to="Término" name="Término"/>
+    </process-state>
+    <process-state name="(EF) Expedir intimação via sistema">
+        <sub-process name="(EF) Expedição de intimação" binding="late"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:meioExp:intimacao','E')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:meioExp:intimacao')}"/>
+        </event>
+    </process-state>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Autos recebidos do gabinete - decisão inicial">
+        <task name="Nó de Desvio - (EF) Autos recebidos do gabinete - decisão inicial" swimlane="Nó de Desvio - (EF) Autos recebidos do gabinete - decisão inicial"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(EF) Autos recebidos do gabinete [decisão inicial] - ANALISAR" name="(EF) Autos recebidos do gabinete [decisão inicial] - ANALISAR"/>
+        <transition to="(EF) Autos recebidos do gabinete [decisão inicial para citação] - ANALISAR" name="(EF) Autos recebidos do gabinete [decisão inicial para citação] - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
