@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Autos recebidos do gabinete - SuspensÃ£o">
-    <description><![CDATA[CÃ³digo do fluxo: EF_AUT_REC_GAB_SPS]]></description>  
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Autos recebidos do gabinete - Suspensão">
+    <description><![CDATA[Código do fluxo: EF_AUT_REC_GAB_REDIRCT]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="NÃ³ de Desvio - (EF) Autos recebidos do gabinete - SuspensÃ£o">
+    <swimlane name="Nó de Desvio - (EF) Autos recebidos do gabinete - Suspensão">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
-    <start-state name="InÃ­cio">
+    <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(EF) Autos recebidos do gabinete [SuspensÃ£o] - ANALISAR" name="(EF) Autos recebidos do gabinete [SuspensÃ£o] - ANALISAR"/>
+        <transition to="(EF) Autos recebidos do gabinete [Suspensão] - ANALISAR" name="(EF) Autos recebidos do gabinete [Suspensão] - ANALISAR"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(EF) Autos recebidos do gabinete [SuspensÃ£o] - ANALISAR">
-        <task name="(EF) Autos recebidos do gabinete [SuspensÃ£o] - ANALISAR" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) Autos recebidos do gabinete [Suspensão] - ANALISAR">
+        <task name="(EF) Autos recebidos do gabinete [Suspensão] - ANALISAR" swimlane="Secretaria">
             <controller>
                 <variable name="Processo_Fluxo_visualizarDecisao" mapped-name="frame:Processo_Fluxo_visualizarDecisao" access="read,write"/>
                 <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[*VariÃ¡veis*
+        <description><![CDATA[*Variáveis*
 
-1. VariÃ¡vel: Processo_Fluxo_visualizarDecisao
+1. Variável: Processo_Fluxo_visualizarDecisao
    Label:
    Escrita: Sim
-   Obrig.: NÃ£o
+   Obrig.: Não
    Tipo: Frame
 
-2. VariÃ¡vel: MovimentarEmLote
+2. Variável: MovimentarEmLote
    Label: 
    Escrita: Sim
-   Obrig.: NÃ£o
-   Tipo: Habilitar MovimentaÃ§Ã£o em Lote]]></description>
-        <transition to="NÃ³ de Desvio - (EF) Autos recebidos do gabinete - SuspensÃ£o" name="NÃ³ de Desvio - (EF) Autos recebidos do gabinete - SuspensÃ£o">
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Autos recebidos do gabinete - Suspensão" name="Nó de Desvio - (EF) Autos recebidos do gabinete - Suspensão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="TÃ©rmino" name="Finalizar e sair da tarefa"/>
-        <transition to="(EF) IntimaÃ§Ã£o eletrÃ´nica" name="Intimar advogados (automaticamente)"/>
+        <transition to="Término" name="Finalizar e sair da tarefa"/>
+        <transition to="(EF) Intimação eletrônica" name="Intimar advogados (automaticamente)"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:intelet:cancelou')}"/>
         </event>
@@ -50,19 +50,19 @@
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
-    <process-state name="(EF) IntimaÃ§Ã£o eletrÃ´nica">
-        <sub-process name="(EF) IntimaÃ§Ãµes eletrÃ´nicas" binding="late"/>
+    <process-state name="(EF) Intimação eletrônica">
+        <sub-process name="(EF) Intimações eletrônicas" binding="late"/>
         <transition to="(EF) Cancelou intelet?" name="(EF) Cancelou intelet?"/>
     </process-state>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:intelet:cancelou') ? '(EF) Autos recebidos do gabinete [SuspensÃ£o] - ANALISAR' : 'TÃ©rmino'}" name="(EF) Cancelou intelet?">
-        <transition to="(EF) Autos recebidos do gabinete [SuspensÃ£o] - ANALISAR" name="(EF) Autos recebidos do gabinete [SuspensÃ£o] - ANALISAR"/>
-        <transition to="TÃ©rmino" name="TÃ©rmino"/>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:intelet:cancelou') ? '(EF) Autos recebidos do gabinete [Suspensão] - ANALISAR' : 'Término'}" name="(EF) Cancelou intelet?">
+        <transition to="(EF) Autos recebidos do gabinete [Suspensão] - ANALISAR" name="(EF) Autos recebidos do gabinete [Suspensão] - ANALISAR"/>
+        <transition to="Término" name="Término"/>
     </decision>
-    <end-state name="TÃ©rmino"/>
-    <task-node end-tasks="true" name="NÃ³ de Desvio - (EF) Autos recebidos do gabinete - SuspensÃ£o">
-        <task name="NÃ³ de Desvio - (EF) Autos recebidos do gabinete - SuspensÃ£o" swimlane="NÃ³ de Desvio - (EF) Autos recebidos do gabinete - SuspensÃ£o"/>
-        <transition to="(EF) Autos recebidos do gabinete [SuspensÃ£o] - ANALISAR" name="(EF) Autos recebidos do gabinete [SuspensÃ£o] - ANALISAR"/>
-        <transition to="TÃ©rmino" name="TÃ©rmino"/>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) Autos recebidos do gabinete - Suspensão">
+        <task name="Nó de Desvio - (EF) Autos recebidos do gabinete - Suspensão" swimlane="Nó de Desvio - (EF) Autos recebidos do gabinete - Suspensão"/>
+        <transition to="(EF) Autos recebidos do gabinete [Suspensão] - ANALISAR" name="(EF) Autos recebidos do gabinete [Suspensão] - ANALISAR"/>
+        <transition to="Término" name="Término"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">

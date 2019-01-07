@@ -4,7 +4,7 @@
     <description><![CDATA[Código do fluxo: EF_AUT_REC_GAB_CDA]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
     </swimlane>
     <swimlane name="Nó de Desvio - (EF) Autos recebidos do gabinete - Cancelamento de CDA">
         <assignment actor-id="#{actor.id}"/>

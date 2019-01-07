@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Expedição de citação">
-    <description><![CDATA[Código do fluxo: EF_EXP_CIT
+    <description><![CDATA[Código do fluxo: EF_EXP_CIT.
 
 Descrição: Preparar citação.
 
@@ -22,22 +22,50 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Secretaria"/>
-        <transition to="(EF) Citação - EXPEDIR" name="(EF) Citação - EXPEDIR"/>
+        <transition to="(EF) Citação pendente de documento - SELECIONAR" name="(EF) Citação pendente de documento - SELECIONAR"/>
     </start-state>  
     <!-- NODES -->
+    <task-node end-tasks="true" name="(EF) Citação pendente de documento - SELECIONAR">
+        <task name="(EF) Citação pendente de documento - SELECIONAR" swimlane="Secretaria">
+            <controller>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(EF) Citação - EXPEDIR" name="01 - Novo documento"/>
+        <transition to="(EF) Documento do processo" name="02 - Documento do processo"/>
+        <transition to="(EF) Preparar comunicação padrão" name="03 - Preparar comunicação (padrão)"/>
+        <transition to="(EF) Apagar minuta não assinada de citação" name="04 - Cancelar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) Expedição de citação" name="Nó de Desvio - (EF) Expedição de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
     <task-node end-tasks="true" name="(EF) Citação - EXPEDIR">
         <task name="(EF) Citação - EXPEDIR" swimlane="Secretaria">
             <controller>
                 <variable name="minuta_citacao" mapped-name="textEditCombo:minuta_citacao" access="read,write"/>
                 <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -52,114 +80,7 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
    Label: 
    Escrita: Sim
    Obrig.: Não
-   Tipo: Habilitar Minutar em Lote]]></description>
-        <transition to="Nó de Desvio - (EF) Expedição de citação" name="Nó de Desvio - (EF) Expedição de citação">
-            <condition expression="#{true}"/>
-        </transition>
-        <transition to="(EF) Sem prazo" name="Prazo para manifestação: Sem prazo"/>
-        <transition to="(EF) Prazo de 5 dias" name="Prazo para manifestação: 005 dias"/>
-        <transition to="(EF) Prazo de 10 dias" name="Prazo para manifestação: 010 dias"/>
-        <transition to="(EF) Prazo de 15 dias" name="Prazo para manifestação: 015 dias"/>
-        <transition to="(EF) Prazo de 20 dias" name="Prazo para manifestação: 020 dias"/>
-        <transition to="(EF) Prazo de 30 dias" name="Prazo para manifestação: 030 dias"/>
-        <transition to="(EF) Prazo de 60 dias" name="Prazo para manifestação: 060 dias"/>
-        <transition to="(EF) Prazo de 90 dias" name="Prazo para manifestação: 090 dias"/>
-        <transition to="(EF) Prazo de 120 dias" name="Prazo para manifestação: 120 dias"/>
-        <transition to="(EF) Apagar minuta não assinada de citação" name="Cancelar e sair da tarefa"/>
-        <transition to="(EF) Preparar comunicação padrão" name="Preparar comunicação (padrão)"/>
-        <event type="task-create">
-            <action name="upd" expression="#{tipoDocumento.set('TipoDocumento',65)}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','65')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_citacao'))}"/>
-            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
-        </event>
-    </task-node>
-    <process-state name="(EF) Preparar comunicação padrão">
-        <sub-process name="(EF) Preparar ato de comunicação de citação" binding="late"/>
-        <transition to="(EF) Apagar minuta não assinada de citação" name="(EF) Apagar minuta não assinada de citação"/>
-    </process-state>
-    <node name="(EF) Sem prazo">
-        <transition to="(EF) Citação pendente de escolha de destinatário - SELECIONAR" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 0)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 5 dias">
-        <transition to="(EF) Citação pendente de escolha de destinatário - SELECIONAR" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 5)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 10 dias">
-        <transition to="(EF) Citação pendente de escolha de destinatário - SELECIONAR" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 10)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 15 dias">
-        <transition to="(EF) Citação pendente de escolha de destinatário - SELECIONAR" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 15)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 20 dias">
-        <transition to="(EF) Citação pendente de escolha de destinatário - SELECIONAR" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 20)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 30 dias">
-        <transition to="(EF) Citação pendente de escolha de destinatário - SELECIONAR" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 30)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 60 dias">
-        <transition to="(EF) Citação pendente de escolha de destinatário - SELECIONAR" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 60)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 90 dias">
-        <transition to="(EF) Citação pendente de escolha de destinatário - SELECIONAR" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 90)}"/>
-        </event>
-    </node>
-    <node name="(EF) Prazo de 120 dias">
-        <transition to="(EF) Citação pendente de escolha de destinatário - SELECIONAR" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 120)}"/>
-        </event>
-    </node>
-    <task-node end-tasks="true" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR">
-        <task name="(EF) Citação pendente de escolha de destinatário - SELECIONAR" swimlane="Secretaria">
-            <controller>
-                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
-                <variable name="minuta_citacao" mapped-name="textEditCombo:minuta_citacao" access="read,write"/>
-                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
-            </controller>
-        </task>
-        <description><![CDATA[* Variáveis *
-
-1. Variável: aviso1
-   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:citacao') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:citacao')).concat(' dias.'))}
-    Escrita: Sim
-    Obrig.: Não
-    Tipo: Aviso
-
-2. Variável: minuta_citacao
-   Label: Minuta em elaboração de citação
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Editor
+   Tipo: Habilitar Minutar em Lote
 
 3. Variável: movimentacaoLote
    Label: 
@@ -169,50 +90,199 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="Nó de Desvio - (EF) Expedição de citação" name="Nó de Desvio - (EF) Expedição de citação">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Destinatário: partes do polo passivo" name="Destinatário: partes do polo passivo"/>
-        <transition to="(EF) Destinatário: representantes do polo passivo" name="Destinatário: representantes do polo passivo"/>
-        <transition to="(EF) Destinatário: partes e representantes do polo passivo" name="Destinatário: partes e representantes do polo passivo"/>
-        <transition to="(EF) Apagar minuta não assinada de citação" name="Cancelar e sair da tarefa"/>
-        <transition to="(EF) Retornar para minuta" name="Retornar para expedição"/>
+        <transition to="(EF) Citação pendente de escolha de destinatário - SELECIONAR" name="01 - Prosseguir"/>
+        <transition to="(EF) Preparar comunicação padrão" name="02 - Preparar comunicação (padrão)"/>
+        <transition to="(EF) Retornar para minuta" name="03 - Retornar para a escolha de documento"/>
+        <transition to="(EF) Apagar minuta não assinada de citação" name="04 - Cancelar e sair da tarefa"/>
         <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_cit:idProcessoDocumento', processoHome.idProcessoDocumento)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_cit:docProcesso', false)}"/>
         </event>
         <event type="task-create">
-            <action expression="#{tipoDocumento.set('TipoDocumento',65)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','65')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+            <action name="upd" expression="#{tipoDocumento.set('TipoDocumento',65)}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','65')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', '04 - Cancelar e sair da tarefa')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_citacao'))}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_cit:idProcessoDocumento', ( ( not empty processoHome.idProcessoDocumento)  ? processoHome.idProcessoDocumento : null ) )}"/>
+        </event>
+    </task-node>
+    <node name="(EF) Documento do processo">
+        <transition to="(EF) Citação pendente de escolha de destinatário - SELECIONAR" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_cit:idProcessoDocumento', tramitacaoProcessualService.recuperaVariavel('pje:atoProferido'))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_cit:docProcesso', true)}"/>
+        </event>
+    </node>
+    <process-state name="(EF) Preparar comunicação padrão">
+        <sub-process name="(EF) Preparar ato de comunicação de citação" binding="late"/>
+        <transition to="(EF) Apagar minuta não assinada de citação" name="(EF) Apagar minuta não assinada de citação"/>
+    </process-state>
+    <task-node end-tasks="true" name="(EF) Citação pendente de escolha de destinatário - SELECIONAR">
+        <task name="(EF) Citação pendente de escolha de destinatário - SELECIONAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso1
+   Label: #{'Documento: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:exp_cit:docProcesso')?'Último ato proferido':'Novo documento').concat('.')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Expedição de citação" name="Nó de Desvio - (EF) Expedição de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Destinatário: partes do polo passivo" name="01 - Destinatário: partes do polo passivo"/>
+        <transition to="(EF) Destinatário: representantes do polo passivo" name="02 - Destinatário: representantes do polo passivo"/>
+        <transition to="(EF) Destinatário: partes e representantes do polo passivo" name="03 - Destinatário: partes e representantes do polo passivo"/>
+        <transition to="(EF) Apagar minuta não assinada de citação" name="04 - Cancelar e sair da tarefa"/>
+        <transition to="(EF) Retornar para minuta" name="05 - Retornar para expedição"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <node name="(EF) Destinatário: partes do polo passivo">
-        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <transition to="(EF) Citação pendente de escolha de prazo - SELECIONAR" name="(EF) Citação pendente de escolha de prazo - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:citacao', 'P')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:citacao', 'partes do polo passivo')}"/>
         </event>
     </node>
     <node name="(EF) Destinatário: representantes do polo passivo">
-        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <transition to="(EF) Citação pendente de escolha de prazo - SELECIONAR" name="(EF) Citação pendente de escolha de prazo - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:citacao', 'RP')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:citacao', 'representantes do polo passivo')}"/>
         </event>
     </node>
     <node name="(EF) Destinatário: partes e representantes do polo passivo">
-        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <transition to="(EF) Citação pendente de escolha de prazo - SELECIONAR" name="(EF) Citação pendente de escolha de prazo - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:citacao', 'TP')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:destExpediente:texto:citacao', 'partes e representantes do polo passivo')}"/>
         </event>
     </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:meioExp:citacao') == null ? '(EF) Citação pendente de escolha do meio de expedição - SELECIONAR' : '(EF) Citação - ASSINAR'}" name="(EF) Meio já informado?">
+    <task-node end-tasks="true" name="(EF) Citação pendente de escolha de prazo - SELECIONAR">
+        <task name="(EF) Citação pendente de escolha de prazo - SELECIONAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[* Variáveis *
+
+1. Variável: aviso1
+   Label: #{'Documento: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:exp_cit:docProcesso')?'Último ato proferido':'Novo documento').concat('.')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+2. Variável: aviso2
+   Label: #{'Destinatários: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:citacao')).concat('.')}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+3. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) Expedição de citação" name="Nó de Desvio - (EF) Expedição de citação">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Sem prazo" name="01 - Prazo para manifestação: Sem prazo"/>
+        <transition to="(EF) Prazo de 5 dias" name="02 - Prazo para manifestação: 5 dias"/>
+        <transition to="(EF) Prazo de 10 dias" name="03 - Prazo para manifestação: 10 dias"/>
+        <transition to="(EF) Prazo de 15 dias" name="04 - Prazo para manifestação: 15 dias"/>
+        <transition to="(EF) Prazo de 20 dias" name="05 - Prazo para manifestação: 20 dias"/>
+        <transition to="(EF) Prazo de 30 dias" name="06 - Prazo para manifestação: 30 dias"/>
+        <transition to="(EF) Prazo de 60 dias" name="07 - Prazo para manifestação: 60 dias"/>
+        <transition to="(EF) Prazo de 90 dias" name="08 - Prazo para manifestação: 90 dias"/>
+        <transition to="(EF) Prazo de 120 dias" name="09 - Prazo para manifestação: 120 dias"/>
+        <transition to="(EF) Apagar minuta não assinada de citação" name="10 - Cancelar e sair da tarefa"/>
+        <transition to="(EF) Retornar para minuta" name="11 - Retornar para minuta de citação"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(EF) Sem prazo">
+        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 0)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 5 dias">
+        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 5)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 10 dias">
+        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 10)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 15 dias">
+        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 15)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 20 dias">
+        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 20)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 30 dias">
+        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 30)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 60 dias">
+        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 60)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 90 dias">
+        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 90)}"/>
+        </event>
+    </node>
+    <node name="(EF) Prazo de 120 dias">
+        <transition to="(EF) Meio já informado?" name="(EF) Meio já informado?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:prazoManifestacao:citacao', 120)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:meioExp:citacao') == null ? '(EF) Citação pendente de escolha do meio de expedição - SELECIONAR' : '(EF) Assinar?'}" name="(EF) Meio já informado?">
         <transition to="(EF) Citação pendente de escolha do meio de expedição - SELECIONAR" name="(EF) Citação pendente de escolha do meio de expedição - SELECIONAR"/>
-        <transition to="(EF) Citação - ASSINAR" name="(EF) Citação - ASSINAR"/>
+        <transition to="(EF) Assinar?" name="(EF) Assinar?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:meioExp:citacao:texto','C'.equals(tramitacaoProcessualService.recuperaVariavel('ef:meioExp:citacao')) ? 'Correios' : ('E'.equals(tramitacaoProcessualService.recuperaVariavel('ef:meioExp:citacao')) ? 'Sistema' : ('M'.equals(tramitacaoProcessualService.recuperaVariavel('ef:meioExp:citacao')) ? 'Central de Mandados' : ('D'.equals(tramitacaoProcessualService.recuperaVariavel('ef:meioExp:citacao')) ? 'Edital' : ''))))}"/>
         </event>
@@ -222,29 +292,29 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
                 <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
-                <variable name="minuta_citacao" mapped-name="textEditCombo:minuta_citacao" access="read,write"/>
+                <variable name="aviso3" mapped-name="textAlert:aviso3" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
         <description><![CDATA[* Variáveis *
 
 1. Variável: aviso1
-   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:citacao') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:citacao')).concat(' dias.'))}
+   Label: #{'Documento: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:exp_cit:docProcesso')?'Último ato proferido':'Novo documento').concat('.')}
     Escrita: Sim
     Obrig.: Não
     Tipo: Aviso
 
 2. Variável: aviso2
-   Label: #{'Destinatário: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:citacao')).concat('.')}
+   Label: #{'Destinatários: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:citacao')).concat('.')}
     Escrita: Sim
     Obrig.: Não
     Tipo: Aviso
 
-3. Variável: minuta_citacao
-   Label: Minuta em elaboração de citação
-   Escrita: Sim
-   Obrig.: Não
-   Tipo: Editor
+3. Variável: aviso3
+   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:citacao') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:citacao')).concat(' dias.'))}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
 
 4. Variável: movimentacaoLote
    Label: 
@@ -261,51 +331,51 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="(EF) Meio de expedição: Edital" name="Meio de expedição: Edital"/>
         <transition to="(EF) Retornar para minuta" name="Retornar para expedição"/>
         <event type="task-create">
-            <action expression="#{tipoDocumento.set('TipoDocumento',65)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','65')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
         <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_citacao'))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <node name="(EF) Meio de expedição: Correios">
-        <transition to="(EF) Citação - ASSINAR" name="(EF) Citação - ASSINAR"/>
+        <transition to="(EF) Assinar?" name="(EF) Assinar?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:meioExp:citacao', 'C')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:meioExp:citacao:texto', 'Correios')}"/>
         </event>
     </node>
     <node name="(EF) Meio de expedição: Sistema">
-        <transition to="(EF) Citação - ASSINAR" name="(EF) Citação - ASSINAR"/>
+        <transition to="(EF) Assinar?" name="(EF) Assinar?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:meioExp:citacao', 'E')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:meioExp:citacao:texto', 'Sistema')}"/>
         </event>
     </node>
     <node name="(EF) Meio de expedição: Central de Mandados">
-        <transition to="(EF) Citação - ASSINAR" name="(EF) Citação - ASSINAR"/>
+        <transition to="(EF) Assinar?" name="(EF) Assinar?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:meioExp:citacao', 'M')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:meioExp:citacao:texto', 'Central de Mandados')}"/>
         </event>
     </node>
     <node name="(EF) Meio de expedição: Edital">
-        <transition to="(EF) Citação - ASSINAR" name="(EF) Citação - ASSINAR"/>
+        <transition to="(EF) Assinar?" name="(EF) Assinar?"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:meioExp:citacao', 'D')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:meioExp:citacao:texto', 'Edital')}"/>
         </event>
     </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:exp_cit:docProcesso') ? '(EF) É Correios?' : '(EF) Citação - ASSINAR'}" name="(EF) Assinar?">
+        <transition to="(EF) Citação - ASSINAR" name="(EF) Citação - ASSINAR"/>
+        <transition to="(EF) É Correios?" name="(EF) É Correios?"/>
+    </decision>
     <task-node end-tasks="true" name="(EF) Citação - ASSINAR">
         <task name="(EF) Citação - ASSINAR" swimlane="Magistrado">
             <controller>
                 <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
                 <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
                 <variable name="aviso3" mapped-name="textAlert:aviso3" access="read,write"/>
+                <variable name="aviso4" mapped-name="textAlert:aviso4" access="read,write"/>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
                 <variable name="AssinaturaEmLote" mapped-name="assinarLote:AssinaturaEmLote" access="read,write"/>
@@ -314,36 +384,42 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <description><![CDATA[* Variáveis *
 
 1. Variável: aviso1
-   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:citacao') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:citacao')).concat(' dias.'))}
+   Label: #{'Documento: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:exp_cit:docProcesso')?'Último ato proferido':'Novo documento').concat('.')}
     Escrita: Sim
     Obrig.: Não
     Tipo: Aviso
 
 2. Variável: aviso2
-   Label: #{'Destinatário: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:citacao')).concat('.')}
+   Label: #{'Destinatários: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:destExpediente:texto:citacao')).concat('.')}
     Escrita: Sim
     Obrig.: Não
     Tipo: Aviso
 
 3. Variável: aviso3
+   Label: #{'Prazo para manifestação: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:citacao') == 0 ? 'Sem prazo.' : ''.concat(tramitacaoProcessualService.recuperaVariavel('ef:prazoManifestacao:citacao')).concat(' dias.'))}
+    Escrita: Sim
+    Obrig.: Não
+    Tipo: Aviso
+
+4. Variável: aviso4
    Label: #{'Meio de expedição: '.concat(tramitacaoProcessualService.recuperaVariavel('ef:meioExp:citacao:texto')).concat('.')}
     Escrita: Sim
     Obrig.: Não
     Tipo: Aviso
 
-4. Variável: Processo_Fluxo_revisarMinuta
-   Label: Assinar Minuta
+5. Variável: Processo_Fluxo_revisarMinuta
+   Label: Assinar minuta
    Escrita: Sim
    Obrig.: Não
    Tipo: Frame
 
-5. Variável: MovimentarEmLote
+6. Variável: MovimentarEmLote
    Label: 
    Escrita: Sim
    Obrig.: Não
    Tipo: Habilitar Movimentação em Lote
 
-6. Variável: AssinaturaEmLote
+7. Variável: AssinaturaEmLote
    Label: 
    Escrita: Sim
    Obrig.: Não
@@ -358,10 +434,12 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','65')}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) É Correios?')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('condicaoLancamentoMovimentosTemporario', '${true}')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('condicaoLancamentoMovimentosTemporario')}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:meioExp:citacao') == 'C' ? '(EF) Lançar movimento de citação - Correios' : '(EF) É Sistema?'}" name="(EF) É Correios?">
@@ -493,10 +571,12 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         </event>
     </node>
     <node name="(EF) Retornar para minuta">
-        <transition to="(EF) Citação - EXPEDIR" name="(EF) Citação - EXPEDIR"/>
+        <transition to="(EF) Citação pendente de documento - SELECIONAR" name="(EF) Citação pendente de documento - SELECIONAR"/>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:meioExp:citacao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:meioExp:citacao:texto')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:exp_cit:docProcesso')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:prazoManifestacao:citacao')}"/>
         </event>
     </node>
     <process-state name="(EF) Devolução à secretaria">
@@ -513,6 +593,8 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="(EF) Citação pendente de escolha do meio de expedição - SELECIONAR" name="(EF) Citação pendente de escolha do meio de expedição - SELECIONAR"/>
         <transition to="(EF) Citação - IMPRIMIR" name="(EF) Citação - IMPRIMIR"/>
         <transition to="(EF) Citação pendente de escolha de Central de Mandados - SELECIONAR" name="(EF) Citação pendente de escolha de Central de Mandados - SELECIONAR"/>
+        <transition to="(EF) Citação pendente de documento - SELECIONAR" name="(EF) Citação pendente de documento - SELECIONAR"/>
+        <transition to="(EF) Citação pendente de escolha de prazo - SELECIONAR" name="(EF) Citação pendente de escolha de prazo - SELECIONAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
