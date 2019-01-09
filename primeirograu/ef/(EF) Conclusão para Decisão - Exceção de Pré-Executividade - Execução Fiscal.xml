@@ -37,13 +37,14 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
    Escrita: Sim
    Obrig. Não
    Tipo: Habilitar Minutar em Lote]]></description>
-        <transition to="(EF) Concluso para decisão - Exceção de pré-executidade - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
+        <transition to="(EF) Concluso para decisão - Exceção de pré-executividade - ASSINAR" name="Encaminhar para assinatura do magistrado"/>
         <transition to="Nó de Desvio - (EF) Conclusão para Decisão - Exceção de Pré-Executividade - Execução Fiscal" name="Nó de Desvio - (EF) Conclusão para Decisão - Exceção de Pré-Executividade - Execução Fiscal">
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Selecionar outro tipo de conclusão" name="Alterar escolha do tipo de conclusão"/>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Alterar escolha do tipo de conclusão')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:lancamentoMovimentoObrigatorio','true')}"/>
         </event>
         <event type="task-end">
             <action expression="#{not empty tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial') ? tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_ato_judicial')) : ''}"/>
@@ -56,32 +57,32 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
         </event>
     </task-node>
-    <task-node end-tasks="true" name="(EF) Concluso para decisão - Exceção de pré-executidade - ASSINAR">
-        <task name="(EF) Concluso para decisão - Exceção de pré-executidade - ASSINAR" swimlane="Magistrado">
+    <task-node end-tasks="true" name="(EF) Concluso para decisão - Exceção de pré-executividade - ASSINAR">
+        <task name="(EF) Concluso para decisão - Exceção de pré-executividade - ASSINAR" swimlane="Magistrado">
             <controller>
                 <variable name="Processo_Fluxo_revisarMinuta" mapped-name="frame:Processo_Fluxo_revisarMinuta" access="read,write"/>
                 <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
                 <variable name="assinaturaLote" mapped-name="assinarLote:assinaturaLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[*Variáveis*
-
-1. Variável: Processo_Fluxo_revisarMinuta
-   Label: 
-   Escrita: Sim
-   Obrig. Não
-   Tipo: Frame
-
-2. Variável: movimentacaoLote
-   Label: 
-   Escrita: Sim
-   Obrig. Não
-   Tipo: Habilitar Movimentação em Lote
-
-3. Variável: assinaturaLote
-   Label: 
-   Escrita: Sim
-   Obrig. Não
+        <description><![CDATA[*Variáveis*
+
+1. Variável: Processo_Fluxo_revisarMinuta
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Frame
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
+   Tipo: Habilitar Movimentação em Lote
+
+3. Variável: assinaturaLote
+   Label: 
+   Escrita: Sim
+   Obrig. Não
    Tipo: Habilitar Assinatura em Lote]]></description>
         <transition to="(EF) Concluso para decisão - Exceção de pré-executividade - MINUTAR" name="Retornar para minuta"/>
         <transition to="(EF) Encaminhar para despachados" name="(EF) Encaminhar para despachados">
@@ -97,6 +98,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Encaminhar para despachados')}"/>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:lancamentoMovimentoObrigatorio','true')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
@@ -107,7 +109,7 @@ Descrição: Fluxo destinado ao preparo de atos judiciais de decisões genéricas.]]
     <task-node end-tasks="true" name="Nó de Desvio - (EF) Conclusão para Decisão - Exceção de Pré-Executividade - Execução Fiscal">
         <task name="Nó de Desvio - (EF) Conclusão para Decisão - Exceção de Pré-Executividade - Execução Fiscal"/>
         <transition to="(EF) Concluso para decisão - Exceção de pré-executividade - MINUTAR" name="(EF) Concluso para decisão - Exceção de pré-executividade - MINUTAR"/>
-        <transition to="(EF) Concluso para decisão - Exceção de pré-executidade - ASSINAR" name="(EF) Concluso para decisão - Exceção de pré-executidade - ASSINAR"/>
+        <transition to="(EF) Concluso para decisão - Exceção de pré-executividade - ASSINAR" name="(EF) Concluso para decisão - Exceção de pré-executividade - ASSINAR"/>
         <transition to="Término" name="Término"/>
     </task-node>
     <process-state name="(EF) Encaminhar para despachados">

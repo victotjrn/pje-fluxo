@@ -61,6 +61,9 @@ Magistrado  Secretaria  Chefe de Secretaria]]></description>
         <event type="node-enter">
             <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Concluso para decisão inicial - MINUTAR', true, true, true, true)}"/>
         </event>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:lancamentoMovimentoObrigatorio','true')}"/>
+        </event>
         <event type="node-leave">
             <action expression="#{processoHome.limparCaixaTriagem()}"/>
         </event>
@@ -118,6 +121,7 @@ Magistrado  Secretaria  Chefe de Secretaria]]></description>
             <action expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '63,64,'.concat(parametroUtil.getParametro('idTipoDocumentoDecisaoCitacao')))}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Término')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:lancamentoMovimentoObrigatorio','true')}"/>
         </event>
         <event type="node-leave">
             <action expression="#{processoHome.limparCaixaTriagem()}"/>
