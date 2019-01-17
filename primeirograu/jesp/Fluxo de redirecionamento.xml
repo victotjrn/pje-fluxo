@@ -23,10 +23,18 @@
         <sub-process name="(SAJ) Saj migracao" binding="late"/>
         <transition to="Encaminhar para analise da secretaria" name="Encaminhar para analise da secretaria"/>
     </process-state>
-    <decision expression="#{ not parametroUtil.getParametro('pje:tjrn:ip3:migracao:jurisdicoes:vara').contains(' '.concat(tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao).concat(' ')) and parametroUtil.getParametro('pje:tjrn:ip3:migracao:ativo').equals('true') and tramitacaoProcessualService.recuperaProcesso().importadoSistemaLegado ? 'Entrar no projudi migração' : '(VCiv) Deslocar secretaria unificada' }" name="É migração?">
+    <decision expression="#{ not empty contexts.sessionContext.get('migracao') and contexts.sessionContext.get('migracao').contains('PROJUDI') and parametroUtil.getParametro('pje:tjrn:ip3:migracao:ativo').equals('true') and tramitacaoProcessualService.recuperaProcesso().importadoSistemaLegado ? 'Entrar no projudi migração' : 'É digitalização?' }" name="É migração?">
         <transition to="Entrar no projudi migração" name="Entrar no projudi migração"/>
+        <transition to="É digitalização?" name="É digitalização?"/>
+    </decision>
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().importadoSistemaLegado == true ? 'Entrar no Processos digitalizados' : '(VCiv) Deslocar secretaria unificada'}" name="É digitalização?">
+        <transition to="Entrar no Processos digitalizados" name="Entrar no Processos digitalizados"/>
         <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
     </decision>
+    <process-state name="Entrar no Processos digitalizados">
+        <sub-process name="(VCiv) Processos digitalizados" binding="late"/>
+        <transition to="Encaminhar para analise da secretaria" name="Encaminhar para analise da secretaria"/>
+    </process-state>
     <process-state name="Entrar no projudi migração">
         <sub-process name="(PROJUDI) Projudi migração" binding="late"/>
         <transition to="Encaminhar para analise da secretaria" name="Encaminhar para analise da secretaria"/>
