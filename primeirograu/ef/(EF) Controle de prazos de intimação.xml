@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Controle de prazos de intimação">
-    <description><![CDATA[Código do fluxo: EF_CONTPRAZOS_INT
-
-Descrição: Fluxo destinado ao controle de prazos de intimação.
-
-Raia        Localização     Papel
+    <description><![CDATA[Código do fluxo: EF_CONTPRAZOS_INT
+
+Descrição: Fluxo destinado ao controle de prazos de intimação.
+
+Raia        Localização     Papel
 Secretaria  Secretaria      Chefe de Secretaria]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (EF) Controle de prazos de intimação">
@@ -92,6 +92,7 @@ Secretaria  Secretaria      Chefe de Secretaria]]></description>
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:registroCiencia', false)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda60', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Intimação pendente de AR [060 dias] - AGUARDAR')}"/>
         </event>
@@ -127,6 +128,7 @@ Secretaria  Secretaria      Chefe de Secretaria]]></description>
             <condition expression="#{true}"/>
         </transition>
         <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:registroCiencia', false)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda100', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Intimação pendente de AR [100 dias ou mais] - AGUARDAR')}"/>
         </event>
@@ -158,6 +160,9 @@ Secretaria  Secretaria      Chefe de Secretaria]]></description>
         </transition>
         <transition to="Término" name="Cancelar e sair da tarefa"/>
         <transition to="(EF) Há expedientes em aberto?" name="Registrar devolução do AR"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:correios:registroCiencia', false)}"/>
+        </event>
     </task-node>
     <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 || processoParteExpedienteManager.getAtosComunicacaoSemPrazo(0, processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))).size() &gt; 0 ? '(EF) Intimação pendente de registro de AR - REGISTRAR' : '(EF) Intimação pendente de AR - AGUARDAR'}" name="(EF) Há expedientes em aberto?">
         <transition to="(EF) Intimação pendente de AR - AGUARDAR" name="(EF) Intimação pendente de AR - AGUARDAR"/>
