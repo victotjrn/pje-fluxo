@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Fluxo básico geral">
-    <description><![CDATA[Código do fluxo: SG_FBG
-
+    <description><![CDATA[Código do fluxo: SG_FBG.
+.
 Descrição: Fluxo básico geral de entrada dos processos.
 
 Raia        Localização              Papel
@@ -231,7 +231,8 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <condition expression="#{!empty tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj')}"/>
         </transition>
         <transition to="(SG) Gravar variavel fluxo unico - Encaminhamento ao núcleo de conciliação e mediação" name="14 - Encaminhar ao núcleo de conciliação e mediação"/>
-        <transition to="(SG) Gravar variavel fluxo unico - Devolver ao apoio do relator de origem" name="15 - Devolver ao apoio do relator de origem">
+        <transition to="(SG) Gravar variavel fluxo unico - Remeter para outro juízo" name="15 - Remeter para outro juízo"/>
+        <transition to="(SG) Gravar variavel fluxo unico - Devolver ao apoio do relator de origem" name="16 - Devolver ao apoio do relator de origem">
             <condition expression="#{!empty tramitacaoProcessualService.recuperaVariavel('sg:remadmrec:idOj')}"/>
         </transition>
         <event type="task-end">
@@ -399,6 +400,12 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:sub_fluxo_unico', '(SG) Encaminhamento ao núcleo de conciliação e mediação')}"/>
         </event>
     </node>
+    <node name="(SG) Gravar variavel fluxo unico - Remeter para outro juízo">
+        <transition to="(SG) Pode ir para subfluxo único?" name="(SG) Pode ir para subfluxo único?"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:paj:sub_fluxo_unico', '(SG) Preparação de remessa para outro juízo')}"/>
+        </event>
+    </node>
     <decision expression="#{entityManager.createNativeQuery(&quot;select count(*) from vs_situacao_processo_new s where s.nm_tarefa not in ('(SG) Secretaria - ANALISAR','(SG) Voto [não relator] - VOTAR','(SG) Sessão de julgamento [outros julgadores] - AGUARDAR','(SG) Voto [não relator] - MINUTAR','(SG) Voto [não relator] - CONFIRMAR','(SG) Voto [não relator] - VALIDAR','(SG) Voto [não relator] - ASSINAR') AND s.id_processo_trf = :idProcessoTrf&quot;).setParameter(&quot;idProcessoTrf&quot;, tramitacaoProcessualService.recuperaProcesso().idProcessoTrf).getSingleResult() &gt; 0 ? '(SG) Gravar mensagem nao pode entrar no fluxo' : tramitacaoProcessualService.recuperaVariavel('sg:paj:sub_fluxo_unico')}" name="(SG) Pode ir para subfluxo único?">
         <transition to="(SG) Controlar suspensão de processo" name="(SG) Controlar suspensão de processo"/>
         <transition to="(SG) Preparação de redistribuição" name="(SG) Preparação de redistribuição"/>
@@ -419,6 +426,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Gravar mensagem nao pode entrar no fluxo" name="(SG) Gravar mensagem nao pode entrar no fluxo"/>
         <transition to="(SG) Encaminhamento ao núcleo de conciliação e mediação" name="(SG) Encaminhamento ao núcleo de conciliação e mediação"/>
         <transition to="(SG) Retornar ao apoio do gabinete de origem" name="(SG) Retornar ao apoio do gabinete de origem"/>
+        <transition to="(SG) Preparação de remessa para outro juízo" name="(SG) Preparação de remessa para outro juízo"/>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:paj:sub_fluxo_unico')}"/>
         </event>
@@ -608,6 +616,7 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
         <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
         <event type="node-enter">
             <action expression="#{preencherMovimento.deCodigo(123).comComplementoDeCodigo(7).doTipoLivre().preencherComTexto(tramitacaoProcessualService.recuperaVariavel('sg:encgab:OrgJulgadorOrigem')).comComplementoDeCodigo(18).doTipoDominio().preencherComElementoDeCodigo(200003).lancarMovimento()}"/>
+            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('sg:encgab:idOjOrigem'), tramitacaoProcessualService.recuperaVariavel('sg:encgab:idOjCargoOrigem'), tramitacaoProcessualService.recuperaVariavel('sg:encgab:idOjcOrigem'))}"/>
             <action expression="#{processoJudicialService.deslocarOrgaoJulgador(tramitacaoProcessualService.recuperaProcesso(), tramitacaoProcessualService.recuperaVariavel('sg:encgab:idOjOrigem'), tramitacaoProcessualService.recuperaVariavel('sg:encgab:idOjcOrigem'), tramitacaoProcessualService.recuperaVariavel('sg:encgab:idOjCargoOrigem'), false)}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:encgab:idOjOrigem')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:encgab:idOjCargoOrigem')}"/>
@@ -615,6 +624,10 @@ Secretaria  Secretaria Segundo Grau  Servidor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:encgab:OrgJulgadorOrigem')}"/>
         </event>
     </node>
+    <process-state name="(SG) Preparação de remessa para outro juízo">
+        <sub-process name="(SG) Remessa para outro juízo" binding="late"/>
+        <transition to="(SG) Secretaria - ANALISAR" name="(SG) Secretaria - ANALISAR"/>
+    </process-state>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Fluxo básico geral">
         <task name="Nó de Desvio - (SG) Fluxo básico geral" swimlane="Nó de Desvio - (SG) Fluxo básico geral"/>
