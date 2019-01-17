@@ -10,7 +10,7 @@ Secretaria  Corregedoria   Servidor Corregedoria
 Secretaria  Corregedoria   Magistrado Corregedor]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,8:5852,8:5853')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -249,35 +249,6 @@ ESTA VARIÁVEL É APENAS PARA A CLASSE "EMBARGOS À EXECUÇÃO". COMO O FLUXO, A PRIN
         <transition to="(EF) Gravar variavel fluxo unico - Enviar à Contadoria Judicial - COJUD" name="11 - Enviar à Contadoria Judicial - COJUD"/>
         <transition to="(EF) Gravar variavel fluxo unico - Enviar à Penhora eletrônica - Poti" name="12 - Enviar à Penhora eletrônica - Poti"/>
         <transition to="(EF) Gravar variavel fluxo unico - Intimar advogados automaticamente" name="13 - Intimar advogados (automaticamente)"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_cumprimento')}"/>
-        </event>
-        <event type="task-create">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_alterar_tipo_documento')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_bacenjud_minutar')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_serasajud_solicitar')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_certificar_decurso')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_certificar_transito')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_citar')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_intimar')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_controlar_audiencia')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_controlar_retorno_expediente')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_encaminhar_cejusc')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_encerrar_prazo')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_alvaras')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_carta')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_mandado')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_oficio')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_outros_documentos')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_precatorio_rpv')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_infojud_infoseg_consultar')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_publicar_dje')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_renajud_consultar')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:fbg:aviso_secretaria_analisar')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', '')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_alterar_tipo_documento') == true ? '{ef_fbg_alterar_tipo_documento}' : ''))}"/>
@@ -322,6 +293,35 @@ ESTA VARIÁVEL É APENAS PARA A CLASSE "EMBARGOS À EXECUÇÃO". COMO O FLUXO, A PRIN
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_renajud_consultar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_alterar_tipo_documento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_bacenjud_minutar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_serasajud_solicitar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_certificar_decurso')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_certificar_transito')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_citar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_intimar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_controlar_audiencia')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_controlar_retorno_expediente')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_encaminhar_cejusc')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_encerrar_prazo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_alvaras')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_carta')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_mandado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_oficio')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_outros_documentos')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_expedir_precatorio_rpv')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_infojud_infoseg_consultar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_publicar_dje')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_renajud_consultar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:fbg:aviso_secretaria_analisar')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_cumprimento')}"/>
+        </event>
     </task-node>
     <process-state name="(EF) Autos recebidos da secretaria">
         <sub-process name="(EF) Autos recebidos da secretaria - Execução Fiscal" binding="late"/>
@@ -364,13 +364,13 @@ ESTA VARIÁVEL É APENAS PARA A CLASSE "EMBARGOS À EXECUÇÃO". COMO O FLUXO, A PRIN
         <transition to="(EF) Secretaria - ANALISAR" name="(EF) Secretaria - ANALISAR">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-end">
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_cumprimento', 'true')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Secretaria - ANALISAR')}"/>
-        </event>
-        <event type="task-end">
-            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <node name="(EF) Gravar variavel fluxo unico - Redistribuir processo">
@@ -511,10 +511,37 @@ ESTA VARIÁVEL É APENAS PARA A CLASSE "EMBARGOS À EXECUÇÃO". COMO O FLUXO, A PRIN
         <transition to="(EF) Secretaria aguardando cumprimento - AGUARDAR" name="(EF) Secretaria aguardando cumprimento - AGUARDAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -523,40 +550,13 @@ ESTA VARIÁVEL É APENAS PARA A CLASSE "EMBARGOS À EXECUÇÃO". COMO O FLUXO, A PRIN
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
     <!-- ACTIONS --> 

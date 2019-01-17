@@ -7,7 +7,7 @@
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -100,18 +100,18 @@
         <transition to="(EF) Limpar prazos" name="Retornar para a escolha de prazos dos advogados/representantes do polo ativo">
             <condition expression="#{tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != null ? true : false}"/>
         </transition>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntAtvMsg', tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? 'Defina o prazo para os advogados/representantes do polo ativo.' : 'Prazo para os advogados/representantes do polo ativo: '.concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 0 ? 'Sem prazo' : (tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 99 ? 'Não intimar' : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo'))).concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != 0 and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != 99 ? ' dias' : ''))}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntPasMsg', tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == null ? (tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? '' : 'Defina o prazo para os advogados/representantes do polo passivo.') : 'Prazo para os advogados/representantes do polo passivo: '.concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 0 ? 'Sem prazo' : (tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 99 ? 'Não intimar' : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo'))).concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != 0 and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != 99 ? ' dias' : ''))}"/>
-        </event>
-        <event type="task-create">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
         </event>
         <event type="task-end">
             <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
-        <event type="task-start">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntAtvMsg', tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? 'Defina o prazo para os advogados/representantes do polo ativo.' : 'Prazo para os advogados/representantes do polo ativo: '.concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 0 ? 'Sem prazo' : (tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == 99 ? 'Não intimar' : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo'))).concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != 0 and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') != 99 ? ' dias' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('prazoIntPasMsg', tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == null ? (tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoAtivo') == null ? '' : 'Defina o prazo para os advogados/representantes do polo passivo.') : 'Prazo para os advogados/representantes do polo passivo: '.concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 0 ? 'Sem prazo' : (tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') == 99 ? 'Não intimar' : tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo'))).concat(tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != 0 and tramitacaoProcessualService.recuperaVariavel('prazoIntimacaoPassivo') != 99 ? ' dias' : ''))}"/>
         </event>
     </task-node>
     <node name="(EF) Polo ativo - Sem prazo">
@@ -391,10 +391,37 @@
         <transition to="(EF) Intimação eletrônica - CONFIRMAR" name="(EF) Intimação eletrônica - CONFIRMAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -403,40 +430,13 @@
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
     <!-- ACTIONS --> 

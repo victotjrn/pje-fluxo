@@ -5,11 +5,11 @@
 
 Descrição: Fluxo lançador de fluxo paralelo.]]></description>  
     <!-- SWIMLANES -->
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
+    </swimlane>
     <swimlane name="Nó de Desvio - (EF) Lançador de fluxo">
         <assignment actor-id="#{actor.id}"/>
-    </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -23,16 +23,16 @@ Descrição: Fluxo lançador de fluxo paralelo.]]></description>
     </decision>
     <node name="(EF) Expedição de certidão de decurso de prazo">
         <transition to="(EF) É certificar trânsito em julgado?" name="(EF) É certificar trânsito em julgado?"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_decurso_prazo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:alvara')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_transito_julgado')}"/>
+        </event>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_decurso_prazo', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_transito_julgado', false)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:alvara', false)}"/>
             <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXPDOC', processInstance.contextInstance.variables)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_decurso_prazo')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:alvara')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_transito_julgado')}"/>
         </event>
     </node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_certificar_transito}') == true ? '(EF) Expedição de certidão de trânsito em julgado' : '(EF) É expedir alvará?'}" name="(EF) É certificar trânsito em julgado?">
@@ -41,16 +41,16 @@ Descrição: Fluxo lançador de fluxo paralelo.]]></description>
     </decision>
     <node name="(EF) Expedição de certidão de trânsito em julgado">
         <transition to="(EF) É expedir alvará?" name="(EF) É expedir alvará?"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_transito_julgado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:alvara')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_decurso_prazo')}"/>
+        </event>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_transito_julgado', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:alvara', false)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_decurso_prazo', false)}"/>
             <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXPDOC', processInstance.contextInstance.variables)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_transito_julgado')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:alvara')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_decurso_prazo')}"/>
         </event>
     </node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_expedir_alvaras}') == true ? '(EF) Expedição de alvará' : '(EF) Aguardar Laudo Técnico?'}" name="(EF) É expedir alvará?">
@@ -59,16 +59,16 @@ Descrição: Fluxo lançador de fluxo paralelo.]]></description>
     </decision>
     <node name="(EF) Expedição de alvará">
         <transition to="(EF) Aguardar Laudo Técnico?" name="(EF) Aguardar Laudo Técnico?"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_transito_julgado')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:alvara')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_decurso_prazo')}"/>
+        </event>
         <event type="node-enter">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_transito_julgado', false)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:alvara', true)}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:expdoc:certidao_decurso_prazo', false)}"/>
             <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_EXPDOC', processInstance.contextInstance.variables)}"/>
-        </event>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_transito_julgado')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:alvara')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:expdoc:certidao_decurso_prazo')}"/>
         </event>
     </node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_aguardar_laudo_tecnico}') == true ? '(EF) Aguardando Perícia, Laudo Técnico ou Outros' : '(EF) Alterar tipo de documento?'}" name="(EF) Aguardar Laudo Técnico?">
@@ -261,10 +261,37 @@ Descrição: Fluxo lançador de fluxo paralelo.]]></description>
         <transition to="Término" name="Término"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -273,40 +300,13 @@ Descrição: Fluxo lançador de fluxo paralelo.]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>

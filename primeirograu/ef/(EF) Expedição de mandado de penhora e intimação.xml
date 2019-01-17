@@ -18,14 +18,14 @@ Magistrado  Corregedoria    Servidor Corregedoria
 Magistrado  Corregedoria    Magistrado Corregedor
 Magistrado  Gabinete        Magistrado Gabinete]]></description>  
     <!-- SWIMLANES -->
+    <swimlane name="Magistrado">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
+    </swimlane>
     <swimlane name="Nó de Desvio - (EF) Expedição de mandado de penhora e intimação">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
-    <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901')}"/>
-    </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -67,8 +67,9 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="(EF) Prazo de 120 dias" name="Prazo para manifestação: 120 dias"/>
         <transition to="(EF) Apagar minuta não assinada de mandado de penhora e intimação" name="Cancelar e sair da tarefa"/>
         <transition to="(EF) Preparar comunicação padrão" name="Preparar comunicação (padrão)"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
+        <event type="task-start">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','95')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('tiposDisponiveisIds','95')}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_mandado_penhora_intimacao'))}"/>
@@ -77,9 +78,8 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
-        <event type="task-start">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','95')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('tiposDisponiveisIds','95')}"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
         </event>
     </task-node>
     <process-state name="(EF) Preparar comunicação padrão">
@@ -175,8 +175,12 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="(EF) Destinatário: partes dos polos ativo e passivo" name="Destinatário: partes dos polos ativo e passivo"/>
         <transition to="(EF) Mandado de penhora e intimação - EXPEDIR" name="Retornar para expedição"/>
         <transition to="(EF) Apagar minuta não assinada de mandado de penhora e intimação" name="Cancelar e sair da tarefa"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_mandado_penhora_intimacao:idProcessoDocumento', processoHome.idProcessoDocumento)}"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_mandado_penhora_intimacao'))}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
         <event type="task-create">
             <action expression="#{tipoDocumento.set('TipoDocumento',95)}"/>
@@ -184,12 +188,8 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:minuta_mandado_penhora_intimacao'))}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:exp_mandado_penhora_intimacao:idProcessoDocumento', processoHome.idProcessoDocumento)}"/>
         </event>
     </task-node>
     <node name="(EF) Destinatário: partes do polo ativo">
@@ -254,11 +254,11 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="Nó de Desvio - (EF) Expedição de mandado de penhora e intimação" name="Nó de Desvio - (EF) Expedição de mandado de penhora e intimação">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandado de penhora e intimação [chefe de secretaria] - ASSINAR">
@@ -315,16 +315,16 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="(EF) Mandado de penhora e intimação pendente de escolha de central - SELECIONAR" name="Documento já assinado.">
             <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','95')}"/>
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Mandado de penhora e intimação pendente de escolha de central - SELECIONAR')}"/>
-            <action expression="#{tipoDocumento.set('TipoDocumento',95)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:expedir_mandado_penhora_intimacao'))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','95')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Mandado de penhora e intimação pendente de escolha de central - SELECIONAR')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',95)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandado de penhora e intimação [magistrado] - ASSINAR">
@@ -375,16 +375,16 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="(EF) Mandado de penhora e intimação pendente de escolha de central - SELECIONAR" name="Documento já assinado.">
             <condition expression="#{processoHome.instance.idProcesso &gt; 0 and not empty revisarMinutaAction.processoDocumento.processoDocumentoBin.signatarios and revisarMinutaAction.processoDocumento.ativo}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','95')}"/>
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Mandado de penhora e intimação pendente de escolha de central - SELECIONAR')}"/>
-            <action expression="#{tipoDocumento.set('TipoDocumento',95)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
             <action expression="#{taskInstanceUtil.deleteVariableLocally('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:expedir_mandado_penhora_intimacao'))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','95')}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Mandado de penhora e intimação pendente de escolha de central - SELECIONAR')}"/>
+            <action expression="#{tipoDocumento.set('TipoDocumento',95)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandado de penhora e intimação pendente de escolha de central - SELECIONAR">
@@ -404,13 +404,13 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Lançar movimento de expedição de mandado" name="Finalizar e prosseguir"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Lançar movimento de expedição de mandado')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Cancelar e sair da tarefa')}"/>
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
     </task-node>
     <node name="(EF) Lançar movimento de expedição de mandado">
@@ -442,19 +442,19 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="(EF) Mandado de penhora e intimação pendente de devolução [030 dias] - AGUARDAR" name="(EF) Mandado de penhora e intimação pendente de devolução [030 dias] - AGUARDAR">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda30', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado de penhora e intimação pendente de devolução [030 dias] - AGUARDAR')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de penhora e intimação devolvidos - ANALISAR')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda30')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda30', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado de penhora e intimação pendente de devolução [030 dias] - AGUARDAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de penhora e intimação devolvidos - ANALISAR')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandado de penhora e intimação pendente de devolução [030 dias] - AGUARDAR">
@@ -480,19 +480,19 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="Nó de Desvio - (EF) Expedição de mandado de penhora e intimação" name="Nó de Desvio - (EF) Expedição de mandado de penhora e intimação">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda60', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado de penhora e intimação pendente de devolução [060 dias] - AGUARDAR')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de penhora e intimação devolvidos - ANALISAR')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda60')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda60', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado de penhora e intimação pendente de devolução [060 dias] - AGUARDAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de penhora e intimação devolvidos - ANALISAR')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandado de penhora e intimação pendente de devolução [060 dias] - AGUARDAR">
@@ -518,19 +518,19 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="Nó de Desvio - (EF) Expedição de mandado de penhora e intimação" name="Nó de Desvio - (EF) Expedição de mandado de penhora e intimação">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda100', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado de penhora e intimação pendente de devolução [100 dias ou mais] - AGUARDAR')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de penhora e intimação devolvidos - ANALISAR')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda100')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda100', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado de penhora e intimação pendente de devolução [100 dias ou mais] - AGUARDAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de penhora e intimação devolvidos - ANALISAR')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandado de penhora e intimação pendente de devolução [100 dias ou mais] - AGUARDAR">
@@ -553,17 +553,17 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="Nó de Desvio - (EF) Expedição de mandado de penhora e intimação" name="Nó de Desvio - (EF) Expedição de mandado de penhora e intimação">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandados de penhora e intimação devolvidos - ANALISAR')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de penhora e intimação devolvidos - ANALISAR')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandados de penhora e intimação devolvidos - ANALISAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados de penhora e intimação devolvidos - ANALISAR')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandados de penhora e intimação devolvidos - ANALISAR">
@@ -580,8 +580,8 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="Nó de Desvio - (EF) Expedição de mandado de penhora e intimação" name="Nó de Desvio - (EF) Expedição de mandado de penhora e intimação">
             <condition expression="#{true}"/>
         </transition>
-        <event type="node-enter">
-            <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Mandados de penhora e intimação devolvidos - ANALISAR', true, false, true, true)}"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
         <event type="task-create">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
@@ -589,8 +589,8 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <event type="node-leave">
             <action expression="#{processoHome.limparCaixaTriagem()}"/>
         </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        <event type="node-enter">
+            <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Mandados de penhora e intimação devolvidos - ANALISAR', true, false, true, true)}"/>
         </event>
     </task-node>
     <node name="(EF) Apagar minuta não assinada de mandado de penhora e intimação">
@@ -616,10 +616,37 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
         <transition to="(EF) Mandado de penhora e intimação pendente de devolução [100 dias ou mais] - AGUARDAR" name="(EF) Mandado de penhora e intimação pendente de devolução [100 dias ou mais] - AGUARDAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -628,40 +655,13 @@ Magistrado  Gabinete        Magistrado Gabinete]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
     <!-- ACTIONS --> 

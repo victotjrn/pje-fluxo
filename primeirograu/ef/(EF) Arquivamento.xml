@@ -3,11 +3,11 @@
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Arquivamento">
     <description><![CDATA[Gestão de arquivamento de processos.]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (EF) Arquivamento">
-        <assignment actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (EF) Arquivamento">
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -37,11 +37,11 @@
         <transition to="(EF) Lançar movimento de Execuções fiscais aguardando a localização do devedor ou de bens" name="Arquivar e aguardar localização do devedor ou de bens"/>
         <transition to="(EF) Lançar movimento de arquivamento de processos com custas pendentes" name="Arquivar por falta de recolhimento das custas processuais"/>
         <transition to="(EF) Lançar movimentação arquivamento reunião de processos" name="Arquivar - Reunião de processos"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Arquivo provisório (data limite) - DEFINIR">
@@ -63,11 +63,11 @@
         <transition to="(EF) Lançar movimento de Arquivo provisório" name="Arquivar provisoriamente"/>
         <transition to="(EF) Lançar movimento de Arquivo provisório - art. 40" name="Arquivar provisoriamente - art. 40"/>
         <transition to="(EF) ~Arquivo - CONFIRMAR" name="Retornar para opções de arquivamento"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('date:ef_cs_data_limite_arquivamento')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('dla', tramitacaoProcessualService.recuperaVariavelTarefa('date:ef_cs_data_limite_arquivamento'))}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('date:ef_cs_data_limite_arquivamento')}"/>
         </event>
     </task-node>
     <node name="(EF) Lançar movimento de Arquivo Definitivo">
@@ -101,12 +101,12 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Conclusão para decisão de reativação" name="Enviar concluso para decisão de reativação"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:tjrn:TipoArquivo', '(EF) ~Arquivo definitivo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <node name="(EF) Lançar movimento de Execuções fiscais aguardando a localização do devedor ou de bens">
@@ -139,12 +139,12 @@
         <transition to="Nó de Desvio - (EF) Arquivamento" name="Nó de Desvio - (EF) Arquivamento">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:tjrn:TipoArquivo', '(EF) ~Arquivado - Execuções fiscais aguardando a localização do devedor ou de bens')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <node name="(EF) Lançar movimento de arquivamento de processos com custas pendentes">
@@ -177,12 +177,12 @@
         <transition to="Nó de Desvio - (EF) Arquivamento" name="Nó de Desvio - (EF) Arquivamento">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:tjrn:TipoArquivo', '(EF) ~Arquivado - Processos com custas pendentes')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <node name="(EF) Lançar movimento de Reativação">
@@ -223,15 +223,15 @@
         <transition to="(EF) ~Arquivo com prazo decorrido - ANALISAR" name="(EF) ~Arquivo com prazo decorrido - ANALISAR">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaArquivamentoProvisorio', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) ~Arquivo com prazo decorrido - ANALISAR')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaArquivamentoProvisorio')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaArquivamentoProvisorio', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) ~Arquivo com prazo decorrido - ANALISAR')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) ~Arquivo provisório - art. 40">
@@ -255,15 +255,15 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR" name="a"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaArquivamentoProvisorio', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaArquivamentoProvisorio')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaArquivamentoProvisorio', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR')}"/>
         </event>
     </task-node>
     <node name="(EF) Lançar movimento de Desarquivamento">
@@ -275,13 +275,13 @@
     <process-state name="(EF) Conclusão para decisão de reativação">
         <sub-process name="(EF) Preparar ato judicial de decisão sobre reativação" binding="late"/>
         <transition to="(EF) ~Despachados sobre reativação" name="(EF) ~Despachados sobre reativação"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:decisao', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:decisao_reativacao', 'true')}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:paj:decisao')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:paj:decisao_reativacao')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:decisao', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:paj:decisao_reativacao', 'true')}"/>
         </event>
     </process-state>
     <task-node end-tasks="true" name="(EF) ~Despachados sobre reativação">
@@ -306,11 +306,11 @@
         </transition>
         <transition to="(EF) Citar e(ou) intimar sobre reativação" name="Intimar da decisão"/>
         <transition to="(EF) Retornar para qual arquivo?" name="Manter arquivado"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <decision expression="#{not empty tramitacaoProcessualService.recuperaVariavel('ef:tjrn:TipoArquivo') ? tramitacaoProcessualService.recuperaVariavel('ef:tjrn:TipoArquivo') : '(EF) ~Arquivo definitivo'}" name="(EF) Retornar para qual arquivo?">
@@ -349,12 +349,12 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Conclusão para decisão de reativação" name="Enviar concluso para decisão de reativação"/>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:tjrn:TipoArquivo', '(EF) ~Arquivado - Reunião de processos')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) ~Arquivo com prazo decorrido - ANALISAR">
@@ -426,10 +426,37 @@
     </task-node>
     <end-state name="Término"/>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -438,40 +465,13 @@
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>

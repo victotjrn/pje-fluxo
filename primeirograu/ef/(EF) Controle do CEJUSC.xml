@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Controle do CEJUSC">
-    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC.........]]></description>  
+    <description><![CDATA[Fluxo responsável pelo controle de processos enviados para conciliação no CEJUSC........]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - (EF) Controle do CEJUSC">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,6:5197')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
     </swimlane>
     <swimlane name="CEJUSC">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:5886,5:1338,6:1469,6:5197')}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -174,13 +174,13 @@
         <transition to="(CEJUSC) Separação preparação intimação" name="(CEJUSC) Separação preparação intimação">
             <condition expression="#{true}"/>
         </transition>
-        <event type="node-enter">
-            <action name="upd" expression="#{modeloDocumento.set('Processo_Fluxo_prepararExpediente',80)}"/>
-        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(CEJUSC) Separação preparação intimação')}"/>
             <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,69,65,71')}"/>
             <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,S,D,M,L,N,T')}"/>
+        </event>
+        <event type="node-enter">
+            <action name="upd" expression="#{modeloDocumento.set('Processo_Fluxo_prepararExpediente',80)}"/>
         </event>
     </task-node>
     <decision expression="#{conectorMandados.haVariasCentraisMandado() ? '(CEJUSC) Selecionar Central de Mandados' : '(CEJUSC) Junção preparação intimação'}" name="(CEJUSC) Existe alguma Central de Mandados?">
@@ -215,12 +215,12 @@
         </transition>
         <transition to="(CEJUSC) Análise do CEJUSC" name="Cancelar e sair da tarefa"/>
         <transition to="(CEJUSC) Prazos continuam abertos ?" name="Verificar se há prazo em aberto"/>
+        <event type="task-end">
+            <action expression="#{taskInstanceUtil.deleteVariableLocally('pje:aguardaPeticao')}"/>
+        </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Processo com prazo decorrido')}"/>
             <action expression="#{taskInstanceUtil.setVariable('pje:aguardaPeticao', 'true')}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{taskInstanceUtil.deleteVariableLocally('pje:aguardaPeticao')}"/>
         </event>
     </task-node>
     <decision expression="#{atoComunicacaoService.getAtosComunicacaoAbertos(processoJudicialService.findById(org.jboss.seam.bpm.processInstance.contextInstance.getVariable('processo'))) &gt; 0 ? 'Processo com prazo em curso' : 'Processo com prazo decorrido'}" name="(CEJUSC) Prazos continuam abertos ?">
@@ -254,15 +254,15 @@
             <condition expression="#{true}"/>
         </transition>
         <transition to="(CEJUSC) Remover documento temporário cejusc" name="Finalizar e sair da tarefa"/>
+        <event type="task-start">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','34,57,67')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Finalizar e sair da tarefa')}"/>
+        </event>
         <event type="task-create">
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('É ofício ?')}"/>
         </event>
         <event type="node-leave">
             <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
-        </event>
-        <event type="task-start">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','34,57,67')}"/>
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Finalizar e sair da tarefa')}"/>
         </event>
     </task-node>
     <decision expression="#{processoDocumentoManager.getProcessoDocumento(tramitacaoProcessualService.recuperaProcesso().getNumeroProcesso(),null, papelDAO.findByCodeName('admin'),null).get(0).getTipoProcessoDocumento().getIdTipoProcessoDocumento() == 34 ? '(CEJUSC) Lançar movimentação ofício' : '(CEJUSC) É ato ordinatório ?'}" name="(CEJUSC) É ofício ?">
@@ -320,14 +320,14 @@
         <transition to="(CEJUSC) Imprimir Documento" name="Imprimir Documento">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Imprimir Documento')}"/>
+        <event type="task-start">
+            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',34,57)}"/>
         </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('Processo_Fluxo_revisarMinutaTipoProcessoDocumento')}"/>
         </event>
-        <event type="task-start">
-            <action expression="#{tipoDocumento.set('Processo_Fluxo_revisarMinuta',34,57)}"/>
+        <event type="task-create">
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('Imprimir Documento')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Imprimir Documento">
@@ -408,14 +408,14 @@
         </transition>
         <transition to="(CEJUSC) Preencheu conteúdo DJe" name="Prosseguir"/>
         <transition to="(CEJUSC) Ignorar conteúdo DJe" name="Cancelar e sair da tarefa"/>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_conteudo_dje')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('magistrado_dje_temp', tramitacaoProcessualService.recuperaVariavelTarefa('combo_objetos:ef_magistrado_dje').getIdUsuario())}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('combo_objetos:ef_magistrado_dje')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('conteudo_dje_temp', tramitacaoProcessualService.strToBase64(tramitacaoProcessualService.recuperaVariavelTarefa('text:ef_conteudo_dje')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('text:ef_conteudo_dje')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_conteudo_dje')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(CEJUSC) Ignorar conteúdo DJe">
@@ -745,10 +745,37 @@ aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiên
         <transition to="(CEJUSC) Selecionar Central de Mandados" name="(CEJUSC) Selecionar Central de Mandados"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -757,40 +784,13 @@ aviso3:A opção "CEJUSC - DPVAT" encaminhará o processo para a marcação de audiên
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
     <!-- ACTIONS --> 

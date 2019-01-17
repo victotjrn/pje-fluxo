@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Preparar Ato de Comunicação - Audiências">
-    <description><![CDATA[Código do fluxo: EF_PAC_AUD.
-
-Descrição: Fluxo destinado a permitir a realização de atos de comunicação relacionados à audiências.
-
-Raia         Localização   Papel
-Secretaria   Secretaria    Chefe de Secretaria
-Secretaria   Secretaria    Servidor de Secretaria
-Secretaria   Secretaria    Conciliador Judicial
-Secretaria   Gabinete      Magistrado
-Secretaria   Gabinete      Assessor
-Magistrado   Secretaria    Chefe de Secretaria
-Magistrado   Secretaria    Servidor de Secretaria
-Magistrado   Gabinete      Magistrado
-Magistrado   Gabinete      Magistrado Gabinete
-Magistrado   Corregedoria  Servidor Corregedoria
-Magistrado   Corregedoria  Magistrado Corregedor
+    <description><![CDATA[Código do fluxo: EF_PAC_AUD.
+
+Descrição: Fluxo destinado a permitir a realização de atos de comunicação relacionados à audiências.
+
+Raia         Localização   Papel
+Secretaria   Secretaria    Chefe de Secretaria
+Secretaria   Secretaria    Servidor de Secretaria
+Secretaria   Secretaria    Conciliador Judicial
+Secretaria   Gabinete      Magistrado
+Secretaria   Gabinete      Assessor
+Magistrado   Secretaria    Chefe de Secretaria
+Magistrado   Secretaria    Servidor de Secretaria
+Magistrado   Gabinete      Magistrado
+Magistrado   Gabinete      Magistrado Gabinete
+Magistrado   Corregedoria  Servidor Corregedoria
+Magistrado   Corregedoria  Magistrado Corregedor
 Magistrado   Assessoria    Assessor]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,7:5197,6:5901')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,7:5197')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -61,13 +61,13 @@ Magistrado   Assessoria    Assessor]]></description>
         <transition to="(EF) Lançar movimentações" name="(EF) Lançar movimentações">
             <condition expression="#{true}"/>
         </transition>
-        <event type="node-enter">
-            <action name="upd" expression="#{modeloDocumento.set('Processo_Fluxo_prepararExpediente',80)}"/>
-        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Lançar movimentações')}"/>
             <action name="upd" expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,69,65,71')}"/>
             <action name="upd" expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('E,C,S,D')}"/>
+        </event>
+        <event type="node-enter">
+            <action name="upd" expression="#{modeloDocumento.set('Processo_Fluxo_prepararExpediente',80)}"/>
         </event>
     </task-node>
     <decision expression="#{(processoTrfHome.possuiCompetencia(3) || processoTrfHome.possuiCompetencia(10)) || ((comunicacaoProcessualAction.getExpedientesEletronico().size() == 0 &amp;&amp; comunicacaoProcessualAction.getExpedientesCorreios().size() == 0 &amp;&amp; comunicacaoProcessualAction.getExpedientesEdital().size() == 0) &amp;&amp; comunicacaoProcessualAction.getExpedientesPessoal().size() &gt; 0) ? '(EF) Separação em controle de prazo' : '(EF) Publicacao DJe'}" name="(EF) É competência de Fazenda?">
@@ -134,14 +134,14 @@ Magistrado   Assessoria    Assessor]]></description>
         <transition to="Nó de Desvio - (EF) Preparar Ato de Comunicação - Audiências" name="Nó de Desvio - (EF) Preparar Ato de Comunicação - Audiências">
             <condition expression="#{true}"/>
         </transition>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_conteudo_dje')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('magistrado_dje_temp', tramitacaoProcessualService.recuperaVariavelTarefa('combo_objetos:ef_magistrado_dje').getIdUsuario())}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('combo_objetos:ef_magistrado_dje')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('conteudo_dje_temp', tramitacaoProcessualService.strToBase64(tramitacaoProcessualService.recuperaVariavelTarefa('text:ef_conteudo_dje')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('text:ef_conteudo_dje')}"/>
+        </event>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_conteudo_dje')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Audiência pendente de conteúdo DJe - IGNORAR">
@@ -283,11 +283,11 @@ Magistrado   Assessoria    Assessor]]></description>
     <process-state name="(EF) Controlar prazos via mandado">
         <sub-process name="(EF) Controle de prazos e retorno de expedientes" binding="late"/>
         <transition to="Término" name="Término"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cpre:mandado','true')}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:cpre:mandado')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cpre:mandado','true')}"/>
         </event>
     </process-state>
     <task-node end-tasks="true" name="Nó de Desvio - (EF) Preparar Ato de Comunicação - Audiências">
@@ -315,11 +315,11 @@ Magistrado   Assessoria    Assessor]]></description>
     <process-state name="(EF) Controlar prazos via correios">
         <sub-process name="(EF) Controle de prazos e retorno de expedientes" binding="late"/>
         <transition to="(EF) Junção em controle de prazo" name="(EF) Junção em controle de prazo"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cpre:correios','true')}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:cpre:correios')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cpre:correios','true')}"/>
         </event>
     </process-state>
     <decision expression="#{comunicacaoProcessualAction.getExpedientesCorreios().size() &gt; 0 ? '(EF) Controlar prazos via correios' : '(EF) Junção em controle de prazo'}" name="(EF) Possiu correios ?">
@@ -333,11 +333,11 @@ Magistrado   Assessoria    Assessor]]></description>
     <process-state name="(EF) Controlar prazos via sistema">
         <sub-process name="(EF) Controle de prazos e retorno de expedientes" binding="late"/>
         <transition to="(EF) Junção em controle de prazo" name="(EF) Junção em controle de prazo"/>
-        <event type="node-enter">
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cpre:sistema','true')}"/>
-        </event>
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef:cpre:sistema')}"/>
+        </event>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cpre:sistema','true')}"/>
         </event>
     </process-state>
     <fork name="(EF) Separação em controle de prazo">
@@ -348,10 +348,37 @@ Magistrado   Assessoria    Assessor]]></description>
         <transition to="Término" name="Término"/>
     </join>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -360,40 +387,13 @@ Magistrado   Assessoria    Assessor]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
     <!-- ACTIONS --> 

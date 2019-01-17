@@ -18,14 +18,14 @@ Magistrado   Gabinete      Magistrado Gabinete
 Magistrado   Corregedoria  Servidor Corregedoria
 Magistrado   Corregedoria  Magistrado Corregedor]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (EF) Preparar ato de comunicação de mandado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
-    </swimlane>
     <swimlane name="Magistrado">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (EF) Preparar ato de comunicação de mandado">
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
     </swimlane>  
     <!-- START-STATE -->
     <start-state name="Início">
@@ -67,6 +67,12 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         <transition to="Nó de Desvio - (EF) Preparar ato de comunicação de mandado" name="Nó de Desvio - (EF) Preparar ato de comunicação de mandado">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempMand', org.jboss.seam.bpm.taskInstance.getId())}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pg:tjrn:MandValidoParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Existe alguma Central de Mandados?')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('M')}"/>
@@ -86,12 +92,6 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempMand', org.jboss.seam.bpm.taskInstance.getId())}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pg:tjrn:MandValidoParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandado genérico [chefe de secretaria] - ASSINAR">
@@ -118,6 +118,12 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         <transition to="Nó de Desvio - (EF) Preparar ato de comunicação de mandado" name="Nó de Desvio - (EF) Preparar ato de comunicação de mandado">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempMand',org.jboss.seam.bpm.taskInstance.getId())}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('pg:tjrn:MandValidoParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
+        </event>
         <event type="task-create">
             <action name="upd" expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Existe alguma Central de Mandados?')}"/>
             <action expression="#{preparaAtoComunicacaoAction.setMeiosComunicacao('M')}"/>
@@ -137,12 +143,6 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTempMand')))}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTempMand',org.jboss.seam.bpm.taskInstance.getId())}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('pg:tjrn:MandValidoParaAss', (preparaAtoComunicacaoAction.haDestinatarios() and preparaAtoComunicacaoAction.validaAtosDeComunicacao() and not empty preparaAtoComunicacaoAction.getAssinaturas()))}"/>
         </event>
     </task-node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pg:tjrn:MandValidoParaAss') == true ? tramitacaoProcessualService.recuperaVariavel('pg:tjrn:ProxMand') : tramitacaoProcessualService.recuperaVariavel('pg:tjrn:AntMand') }" name="(EF) Encaminhar para assinatura de mandado?">
@@ -209,19 +209,19 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         <transition to="(EF) Mandados genéricos devolvidos - ANALISAR" name="(EF) Mandados genéricos devolvidos - ANALISAR">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda30', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado genérico pendente de devolução [030 dias] - AGUARDAR')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados genéricos devolvidos - ANALISAR')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda30')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda30', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado genérico pendente de devolução [030 dias] - AGUARDAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados genéricos devolvidos - ANALISAR')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandado genérico pendente de devolução [030 dias] - AGUARDAR">
@@ -247,19 +247,19 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         <transition to="Nó de Desvio - (EF) Preparar ato de comunicação de mandado" name="Nó de Desvio - (EF) Preparar ato de comunicação de mandado">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda60', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado genérico pendente de devolução [060 dias] - AGUARDAR')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados genéricos devolvidos - ANALISAR')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda60')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda60', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado genérico pendente de devolução [060 dias] - AGUARDAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados genéricos devolvidos - ANALISAR')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandado genérico pendente de devolução [060 dias] - AGUARDAR">
@@ -285,19 +285,19 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         <transition to="Nó de Desvio - (EF) Preparar ato de comunicação de mandado" name="Nó de Desvio - (EF) Preparar ato de comunicação de mandado">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda100', true)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado genérico pendente de devolução [100 dias ou mais] - AGUARDAR')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados genéricos devolvidos - ANALISAR')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda100')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda100', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandado genérico pendente de devolução [100 dias ou mais] - AGUARDAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados genéricos devolvidos - ANALISAR')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandado genérico pendente de devolução [100 dias ou mais] - AGUARDAR">
@@ -320,17 +320,17 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         <transition to="Nó de Desvio - (EF) Preparar ato de comunicação de mandado" name="Nó de Desvio - (EF) Preparar ato de comunicação de mandado">
             <condition expression="#{true}"/>
         </transition>
-        <event type="task-create">
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandados genéricos devolvidos - ANALISAR')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados genéricos devolvidos - ANALISAR')}"/>
-        </event>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_devolucao_mandado')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition2')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_devolucao_mandado', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) Mandados genéricos devolvidos - ANALISAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition2', '(EF) Mandados genéricos devolvidos - ANALISAR')}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(EF) Mandados genéricos devolvidos - ANALISAR">
@@ -347,8 +347,8 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(EF) Apagar variáveis do fluxo" name="Finalizar e sair da tarefa"/>
-        <event type="node-enter">
-            <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Mandados genéricos devolvidos - ANALISAR', true, false, true, true)}"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
         </event>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
@@ -356,8 +356,8 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         <event type="node-leave">
             <action expression="#{processoHome.limparCaixaTriagem()}"/>
         </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        <event type="node-enter">
+            <action expression="#{processoHome.fazerTriagemExecucaoFiscal('(EF) Mandados genéricos devolvidos - ANALISAR', true, false, true, true)}"/>
         </event>
     </task-node>
     <node name="(EF) Apagar variáveis do fluxo">
@@ -387,10 +387,37 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
         <transition to="(EF) Mandado genérico pendente de devolução [100 dias ou mais] - AGUARDAR" name="(EF) Mandado genérico pendente de devolução [100 dias ou mais] - AGUARDAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -399,40 +426,13 @@ Magistrado   Corregedoria  Magistrado Corregedor]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
     <!-- ACTIONS --> 
