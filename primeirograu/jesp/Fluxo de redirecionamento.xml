@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="Fluxo de redirecionamento">
-    <description><![CDATA[Fluxo de redirecionamento com base na competência para controle de conflito de competência.....]]></description>  
+    <description><![CDATA[Fluxo de redirecionamento com base na competência para controle de conflito de competência...]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Nó de Desvio - Fluxo de redirecionamento">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
