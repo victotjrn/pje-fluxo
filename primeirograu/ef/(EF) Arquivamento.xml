@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Arquivamento">
-    <description><![CDATA[Gestão de arquivamento de processos.]]></description>  
+    <description><![CDATA[Código do fluxo: EF_ARQ
+
+Descrição:
+Gestão de arquivamento de processos.]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,5:5483,6:1469,8:5852,8:5853,6:5901,7:5197')}"/>
@@ -254,7 +257,6 @@
         <transition to="(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR" name="(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) ~Arquivo com prazo decorrido - art. 40 - ANALISAR" name="a"/>
         <event type="task-end">
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaArquivamentoProvisorio')}"/>

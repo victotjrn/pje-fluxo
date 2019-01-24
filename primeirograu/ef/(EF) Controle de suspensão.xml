@@ -102,7 +102,6 @@ Descrição: Fluxo de controle de suspensão de processos.]]></description>
         <transition to="(EF) Suspensão com prazo decorrido - ANALISAR" name="(EF) Suspensão com prazo decorrido - ANALISAR">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Suspensão com prazo decorrido - ANALISAR" name="s"/>
         <event type="task-start">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:cs:suspensao_art40', 'true')}"/>
         </event>
