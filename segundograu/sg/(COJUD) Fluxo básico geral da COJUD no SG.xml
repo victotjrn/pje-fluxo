@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(COJUD) Fluxo básico geral da COJUD no SG">
+    <description><![CDATA[Código do fluxo: COJUD_FBG_SG
+
+Descrição: Processos deslocados à COJUD.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor de Secretaria]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Contadoria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5906')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (COJUD) Fluxo básico geral da COJUD no SG">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,1342:1469')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Contadoria"/>
+        <transition to="(COJUD) Processos pendentes de juntada de cálculo judicial - ANALISAR" name="(COJUD) Processos pendentes de juntada de cálculo judicial - ANALISAR"/>
+    </start-state>  
+    <!-- NODES -->
+    <task-node end-tasks="true" name="(COJUD) Processos pendentes de juntada de cálculo judicial - ANALISAR">
+        <task name="(COJUD) Processos pendentes de juntada de cálculo judicial - ANALISAR" swimlane="Contadoria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. aviso
+   Label: Para juntar o cálculo, clique no número do processo e o anexe através do menu INCLUIR PETIÇÕES E DOCUMENTOS.
+   Escrita: Sim.
+   Obrig.: Não.
+   Tipo: Aviso.
+
+2. Variável: movimentarLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (COJUD) Fluxo básico geral da COJUD no SG" name="Nó de Desvio - (COJUD) Fluxo básico geral da COJUD no SG">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(COJUD) Devolver ao órgão de origem" name="Finalizar tarefa e devolver processo"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+    </task-node>
+    <node name="(COJUD) Devolver ao órgão de origem">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.sinalizarFluxo(tramitacaoProcessualService.recuperaProcesso(), 'pje:aguarda_cojud', true, false, true)}"/>
+        </event>
+    </node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (COJUD) Fluxo básico geral da COJUD no SG">
+        <task name="Nó de Desvio - (COJUD) Fluxo básico geral da COJUD no SG" swimlane="Nó de Desvio - (COJUD) Fluxo básico geral da COJUD no SG"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(COJUD) Processos pendentes de juntada de cálculo judicial - ANALISAR" name="(COJUD) Processos pendentes de juntada de cálculo judicial - ANALISAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>

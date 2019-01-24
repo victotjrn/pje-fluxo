@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Encaminhamento à COJUD">
+    <description><![CDATA[Código do fluxo: ENC_COJUD.
+
+Descrição: Encaminhar o processo à COJUD.
+
+Raia        Localização              Papel
+Secretaria  Secretaria Segundo Grau  Chefe de Secretaria
+Secretaria  Secretaria Segundo Grau  Servidor Geral
+Secretaria  Secretaria Segundo Grau  Servidor de Secretaria]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5906,602:5483')}" actor-id="#{actor.id}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Encaminhamento à COJUD">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,1342:1469')}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(SG) Encamihar à COJUD" name="(SG) Encamihar à COJUD"/>
+    </start-state>  
+    <!-- NODES -->
+    <node name="(SG) Encamihar à COJUD">
+        <transition to="(SG) Lançar movimento de recebimento dos autos pela contadoria" name="(SG) Lançar movimento de recebimento dos autos pela contadoria"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'COJUD_FBG_SG', 73, 136, 18, true,processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <node name="(SG) Lançar movimento de recebimento dos autos pela contadoria">
+        <transition to="(SG) Processo encaminhado à COJUD - AGUARDAR" name="(SG) Processo encaminhado à COJUD - AGUARDAR"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(979).lancarMovimento()}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(SG) Processo encaminhado à COJUD - AGUARDAR">
+        <task name="(SG) Processo encaminhado à COJUD - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. aviso
+   Label: Aguardando juntada de cálculo pela contadoria judicial
+   Escrita: Sim.
+   Obrig.: Não.
+   Tipo: Aviso]]></description>
+        <transition to="Nó de Desvio - (SG) Encaminhamento à COJUD" name="Nó de Desvio - (SG) Encaminhamento à COJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(SG) Lançar movimento de devolução dos autos à secretaria" name="Devolver para a secretaria">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguarda_cojud')}"/>
+        </event>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguarda_cojud', 'true')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', 'Devolver para a secretaria')}"/>
+        </event>
+    </task-node>
+    <node name="(SG) Lançar movimento de devolução dos autos à secretaria">
+        <transition to="(SG) Processo devolvido pela COJUD - ANALISAR" name="(SG) Processo devolvido pela COJUD - ANALISAR"/>
+        <event type="node-enter">
+            <action expression="#{preencherMovimento.deCodigo(980).comComplementoDeCodigo(7).preencherComTexto('juízo de origem').lancarMovimento()}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(SG) Processo devolvido pela COJUD - ANALISAR">
+        <task name="(SG) Processo devolvido pela COJUD - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. aviso
+   Label:
+   Escrita: Sim.
+   Obrig.: Não.
+   Tipo: Aviso]]></description>
+        <transition to="Término" name="Encaminhar para &quot;(SG) Secretaria - ANALISAR&quot;"/>
+        <transition to="Nó de Desvio - (SG) Encaminhamento à COJUD" name="Nó de Desvio - (SG) Encaminhamento à COJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (SG) Encaminhamento à COJUD">
+        <task name="Nó de Desvio - (SG) Encaminhamento à COJUD" swimlane="Nó de Desvio - (SG) Encaminhamento à COJUD"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(SG) Processo devolvido pela COJUD - ANALISAR" name="(SG) Processo devolvido pela COJUD - ANALISAR"/>
+        <transition to="(SG) Processo encaminhado à COJUD - AGUARDAR" name="(SG) Processo encaminhado à COJUD - AGUARDAR"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>  
+    <!-- ACTIONS --> 
+</process-definition>
