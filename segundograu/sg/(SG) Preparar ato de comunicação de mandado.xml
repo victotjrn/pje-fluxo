@@ -14,11 +14,11 @@ Magistrado  Assessoria Segundo Grau  Assessor para Votação Antecipada
 Magistrado  Gabinete Segundo Grau    Magistrado
 Assessoria Segundo Grau  Assessor Geral]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (SG) Preparar ato de comunicação de mandado">
-        <assignment actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Magistrado">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('600:5197,599:1469,600:5898,600:5899,600:5907')}"/>
+    </swimlane>
+    <swimlane name="Nó de Desvio - (SG) Preparar ato de comunicação de mandado">
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('602:1338,602:5483,602:5906')}" actor-id="#{actor.id}"/>
@@ -50,6 +50,11 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
             <condition expression="#{true}"/>
         </transition>
         <transition to="(SG) Secretário(a) [MANDADO] - ASSINAR" name="Encaminhar para assinatura do(a) secretário(a)"/>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp', org.jboss.seam.bpm.taskInstance.getId())}"/>
+        </event>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(SG) É SG?')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds', '60,65,69')}"/>
@@ -69,11 +74,6 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaInstrumento'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaExpedientes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp', org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Mandado pendente de assinatura pela secretaria - ASSINAR">
@@ -97,6 +97,11 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
         <transition to="(SG) É SG?" name="(SG) É SG?">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp',org.jboss.seam.bpm.taskInstance.getId())}"/>
+        </event>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:mapaProcuradorias'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:mapaProcuradorias'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
@@ -115,11 +120,6 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) É SG?')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,69')}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp',org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Secretário(a) [MANDADO] - ASSINAR">
@@ -143,6 +143,11 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
         <transition to="(SG) É SG?" name="(SG) É SG?">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp',org.jboss.seam.bpm.taskInstance.getId())}"/>
+        </event>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:mapaProcuradorias'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:mapaProcuradorias'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
@@ -161,11 +166,6 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('prepararAto:mapaAgrupamentos'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp')))}"/>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) É SG?')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,69')}"/>
-        </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp',org.jboss.seam.bpm.taskInstance.getId())}"/>
         </event>
     </task-node>
     <task-node end-tasks="true" name="(SG) Mandado pendente de assinatura pelo gabinete - ASSINAR">
@@ -186,6 +186,11 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
         <transition to="(SG) É SG?" name="(SG) É SG?">
             <condition expression="#{true}"/>
         </transition>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp',org.jboss.seam.bpm.taskInstance.getId())}"/>
+        </event>
         <event type="task-create">
             <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:meiosComunicacoes'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:meiosComunicacoes'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('prepararAto:mapaProcuradorias'.concat(org.jboss.seam.bpm.taskInstance.getId()), tramitacaoProcessualService.recuperaVariavel('prepararAto:mapaProcuradorias'.concat(tramitacaoProcessualService.recuperaVariavel('idTaskInstanceTemp'))))}"/>
@@ -205,13 +210,8 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
             <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(SG) É SG?')}"/>
             <action expression="#{taskInstanceUtil.setVariable('tiposDisponiveisIds','60,65,69')}"/>
         </event>
-        <event type="task-end">
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
-            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
-            <action expression="#{tramitacaoProcessualService.gravaVariavel('idTaskInstanceTemp',org.jboss.seam.bpm.taskInstance.getId())}"/>
-        </event>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao == (0+parametroUtil.getParametro('pje:tjrn:sg:jurisdicao:id')) ? '(SG) Encaminhar para CCM - SG' : '(SG) Encaminhar para CCM-TR'}" name="(SG) É SG?">
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().jurisdicao.idJurisdicao == (0+parametroUtil.getParametro('pje:tjrn:tr:jurisdicao:id')) ? '(SG) Encaminhar para CCM-TR' : '(SG) Encaminhar para CCM - SG'}" name="(SG) É SG?">
         <transition to="(SG) Encaminhar para CCM - SG" name="(SG) Encaminhar para CCM - SG"/>
         <transition to="(SG) Encaminhar para CCM-TR" name="(SG) Encaminhar para CCM-TR"/>
     </decision>
@@ -255,10 +255,37 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
         <transition to="(SG) Secretário(a) [MANDADO] - ASSINAR" name="(SG) Secretário(a) [MANDADO] - ASSINAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="node-enter">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -267,40 +294,13 @@ Assessoria Segundo Grau  Assessor Geral]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="superstate-enter">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-end">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="task-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event> 
 </process-definition>
