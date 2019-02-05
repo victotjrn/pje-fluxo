@@ -263,7 +263,7 @@ Parâmetros
     <task-node end-tasks="true" name="(VCiv) Imprimir Ofício">
         <task name="(VCiv) Imprimir Ofício" swimlane="Secretaria">
             <controller>
-                <variable name="Processo_ConsultaProcesso_Detalhe_detalheProcessoVisualizacao" mapped-name="page:Processo_ConsultaProcesso_Detalhe_detalheProcessoVisualizacao" access="read,write"/>
+                 <variable name="DistribuirExpediente_list" mapped-name="page:DistribuirExpediente_list" access="read,write"/>
             </controller>
         </task>
         <transition to="(VCiv) Junção em Elaborar Documentos" name="Finalizar tarefa"/>
