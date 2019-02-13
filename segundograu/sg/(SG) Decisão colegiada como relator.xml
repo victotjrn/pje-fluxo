@@ -608,7 +608,7 @@ Magistrado  Assessoria Segundo Grau  Assessor
             <action name="upd" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{false}')}"/>
         </event>
     </task-node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('sg:acordaorevisado') == true ? '(SG) Lançar movimentação do acórdão' : '(SG) Acórdão aguardando movimento de julgamento - LANÇAR'}" name="(SG) Acórdão revisado?">
+    <decision expression="#{ ( tramitacaoProcessualService.recuperaVariavel('sg:acordaorevisado') == true and not empty tramitacaoProcessualService.recuperaVariavel('MovimentosLancadosTemporariamente') ) ? '(SG) Lançar movimentação do acórdão' : '(SG) Acórdão aguardando movimento de julgamento - LANÇAR'}" name="(SG) Acórdão revisado?">
         <transition to="(SG) Lançar movimentação do acórdão" name="(SG) Lançar movimentação do acórdão"/>
         <transition to="(SG) Acórdão aguardando movimento de julgamento - LANÇAR" name="(SG) Acórdão aguardando movimento de julgamento - LANÇAR"/>
     </decision>
