@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) Renajud">
-    <description><![CDATA[Código do fluxo: EF_RENAJUD.
-
-Descrição: Fluxo para consultar Renajud.
-
-Raia        Localização   Papel
-Secretaria  Secretaria    Chefe de Secretaria
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(EF) RENAJUD">
+    <description><![CDATA[Código do fluxo: EF_RENAJUD.
+
+Descrição: Fluxo para consultar RENAJUD.
+
+Raia        Localização   Papel
+Secretaria  Secretaria    Chefe de Secretaria
 Secretaria  Gabinete      Magistrado]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="Nó de Desvio - (EF) Renajud">
+    <swimlane name="Nó de Desvio - (EF) RENAJUD">
         <assignment actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria">
@@ -18,80 +18,445 @@ Secretaria  Gabinete      Magistrado]]></description>
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial"/>
-        <transition to="(EF) Renajud - Consultar" name="(EF) Renajud - Consultar"/>
+        <transition to="(EF) RENAJUD" name="(EF) RENAJUD"/>
     </start-state>  
     <!-- NODES -->
-    <task-node end-tasks="true" name="(EF) Renajud - Consultar">
-        <task name="(EF) Renajud - Consultar" swimlane="Secretaria">
+    <task-node end-tasks="true" name="(EF) RENAJUD">
+        <task name="(EF) RENAJUD" swimlane="Secretaria">
             <controller>
                 <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
             </controller>
         </task>
-        <description><![CDATA[* Variáveis *
+        <description><![CDATA[*Variáveis*
 
 1. Variável: aviso
-   Label: Para juntar a resposta do Renajud, clique no número do processo e Anexar documentos.
+   Label: Selecione a opção abaixo condizente com a resposta do RENAJUD.
    Escrita: Sim
    Obrig.: Não
-   Tipo: Aviso]]></description>
-        <transition to="Nó de Desvio - (EF) Renajud" name="Nó de Desvio - (EF) Renajud">
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) RENAJUD" name="Nó de Desvio - (EF) RENAJUD">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(EF) Mandado de intimação e penhora" name="Expedir mandado de intimação e penhora"/>
-        <transition to="(EF) Devolução à secretaria" name="Finalizar e sair da tarefa"/>
-        <event type="task-end">
-            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        <transition to="(EF) Devolução à secretaria" name="04 - Finalizar e sair da tarefa"/>
+        <transition to="(EF) RENAJUD - Penhora integral" name="01 - Penhora integral"/>
+        <transition to="(EF) RENAJUD - Penhora parcial" name="02 - Penhora parcial"/>
+        <transition to="(EF) RENAJUD - Inexistência de bens" name="03 - Inexistência de bens"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('iptu', entityManager.createNativeQuery(parametroUtil.getParametro('ef:query_processo_iptu')).setParameter(&quot;idProcesso&quot;, tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf()).getSingleResult() == 1)}"/>
         </event>
         <event type="task-create">
             <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
         </event>
+        <event type="task-end">
+            <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
     </task-node>
-    <process-state name="(EF) Mandado de intimação e penhora">
-        <sub-process name="(EF) Expedição de mandado de intimação e penhora" binding="late"/>
+    <task-node end-tasks="true" name="(EF) RENAJUD - Penhora integral">
+        <task name="(EF) RENAJUD - Penhora integral" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="termo" mapped-name="textEditAndAttachmentSignature:termo" access="read,write"/>
+                <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso
+   Label: Ao minutar a certidão, clique em "Salvar alterações" para poder incluir o termo do RENAJUD como anexo.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: termo
+   Label: Juntada de termo
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Editor e Anexos com Assinatura
+
+3. Variável: minutarLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Minutar em Lote
+
+4. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) RENAJUD" name="Nó de Desvio - (EF) RENAJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Devolução à secretaria" name="02 - Finalizar e sair da tarefa"/>
+        <transition to="(EF) RENAJUD" name="01 - Retornar ao RENAJUD"/>
+        <transition to="(EF) Intimar exequente - penhora integral" name="(EF) Intimar exequente - penhora integral">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tipoDocumento.set('TipoDocumento',93)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','93')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', '02 - Finalizar e sair da tarefa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', true)}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Intimar exequente - penhora integral')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:termo'))}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:renajud:idProcessoDocumento', ( ( not empty processoHome.idProcessoDocumento)  ? processoHome.idProcessoDocumento : null ) )}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <node name="(EF) Intimar exequente - penhora integral">
+        <transition to="(EF) RENAJUD - Penhora integral com prazo em curso - AGUARDAR" name="(EF) RENAJUD - Penhora integral com prazo em curso - AGUARDAR"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarExequenteEletronicamente(tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf(), 'D', 10, parametroUtil.getParametro('idModeloIntimacaoPenhoraIntegralRENAJUD'), 60)}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(EF) RENAJUD - Penhora integral com prazo em curso - AGUARDAR">
+        <task name="(EF) RENAJUD - Penhora integral com prazo em curso - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo contém intimação com prazo em curso. Após o fechamento de todos os prazos que estão abertos, o processo será encaminhado automaticamente para tarefa "(EF) RENAJUD - Penhora integral com prazo decorrido - ANALISAR".
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) RENAJUD" name="Nó de Desvio - (EF) RENAJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) RENAJUD - Penhora integral com prazo decorrido - ANALISAR" name="(EF) RENAJUD - Penhora integral com prazo decorrido - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) RENAJUD - Penhora integral com prazo decorrido - ANALISAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) RENAJUD - Penhora integral com prazo decorrido - ANALISAR">
+        <task name="(EF) RENAJUD - Penhora integral com prazo decorrido - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Intimação com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(EF) Devolução à secretaria" name="Finalizar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) RENAJUD" name="Nó de Desvio - (EF) RENAJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) RENAJUD - Penhora parcial">
+        <task name="(EF) RENAJUD - Penhora parcial" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="termo" mapped-name="textEditAndAttachmentSignature:termo" access="read,write"/>
+                <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso
+   Label: Ao minutar a certidão, clique em "Salvar alterações" para poder incluir o termo do RENAJUD como anexo.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: termo
+   Label: Juntada de termo
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Editor e Anexos com Assinatura
+
+3. Variável: minutarLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Minutar em Lote
+
+4. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) RENAJUD" name="Nó de Desvio - (EF) RENAJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Devolução à secretaria" name="02 - Finalizar e sair da tarefa"/>
+        <transition to="(EF) RENAJUD" name="01 - Retornar ao RENAJUD"/>
+        <transition to="(EF) Intimar exequente - penhora parcial" name="(EF) Intimar exequente - penhora parcial">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tipoDocumento.set('TipoDocumento',93)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','93')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', '02 - Finalizar e sair da tarefa')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', true)}"/>
+            <action expression="#{taskInstanceUtil.setFrameDefaultTransition('(EF) Intimar exequente - penhora parcial')}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:termo'))}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:renajud:idProcessoDocumento', ( ( not empty processoHome.idProcessoDocumento)  ? processoHome.idProcessoDocumento : null ) )}"/>
+        </event>
+    </task-node>
+    <node name="(EF) Intimar exequente - penhora parcial">
+        <transition to="(EF) RENAJUD - Penhora parcial com prazo em curso - AGUARDAR" name="(EF) RENAJUD - Penhora parcial com prazo em curso - AGUARDAR"/>
+        <event type="node-enter">
+            <action expression="#{atoComunicacaoService.intimarExequenteEletronicamente(tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf(), 'D', 10, parametroUtil.getParametro('idModeloIntimacaoPenhoraParcialRENAJUD'), 60)}"/>
+        </event>
+    </node>
+    <task-node end-tasks="true" name="(EF) RENAJUD - Penhora parcial com prazo em curso - AGUARDAR">
+        <task name="(EF) RENAJUD - Penhora parcial com prazo em curso - AGUARDAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: O processo contém intimação com prazo em curso. Após o fechamento de todos os prazos que estão abertos, o processo será encaminhado automaticamente para tarefa "(EF) RENAJUD - Penhora parcial com prazo decorrido - ANALISAR".
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) RENAJUD" name="Nó de Desvio - (EF) RENAJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) RENAJUD - Penhora parcial com prazo decorrido - ANALISAR" name="(EF) RENAJUD - Penhora parcial com prazo decorrido - ANALISAR">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Devolução à secretaria" name="Cancelar e sair da tarefa"/>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:aguardaPeticao', true)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('frameDefaultLeavingTransition', '(EF) RENAJUD - Penhora parcial com prazo decorrido - ANALISAR')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:aguardaPeticao')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('frameDefaultLeavingTransition')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) RENAJUD - Penhora parcial com prazo decorrido - ANALISAR">
+        <task name="(EF) RENAJUD - Penhora parcial com prazo decorrido - ANALISAR" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: Intimação com prazo decorrido. Clique na próxima ação abaixo para prosseguir.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: movimentacaoLote
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(EF) Devolução à secretaria" name="Finalizar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) RENAJUD" name="Nó de Desvio - (EF) RENAJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-create">
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) RENAJUD - Inexistência de bens">
+        <task name="(EF) RENAJUD - Inexistência de bens" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso1" mapped-name="textAlert:aviso1" access="read,write"/>
+                <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
+                <variable name="aviso3" mapped-name="textAlert:aviso3" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label: ATENÇÃO
+
+2. Variável: aviso2
+   Label: #{tramitacaoProcessualService.recuperaVariavel('iptu') ? 'Este processo contém o assunto IPTU.' : 'Este processo não contém o assunto IPTU.'}
+
+3. Variável: aviso3
+   Label: #{tramitacaoProcessualService.recuperaVariavel('iptu') ? 'Para prosseguir, escolha a opção "Malote Digital - Comunicação com Cartórios".' : 'Favor, expedir o mandado de penhora.'}
+
+4. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Nó de Desvio - (EF) RENAJUD" name="Nó de Desvio - (EF) RENAJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Devolução à secretaria" name="03 - Finalizar e sair da tarefa"/>
+        <transition to="(EF) RENAJUD - Malote Digital - Comunicação com Cartórios" name="01 - Malote Digital - Comunicação com Cartórios">
+            <condition expression="#{tramitacaoProcessualService.recuperaVariavel('iptu')}"/>
+        </transition>
+        <transition to="(EF) Mandado de penhora" name="01 - Expedir mandado de penhora">
+            <condition expression="#{!tramitacaoProcessualService.recuperaVariavel('iptu')}"/>
+        </transition>
+        <transition to="(EF) RENAJUD" name="02 - Retornar ao RENAJUD"/>
+        <event type="task-create">
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', false)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(EF) RENAJUD - Malote Digital - Comunicação com Cartórios">
+        <task name="(EF) RENAJUD - Malote Digital - Comunicação com Cartórios" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="termo" mapped-name="textEditAndAttachmentSignature:termo" access="read,write"/>
+                <variable name="minutarLote" mapped-name="minutarLote:minutarLote" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso
+   Label: Ao minutar a certidão, clique em "Salvar alterações" para poder incluir o termo do RENAJUD como anexo.
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: termo
+   Label: Juntada de termo
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Editor e Anexos com Assinatura
+
+3. Variável: minutarLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Minutar em Lote
+
+4. Variável: movimentacaoLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="(EF) Devolução à secretaria" name="02 - Finalizar e sair da tarefa"/>
+        <transition to="Nó de Desvio - (EF) RENAJUD" name="Nó de Desvio - (EF) RENAJUD">
+            <condition expression="#{true}"/>
+        </transition>
+        <transition to="(EF) Expedição de ofício" name="01 - Expedir ofício"/>
+        <event type="task-create">
+            <action expression="#{tipoDocumento.set('TipoDocumento',93)}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('tiposDisponiveisIds','93')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', '02 - Finalizar e sair da tarefa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('mostrarBotaoGravarNoFluxo', true)}"/>
+        </event>
+        <event type="task-end">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('minutaEmElaboracao', tramitacaoProcessualService.recuperaVariavelTarefa('textEditCombo:termo'))}"/>
+            <action expression="#{not empty processoHome.idProcessoDocumento ? org.jboss.seam.bpm.processInstance.contextInstance.setVariable('minutaEmElaboracao', processoHome.idProcessoDocumento) : ''}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('TipoDocumentoTipoProcessoDocumento')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('tiposDisponiveisIds')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:renajud:idProcessoDocumento', ( ( not empty processoHome.idProcessoDocumento)  ? processoHome.idProcessoDocumento : null ) )}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('mostrarBotaoGravarNoFluxo')}"/>
+        </event>
+    </task-node>
+    <process-state name="(EF) Expedição de ofício">
+        <sub-process name="(EF) Expedição de ofício" binding="late"/>
+        <transition to="(EF) Devolução à secretaria" name="(EF) Devolução à secretaria"/>
+    </process-state>
+    <process-state name="(EF) Mandado de penhora">
+        <sub-process name="(EF) Expedição de mandado de penhora" binding="late"/>
         <transition to="(EF) Devolução à secretaria" name="(EF) Devolução à secretaria"/>
     </process-state>
     <process-state name="(EF) Devolução à secretaria">
         <sub-process name="(EF) Fluxo de devolução à secretaria" binding="late"/>
         <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('iptu')}"/>
+        </event>
     </process-state>
     <end-state name="Término"/>
-    <task-node end-tasks="true" name="Nó de Desvio - (EF) Renajud">
-        <task name="Nó de Desvio - (EF) Renajud" swimlane="Nó de Desvio - (EF) Renajud"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (EF) RENAJUD">
+        <task name="Nó de Desvio - (EF) RENAJUD" swimlane="Nó de Desvio - (EF) RENAJUD"/>
         <transition to="Término" name="Término"/>
-        <transition to="(EF) Renajud - Consultar" name="(EF) Renajud - Consultar"/>
+        <transition to="(EF) RENAJUD" name="(EF) RENAJUD"/>
+        <transition to="(EF) RENAJUD - Penhora integral" name="(EF) RENAJUD - Penhora integral"/>
+        <transition to="(EF) RENAJUD - Penhora parcial" name="(EF) RENAJUD - Penhora parcial"/>
+        <transition to="(EF) RENAJUD - Inexistência de bens" name="(EF) RENAJUD - Inexistência de bens"/>
+        <transition to="(EF) RENAJUD - Malote Digital - Comunicação com Cartórios" name="(EF) RENAJUD - Malote Digital - Comunicação com Cartórios"/>
+        <transition to="(EF) RENAJUD - Penhora integral com prazo em curso - AGUARDAR" name="(EF) RENAJUD - Penhora integral com prazo em curso - AGUARDAR"/>
+        <transition to="(EF) RENAJUD - Penhora parcial com prazo em curso - AGUARDAR" name="(EF) RENAJUD - Penhora parcial com prazo em curso - AGUARDAR"/>
+        <transition to="(EF) RENAJUD - Penhora integral com prazo decorrido - ANALISAR" name="(EF) RENAJUD - Penhora integral com prazo decorrido - ANALISAR"/>
+        <transition to="(EF) RENAJUD - Penhora parcial com prazo decorrido - ANALISAR" name="(EF) RENAJUD - Penhora parcial com prazo decorrido - ANALISAR"/>
     </task-node>  
     <!-- PROCESS-EVENTS -->
-    <event type="superstate-enter">
+    <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="process-start">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="before-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-end">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="subprocess-created">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-create">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="transition">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-assign">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="after-signal">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="timer">
-        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>
-    <event type="task-start">
+    <event type="superstate-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="subprocess-end">
@@ -100,13 +465,40 @@ Secretaria  Gabinete      Magistrado]]></description>
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
     <event type="process-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-leave">
+    <event type="task-end">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="node-enter">
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>  
     <!-- ACTIONS --> 
