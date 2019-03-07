@@ -6,11 +6,11 @@
     <swimlane name="Nó de Desvio - (VCiv) Cumprimento de decisão">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
     </swimlane>
-    <swimlane name="Secretaria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
-    </swimlane>
     <swimlane name="Conciliação">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,7:5197,7:5886,6:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
     </swimlane>
     <swimlane name="Secretaria e Servidor de cálculo">
         <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,5:5891')}"/>
@@ -136,9 +136,15 @@
         <transition to="Nó de Desvio - (VCiv) Cumprimento de decisão" name="Nó de Desvio - (VCiv) Cumprimento de decisão">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="(VCiv) Remetido a outro juízo" name="Remeter a outro juízo"/>
+        <transition to="(VCiv) Remetido a outro juízo - Bloquear processo" name="Remeter a outro juízo"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="Ignorar redistribuição física"/>
     </task-node>
+    <node name="(VCiv) Remetido a outro juízo - Bloquear processo">
+        <transition to="(VCiv) Remetido a outro juízo" name="(VCiv) Remetido a outro juízo"/>
+        <event type="node-enter">
+            <action name="upd" expression="#{entityManager.createNativeQuery('update tb_processo_trf set in_outra_instancia = true where id_processo_trf = :idProcesso').setParameter('idProcesso',tramitacaoProcessualService.recuperaProcesso().getIdProcessoTrf() ).executeUpdate()}"/>
+        </event>
+    </node> 
     <task-node end-tasks="true" name="(VCiv) Remetido a outro juízo">
         <task name="(VCiv) Remetido a outro juízo" swimlane="Secretaria">
             <controller/>
@@ -894,7 +900,7 @@
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('vciv:fbc:registrar_serasajud') ? '(VCiv) Registrar SERASAJUD' : '(VCiv) Junção em cumprimento de decisão'}" name="(VCiv) Serasajud?">
         <transition to="(VCiv) Registrar SERASAJUD" name="(VCiv) Registrar SERASAJUD"/>
         <transition to="(VCiv) Junção em cumprimento de decisão" name="(VCiv) Junção em cumprimento de decisão"/>
-    </decision>  
+    </decision> 
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
