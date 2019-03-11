@@ -27,9 +27,9 @@
         <transition to="Entrar no projudi migração" name="Entrar no projudi migração"/>
         <transition to="É digitalização?" name="É digitalização?"/>
     </decision>
-    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().importadoSistemaLegado == true ? 'Entrar no Processos digitalizados' : '(VCiv) Deslocar secretaria unificada'}" name="É digitalização?">
+    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().importadoSistemaLegado == true ? 'Entrar no Processos digitalizados' : '(VCiv) Prevenção'}" name="É digitalização?">
         <transition to="Entrar no Processos digitalizados" name="Entrar no Processos digitalizados"/>
-        <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
+        <transition to="(VCiv) Prevenção" name="(VCiv) Prevenção"/>
     </decision>
     <process-state name="Entrar no Processos digitalizados">
         <sub-process name="(VCiv) Processos digitalizados" binding="late"/>
@@ -141,6 +141,10 @@
         <transition to="(Projudi) Arquivado provisoriamente" name="(Projudi) Arquivado provisoriamente"/>
         <transition to="(Projudi) Enviado à Central de Avaliação" name="(Projudi) Enviado à Central de Avaliação"/>
     </task-node>
+    <process-state name="(VCiv) Prevenção">
+        <sub-process name="(VCiv) Prevenção" binding="late"/>
+        <transition to="(VCiv) Deslocar secretaria unificada" name="(VCiv) Deslocar secretaria unificada"/>
+    </process-state>
     <process-state name="(VCiv) Deslocar secretaria unificada">
         <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
         <transition to="É competência de Fazenda?" name="É competência de Fazenda?"/>

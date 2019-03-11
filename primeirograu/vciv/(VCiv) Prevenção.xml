@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Prevenção">
+    <description><![CDATA[Fluxo para analise de prevenção...]]></description>  
+    <!-- SWIMLANES -->
+    <swimlane name="Nó de Desvio - (VCiv) Prevenção">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    </swimlane>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469')}" actor-id="#{actor.id}"/>
+    </swimlane>  
+    <!-- START-STATE -->
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(VCiv) É urgencia?" name="(VCiv) É urgencia?"/>
+    </start-state>  
+    <!-- NODES -->
+    <decision expression="#{ tramitacaoProcessualService.temUrgencia() == true ? '(VCiv) Analise de Prevenção [Urgente]' : '(VCiv) Analise de Prevenção' }" name="(VCiv) É urgencia?">
+        <transition to="(VCiv) Analise de Prevenção" name="(VCiv) Analise de Prevenção"/>
+        <transition to="(VCiv) Analise de Prevenção [Urgente]" name="(VCiv) Analise de Prevenção [Urgente]"/>
+    </decision>
+    <task-node end-tasks="true" name="(VCiv) Analise de Prevenção">
+        <task name="(VCiv) Analise de Prevenção" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_paginaExterna" mapped-name="frame:WEB-INF_xhtml_flx_paginaExterna" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Término" name="Encaminhar para conclusão inicial"/>
+        <transition to="Nó de Desvio - (VCiv) Prevenção" name="Nó de Desvio - (VCiv) Prevenção">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-assign">
+            <action expression="#{ tramitacaoProcessualService.gravaVariavelTarefa( 'pje:flx:paginaExterna', parametroUtil.getParametro('pje:tjrn:pjeprevencao:link').concat('busca/').concat(authenticator.getUsuarioLogado().getLogin()).concat('/').concat(tramitacaoProcessualService.recuperaProcesso().processo.numeroProcesso) ) }"/>
+        </event>
+    </task-node>
+    <task-node end-tasks="true" name="(VCiv) Analise de Prevenção [Urgente]">
+        <task name="(VCiv) Analise de Prevenção [Urgente]" swimlane="Secretaria">
+            <controller>
+                <variable name="WEB-INF_xhtml_flx_paginaExterna" mapped-name="frame:WEB-INF_xhtml_flx_paginaExterna" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read,write"/>
+            </controller>
+        </task>
+        <transition to="Término" name="Encaminhar para conclusão inicial urgente"/>
+        <transition to="Nó de Desvio - (VCiv) Prevenção" name="Nó de Desvio - (VCiv) Prevenção">
+            <condition expression="#{true}"/>
+        </transition>
+        <event type="task-assign">
+            <action expression="#{ tramitacaoProcessualService.gravaVariavelTarefa( 'pje:flx:paginaExterna', parametroUtil.getParametro('pje:tjrn:pjeprevencao:link').concat('busca/').concat(authenticator.getUsuarioLogado().getLogin()).concat('/').concat(tramitacaoProcessualService.recuperaProcesso().processo.numeroProcesso) ) }"/>
+        </event>
+    </task-node>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Prevenção">
+        <task name="Nó de Desvio - (VCiv) Prevenção" swimlane="Nó de Desvio - (VCiv) Prevenção"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Analise de Prevenção" name="(VCiv) Analise de Prevenção"/>
+        <transition to="(VCiv) Analise de Prevenção [Urgente]" name="(VCiv) Analise de Prevenção [Urgente]"/>
+    </task-node>  
+    <!-- PROCESS-EVENTS -->
+    <event type="superstate-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="before-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-create">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-created">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-assign">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="transition">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="after-signal">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="timer">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="task-start">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="subprocess-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="process-end">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="superstate-leave">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event>
+    <event type="node-enter">
+        <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
+    </event> 
+</process-definition>
