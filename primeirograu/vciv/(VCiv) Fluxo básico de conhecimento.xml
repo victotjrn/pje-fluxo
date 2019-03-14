@@ -826,7 +826,7 @@ Aguardar Perícia / Laudo Técnico / Outros]]></description>
         <transition to="(VCiv) Emissão de certidão sem efeito?" name="(VCiv) Emissão de certidão sem efeito?"/>
         <transition to="(VCiv) Sentenciados sobre homologação e extinção" name="(VCiv) Sentenciados sobre homologação e extinção"/>
     </decision>
-    <decision expression="#{tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador == 315 ? '(VCiv) Controlar audiência' : '(VCiv) Conclusão para despacho inicial'}" name="(VCiv) Controlar audiência?">
+    <decision expression="#{((tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador == 314) or (tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador == 315)) ? '(VCiv) Controlar audiência' : '(VCiv) Conclusão para despacho inicial'}" name="(VCiv) Controlar audiência?">
         <transition to="(VCiv) Conclusão para despacho inicial" name="(VCiv) Conclusão para despacho inicial"/>
         <transition to="(VCiv) Controlar audiência" name="(VCiv) Controlar audiência"/>
     </decision>
