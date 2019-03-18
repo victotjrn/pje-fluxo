@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
 <process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(SG) Prevencao">
-    <description><![CDATA[Fluxo para analise de prevenção.]]></description>  
+    <description><![CDATA[Fluxo para analise de prevenção]]></description>  
     <!-- SWIMLANES -->
     <swimlane name="solicitante">
         <assignment actor-id="#{actor.id}"/>
@@ -33,6 +33,7 @@
         <transition to="Nó de Desvio - (SG) Prevencao" name="Nó de Desvio - (SG) Prevencao">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(SG) Gravar variável de ato ordinatório à PGJ" name="Encaminhar para elaboração de ato ordinatório à PGJ"/>
         <event type="task-assign">
             <action expression="#{ tramitacaoProcessualService.gravaVariavelTarefa( 'pje:flx:paginaExterna', parametroUtil.getParametro('pje:tjrn:pjeprevencao:link').concat('busca/').concat(authenticator.getUsuarioLogado().getLogin()).concat('/').concat(tramitacaoProcessualService.recuperaProcesso().processo.numeroProcesso) ) }"/>
         </event>
@@ -48,10 +49,17 @@
         <transition to="Nó de Desvio - (SG) Prevencao" name="Nó de Desvio - (SG) Prevencao">
             <condition expression="#{true}"/>
         </transition>
+        <transition to="(SG) Gravar variável de ato ordinatório à PGJ" name="Encaminhar para elaboração de ato ordinatório à PGJ"/>
         <event type="task-assign">
             <action expression="#{ tramitacaoProcessualService.gravaVariavelTarefa( 'pje:flx:paginaExterna', parametroUtil.getParametro('pje:tjrn:pjeprevencao:link').concat('busca/').concat(authenticator.getUsuarioLogado().getLogin()).concat('/').concat(tramitacaoProcessualService.recuperaProcesso().processo.numeroProcesso) ) }"/>
         </event>
     </task-node>
+    <node name="(SG) Gravar variável de ato ordinatório à PGJ">
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('sg:aog:ato_ord_pgj', true)}"/>
+        </event>
+    </node>
     <end-state name="Término"/>
     <task-node end-tasks="true" name="Nó de Desvio - (SG) Prevencao">
         <task name="Nó de Desvio - (SG) Prevencao" swimlane="Nó de Desvio - (SG) Prevencao"/>

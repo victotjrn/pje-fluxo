@@ -29,14 +29,22 @@ Magistrado  Assessoria Segundo Grau  Assessoria
     <!-- START-STATE -->
     <start-state name="Início">
         <task name="Tarefa inicial" swimlane="Assessoria"/>
-        <transition to="(SG) Concluso para despacho inicial - MINUTAR" name="(SG) Concluso para despacho inicial - MINUTAR"/>
+        <transition to="(SG) Encaminhar para ato ordinatório à PGJ?" name="(SG) Encaminhar para ato ordinatório à PGJ?"/>
     </start-state>  
     <!-- NODES -->
+    <decision expression="#{(not empty tramitacaoProcessualService.recuperaVariavel('sg:aog:ato_ord_pgj')) ? '(SG) Expedir ato ordinatório à PGJ' : '(SG) Concluso para despacho inicial - MINUTAR'}" name="(SG) Encaminhar para ato ordinatório à PGJ?">
+        <transition to="(SG) Concluso para despacho inicial - MINUTAR" name="(SG) Concluso para despacho inicial - MINUTAR"/>
+        <transition to="(SG) Expedir ato ordinatório à PGJ" name="(SG) Expedir ato ordinatório à PGJ"/>
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('sg:aog:ato_ord_pgj')}"/>
+        </event>
+    </decision>
     <task-node end-tasks="true" name="(SG) Concluso para despacho inicial - MINUTAR">
         <task name="(SG) Concluso para despacho inicial - MINUTAR" swimlane="Assessoria">
             <controller>
                 <variable name="minuta_ato_judicial" mapped-name="textEditCombo:minuta_ato_judicial" access="read,write,required"/>
                 <variable name="minutaLote" mapped-name="minutarLote:minutaLote" access="read,write"/>
+                <variable name="movimentacaoLote" mapped-name="movimentarLote:movimentacaoLote" access="read"/>
             </controller>
         </task>
         <description><![CDATA[*Variáveis*
@@ -66,6 +74,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
         <transition to="(SG) Conclusão para decisão de urgência inicial" name="Alterar para decisão de urgência inicial"/>
         <transition to="(SG) Expedir ato ordinatório" name="Prosseguir através de ato ordinatório"/>
         <transition to="(SG) Encaminhar para preparação do voto, relatório e ementa" name="Encaminhar para preparação do voto, relatório e ementa"/>
+        <transition to="(SG) Expedir ato ordinatório à PGJ" name="Prosseguir através de ato ordinatório à PGJ"/>
         <event type="task-start">
             <action name="Condicao do lancamento temporario de movimentos" expression="#{lancadorMovimentosService.setCondicaoLancamentoMovimentosTemporarioNoFluxo('#{true}')}"/>
             <action expression="#{tipoDocumento.set('TipoDocumento', 63,64)}"/>
@@ -77,7 +86,7 @@ Magistrado  Assessoria Segundo Grau  Assessoria
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos')}"/>
         </event>
         <event type="task-create">
-            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Prosseguir através de ato ordinatório,Alterar para decisão de urgência inicial,Encaminhar para preparação do voto, relatório e ementa')}"/>
+            <action name="upd" expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:dispensaRequeridos', 'Prosseguir através de ato ordinatório à PGJ,Prosseguir através de ato ordinatório,Alterar para decisão de urgência inicial,Encaminhar para preparação do voto, relatório e ementa')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavelTarefa('pje:fluxo:transicao:lancamentoMovimentoObrigatorio','true')}"/>
         </event>
     </task-node>
@@ -187,6 +196,10 @@ Magistrado  Assessoria Segundo Grau  Assessoria
     </process-state>
     <process-state name="(SG) Expedir ato ordinatório">
         <sub-process name="(SG) Expedição de ato ordinatório de gabinete" binding="late"/>
+        <transition to="(SG) Ato ordinatório cancelado?" name="(SG) Ato ordinatório cancelado?"/>
+    </process-state>
+    <process-state name="(SG) Expedir ato ordinatório à PGJ">
+        <sub-process name="(SG) Expedição de ato ordinatório do gabinete à PGJ" binding="late"/>
         <transition to="(SG) Ato ordinatório cancelado?" name="(SG) Ato ordinatório cancelado?"/>
     </process-state>
     <process-state name="(SG) Encaminhar para preparação do voto, relatório e ementa">
