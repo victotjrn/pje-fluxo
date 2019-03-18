@@ -1,64 +1,68 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="RedistribuÃ­Ã§Ã£o">
-    <description><![CDATA[....]]></description>  
+<process-definition xmlns="urn:jbpm.org:jpdl-3.2" name="(VCiv) Processos digitalizados">
+    <description><![CDATA[..]]></description>  
     <!-- SWIMLANES -->
-    <swimlane name="SecretÃ¡ria">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
+    <swimlane name="Nó de Desvio - (VCiv) Processos digitalizados">
+        <assignment actor-id="#{actor.id}"/>
     </swimlane>
-    <swimlane name="NÃ³ de Desvio - RedistribuÃ­Ã§Ã£o">
-        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('-1:1338,1342:1469')}"/>
+    <swimlane name="Secretaria">
+        <assignment pooled-actors="#{localizacaoAssignment.getPooledActors('5:1338,6:1469,8:5852,8:5853')}" actor-id="#{actor.id}"/>
     </swimlane>  
     <!-- START-STATE -->
-    <start-state name="InÃ­cio">
-        <task name="Tarefa inicial" swimlane="SecretÃ¡ria"/>
-        <transition to="Eh Cejusc?" name="Eh Cejusc?"/>
+    <start-state name="Início">
+        <task name="Tarefa inicial" swimlane="Secretaria"/>
+        <transition to="(VCiv) Lançar movimento de recebimento dos autos" name="(VCiv) Lançar movimento de recebimento dos autos"/>
     </start-state>  
     <!-- NODES -->
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('pje:fbc:EhDoCejusc') ? 'Processos RedistribuÃ­dos do Cejusc' : 'Deslocar secretaria unificada'}" name="Eh Cejusc?">
-        <transition to="Processos RedistribuÃ­dos do Cejusc" name="Processos RedistribuÃ­dos do Cejusc"/>
-        <transition to="Deslocar secretaria unificada" name="Deslocar secretaria unificada"/>
-    </decision>
-    <task-node end-tasks="true" name="Processos RedistribuÃ­dos de outras varas">
-        <task name="Processos RedistribuÃ­dos de outras varas" swimlane="SecretÃ¡ria"/>
-        <transition to="Enviar concluso para decisÃ£o inicial e_ou urgÃªncia inicial" name="Encaminhar para AnÃ¡lise da Secretaria"/>
-        <transition to="NÃ³ de Desvio - RedistribuÃ­Ã§Ã£o" name="NÃ³ de Desvio - RedistribuÃ­Ã§Ã£o">
-            <condition expression="#{true}"/>
-        </transition>
+    <node name="(VCiv) Lançar movimento de recebimento dos autos">
+        <transition to="(VCiv) Autos recebidos de digitalização" name="(VCiv) Autos recebidos de digitalização"/>
         <event type="node-enter">
-            <action expression="#{!(parametroUtil.getParametro('pje:tjrn:OJsCiveisMossoro').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat('_')) || parametroUtil.getParametro('pje:tjrn:OJsFamiliaMossoro').contains('_'.concat(tramitacaoProcessualService.recuperaProcesso().orgaoJulgador.idOrgaoJulgador).concat('_'))) ? entityManager.createNativeQuery('update tb_processo_instance set id_orgao_julgador = null, id_orgao_julgador_cargo = null where id_processo = :idProcesso').setParameter('idProcesso', tramitacaoProcessualService.recuperaVariavel('processo')).executeUpdate() : null}"/>
+            <action expression="#{preencherMovimento.deCodigo(132).lancarMovimento()}"/>
         </event>
-    </task-node>
-    <task-node end-tasks="true" name="Processos RedistribuÃ­dos do Cejusc">
-        <task name="Processos RedistribuÃ­dos do Cejusc" swimlane="SecretÃ¡ria"/>
-        <transition to="NÃ³ de Desvio - RedistribuÃ­Ã§Ã£o" name="NÃ³ de Desvio - RedistribuÃ­Ã§Ã£o">
+    </node>
+    <task-node end-tasks="true" name="(VCiv) Autos recebidos de digitalização">
+        <task name="(VCiv) Autos recebidos de digitalização" swimlane="Secretaria">
+            <controller>
+                <variable name="aviso" mapped-name="textAlert:aviso" access="read,write"/>
+                <variable name="MovimentarEmLote" mapped-name="movimentarLote:MovimentarEmLote" access="read,write"/>
+            </controller>
+        </task>
+        <description><![CDATA[*Variáveis*
+
+1. Variável: aviso1
+   Label:
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Aviso
+
+2. Variável: MovimentarEmLote
+   Label: 
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Habilitar Movimentação em Lote]]></description>
+        <transition to="Término" name="Encaminhar para análise de secretaria"/>
+        <transition to="Nó de Desvio - (VCiv) Processos digitalizados" name="Nó de Desvio - (VCiv) Processos digitalizados">
             <condition expression="#{true}"/>
         </transition>
-        <transition to="Enviar para verificar providencia adotar" name="Enviar para verificar providencia adotar"/>
+        <transition to="(VCiv) Encaminhamento para instância superior" name="Remeter processo à instância superior"/>
     </task-node>
-    <process-state name="Enviar para verificar providencia adotar">
-        <sub-process name="Fluxo bÃ¡sico de conhecimento" binding="late"/>
-        <transition to="TÃ©rmino" name="TÃ©rmino"/>
-    </process-state>
-    <process-state name="Enviar concluso para decisÃ£o inicial e_ou urgÃªncia inicial">
-        <sub-process name="(VCiv) Fluxo bÃ¡sico de conhecimento" binding="late"/>
-        <transition to="TÃ©rmino" name="TÃ©rmino"/>
-    </process-state>
-    <end-state name="TÃ©rmino"/>
-    <task-node end-tasks="true" name="NÃ³ de Desvio - RedistribuÃ­Ã§Ã£o">
-        <task name="NÃ³ de Desvio - RedistribuÃ­Ã§Ã£o" swimlane="NÃ³ de Desvio - RedistribuÃ­Ã§Ã£o"/>
-        <transition to="TÃ©rmino" name="TÃ©rmino"/>
-        <transition to="Processos RedistribuÃ­dos de outras varas" name="Processos RedistribuÃ­dos de outras varas"/>
-        <transition to="Processos RedistribuÃ­dos do Cejusc" name="Processos RedistribuÃ­dos do Cejusc"/>
-    </task-node>
-    <process-state name="Deslocar secretaria unificada">
-        <sub-process name="(SEC) Deslocamento para secretaria unificada" binding="late"/>
-        <transition to="Processos RedistribuÃ­dos de outras varas" name="Processos RedistribuÃ­dos de outras varas"/>
-        <event type="node-leave">
-            <action expression="#{tramitacaoProcessualService.deslocarFluxoParaOrgaoDiverso(tramitacaoProcessualService.recuperaProcesso().idProcessoTrf, tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:orgaoCargoDestino'), tramitacaoProcessualService.recuperaVariavel('pje:fluxo:deslocamento:colegiadoDestino'))}"/>
-            <action expression="#{entityManager.createNativeQuery(parametroUtil.getParametro('pje:tjrn:sqlLimpezaUnificada')).setParameter('numeroProcesso', tramitacaoProcessualService.recuperaProcesso().getProcesso().getNumeroProcesso()).executeUpdate()}"/>
+    <process-state name="(VCiv) Encaminhamento para instância superior">
+        <sub-process name="(VCiv) Cumprimento de decisão" binding="late"/>
+        <transition to="Término" name="Término"/>
+        <event type="node-enter">
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('vciv:fbc:encaminhar_instancia_superior', 'true')}"/>
         </event>
-    </process-state>  
+        <event type="node-leave">
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('vciv:fbc:encaminhar_instancia_superior')}"/>
+        </event>
+    </process-state>
+    <end-state name="Término"/>
+    <task-node end-tasks="true" name="Nó de Desvio - (VCiv) Processos digitalizados">
+        <task name="Nó de Desvio - (VCiv) Processos digitalizados" swimlane="Nó de Desvio - (VCiv) Processos digitalizados"/>
+        <transition to="Término" name="Término"/>
+        <transition to="(VCiv) Autos recebidos de digitalização" name="(VCiv) Autos recebidos de digitalização"/>
+    </task-node>  
     <!-- PROCESS-EVENTS -->
     <event type="node-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
@@ -72,10 +76,10 @@
     <event type="node-leave">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="superstate-enter">
+    <event type="before-signal">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
-    <event type="before-signal">
+    <event type="superstate-enter">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
     </event>
     <event type="process-start">
@@ -107,7 +111,5 @@
     </event>
     <event type="timer">
         <script>br.com.infox.ibpm.util.JbpmEvents.raiseEvent(executionContext)</script>
-    </event>  
-    <!-- ACTIONS -->
-    <action name="upd" expression="#{tramitacaoProcessualService.apagaVariavelTarefa('pje:fbc:EhDoCejusc')}"/> 
+    </event> 
 </process-definition>
