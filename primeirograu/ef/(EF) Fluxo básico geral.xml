@@ -59,6 +59,7 @@ Secretaria  Corregedoria   Magistrado Corregedor]]></description>
                 <variable name="aviso2" mapped-name="textAlert:aviso2" access="read,write"/>
                 <variable name="ef_fbg_alterar_tipo_documento" mapped-name="sim_nao:ef_fbg_alterar_tipo_documento" access="read,write"/>
                 <variable name="ef_fbg_bacenjud_minutar" mapped-name="sim_nao:ef_fbg_bacenjud_minutar" access="read,write"/>
+                <variable name="ef_fbg_calcular_custas" mapped-name="sim_nao:ef_fbg_calcular_custas" access="read,write"/>
                 <variable name="ef_fbg_serasajud_solicitar" mapped-name="sim_nao:ef_fbg_serasajud_solicitar" access="read,write"/>
                 <variable name="ef_fbg_certificar_decurso" mapped-name="sim_nao:ef_fbg_certificar_decurso" access="read,write"/>
                 <variable name="ef_fbg_certificar_transito" mapped-name="sim_nao:ef_fbg_certificar_transito" access="read,write"/>
@@ -126,109 +127,115 @@ ESTA VARIÁVEL É APENAS PARA A CLASSE "EMBARGOS À EXECUÇÃO". COMO O FLUXO, A PRIN
    Obrig.: Não
    Tipo: Checkbox
 
-8. Variável: ef_fbg_serasajud_solicitar
+8. Variável: ef_fbg_calcular_custas
+   Label: Calcular custas
+   Escrita: Sim
+   Obrig.: Não
+   Tipo: Checkbox
+
+9. Variável: ef_fbg_serasajud_solicitar
    Label: SerasaJUD - Solicitar
    Escrita: Sim
    Obrig.: Não
    Tipo: Checkbox
 
-9. Variável: ef_fbg_certificar_decurso
+10. Variável: ef_fbg_certificar_decurso
    Label: Certificar decurso
    Escrita: Sim
    Obrig.: Não
    Tipo: Checkbox
 
-10. Variável: ef_fbg_certificar_transito
+11. Variável: ef_fbg_certificar_transito
    Label: Certificar trânsito em julgado
    Escrita: Sim
    Obrig.: Não
    Tipo: Checkbox
 
-11. Variável: ef_fbg_citar
+12. Variável: ef_fbg_citar
     Label: Citar via Sistema/Correios/Edital
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-12. Variável: ef_fbg_intimar
+13. Variável: ef_fbg_intimar
     Label: Intimar via Sistema/Correios/Edital
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-13. Variável: ef_fbg_controlar_audiencia
+14. Variável: ef_fbg_controlar_audiencia
     Label: Controlar audiência
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-14. Variável: ef_fbg_controlar_retorno_expediente
+15. Variável: ef_fbg_controlar_retorno_expediente
     Label: Controlar retorno de expedientes
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-15. Variável: ef_fbg_encaminhar_cejusc
+16. Variável: ef_fbg_encaminhar_cejusc
     Label: Encaminhar para o CEJUSC
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-16. Variável: ef_fbg_encerrar_prazo
+17. Variável: ef_fbg_encerrar_prazo
     Label: Encerrar prazo
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-17. Variável: ef_fbg_expedir_alvaras
+18. Variável: ef_fbg_expedir_alvaras
     Label: Expedir alvará(s)
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-18. Variável: ef_fbg_expedir_carta
+19. Variável: ef_fbg_expedir_carta
     Label: Expedir carta de ordem, precatória ou rogatória
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-19. Variável: ef_fbg_expedir_mandado
+20. Variável: ef_fbg_expedir_mandado
     Label: Expedir mandado
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-20. Variável: ef_fbg_expedir_oficio
+21. Variável: ef_fbg_expedir_oficio
     Label: Expedir ofício
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-21. Variável: ef_fbg_expedir_outros_documentos
+22. Variável: ef_fbg_expedir_outros_documentos
     Label: Expedir outros documentos
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-22. Variável: ef_fbg_expedir_precatorio_rpv
+23. Variável: ef_fbg_expedir_precatorio_rpv
     Label: Expedir Precatório e(ou) RPV
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-23. Variável: ef_fbg_infojud_infoseg_consultar
+24. Variável: ef_fbg_infojud_infoseg_consultar
     Label: Infojud / Infoseg / TRE - Consultar
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-24. Variável: ef_fbg_publicar_dje
+25. Variável: ef_fbg_publicar_dje
     Label: Publicar no DJE
     Escrita: Sim
     Obrig.: Não
     Tipo: Checkbox
 
-25. Variável: ef_fbg_renajud_consultar
+26. Variável: ef_fbg_renajud_consultar
     Label: Renajud - Consultar
     Escrita: Sim
     Obrig.: Não
@@ -253,6 +260,7 @@ ESTA VARIÁVEL É APENAS PARA A CLASSE "EMBARGOS À EXECUÇÃO". COMO O FLUXO, A PRIN
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', '')}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_alterar_tipo_documento') == true ? '{ef_fbg_alterar_tipo_documento}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_bacenjud_minutar') == true ? '{ef_fbg_bacenjud_minutar}' : ''))}"/>
+            <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_calcular_custas') == true ? '{ef_fbg_calcular_custas}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_serasajud_solicitar') == true ? '{ef_fbg_serasajud_solicitar}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_certificar_decurso') == true ? '{ef_fbg_certificar_decurso}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_certificar_transito') == true ? '{ef_fbg_certificar_transito}' : ''))}"/>
@@ -273,6 +281,7 @@ ESTA VARIÁVEL É APENAS PARA A CLASSE "EMBARGOS À EXECUÇÃO". COMO O FLUXO, A PRIN
             <action expression="#{tramitacaoProcessualService.gravaVariavel('ef:fbg:opcoesCumprimento', tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').concat(tramitacaoProcessualService.recuperaVariavelTarefa('sim_nao:ef_fbg_renajud_consultar') == true ? '{ef_fbg_renajud_consultar}' : ''))}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_alterar_tipo_documento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_bacenjud_minutar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_calcular_custas')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_serasajud_solicitar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_certificar_decurso')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavelTarefa('sim_nao:ef_fbg_certificar_transito')}"/>
@@ -299,6 +308,7 @@ ESTA VARIÁVEL É APENAS PARA A CLASSE "EMBARGOS À EXECUÇÃO". COMO O FLUXO, A PRIN
         <event type="node-leave">
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_alterar_tipo_documento')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_bacenjud_minutar')}"/>
+            <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_calcular_custas')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_serasajud_solicitar')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_certificar_decurso')}"/>
             <action expression="#{tramitacaoProcessualService.apagaVariavel('ef_fbg_certificar_transito')}"/>

@@ -91,14 +91,24 @@ Descrição: Fluxo lançador de fluxo paralelo.]]></description>
             <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_RET_DOC', processInstance.contextInstance.variables)}"/>
         </event>
     </node>
-    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_bacenjud_minutar}') == true ? '(EF) Bacen Jud - Minutar bloqueio ou desbloqueio' : '(EF) SerasaJUD - Solicitar?'}" name="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio?">
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_bacenjud_minutar}') == true ? '(EF) Bacen Jud - Minutar bloqueio ou desbloqueio' : '(EF) É calcular custas?'}" name="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio?">
         <transition to="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio" name="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio"/>
-        <transition to="(EF) SerasaJUD - Solicitar?" name="(EF) SerasaJUD - Solicitar?"/>
+        <transition to="(EF) É calcular custas?" name="(EF) É calcular custas?"/>
     </decision>
     <node name="(EF) Bacen Jud - Minutar bloqueio ou desbloqueio">
-        <transition to="(EF) SerasaJUD - Solicitar?" name="(EF) SerasaJUD - Solicitar?"/>
+        <transition to="(EF) É calcular custas?" name="(EF) É calcular custas?"/>
         <event type="node-enter">
             <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_BACENJUD', processInstance.contextInstance.variables)}"/>
+        </event>
+    </node>
+    <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_calcular_custas}') == true ? '(EF) Calcular custas' : '(EF) SerasaJUD - Solicitar?'}" name="(EF) É calcular custas?">
+        <transition to="(EF) SerasaJUD - Solicitar?" name="(EF) SerasaJUD - Solicitar?"/>
+        <transition to="(EF) Calcular custas" name="(EF) Calcular custas"/>
+    </decision>
+    <node name="(EF) Calcular custas">
+        <transition to="(EF) SerasaJUD - Solicitar?" name="(EF) SerasaJUD - Solicitar?"/>
+        <event type="node-enter">
+            <action expression="#{processoJudicialService.incluirNovoFluxo(tramitacaoProcessualService.recuperaProcesso(), 'EF_CALCULAR_CUSTAS', processInstance.contextInstance.variables)}"/>
         </event>
     </node>
     <decision expression="#{tramitacaoProcessualService.recuperaVariavel('ef:fbg:opcoesCumprimento').contains('{ef_fbg_serasajud_solicitar}') == true ? '(EF) SerasaJUD - Solicitar' : '(EF) Citar?'}" name="(EF) SerasaJUD - Solicitar?">
